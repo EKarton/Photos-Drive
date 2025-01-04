@@ -1,0 +1,45 @@
+<div>
+  @let album = albumDetails();
+
+  @if (album | isPending) {
+    <div class="skeleton h-full w-full">
+      <!-- A trick to make the skeleton always be a square, regardless of its width. -->
+      <svg viewBox="0 0 1 1"></svg>
+    </div>
+    <div class="mt-4 mr-0 mb-6">
+      <div class="skeleton h-2 w-full mb-2"></div>
+      <div class="skeleton h-2 w-full"></div>
+    </div>
+  } @else if (album | hasFailed) {
+    <span>Error</span>
+  } @else {
+    @let name = album.data!.albumName;
+    @let mediaItemsCount = album.data!.mediaItemIds.length;
+    @let childAlbumsCount = album.data!.childAlbumIds.length;
+
+    <img
+      class="album-card__image"
+      src="assets/404-page/sad-cat.png"
+      loading="lazy"
+      [alt]="name + ' album'"
+    />
+    <div class="album-card__details">
+      <div data-testid="album-card-name">
+        {{ name }}
+      </div>
+      <div class="album-card__sub-text">
+        @if (mediaItemsCount > 0 && childAlbumsCount > 0) {
+          {{ mediaItemsCount }}
+          {{ mediaItemsCount === 1 ? 'photo' : 'photos' }} &middot;
+          {{ childAlbumsCount }}
+          {{ childAlbumsCount === 1 ? 'album' : 'albums' }}
+        } @else if (mediaItemsCount > 0) {
+          {{ mediaItemsCount }} {{ mediaItemsCount === 1 ? 'photo' : 'photos' }}
+        } @else {
+          {{ childAlbumsCount }}
+          {{ childAlbumsCount === 1 ? 'album' : 'albums' }}
+        }
+      </div>
+    </div>
+  }
+</div>

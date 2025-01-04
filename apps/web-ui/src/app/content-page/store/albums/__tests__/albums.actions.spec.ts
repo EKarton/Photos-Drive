@@ -1,0 +1,31 @@
+import { toSuccess } from '../../../../shared/results/results';
+import { AlbumDetailsApiResponse } from '../../../services/webapi.service';
+import * as fromActions from '../albums.actions';
+
+describe('Album Actions', () => {
+  it('should create a loadAlbumDetails action', () => {
+    const albumId = '123';
+    const action = fromActions.loadAlbumDetails({ albumId });
+
+    expect(action.type).toBe('[Albums] Load details of an album by ID');
+    expect(action.albumId).toBe(albumId);
+  });
+
+  it('should create a loadAlbumDetailsResult action', () => {
+    const albumId = '123';
+    const result = toSuccess<AlbumDetailsApiResponse>({
+      id: albumId,
+      albumName: 'Test Album',
+      parentAlbumId: undefined,
+      childAlbumIds: [],
+      mediaItemIds: [],
+    });
+    const action = fromActions.loadAlbumDetailsResult({ albumId, result });
+
+    expect(action.type).toBe(
+      '[Albums] Saves results of getting details of an album',
+    );
+    expect(action.albumId).toBe(albumId);
+    expect(action.result).toEqual(result);
+  });
+});

@@ -1,0 +1,56 @@
+[tool.poetry]
+name = "sharded_photos_drive_cli_client"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+exifread = "^3.0.0"
+typer = "^0.15.1"
+backoff = "^2.2.1"
+types-requests = "^2.32.0.20241016"
+google-api-python-client = "^2.156.0"
+google-auth-oauthlib = "^1.2.1"
+python-magic = "^0.4.27"
+tqdm = "^4.67.1"
+event-bus = "^1.0.2"
+dacite = "^1.8.1"
+types-exifread = "^3.0.0.20240806"
+pymongo = "^4.10.1"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+mypy = "^1.13.0"
+pytest = "^8.3.4"
+flake8 = "^7.1.1"
+flake8-bugbear = "^24.12.12"
+coverage = "^7.6.9"
+pytest-mock = "^3.14.0"
+requests-mock = "^1.12.1"
+freezegun = "^1.5.1"
+mongomock = "^4.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+cli = "sharded_photos_drive_cli_client.cli.main:main"
+
+[[tool.mypy.overrides]]
+module = "google_auth_oauthlib.*"
+ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = [".*", "*/site-packages/*"]
+
+[tool.coverage.report]
+fail_under = 50
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+skip-string-normalization = true

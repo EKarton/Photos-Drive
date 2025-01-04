@@ -1,0 +1,8 @@
+@let mediaItemResults = imagesResult();
+@if (mediaItemResults | isPending) {
+  <span data-testid="images-section-spinner">Loading...</span>
+} @else if (mediaItemResults | hasFailed) {
+  <span>Error: {{ mediaItemResults.error | json }}</span>
+} @else {
+  <app-content-images-list [images]="mediaItemResults.data!" />
+}

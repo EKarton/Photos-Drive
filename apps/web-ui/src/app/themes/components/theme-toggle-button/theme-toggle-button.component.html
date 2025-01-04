@@ -1,0 +1,7 @@
+<button (click)="toggleTheme()" class="p-2 rounded-md dark:text-white">
+  @if (isDarkMode()) {
+    <span class="moon-icon">🌙</span>
+  } @else {
+    <span class="sun-icon">☀️</span>
+  }
+</button>

@@ -1,0 +1,24 @@
+<div #masonryContainer>
+  @let options = masonryOptions();
+  @let images = processedImages();
+
+  <ngx-masonry [options]="options">
+    @for (image of images; track image.id) {
+      <div ngxMasonryItem class="masonry-item">
+        <img
+          masonryLazy
+          loading="lazy"
+          data-testid="media-item-image"
+          [src]="image.baseUrl"
+          [style.height.px]="image.height"
+          [style.width.px]="image.width"
+          [alt]="image.fileName"
+          (click)="image.onClick($event)"
+          (keydown)="image.onKeyDown($event)"
+          tabindex="0"
+          role="button"
+        />
+      </div>
+    }
+  </ngx-masonry>
+</div>
