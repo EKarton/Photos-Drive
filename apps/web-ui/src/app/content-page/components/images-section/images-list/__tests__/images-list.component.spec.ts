@@ -149,6 +149,7 @@ describe('ImagesListComponent', () => {
         // Trigger the observer's callback
         mockResizeObserverFactory.getInstances()[0].trigger([entry]);
         fixture.detectChanges();
+        await fixture.whenStable();
 
         // Assert the images resized correctly
         const elements: HTMLImageElement[] = Array.from(
