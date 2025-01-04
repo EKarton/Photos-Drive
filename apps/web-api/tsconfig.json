@@ -13,20 +13,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "tests/middlewares/authentication.test.ts",
-    "tests/middlewares/authorization.test.ts",
-    "tests/routes/albums.test.ts",
-    "tests/routes/authentication.test.ts",
-    "tests/routes/gphoto_clients.test.ts",
-    "tests/routes/health.test.ts",
-    "tests/routes/media_items.test.ts",
-    "tests/services/blob_store/GPhotosClient.test.ts",
-    "tests/services/blob_store/GPhotosClientsRepository.test.ts",
-    "tests/services/metadata_store/AlbumsRepository.test.ts",
-    "tests/services/metadata_store/MediaItemsRepository.test.ts",
-    "tests/services/metadata_store/MongoDbClientsRepository.test.ts",
-    "tests/services/vault/VaultStoreFromFile.test.ts",
-    "tests/utils/checkNotNull.test.ts"
   ],
   "exclude": ["src/**/__tests__/*"]
 }
