@@ -28,3 +28,39 @@ jobs:
           cd ./apps/web-ui
           npm ci
           npm run lint
+
+  run-tests:
+    name: Runs all tests in Web UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node JS
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies and run tests
+        run: |
+          cd ./apps/web-ui
+          npm ci
+          ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage
+
+  build:
+    name: Builds the Web UI app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node JS
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies build the app
+        run: |
+          cd ./apps/web-ui
+          npm ci
+          npm run build

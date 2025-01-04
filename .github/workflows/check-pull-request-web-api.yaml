@@ -26,7 +26,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9.6.0'
+          version: "9.6.0"
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -39,3 +39,68 @@ jobs:
           cd ./apps/web-api
           pnpm install
           pnpm lint
+
+  run-tests:
+    name: Runs all tests in Web Api
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.6.0"
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies, run tests, and upload coverage
+        run: |
+          cd ./apps/web-api
+          pnpm install
+          pnpm test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_SECRET }}
+          directory: ./apps/web-api/coverage/
+          flags: unittests
+
+  build:
+    name: Build the app in Web Api
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.6.0"
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies and build it
+        run: |
+          cd ./apps/web-api
+          pnpm install
+          pnpm build
