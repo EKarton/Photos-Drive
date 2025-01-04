@@ -20,6 +20,8 @@ describe('webApiAuthRequestInterceptor', () => {
 
   beforeEach(() => {
     windowMock = { location: { href: '' } };
+    environment.loginUrl = 'http://localhost:3000/auth/v1/google';
+    environment.webApiEndpoint = 'http://localhost:3000';
 
     TestBed.configureTestingModule({
       imports: [],
