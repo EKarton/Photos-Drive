@@ -32,7 +32,7 @@ class InMemoryConfig(Config):
         ]
 
     @override
-    def add_mongo_db_client(self, mongodb_client: MongoClient) -> str:
+    def add_mongo_db_client(self, mongodb_client: MongoClient) -> str:  # type: ignore
         client_id = self.__generate_unique_object_id()
         client_id_str = str(client_id)
         self.__id_to_mongodb_clients[client_id_str] = mongodb_client

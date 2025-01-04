@@ -481,9 +481,11 @@ class TestPhotosBackup(unittest.TestCase):
             f'{mongodb_client_1_id}:{dog_mitem['_id']}', album_2010['media_item_ids']
         )
 
-    def __create_mongodb_client__(self, total_free_storage_size: int = 1000):
-        mock_client = mongomock.MongoClient()
-        mock_client["sharded_google_photos"].command = Mock(
+    def __create_mongodb_client__(
+        self, total_free_storage_size: int = 1000
+    ) -> mongomock.MongoClient:
+        mock_client: mongomock.MongoClient = mongomock.MongoClient()
+        mock_client["sharded_google_photos"].command = Mock(  # type: ignore
             return_value={"totalFreeStorageSize": total_free_storage_size}
         )
 

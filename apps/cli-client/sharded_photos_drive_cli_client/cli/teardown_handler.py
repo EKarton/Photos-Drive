@@ -37,8 +37,8 @@ class TeardownHandler:
         # Update the root album to not have any child elements
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         albums_repo.update_album(
-            album_id=config.get_root_album_id(), 
-            updated_album_fields=UpdatedAlbumFields(new_child_album_ids=[])
+            album_id=config.get_root_album_id(),
+            updated_album_fields=UpdatedAlbumFields(new_child_album_ids=[]),
         )
 
         # Delete all media items from the DB
