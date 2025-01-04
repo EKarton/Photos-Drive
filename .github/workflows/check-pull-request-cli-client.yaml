@@ -31,6 +31,7 @@ jobs:
           cd ./apps/cli-client
           poetry install --no-interaction
           poetry run mypy .
+          poetry run black --check .
 
   run-tests:
     name: Run tests in CLI Client
