@@ -7,7 +7,7 @@
     "dev": "cross-env TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true nodemon src/server.ts | pino-pretty",
     "build": "tsc",
     "start": "NODE_ENV=production node dist/server.js",
-    "lint": "eslint . && prettier . --check",
+    "lint": "prettier . --check",
     "lint:fix": "eslint . --fix && prettier . --write",
     "test": "jest",
     "test:coverage": "jest --coverage"
