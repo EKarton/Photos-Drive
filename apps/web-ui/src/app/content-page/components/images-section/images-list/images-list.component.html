@@ -3,7 +3,7 @@
   @let images = processedImages();
 
   <ngx-masonry [options]="options">
-    @for (image of images; track image.id) {
+    @for (image of images; track image) {
       <div ngxMasonryItem class="masonry-item">
         <img
           masonryLazy
