@@ -97,9 +97,9 @@ class TestMongoDbClientsRepository(unittest.TestCase):
         self.assertIn((client_id_1, client_1), all_clients)
         self.assertIn((client_id_2, client_2), all_clients)
 
-    def __create_mongodb_client__(self, total_free_storage_size: int = 1000):
-        mock_client = mongomock.MongoClient()
-        mock_client["sharded_google_photos"].command = Mock(
+    def __create_mongodb_client__(self, total_free_storage_size: int = 1000) -> mongomock.MongoClient:
+        mock_client: mongomock.MongoClient = mongomock.MongoClient()
+        mock_client["sharded_google_photos"].command = Mock(                    # type: ignore
             return_value={"totalFreeStorageSize": total_free_storage_size}
         )
 

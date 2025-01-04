@@ -213,7 +213,7 @@ class PhotosBackup:
             for child_album_id in cur_album.child_album_ids:
                 child_album = self.__albums_repo.get_album_by_id(child_album_id)
 
-                child_album_name_to_album[child_album.name] = child_album
+                child_album_name_to_album[cast(str, child_album.name)] = child_album
 
             created_child_album_ids = []
             for child_diff_node in cur_diffs_tree_node.child_nodes:
