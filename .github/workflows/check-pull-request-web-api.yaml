@@ -77,7 +77,7 @@ jobs:
           flags: unittests
 
   build:
-    name: Build the app in Web Api
+    name: Build the Web Api app
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
