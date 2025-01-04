@@ -1,0 +1,97 @@
+import configparser
+from typing import Dict, cast, override
+
+from google.oauth2.credentials import Credentials
+from mongomock import MongoClient
+from google.auth.transport.requests import AuthorizedSession
+from pymongo.server_api import ServerApi
+from bson.objectid import ObjectId
+
+
+from .config import Config
+from ..gphotos.client import GPhotosClientV2
+from ..mongodb.albums import AlbumId
+
+
+class InMemoryConfig(Config):
+    """Represents the config repository stored in memory."""
+
+    def __init__(self):
+        self.__id_to_mongodb_clients: Dict[str, MongoClient] = {}
+        self.__id_to_gphotos_clients: Dict[str, GPhotosClientV2] = {}
+        self.__root_album_id = None
+
+    @override
+    def get_mongo_db_clients(self) -> list[tuple[ObjectId, MongoClient]]:
+        """
+        Returns a list of MongoDB clients with their IDs.
+        """
+        return [
+            (ObjectId(id), client)
+            for id, client in self.__id_to_mongodb_clients.items()
+        ]
+
+    @override
+    def add_mongo_db_client(self, mongodb_client: MongoClient) -> str:
+        client_id = self.__generate_unique_object_id()
+        client_id_str = str(client_id)
+        self.__id_to_mongodb_clients[client_id_str] = mongodb_client
+
+        return client_id_str
+
+    @override
+    def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
+        """
+        Returns a list of tuples, where each tuple is a Google Photo client ID and a Google Photos client instance.
+        """
+        return [
+            (ObjectId(id), client)
+            for id, client in self.__id_to_gphotos_clients.items()
+        ]
+
+    @override
+    def add_gphotos_client(self, gphotos_client: GPhotosClientV2) -> str:
+        client_id = self.__generate_unique_object_id()
+        client_id_str = str(client_id)
+
+        self.__id_to_gphotos_clients[client_id_str] = gphotos_client
+
+        return client_id_str
+
+    @override
+    def get_root_album_id(self) -> AlbumId:
+        """
+        Gets the ID of the root album.
+
+        Raises:
+            ValueError: If there is no root album ID.
+
+        Returns:
+            AlbumId: The album ID if it exists; else None.
+        """
+        if self.__root_album_id:
+            return self.__root_album_id
+
+        raise ValueError("Cannot find root album")
+
+    @override
+    def set_root_album_id(self, album_id: AlbumId):
+        """
+        Sets the ID of the root album.
+
+        Args:
+            album_id (AlbumId): The album ID of the root album.
+        """
+        self.__root_album_id = album_id
+
+    def __generate_unique_object_id(self) -> ObjectId:
+        id = ObjectId()
+        str_id = str(id)
+        while (
+            str_id in self.__id_to_gphotos_clients
+            or str_id in self.__id_to_mongodb_clients
+        ):
+            id = ObjectId()
+            str_id = str(id)
+
+        return id
