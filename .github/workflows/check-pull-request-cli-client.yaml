@@ -1,0 +1,33 @@
+##################################################################
+# A Github action used to check pull requests on CLI Client
+# More info at https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
+##################################################################
+
+name: Check pull request on CLI Client
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-linting:
+    name: Check for linting errors in CLI Client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies and run linting
+        run: |
+          cd ./apps/cli-client
+          poetry install --no-interaction
+          poetry run mypy .
