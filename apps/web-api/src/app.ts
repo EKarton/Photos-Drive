@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express, { Application, NextFunction, Request, Response } from 'express'
 import helmet from 'helmet'
+import { MongoClient } from 'mongodb'
 import expressLogger from 'pino-http'
 import { Config, getConfig } from './config'
 import albumsRouter from './routes/albums'
@@ -25,6 +26,7 @@ import {
 } from './services/metadata_store/MongoDbClientsRepository'
 import { Vault } from './services/vault/VaultStore'
 import { VaultStoreFromFile } from './services/vault/VaultStoreFromFile'
+import { VaultStoreFromMongoDb } from './services/vault/VaultStoreFromMongoDb'
 import logger from './utils/logger'
 
 export class App {
@@ -43,7 +45,18 @@ export class App {
   }
 
   async run() {
-    this.config = new VaultStoreFromFile(this.appConfig.vaultFilePath)
+    if (this.appConfig.vaultFilePath) {
+      this.config = new VaultStoreFromFile(this.appConfig.vaultFilePath)
+    } else if (this.appConfig.vaultMongoDb) {
+      this.config = new VaultStoreFromMongoDb(
+        new MongoClient(this.appConfig.vaultMongoDb)
+      )
+    } else {
+      throw new Error(
+        'Vault file path or vault mongo db env var needs to be set!'
+      )
+    }
+
     this.mongoDbClientsRepository =
       await MongoDbClientsRepositoryImpl.buildFromVault(this.config)
     this.gPhotosClientsRepository =

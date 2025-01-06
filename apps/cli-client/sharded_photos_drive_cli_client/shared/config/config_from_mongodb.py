@@ -19,7 +19,8 @@ class ConfigFromMongoDb(Config):
         Constructs the ConfigFromMongoDbRepository
 
         Args:
-            mongodb_client (MongoClient): The MongoDB client used to access the config database
+            mongodb_client (MongoClient): The MongoDB client used to access the config
+              database
         """
         self.__mongodb_client = mongodb_client
         self.__mongodb_client["sharded_google_photos"].command("ping")
@@ -66,7 +67,8 @@ class ConfigFromMongoDb(Config):
     @override
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
         """
-        Returns a list of tuples, where each tuple is a Google Photo client ID and a Google Photos client instance.
+        Returns a list of tuples, where each tuple is a Google Photo client ID and a
+        Google Photos client instance.
         """
         collection = self.__mongodb_client["sharded_google_photos"]["gphotos_clients"]
 

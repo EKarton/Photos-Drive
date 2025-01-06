@@ -23,7 +23,6 @@ def main():
 
     # Add subparser for the 'config init' command
     config_init_parser = config_subparsers.add_parser("init")
-    __add_config_file_argument(config_init_parser)
     __add_verbose_argument(config_init_parser)
 
     # Add subparser for the 'config add' command
@@ -87,7 +86,7 @@ def main():
     if args.command == "config":
         if args.cmd_type == "init":
             config_init_handler = InitHandler()
-            config_init_handler.init(args.config_file)
+            config_init_handler.init()
 
         elif args.cmd_type == "add":
             if args.account_type == "gphotos":
