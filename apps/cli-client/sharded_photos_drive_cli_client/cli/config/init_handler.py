@@ -109,6 +109,8 @@ class InitHandler:
             return self.__prompt_mongodb_config()
         elif config_type == 'file':
             return self.__prompt_config_file()
+        else:
+            raise ValueError(f"Unknown config type {config_type}")
 
     def __prompt_which_config_type(self) -> str:
         while True:
@@ -133,8 +135,7 @@ class InitHandler:
 
     def __prompt_mongodb_config(self) -> ConfigFromMongoDb:
         connection_string = prompt_user_for_mongodb_connection_string()
-        client = MongoClient(connection_string)
-        return ConfigFromMongoDb(client)
+        return ConfigFromMongoDb(MongoClient(connection_string))
 
     def __prompt_config_file(self) -> ConfigFromFile:
         while True:
