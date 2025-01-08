@@ -14,6 +14,7 @@ const fakeGoogleClientId = '123'
 const fakeGoogleClientSecret = '456'
 const fakeGoogleCallbackUri = 'http://localhost:3000/photos'
 const fakeLoginCallbackUri = 'http://localhost:4200/content/root'
+const fakeAccessTokenDomain = 'localhost'
 
 beforeEach(() => {
   jest.resetModules()
@@ -24,7 +25,8 @@ beforeEach(() => {
     GOOGLE_CLIENT_ID: fakeGoogleClientId,
     GOOGLE_CLIENT_SECRET: fakeGoogleClientSecret,
     GOOGLE_CALLBACK_URI: fakeGoogleCallbackUri,
-    LOGIN_CALLBACK_URL: fakeLoginCallbackUri
+    LOGIN_CALLBACK_URL: fakeLoginCallbackUri,
+    ACCESS_TOKEN_DOMAIN: fakeAccessTokenDomain
   }
 })
 
@@ -48,40 +50,55 @@ describe('GET auth/v1/google', () => {
 })
 
 describe('GET auth/v1/google/callback', () => {
-  it('should set access token and redirect user to correct uri, given correct auth path', async () => {
-    // Test setup: mock out the api to fetch the token
-    nock('https://www.googleapis.com').post('/oauth2/v4/token').reply(200, {
-      access_token: 'access_token_123',
-      expires_in: 3920,
-      scope: 'profile',
-      token_type: 'Bearer'
-    })
+  test.each([
+    {
+      accessTokenDomain: 'localhost'
+    },
+    {
+      accessTokenDomain: 'photoarchives.netlify.app'
+    }
+  ])(
+    'should set access token and redirect user to correct uri, given correct auth path and accessTokenDomain=$accessTokenDomain',
+    async ({ accessTokenDomain }) => {
+      // Test setup: mock out accessTokenDomain
+      process.env.ACCESS_TOKEN_DOMAIN = accessTokenDomain
 
-    // Test setup: mock out the api to fetch the profile
-    nock('https://www.googleapis.com')
-      .get('/oauth2/v3/userinfo?access_token=access_token_123')
-      .reply(200, {
-        id: '110248495921238986420',
-        name: 'Bob Smith',
-        given_name: 'Bob',
-        family_name: 'Smith',
-        picture: 'https://lh4.googleusercontent.com/profile-pic.jpg'
+      // Test setup: mock out the api to fetch the token
+      nock('https://www.googleapis.com').post('/oauth2/v4/token').reply(200, {
+        access_token: 'access_token_123',
+        expires_in: 3920,
+        scope: 'profile',
+        token_type: 'Bearer'
       })
 
-    const app = express()
-    app.use(cookieParser())
-    app.use(await authRouter())
+      // Test setup: mock out the api to fetch the profile
+      nock('https://www.googleapis.com')
+        .get('/oauth2/v3/userinfo?access_token=access_token_123')
+        .reply(200, {
+          id: '110248495921238986420',
+          name: 'Bob Smith',
+          given_name: 'Bob',
+          family_name: 'Smith',
+          picture: 'https://lh4.googleusercontent.com/profile-pic.jpg'
+        })
 
-    const res = await request(app).get('/auth/v1/google/callback?code=1234')
+      const app = express()
+      app.use(cookieParser())
+      app.use(await authRouter())
 
-    expect(res.statusCode).toEqual(302)
-    expect(res.headers['set-cookie'].length).toEqual(2)
-    expect(res.headers['set-cookie'][0].startsWith('access_token')).toBeTruthy()
-    expect(
-      res.headers['set-cookie'][1].startsWith('user_profile_url')
-    ).toBeTruthy()
-    expect(res.headers['location']).toEqual(fakeLoginCallbackUri)
-  })
+      const res = await request(app).get('/auth/v1/google/callback?code=1234')
+
+      expect(res.statusCode).toEqual(302)
+      expect(res.headers['set-cookie'].length).toEqual(2)
+      expect(
+        res.headers['set-cookie'][0].startsWith('access_token')
+      ).toBeTruthy()
+      expect(
+        res.headers['set-cookie'][1].startsWith('user_profile_url')
+      ).toBeTruthy()
+      expect(res.headers['location']).toEqual(fakeLoginCallbackUri)
+    }
+  )
 })
 
 describe('GET auth/v1/google/failed', () => {
