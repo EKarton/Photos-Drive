@@ -35,6 +35,10 @@ export type Config = {
   /** The file path to the vault. */
   vaultFilePath: string
 
+  /** The MongoDB connection string to the vault */
+  vaultMongoDb: string
+
+  /** The frontend endpoint */
   frontendEndpoint: string
 }
 
@@ -54,6 +58,7 @@ export function getConfig(): Config {
     loginCallbackUrl: process.env.LOGIN_CALLBACK_URL || '',
     serverPort: parseInt(process.env.PORT || '3000'),
     vaultFilePath: process.env.VAULT_FILE_PATH || '',
+    vaultMongoDb: process.env.VAULT_MONGODB || '',
     frontendEndpoint: process.env.FRONTEND_ENDPOINT || ''
   }
 }

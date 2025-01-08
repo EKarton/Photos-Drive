@@ -25,7 +25,7 @@ interface ConfigSection {
   object_id?: string
 }
 
-/** Implementation of {@code Vault}. */
+/** Implementation of {@code Vault} read from a file. */
 export class VaultStoreFromFile implements Vault {
   private _config: Config
 

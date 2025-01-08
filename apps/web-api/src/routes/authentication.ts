@@ -65,7 +65,7 @@ export default async function () {
       res.cookie('access_token', token, {
         secure: config.accessTokenDomain !== 'localhost',
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: config.accessTokenDomain
       })
@@ -74,7 +74,7 @@ export default async function () {
       res.cookie('user_profile_url', profilePhoto, {
         secure: config.accessTokenDomain !== 'localhost',
         httpOnly: false,
-        sameSite: 'none',
+        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: config.accessTokenDomain
       })

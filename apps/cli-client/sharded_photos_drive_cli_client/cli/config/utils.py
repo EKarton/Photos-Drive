@@ -25,9 +25,14 @@ def prompt_user_for_mongodb_connection_string() -> str:
 
     mongodb_connection_string = None
     while True:
-        mongodb_connection_string = getpass.getpass(
-            "Enter your MongoDB connection string \n(follow go/mongodb for instructions to get a connection string to your MongoDB account): "
+        print(
+            "Enter your MongoDB connection string",
         )
+        print(
+            "(follow go/mongodb for instructions to get a ",
+            "connection string to your MongoDB account): ",
+        )
+        mongodb_connection_string = getpass.getpass()
         try:
             mongodb_client: MongoClient = MongoClient(mongodb_connection_string)
             mongodb_client.admin.command("ping")

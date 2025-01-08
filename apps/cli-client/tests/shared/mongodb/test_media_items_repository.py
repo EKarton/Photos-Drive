@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from bson.objectid import ObjectId
 import mongomock
 
@@ -9,7 +9,6 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
     MongoDbClientsRepository,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.media_items import (
-    MediaItem,
     MediaItemId,
     GpsLocation,
 )

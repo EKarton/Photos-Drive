@@ -24,15 +24,15 @@
 
 3. To run tests, run `pnpm test`
 
-4. To run tests with coverage, run `pnpm test --coverage`
+4. To run tests with coverage, run `pnpm test:coverage`
 
-5. To run tests with coverage for a particular file, run tests like this: `pnpm test --coverage src/middlewares`
+5. To run tests with coverage for a particular file, run tests like this: `pnpm test:coverage tests/middlewares`
 
 ## Generating keys
 
 1. Generate public and private keys by running:
 
-```
+```bash
 openssl genpkey -algorithm ed25519 -out private.pem
 openssl pkey -in private.pem -pubout -out public.pem
 ```
@@ -41,12 +41,12 @@ It will create two files: `private.pem` and `public.pem`.
 
 2. Now, run this to set the `private.pem` file as the environment variable `JWT_PRIVATE_KEY`:
 
-```
+```bash
 export JWT_PRIVATE_KEY=$(tr -d '\n' < private.pem)
 ```
 
 3. Similarly, run this to set the `public.pem` file as the environment variable `JWT_PUBLIC_KEY`:
 
-```
+```bash
 export JWT_PUBLIC_KEY=$(tr -d '\n' < public.pem)
 ```
