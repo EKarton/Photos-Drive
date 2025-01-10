@@ -31,13 +31,26 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Generate timestamp tag for Docker image
+        run: echo "TIMESTAMP_TAG=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+
+      - name: Create Docker image metadata
+        id: docker-metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ekarton/sharded-photos-drive-web-api
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ env.TIMESTAMP_TAG }}
+
       - name: Build and push to Docker Hub
         uses: docker/build-push-action@v5
         with:
           push: true
           context: ./apps/web-api
           file: ./apps/web-api/Dockerfile
-          tags: ekarton/sharded-photos-drive-web-api:latest
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          labels: ${{ steps.docker-metadata.outputs.labels }}
 
   deploy:
     name: Deploy to Azure
