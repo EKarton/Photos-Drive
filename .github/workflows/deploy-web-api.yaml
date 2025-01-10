@@ -1,7 +1,7 @@
 ##################################################################
 # A Github action used to deploy to Azure
 # More info at https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
-# Azure info at https://learn.microsoft.com/en-us/azure/app-service/tutorial-custom-container?tabs=azure-cli&pivots=container-linux
+# Azure info at https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-docker-to-azure-app-service
 ##################################################################
 
 name: Deploy to Azure
@@ -57,18 +57,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
       - name: Deploy web app using Azure credentials
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: "docker.io/ekarton/sharded-photos-drive-webapi:latest"
-
-      - name: Logout of Azure
-        run: |
-          az logout
