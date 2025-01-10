@@ -38,7 +38,7 @@ jobs:
         id: docker-metadata
         uses: docker/metadata-action@v5
         with:
-          images: ekarton/sharded-photos-drive-web-api
+          images: ekarton/sharded-photos-drive-webapi
           tags: |
             type=raw,value=latest
             type=raw,value=${{ env.TIMESTAMP_TAG }}
@@ -67,7 +67,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          images: "docker.io/ekarton/sharded-photos-drive-web-api:latest"
+          images: "docker.io/ekarton/sharded-photos-drive-webapi:latest"
 
       - name: Logout of Azure
         run: |
