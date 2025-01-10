@@ -37,7 +37,7 @@ jobs:
           push: true
           context: ./apps/web-api
           file: ./apps/web-api/Dockerfile
-          tags: sheepf8588/sharded-photos-drive-web-api:latest
+          tags: ekarton/sharded-photos-drive-web-api:latest
 
   deploy:
     name: Deploy to Azure
@@ -54,7 +54,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          images: "docker.io/sheepf8588/sharded-photos-drive-web-api:latest"
+          images: "docker.io/ekarton/sharded-photos-drive-web-api:latest"
 
       - name: Logout of Azure
         run: |
