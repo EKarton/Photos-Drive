@@ -68,7 +68,6 @@ export default async function () {
         sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: config.accessTokenDomain,
-        path: '/*'
       })
 
       const profilePhoto = profile.photos?.find((photo) => photo.value)?.value
@@ -78,7 +77,6 @@ export default async function () {
         sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: config.accessTokenDomain,
-        path: '/*'
       })
       res.redirect(config.loginCallbackUrl)
     })
