@@ -1,5 +1,9 @@
 # Sharded-Photos-Drive-Web-Api
 
+## Description
+
+This is the web api app used to serve content to the web ui.
+
 ## Running them locally without Docker
 
 1. Install dependencies by running: `pnpm install`
