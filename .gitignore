@@ -44,3 +44,5 @@ Thumbs.db
 # Config files from cli-client
 *.conf
 .env
+
+scripts/
