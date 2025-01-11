@@ -80,6 +80,10 @@ export default async function () {
         // domain: req.hostname,
         // path: '/'
       })
+
+      res.setHeader('Access-Control-Allow-Origin', config.frontendEndpoint)
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+
       res.redirect(config.loginCallbackUrl)
     })
   )
