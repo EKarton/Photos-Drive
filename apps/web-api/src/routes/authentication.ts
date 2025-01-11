@@ -63,22 +63,22 @@ export default async function () {
         .sign(secretKey)
 
       res.cookie('access_token', token, {
-        // secure: config.accessTokenDomain !== 'localhost',
-        // httpOnly: true,
-        // sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
-        // expires: tokenExpiryTime,
-        // domain: req.hostname,
-        // path: '/'
+        secure: config.accessTokenDomain !== 'localhost',
+        httpOnly: true,
+        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
+        expires: tokenExpiryTime,
+        domain: req.hostname,
+        path: '/'
       })
 
       const profilePhoto = profile.photos?.find((photo) => photo.value)?.value
       res.cookie('user_profile_url', profilePhoto, {
-        // secure: config.accessTokenDomain !== 'localhost',
-        // httpOnly: false,
-        // sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
-        // expires: tokenExpiryTime,
-        // domain: req.hostname,
-        // path: '/'
+        secure: config.accessTokenDomain !== 'localhost',
+        httpOnly: false,
+        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
+        expires: tokenExpiryTime,
+        domain: req.hostname,
+        path: '/'
       })
 
       res.setHeader('Access-Control-Allow-Origin', config.frontendEndpoint)
