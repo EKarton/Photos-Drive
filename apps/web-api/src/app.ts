@@ -76,7 +76,7 @@ export class App {
       cors({
         origin: this.appConfig.frontendEndpoint,
         optionsSuccessStatus: 200,
-        credentials: true
+        credentials: true,
       })
     )
 
