@@ -65,7 +65,7 @@ export default async function () {
       res.cookie('access_token', token, {
         secure: config.accessTokenDomain !== 'localhost',
         httpOnly: true,
-        sameSite: 'lax', //config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
+        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: 'sharded-photos-drive-web-api.azurewebsites.net',
         path: '/'
@@ -75,14 +75,11 @@ export default async function () {
       res.cookie('user_profile_url', profilePhoto, {
         secure: config.accessTokenDomain !== 'localhost',
         httpOnly: false,
-        sameSite: 'lax', //config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
+        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: 'sharded-photos-drive-web-api.azurewebsites.net',
         path: '/'
       })
-
-      res.setHeader('Access-Control-Allow-Origin', config.frontendEndpoint)
-      res.setHeader('Access-Control-Allow-Credentials', 'true')
 
       res.redirect(config.loginCallbackUrl)
     })
