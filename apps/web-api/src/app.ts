@@ -68,8 +68,8 @@ export class App {
       this.mongoDbClientsRepository
     )
 
-    this.app.use(compression())
     this.app.use(helmet())
+    this.app.use(compression())
     this.app.use(cookieParser())
     this.app.use(expressLogger())
     this.app.use(
