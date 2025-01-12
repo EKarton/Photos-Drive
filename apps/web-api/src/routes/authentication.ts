@@ -65,7 +65,7 @@ export default async function () {
       res.cookie('access_token', token, {
         secure: config.accessTokenDomain !== 'localhost',
         httpOnly: true,
-        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
+        sameSite: 'lax', //config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: 'sharded-photos-drive-web-api.azurewebsites.net',
         path: '/'
@@ -75,7 +75,7 @@ export default async function () {
       res.cookie('user_profile_url', profilePhoto, {
         secure: config.accessTokenDomain !== 'localhost',
         httpOnly: false,
-        sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
+        sameSite: 'lax', //config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
         domain: 'sharded-photos-drive-web-api.azurewebsites.net',
         path: '/'
@@ -92,6 +92,7 @@ export default async function () {
     '/auth/v1/google/logout',
     wrap(async (_req: Request, res: Response) => {
       res.clearCookie('access_token')
+      res.clearCookie('user_profile_url')
       res.redirect('/')
     })
   )
