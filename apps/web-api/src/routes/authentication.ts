@@ -67,7 +67,7 @@ export default async function () {
         httpOnly: true,
         sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
-        domain: req.hostname,
+        domain: 'sharded-photos-drive-web-api.azurewebsites.net',
         path: '/'
       })
 
@@ -77,7 +77,7 @@ export default async function () {
         httpOnly: false,
         sameSite: config.accessTokenDomain === 'localhost' ? 'lax' : 'none',
         expires: tokenExpiryTime,
-        domain: req.hostname,
+        domain: 'sharded-photos-drive-web-api.azurewebsites.net',
         path: '/'
       })
 
