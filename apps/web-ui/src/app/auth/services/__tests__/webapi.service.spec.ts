@@ -27,7 +27,7 @@ describe('WebApiService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // Ensure that no unmatched requests are outstanding.
+    httpMock.verify();
   });
 
   it('should be created', () => {
@@ -52,7 +52,7 @@ describe('WebApiService', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ code: mockCode });
 
-    req.flush(mockResponse); // Respond with mock data
+    req.flush(mockResponse);
   });
 
   it('should handle error response', () => {
