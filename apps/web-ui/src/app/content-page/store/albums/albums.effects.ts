@@ -1,29 +1,38 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { distinct, map, mergeMap } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { distinct, map, mergeMap, switchMap } from 'rxjs/operators';
 
+import { authState } from '../../../auth/store';
 import { toResult } from '../../../shared/results/rxjs/toResult';
 import {
   AlbumDetailsApiResponse,
-  WebapiService,
+  WebApiService,
 } from '../../services/webapi.service';
 import * as albumsActions from './albums.actions';
 
 @Injectable()
 export class AlbumsEffects {
+  private readonly store = inject(Store);
   private readonly actions$ = inject(Actions);
-  private readonly webApiService = inject(WebapiService);
+  private readonly webApiService = inject(WebApiService);
 
   loadAlbumDetails$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(albumsActions.loadAlbumDetails),
       distinct((prop) => prop.albumId),
       mergeMap(({ albumId }) => {
-        return this.webApiService.fetchAlbumDetails(albumId).pipe(
-          toResult<AlbumDetailsApiResponse>(),
-          map((result) =>
-            albumsActions.loadAlbumDetailsResult({ albumId, result }),
-          ),
+        return this.store.select(authState.selectAuthToken).pipe(
+          switchMap((accessToken) => {
+            return this.webApiService
+              .fetchAlbumDetails(accessToken, albumId)
+              .pipe(
+                toResult<AlbumDetailsApiResponse>(),
+                map((result) =>
+                  albumsActions.loadAlbumDetailsResult({ albumId, result }),
+                ),
+              );
+          }),
         );
       }),
     );

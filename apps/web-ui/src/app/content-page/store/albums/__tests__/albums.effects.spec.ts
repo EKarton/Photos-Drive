@@ -3,13 +3,13 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { of, throwError } from 'rxjs';
 
 import { toFailure, toSuccess } from '../../../../shared/results/results';
-import { WebapiService } from '../../../services/webapi.service';
+import { WebApiService } from '../../../services/webapi.service';
 import * as albumsActions from '../albums.actions';
 import { AlbumsEffects } from '../albums.effects';
 
 describe('AlbumsEffects', () => {
   let effects: AlbumsEffects;
-  let webapiService: jasmine.SpyObj<WebapiService>;
+  let webapiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(() => {
     const webapiServiceSpy = jasmine.createSpyObj('WebapiService', [
@@ -21,14 +21,14 @@ describe('AlbumsEffects', () => {
       providers: [
         AlbumsEffects,
         provideMockActions(() => actions$),
-        { provide: WebapiService, useValue: webapiServiceSpy },
+        { provide: WebApiService, useValue: webapiServiceSpy },
       ],
     });
 
     effects = TestBed.inject(AlbumsEffects);
     webapiService = TestBed.inject(
-      WebapiService,
-    ) as jasmine.SpyObj<WebapiService>;
+      WebApiService,
+    ) as jasmine.SpyObj<WebApiService>;
   });
 
   it('should fetch album details successfully', (done) => {

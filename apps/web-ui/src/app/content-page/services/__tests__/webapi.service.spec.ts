@@ -11,11 +11,11 @@ import {
   GPhotosClientsListApiResponse,
   MediaItemDetailsApiResponse,
   RefreshTokenApiResponse,
-  WebapiService,
+  WebApiService,
 } from '../webapi.service';
 
 describe('WebapiService', () => {
-  let service: WebapiService;
+  let service: WebApiService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
@@ -24,10 +24,10 @@ describe('WebapiService', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        WebapiService,
+        WebApiService,
       ],
     });
-    service = TestBed.inject(WebapiService);
+    service = TestBed.inject(WebApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 

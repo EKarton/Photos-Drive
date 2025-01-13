@@ -7,7 +7,7 @@ import { toFailure, toSuccess } from '../../../shared/results/results';
 import {
   GPhotosClientsListApiResponse,
   RefreshTokenApiResponse,
-  WebapiService,
+  WebApiService,
 } from '../../services/webapi.service';
 import * as gPhotosClientsActions from './gphotos-clients.actions';
 import { GPhotosClientsEffects } from './gphotos-clients.effects';
@@ -15,7 +15,7 @@ import { GPhotosClientsEffects } from './gphotos-clients.effects';
 describe('GPhotosClientsEffects', () => {
   let actions$: Actions;
   let effects: GPhotosClientsEffects;
-  let webApiService: jasmine.SpyObj<WebapiService>;
+  let webApiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,7 +23,7 @@ describe('GPhotosClientsEffects', () => {
         GPhotosClientsEffects,
         provideMockActions(() => actions$),
         {
-          provide: WebapiService,
+          provide: WebApiService,
           useValue: jasmine.createSpyObj('WebapiService', [
             'fetchGPhotosClients',
             'refreshGPhotoClientAccessToken',
@@ -34,8 +34,8 @@ describe('GPhotosClientsEffects', () => {
 
     effects = TestBed.inject(GPhotosClientsEffects);
     webApiService = TestBed.inject(
-      WebapiService,
-    ) as jasmine.SpyObj<WebapiService>;
+      WebApiService,
+    ) as jasmine.SpyObj<WebApiService>;
   });
 
   it('should dispatch loadGPhotoClientsResults on successful fetch of GPhotos clients', (done) => {
