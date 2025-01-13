@@ -36,21 +36,21 @@ This is the web api app used to serve content to the web ui.
 
 1. Generate public and private keys by running:
 
-    ```bash
-    openssl genpkey -algorithm ed25519 -out private.pem
-    openssl pkey -in private.pem -pubout -out public.pem
-    ```
+   ```bash
+   openssl genpkey -algorithm ed25519 -out private.pem
+   openssl pkey -in private.pem -pubout -out public.pem
+   ```
 
-    It will create two files: `private.pem` and `public.pem`.
+   It will create two files: `private.pem` and `public.pem`.
 
 2. Now, run this to set the `private.pem` file as the environment variable `ACCESS_TOKEN_JWT_PRIVATE_KEY`:
 
-    ```bash
-    export ACCESS_TOKEN_JWT_PRIVATE_KEY=$(tr -d '\n' < private.pem)
-    ```
+   ```bash
+   export ACCESS_TOKEN_JWT_PRIVATE_KEY=$(tr -d '\n' < private.pem)
+   ```
 
 3. Similarly, run this to set the `public.pem` file as the environment variable `ACCESS_TOKEN_JWT_PUBLIC_KEY`:
 
-    ```bash
-    export ACCESS_TOKEN_JWT_PUBLIC_KEY=$(tr -d '\n' < public.pem)
-    ```
+   ```bash
+   export ACCESS_TOKEN_JWT_PUBLIC_KEY=$(tr -d '\n' < public.pem)
+   ```
