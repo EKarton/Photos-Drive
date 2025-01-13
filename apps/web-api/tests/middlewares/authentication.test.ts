@@ -1,4 +1,3 @@
-import cookieParser from 'cookie-parser'
 import express from 'express'
 import { importPKCS8, SignJWT } from 'jose'
 import request from 'supertest'
@@ -36,7 +35,6 @@ describe('verifyAuthentication()', () => {
       .sign(secretKey)
 
     const app = express()
-    app.use(cookieParser())
     app.get(
       '/api/v1/protected-resource',
       await verifyAuthentication(),
@@ -47,7 +45,7 @@ describe('verifyAuthentication()', () => {
 
     const res = await request(app)
       .get('/api/v1/protected-resource')
-      .set('Cookie', [`access_token=${token}`])
+      .set('Authorization', `Bearer ${token}`)
 
     expect(res.statusCode).toEqual(200)
     expect(res.text).toEqual('OK')
@@ -55,7 +53,6 @@ describe('verifyAuthentication()', () => {
 
   it('should return 401 with error message, given no access token', async () => {
     const app = express()
-    app.use(cookieParser())
     app.get(
       '/api/v1/protected-resource',
       await verifyAuthentication(),
@@ -72,7 +69,6 @@ describe('verifyAuthentication()', () => {
 
   it('should return 401 with error message, given invalid access token', async () => {
     const app = express()
-    app.use(cookieParser())
     app.get(
       '/api/v1/protected-resource',
       await verifyAuthentication(),
@@ -83,7 +79,7 @@ describe('verifyAuthentication()', () => {
 
     const res = await request(app)
       .get('/api/v1/protected-resource')
-      .set('Cookie', ['access_token=1234'])
+      .set('Authorization', `Bearer 1234`)
 
     expect(res.statusCode).toEqual(401)
     expect(res.body.error).toEqual('Invalid access token')

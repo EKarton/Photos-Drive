@@ -1,4 +1,3 @@
-import cookieParser from 'cookie-parser'
 import express from 'express'
 import { mock } from 'jest-mock-extended'
 import { importPKCS8, SignJWT } from 'jose'
@@ -69,12 +68,11 @@ describe('GPhoto Clients Router', () => {
         ['gPhotosClient2', client2]
       ])
       const app = express()
-      app.use(cookieParser())
       app.use(await gPhotosClientsRouter(repo))
 
       const res = await request(app)
         .get('/api/v1/gphotos-clients')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(200)
       expect(res.body).toEqual({
@@ -97,12 +95,11 @@ describe('GPhoto Clients Router', () => {
         throw new Error('Random error')
       })
       const app = express()
-      app.use(cookieParser())
       app.use(await gPhotosClientsRouter(repo))
 
       const res = await request(app)
         .get('/api/v1/gphotos-clients')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(500)
       expect(res.body).toEqual({})
@@ -122,12 +119,11 @@ describe('GPhoto Clients Router', () => {
       const repo = mock<GPhotosClientsRepository>()
       repo.getGPhotosClientById.mockReturnValue(client1)
       const app = express()
-      app.use(cookieParser())
       app.use(await gPhotosClientsRouter(repo))
 
       const res = await request(app)
         .post('/api/v1/gphotos-clients/gPhotosClient1/token-refresh')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(200)
       expect(res.body).toEqual({
@@ -141,12 +137,11 @@ describe('GPhoto Clients Router', () => {
         throw new NoGPhotosClientFoundError('gPhotosClient1')
       })
       const app = express()
-      app.use(cookieParser())
       app.use(await gPhotosClientsRouter(repo))
 
       const res = await request(app)
         .post('/api/v1/gphotos-clients/gPhotosClient1/token-refresh')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(404)
       expect(res.body).toEqual({ error: 'No GPhotos client found' })
@@ -158,12 +153,11 @@ describe('GPhoto Clients Router', () => {
         throw new Error('Random error')
       })
       const app = express()
-      app.use(cookieParser())
       app.use(await gPhotosClientsRouter(repo))
 
       const res = await request(app)
         .post('/api/v1/gphotos-clients/gPhotosClient1/token-refresh')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(500)
       expect(res.body).toEqual({})

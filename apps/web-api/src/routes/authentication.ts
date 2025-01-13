@@ -68,7 +68,7 @@ export default async function () {
           userProfileUrl: profilePhoto
         })
       } catch (error) {
-        logger.debug(`Error authenticating ${error}`)
+        logger.error(`Error authenticating ${error}`)
         res.status(500).json({ error: 'Authentication failed' })
       }
     })

@@ -1,6 +1,10 @@
 import { Map as ImmutableMap } from 'immutable';
 
-import { Result, toPending, toSuccess } from '../../../../shared/results/results';
+import {
+  Result,
+  toPending,
+  toSuccess,
+} from '../../../../shared/results/results';
 import {
   initialState,
   selectGPhotosClientsState,

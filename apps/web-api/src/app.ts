@@ -1,5 +1,4 @@
 import compression from 'compression'
-import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express, { Application, NextFunction, Request, Response } from 'express'
 import helmet from 'helmet'
@@ -70,13 +69,12 @@ export class App {
 
     this.app.use(helmet())
     this.app.use(compression())
-    this.app.use(cookieParser())
     this.app.use(expressLogger())
     this.app.use(
       cors({
         origin: this.appConfig.frontendEndpoint,
         optionsSuccessStatus: 200,
-        credentials: true,
+        credentials: true
       })
     )
 

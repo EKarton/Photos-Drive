@@ -1,4 +1,3 @@
-import cookieParser from 'cookie-parser'
 import express from 'express'
 import nock from 'nock'
 import request from 'supertest'
@@ -35,99 +34,76 @@ afterEach(() => {
 })
 
 describe('GET auth/v1/google', () => {
-  it('should return correct redirect uri', async () => {
+  it('should return correct redirect uri given no select_account query param', async () => {
     const app = express()
-    app.use(cookieParser())
     app.use(await authRouter())
 
     const res = await request(app).get('/auth/v1/google')
 
     expect(res.statusCode).toEqual(302)
     expect(res.headers['location']).toEqual(
-      'https://accounts.google.com/o/oauth2/v2/auth?prompt=select_account&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fphotos&scope=profile&client_id=123'
+      'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http://localhost:3000/photos&response_type=code&scope=profile'
+    )
+  })
+
+  it('should return correct redirect uri given no select_account query param', async () => {
+    const app = express()
+    app.use(await authRouter())
+
+    const res = await request(app).get('/auth/v1/google?select_account=true')
+
+    expect(res.statusCode).toEqual(302)
+    expect(res.headers['location']).toEqual(
+      'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http://localhost:3000/photos&response_type=code&scope=profile&prompt=select_account'
     )
   })
 })
 
-describe('GET auth/v1/google/callback', () => {
-  test.each([
-    {
-      accessTokenDomain: 'localhost'
-    },
-    {
-      accessTokenDomain: 'photoarchives.netlify.app'
-    }
-  ])(
-    'should set access token and redirect user to correct uri, given correct auth path and accessTokenDomain=$accessTokenDomain',
-    async ({ accessTokenDomain }) => {
-      // Test setup: mock out accessTokenDomain
-      process.env.ACCESS_TOKEN_DOMAIN = accessTokenDomain
+describe('POST auth/v1/google/token', () => {
+  it('should return correct 200 response when code is correct', async () => {
+    // Test setup: mock out the api to fetch the token
+    nock('https://oauth2.googleapis.com').post('/token').reply(200, {
+      access_token: 'access_token_123',
+      expires_in: 3920,
+      scope: 'profile',
+      token_type: 'Bearer'
+    })
 
-      // Test setup: mock out the api to fetch the token
-      nock('https://www.googleapis.com').post('/oauth2/v4/token').reply(200, {
-        access_token: 'access_token_123',
-        expires_in: 3920,
-        scope: 'profile',
-        token_type: 'Bearer'
-      })
+    // Test setup: mock out the api to fetch the profile
+    nock('https://www.googleapis.com').get('/oauth2/v2/userinfo').reply(200, {
+      id: '110248495921238986420',
+      name: 'Bob Smith',
+      given_name: 'Bob',
+      family_name: 'Smith',
+      picture: 'https://lh4.googleusercontent.com/profile-pic.jpg'
+    })
 
-      // Test setup: mock out the api to fetch the profile
-      nock('https://www.googleapis.com')
-        .get('/oauth2/v3/userinfo?access_token=access_token_123')
-        .reply(200, {
-          id: '110248495921238986420',
-          name: 'Bob Smith',
-          given_name: 'Bob',
-          family_name: 'Smith',
-          picture: 'https://lh4.googleusercontent.com/profile-pic.jpg'
-        })
-
-      const app = express()
-      app.use(cookieParser())
-      app.use(await authRouter())
-
-      const res = await request(app).get('/auth/v1/google/callback?code=1234')
-
-      expect(res.statusCode).toEqual(302)
-      expect(res.headers['set-cookie'].length).toEqual(2)
-      expect(
-        res.headers['set-cookie'][0].startsWith('access_token')
-      ).toBeTruthy()
-      expect(
-        res.headers['set-cookie'][1].startsWith('user_profile_url')
-      ).toBeTruthy()
-      expect(res.headers['location']).toEqual(fakeLoginCallbackUri)
-    }
-  )
-})
-
-describe('GET auth/v1/google/failed', () => {
-  it('should return 401', async () => {
     const app = express()
-    app.use(cookieParser())
-    app.use(await authRouter())
-
-    const res = await request(app).get('/auth/v1/google/failed')
-
-    expect(res.statusCode).toEqual(401)
-    expect(res.text).toEqual('Login failed')
-  })
-})
-
-describe('GET auth/v1/google/logout', () => {
-  it('should return 301, clear cookies, and return back to home page', async () => {
-    const app = express()
-    app.use(cookieParser())
     app.use(await authRouter())
 
     const res = await request(app)
-      .get('/auth/v1/google/logout')
-      .set('Cookie', ['access_token=123'])
+      .post('/auth/v1/google/token')
+      .send({ code: '1234' })
 
-    expect(res.statusCode).toEqual(302)
-    expect(res.headers['set-cookie']).toEqual([
-      'access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
-    ])
-    expect(res.headers['location']).toEqual('/')
+    expect(res.statusCode).toEqual(200)
+    expect(res.body).toEqual({
+      accessToken: expect.any(String),
+      userProfileUrl: 'https://lh4.googleusercontent.com/profile-pic.jpg'
+    })
+  })
+
+  it('should return correct 500 response when code is incorrect', async () => {
+    // Test setup: mock out the api to fetch the token
+    nock('https://www.googleapis.com').post('/oauth2/v4/token').reply(401)
+
+    const app = express()
+    app.use(await authRouter())
+
+    const res = await request(app)
+      .post('/auth/v1/google/token')
+      .send({ code: '1234' })
+
+    expect(res.statusCode).toEqual(500)
+    expect(res.body).toEqual({ error: 'Authentication failed' })
   })
 })

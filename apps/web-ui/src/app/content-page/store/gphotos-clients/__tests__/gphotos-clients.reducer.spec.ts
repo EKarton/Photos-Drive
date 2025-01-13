@@ -1,6 +1,10 @@
 import { Map as ImmutableMap } from 'immutable';
 
-import { hasSucceed, Result, toSuccess } from '../../../../shared/results/results';
+import {
+  hasSucceed,
+  Result,
+  toSuccess,
+} from '../../../../shared/results/results';
 import * as gphotoClientsActions from '../gphotos-clients.actions';
 import { gphotosClientsReducer } from '../gphotos-clients.reducer';
 import { GPhotoClientsState, initialState } from '../gphotos-clients.state';

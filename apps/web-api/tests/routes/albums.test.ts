@@ -1,4 +1,3 @@
-import cookieParser from 'cookie-parser'
 import express from 'express'
 import { mock } from 'jest-mock-extended'
 import { importPKCS8, SignJWT } from 'jose'
@@ -83,12 +82,11 @@ describe('Albums Router', () => {
       const mockAlbumsRepository = mock<AlbumsRepository>()
       mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM)
       const app = express()
-      app.use(cookieParser())
       app.use(await albumsRouter(MOCK_ROOT_ALBUM_ID, mockAlbumsRepository))
 
       const res = await request(app)
         .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(200)
       expect(res.body).toEqual({
@@ -107,12 +105,11 @@ describe('Albums Router', () => {
         parent_album_id: undefined
       })
       const app = express()
-      app.use(cookieParser())
       app.use(await albumsRouter(MOCK_ROOT_ALBUM_ID, mockAlbumsRepository))
 
       const res = await request(app)
         .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(200)
       expect(res.body).toEqual({
@@ -130,12 +127,11 @@ describe('Albums Router', () => {
         new MongoDbClientNotFoundError('albumClient1:albumObject2')
       )
       const app = express()
-      app.use(cookieParser())
       app.use(await albumsRouter(MOCK_ROOT_ALBUM_ID, mockAlbumsRepository))
 
       const res = await request(app)
         .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(404)
       expect(res.body).toEqual({
@@ -149,12 +145,11 @@ describe('Albums Router', () => {
         new AlbumNotFoundError(MOCK_ALBUM.child_album_ids[0])
       )
       const app = express()
-      app.use(cookieParser())
       app.use(await albumsRouter(MOCK_ROOT_ALBUM_ID, mockAlbumsRepository))
 
       const res = await request(app)
         .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(404)
       expect(res.body).toEqual({
@@ -168,12 +163,11 @@ describe('Albums Router', () => {
         new Error('Random error')
       )
       const app = express()
-      app.use(cookieParser())
       app.use(await albumsRouter(MOCK_ROOT_ALBUM_ID, mockAlbumsRepository))
 
       const res = await request(app)
         .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(500)
       expect(res.body).toEqual({})
@@ -185,12 +179,11 @@ describe('Albums Router', () => {
       const mockAlbumsRepository = mock<AlbumsRepository>()
       mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM)
       const app = express()
-      app.use(cookieParser())
       app.use(await albumsRouter(MOCK_ROOT_ALBUM_ID, mockAlbumsRepository))
 
       const res = await request(app)
         .get('/api/v1/albums/root')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(302)
       expect(res.headers['location']).toEqual(

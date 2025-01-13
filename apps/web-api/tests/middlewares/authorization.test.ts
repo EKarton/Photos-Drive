@@ -1,4 +1,3 @@
-import cookieParser from 'cookie-parser'
 import express, { NextFunction, Request, Response } from 'express'
 import request from 'supertest'
 import { verifyAuthorization } from '../../src/middlewares/authorization'
@@ -29,7 +28,6 @@ describe('verifyAuthorization()', () => {
     }
 
     const app = express()
-    app.use(cookieParser())
     app.get(
       '/api/v1/protected-resource',
       mockAuthentication,
@@ -56,7 +54,6 @@ describe('verifyAuthorization()', () => {
     }
 
     const app = express()
-    app.use(cookieParser())
     app.get(
       '/api/v1/protected-resource',
       mockAuthentication,
