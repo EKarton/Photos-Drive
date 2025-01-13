@@ -14,7 +14,7 @@ import {
   WebApiService,
 } from '../webapi.service';
 
-describe('WebapiService', () => {
+describe('WebApiService', () => {
   let service: WebApiService;
   let httpMock: HttpTestingController;
 
@@ -43,7 +43,7 @@ describe('WebapiService', () => {
       ],
     };
 
-    service.fetchGPhotosClients().subscribe((response) => {
+    service.fetchGPhotosClients('authToken123').subscribe((response) => {
       expect(response).toEqual(mockResponse);
     });
 
@@ -51,7 +51,9 @@ describe('WebapiService', () => {
       `${environment.webApiEndpoint}/api/v1/gphotos-clients`,
     );
     expect(req.request.method).toBe('GET');
-    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.headers.get('Authorization')).toEqual(
+      'Bearer authToken123',
+    );
     req.flush(mockResponse);
   });
 
@@ -59,15 +61,19 @@ describe('WebapiService', () => {
     const clientId = '123';
     const mockResponse: RefreshTokenApiResponse = { newToken: 'newToken123' };
 
-    service.refreshGPhotoClientAccessToken(clientId).subscribe((response) => {
-      expect(response).toEqual(mockResponse);
-    });
+    service
+      .refreshGPhotoClientAccessToken('authToken123', clientId)
+      .subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
 
     const req = httpMock.expectOne(
       `${environment.webApiEndpoint}/api/v1/gphotos-clients/${clientId}/token-refresh`,
     );
     expect(req.request.method).toBe('POST');
-    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.headers.get('Authorization')).toEqual(
+      'Bearer authToken123',
+    );
     req.flush(mockResponse);
   });
 
@@ -80,7 +86,7 @@ describe('WebapiService', () => {
       mediaItemIds: ['media1', 'media2'],
     };
 
-    service.fetchAlbumDetails(albumId).subscribe((response) => {
+    service.fetchAlbumDetails('authToken123', albumId).subscribe((response) => {
       expect(response).toEqual(mockResponse);
     });
 
@@ -88,7 +94,9 @@ describe('WebapiService', () => {
       `${environment.webApiEndpoint}/api/v1/albums/${albumId}`,
     );
     expect(req.request.method).toBe('GET');
-    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.headers.get('Authorization')).toEqual(
+      'Bearer authToken123',
+    );
     req.flush(mockResponse);
   });
 
@@ -102,15 +110,19 @@ describe('WebapiService', () => {
       gPhotosMediaItemId: 'gphoto123',
     };
 
-    service.fetchMediaItemDetails(mediaItemId).subscribe((response) => {
-      expect(response).toEqual(mockResponse);
-    });
+    service
+      .fetchMediaItemDetails('authToken123', mediaItemId)
+      .subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
 
     const req = httpMock.expectOne(
       `${environment.webApiEndpoint}/api/v1/media-items/${mediaItemId}`,
     );
     expect(req.request.method).toBe('GET');
-    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.headers.get('Authorization')).toEqual(
+      'Bearer authToken123',
+    );
     req.flush(mockResponse);
   });
 });

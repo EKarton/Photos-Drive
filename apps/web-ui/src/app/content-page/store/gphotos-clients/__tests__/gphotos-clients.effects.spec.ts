@@ -1,16 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of, throwError } from 'rxjs';
 
-import { toFailure, toSuccess } from '../../../shared/results/results';
+import { authState } from '../../../../auth/store';
+import { toFailure, toSuccess } from '../../../../shared/results/results';
 import {
   GPhotosClientsListApiResponse,
   RefreshTokenApiResponse,
   WebApiService,
-} from '../../services/webapi.service';
-import * as gPhotosClientsActions from './gphotos-clients.actions';
-import { GPhotosClientsEffects } from './gphotos-clients.effects';
+} from '../../../services/webapi.service';
+import * as gPhotosClientsActions from '../gphotos-clients.actions';
+import { GPhotosClientsEffects } from '../gphotos-clients.effects';
 
 describe('GPhotosClientsEffects', () => {
   let actions$: Actions;
@@ -24,11 +26,19 @@ describe('GPhotosClientsEffects', () => {
         provideMockActions(() => actions$),
         {
           provide: WebApiService,
-          useValue: jasmine.createSpyObj('WebapiService', [
+          useValue: jasmine.createSpyObj('WebApiService', [
             'fetchGPhotosClients',
             'refreshGPhotoClientAccessToken',
           ]),
         },
+        provideMockStore({
+          selectors: [
+            {
+              selector: authState.selectAuthToken,
+              value: 'mockAccessToken123',
+            },
+          ],
+        }),
       ],
     });
 

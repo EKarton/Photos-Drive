@@ -5,6 +5,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
 import { of } from 'rxjs';
 
+import { authState } from '../../auth/store';
 import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
@@ -125,6 +126,7 @@ describe('ContentPageComponent', () => {
             [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
             [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
+            [authState.FEATURE_KEY]: authState.buildInitialState(),
           },
         }),
         {
@@ -178,6 +180,7 @@ describe('ContentPageComponent', () => {
       [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
       [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
       [themeState.FEATURE_KEY]: themeState.initialState,
+      [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
     store.refreshState();
     fixture.detectChanges();
@@ -209,6 +212,42 @@ describe('ContentPageComponent', () => {
     );
     expect(mediaItemImages[1].getAttribute('src')).toEqual(
       'http://www.google.com/photos/2',
+    );
+  });
+
+  it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', () => {
+    store.setState({
+      [albumsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap()
+          .set('album1', toSuccess(ALBUM_DETAILS_ROOT))
+          .set('album2', toSuccess(ALBUM_DETAILS_ARCHIVES))
+          .set(
+            'album3',
+            toSuccess({
+              id: 'album3',
+              albumName: '2010',
+              parentAlbumId: 'album2',
+              childAlbumIds: [],
+              mediaItemIds: [],
+            }),
+          ),
+      },
+      [mediaItemsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap(),
+      },
+      [gPhotosMediaItemsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap(),
+      },
+      [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
+      [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
+      [themeState.FEATURE_KEY]: themeState.initialState,
+      [authState.FEATURE_KEY]: authState.buildInitialState(),
+    });
+    store.refreshState();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'There are no albums and no photos in this album.',
     );
   });
 });

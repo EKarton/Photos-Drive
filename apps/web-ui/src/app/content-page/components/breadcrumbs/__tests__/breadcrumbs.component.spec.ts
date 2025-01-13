@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
 
+import { authState } from '../../../../auth/store';
 import { toPending, toSuccess } from '../../../../shared/results/results';
 import { Album } from '../../../services/webapi.service';
 import { albumsActions, albumsState } from '../../../store/albums';
@@ -42,6 +43,9 @@ describe('BreadcrumbsComponent', () => {
           initialState: {
             [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
           },
+          selectors: [
+            { selector: authState.selectAuthToken, value: 'mockAccessToken' },
+          ],
         }),
         provideRouter([]),
       ],

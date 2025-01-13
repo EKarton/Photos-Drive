@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of, throwError } from 'rxjs';
 
+import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
 import {
   MediaItemDetailsApiResponse,
@@ -23,10 +25,18 @@ describe('MediaItemsEffects', () => {
         provideMockActions(() => actions$),
         {
           provide: WebApiService,
-          useValue: jasmine.createSpyObj('WebapiService', [
+          useValue: jasmine.createSpyObj('WebApiService', [
             'fetchMediaItemDetails',
           ]),
         },
+        provideMockStore({
+          selectors: [
+            {
+              selector: authState.selectAuthToken,
+              value: 'mockAccessToken123',
+            },
+          ],
+        }),
       ],
     });
 

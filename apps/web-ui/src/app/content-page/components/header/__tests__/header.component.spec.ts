@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 
+import { authState } from '../../../../auth/store';
 import { themeState } from '../../../../themes/store';
 import { HeaderComponent } from '../header.component';
 
@@ -13,7 +14,13 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent],
       providers: [
         provideMockStore({
-          selectors: [{ selector: themeState.selectIsDarkMode, value: false }],
+          selectors: [
+            { selector: themeState.selectIsDarkMode, value: false },
+            {
+              selector: authState.selectUserProfileUrl,
+              value: 'http://profile.com/1',
+            },
+          ],
         }),
       ],
     }).compileComponents();

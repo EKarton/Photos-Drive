@@ -1,9 +1,9 @@
 import { Map as ImmutableMap } from 'immutable';
 
-import { hasSucceed, Result, toSuccess } from '../../../shared/results/results';
-import * as gphotoClientsActions from './gphotos-clients.actions';
-import { gphotosClientsReducer } from './gphotos-clients.reducer';
-import { GPhotoClientsState, initialState } from './gphotos-clients.state';
+import { hasSucceed, Result, toSuccess } from '../../../../shared/results/results';
+import * as gphotoClientsActions from '../gphotos-clients.actions';
+import { gphotosClientsReducer } from '../gphotos-clients.reducer';
+import { GPhotoClientsState, initialState } from '../gphotos-clients.state';
 
 describe('GPhotos Clients Reducer', () => {
   it('should return the initial state', () => {

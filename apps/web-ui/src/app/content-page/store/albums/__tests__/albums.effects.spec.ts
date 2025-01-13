@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of, throwError } from 'rxjs';
 
+import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
 import { WebApiService } from '../../../services/webapi.service';
 import * as albumsActions from '../albums.actions';
@@ -12,7 +14,7 @@ describe('AlbumsEffects', () => {
   let webapiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(() => {
-    const webapiServiceSpy = jasmine.createSpyObj('WebapiService', [
+    const webapiServiceSpy = jasmine.createSpyObj('WebApiService', [
       'fetchAlbumDetails',
     ]);
     const actions$ = of(albumsActions.loadAlbumDetails({ albumId: '123' }));
@@ -22,6 +24,14 @@ describe('AlbumsEffects', () => {
         AlbumsEffects,
         provideMockActions(() => actions$),
         { provide: WebApiService, useValue: webapiServiceSpy },
+        provideMockStore({
+          selectors: [
+            {
+              selector: authState.selectAuthToken,
+              value: 'mockAccessToken123',
+            },
+          ],
+        }),
       ],
     });
 
