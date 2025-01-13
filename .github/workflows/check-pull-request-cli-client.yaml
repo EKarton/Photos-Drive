@@ -7,8 +7,14 @@ name: Check pull request on CLI Client
 on:
   push:
     branches: [main]
+    paths:
+      - "apps/cli-client/**"
+      - ".github/workflows/check-pull-request-cli-client.yaml"
   pull_request:
     branches: [main]
+    paths:
+      - "apps/cli-client/**"
+      - ".github/workflows/check-pull-request-cli-client.yaml"
 
 jobs:
   check-linting:
