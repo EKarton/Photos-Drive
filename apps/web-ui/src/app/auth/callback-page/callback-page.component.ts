@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter, map, Subscription } from 'rxjs';
 
-import { filterOnlySuccess } from '../../shared/results/rxjs/filterOnlySuccess';
+import { WINDOW } from '../../app.tokens';
 import { authActions, authState } from '../store';
 
 @Component({
@@ -16,6 +16,8 @@ export class CallbackPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly store = inject(Store);
+  private readonly window = inject(WINDOW);
+
   private readonly subscription = new Subscription();
 
   readonly code$ = this.route.queryParamMap.pipe(
@@ -34,7 +36,11 @@ export class CallbackPageComponent implements OnInit, OnDestroy {
         .select(authState.selectAuthToken)
         .pipe(filter((accessToken) => accessToken.length > 0))
         .subscribe(() => {
-          this.router.navigate(['/content/root']);
+          const redirectPath =
+            this.window.localStorage.getItem('auth_redirect_path') ??
+            '/content/home';
+
+          this.router.navigate([redirectPath]);
         }),
     );
   }

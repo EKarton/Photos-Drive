@@ -13,6 +13,6 @@ export class HomePageComponent {
   private readonly window: Window = inject(WINDOW);
 
   handleLoginClick() {
-    this.window.location.href = environment.loginUrl;
+    this.window.location.href = `${environment.loginUrl}?select_account=true`;
   }
 }

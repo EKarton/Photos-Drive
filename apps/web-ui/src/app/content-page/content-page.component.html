@@ -28,6 +28,10 @@
         </div>
       </div>
     }
+
+    @if (album.data!.childAlbumIds.length === 0 && album.data!.mediaItemIds.length === 0) {
+      
+    }
   }
 </div>
 <app-content-media-viewer></app-content-media-viewer>
