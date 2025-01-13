@@ -14,8 +14,8 @@ describe('verifyAuthentication()', () => {
     jest.resetModules()
     process.env = {
       ...originalEnv,
-      JWT_PUBLIC_KEY: fakePublicKey,
-      JWT_PRIVATE_KEY: fakePrivateKey
+      ACCESS_TOKEN_JWT_PUBLIC_KEY: fakePublicKey,
+      ACCESS_TOKEN_JWT_PRIVATE_KEY: fakePrivateKey
     }
   })
 

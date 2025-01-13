@@ -21,13 +21,20 @@ export default async function () {
 
   const router: Router = Router()
   router.get('/auth/v1/google', (req: Request, res: Response) => {
-    const baseUrl = `${GOOGLE_LOGIN_PAGE_URL}?client_id=${config.googleLoginClientId}&redirect_uri=${config.googleLoginCallbackUri}&response_type=code&scope=profile`
+    const url = new URL(GOOGLE_LOGIN_PAGE_URL)
+    const params = new URLSearchParams({
+      client_id: config.googleLoginClientId,
+      redirect_uri: config.googleLoginCallbackUri,
+      response_type: 'code',
+      scope: 'profile'
+    })
 
     if (req.query['select_account'] === 'true') {
-      res.redirect(`${baseUrl}&prompt=select_account`)
-    } else {
-      res.redirect(baseUrl)
+      params.append('prompt', 'select_account')
     }
+
+    url.search = params.toString()
+    res.redirect(url.toString())
   })
 
   router.post(

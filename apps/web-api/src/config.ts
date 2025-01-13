@@ -8,10 +8,7 @@ export type Config = {
   /** The client secret of the Google OAuth2 login flow. */
   googleLoginClientSecret: string
 
-  /**
-   * The callback uri of the Google OAuth2 login flow.
-   * It should match what is in GCP.
-   */
+  /** The callback uri of the Google OAuth2 login flow (should match whats in GCP).  */
   googleLoginCallbackUri: string
 
   /** The JWT public key used to generate the access token. */
@@ -20,14 +17,8 @@ export type Config = {
   /** The JWT private key used to generate the access token. */
   accessTokenJwtPrivateKey: string
 
-  /** The allowed domains for the access token. */
-  accessTokenDomain: string
-
   /** The allowed subject for the access token. */
   accessTokenAllowedSubject: string
-
-  /** The url for when authentication happens. */
-  loginCallbackUrl: string
 
   /** The server port. */
   serverPort: number
@@ -38,8 +29,8 @@ export type Config = {
   /** The MongoDB connection string to the vault */
   vaultMongoDb: string
 
-  /** The frontend endpoint */
-  frontendEndpoint: string
+  /** The frontend endpoint for CORS. */
+  corsFrontendEndpoint: string
 }
 
 /**
@@ -51,14 +42,12 @@ export function getConfig(): Config {
     googleLoginClientId: process.env.GOOGLE_CLIENT_ID || '',
     googleLoginClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     googleLoginCallbackUri: process.env.GOOGLE_CALLBACK_URI || '',
-    accessTokenJwtPublicKey: process.env.JWT_PUBLIC_KEY || '',
-    accessTokenJwtPrivateKey: process.env.JWT_PRIVATE_KEY || '',
-    accessTokenAllowedSubject: process.env.ALLOWED_SUBJECT || '',
-    accessTokenDomain: process.env.ACCESS_TOKEN_DOMAIN || '',
-    loginCallbackUrl: process.env.LOGIN_CALLBACK_URL || '',
+    accessTokenJwtPublicKey: process.env.ACCESS_TOKEN_JWT_PUBLIC_KEY || '',
+    accessTokenJwtPrivateKey: process.env.ACCESS_TOKEN_JWT_PRIVATE_KEY || '',
+    accessTokenAllowedSubject: process.env.ACCESS_TOKEN_ALLOWED_SUBJECT || '',
     serverPort: parseInt(process.env.PORT || '3000'),
     vaultFilePath: process.env.VAULT_FILE_PATH || '',
     vaultMongoDb: process.env.VAULT_MONGODB || '',
-    frontendEndpoint: process.env.FRONTEND_ENDPOINT || ''
+    corsFrontendEndpoint: process.env.CORS_FRONTEND_ENDPOINT || ''
   }
 }

@@ -12,20 +12,16 @@ const fakePrivateKey =
 const fakeGoogleClientId = '123'
 const fakeGoogleClientSecret = '456'
 const fakeGoogleCallbackUri = 'http://localhost:3000/photos'
-const fakeLoginCallbackUri = 'http://localhost:4200/content/root'
-const fakeAccessTokenDomain = 'localhost'
 
 beforeEach(() => {
   jest.resetModules()
   process.env = {
     ...originalEnv,
-    JWT_PUBLIC_KEY: fakePublicKey,
-    JWT_PRIVATE_KEY: fakePrivateKey,
+    ACCESS_TOKEN_JWT_PUBLIC_KEY: fakePublicKey,
+    ACCESS_TOKEN_JWT_PRIVATE_KEY: fakePrivateKey,
     GOOGLE_CLIENT_ID: fakeGoogleClientId,
     GOOGLE_CLIENT_SECRET: fakeGoogleClientSecret,
-    GOOGLE_CALLBACK_URI: fakeGoogleCallbackUri,
-    LOGIN_CALLBACK_URL: fakeLoginCallbackUri,
-    ACCESS_TOKEN_DOMAIN: fakeAccessTokenDomain
+    GOOGLE_CALLBACK_URI: fakeGoogleCallbackUri
   }
 })
 
@@ -42,7 +38,7 @@ describe('GET auth/v1/google', () => {
 
     expect(res.statusCode).toEqual(302)
     expect(res.headers['location']).toEqual(
-      'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http://localhost:3000/photos&response_type=code&scope=profile'
+      'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fphotos&response_type=code&scope=profile'
     )
   })
 
@@ -54,7 +50,7 @@ describe('GET auth/v1/google', () => {
 
     expect(res.statusCode).toEqual(302)
     expect(res.headers['location']).toEqual(
-      'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http://localhost:3000/photos&response_type=code&scope=profile&prompt=select_account'
+      'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fphotos&response_type=code&scope=profile&prompt=select_account'
     )
   })
 })

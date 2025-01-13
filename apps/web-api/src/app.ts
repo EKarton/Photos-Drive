@@ -72,7 +72,7 @@ export class App {
     this.app.use(expressLogger())
     this.app.use(
       cors({
-        origin: this.appConfig.frontendEndpoint,
+        origin: this.appConfig.corsFrontendEndpoint,
         optionsSuccessStatus: 200
       })
     )

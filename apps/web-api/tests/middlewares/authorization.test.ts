@@ -9,7 +9,7 @@ describe('verifyAuthorization()', () => {
     jest.resetModules()
     process.env = {
       ...originalEnv,
-      ALLOWED_SUBJECT: '1234'
+      ACCESS_TOKEN_ALLOWED_SUBJECT: '1234'
     }
   })
 
