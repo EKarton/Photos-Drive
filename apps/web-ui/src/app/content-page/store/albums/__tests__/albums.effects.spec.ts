@@ -1,18 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of, throwError } from 'rxjs';
 
+import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
-import { WebapiService } from '../../../services/webapi.service';
+import { WebApiService } from '../../../services/webapi.service';
 import * as albumsActions from '../albums.actions';
 import { AlbumsEffects } from '../albums.effects';
 
 describe('AlbumsEffects', () => {
   let effects: AlbumsEffects;
-  let webapiService: jasmine.SpyObj<WebapiService>;
+  let webapiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(() => {
-    const webapiServiceSpy = jasmine.createSpyObj('WebapiService', [
+    const webapiServiceSpy = jasmine.createSpyObj('WebApiService', [
       'fetchAlbumDetails',
     ]);
     const actions$ = of(albumsActions.loadAlbumDetails({ albumId: '123' }));
@@ -21,14 +23,22 @@ describe('AlbumsEffects', () => {
       providers: [
         AlbumsEffects,
         provideMockActions(() => actions$),
-        { provide: WebapiService, useValue: webapiServiceSpy },
+        { provide: WebApiService, useValue: webapiServiceSpy },
+        provideMockStore({
+          selectors: [
+            {
+              selector: authState.selectAuthToken,
+              value: 'mockAccessToken123',
+            },
+          ],
+        }),
       ],
     });
 
     effects = TestBed.inject(AlbumsEffects);
     webapiService = TestBed.inject(
-      WebapiService,
-    ) as jasmine.SpyObj<WebapiService>;
+      WebApiService,
+    ) as jasmine.SpyObj<WebApiService>;
   });
 
   it('should fetch album details successfully', (done) => {

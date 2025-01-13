@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of, throwError } from 'rxjs';
 
+import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
 import {
   MediaItemDetailsApiResponse,
-  WebapiService,
+  WebApiService,
 } from '../../../services/webapi.service';
 import * as mediaItemsActions from '../media-items.actions';
 import { MediaItemsEffects } from '../media-items.effects';
@@ -14,7 +16,7 @@ import { MediaItemsEffects } from '../media-items.effects';
 describe('MediaItemsEffects', () => {
   let actions$: Actions;
   let effects: MediaItemsEffects;
-  let webApiService: jasmine.SpyObj<WebapiService>;
+  let webApiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -22,18 +24,26 @@ describe('MediaItemsEffects', () => {
         MediaItemsEffects,
         provideMockActions(() => actions$),
         {
-          provide: WebapiService,
-          useValue: jasmine.createSpyObj('WebapiService', [
+          provide: WebApiService,
+          useValue: jasmine.createSpyObj('WebApiService', [
             'fetchMediaItemDetails',
           ]),
         },
+        provideMockStore({
+          selectors: [
+            {
+              selector: authState.selectAuthToken,
+              value: 'mockAccessToken123',
+            },
+          ],
+        }),
       ],
     });
 
     effects = TestBed.inject(MediaItemsEffects);
     webApiService = TestBed.inject(
-      WebapiService,
-    ) as jasmine.SpyObj<WebapiService>;
+      WebApiService,
+    ) as jasmine.SpyObj<WebApiService>;
   });
 
   it('should dispatch loadMediaItemDetailsResult on successful fetch', (done) => {

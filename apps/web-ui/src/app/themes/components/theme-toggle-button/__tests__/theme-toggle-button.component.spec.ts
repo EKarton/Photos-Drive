@@ -1,4 +1,3 @@
-import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 
@@ -12,13 +11,6 @@ describe('ThemeToggleButtonComponent', () => {
   let store: MockStore;
 
   beforeEach(() => {
-    const storeSpy = jasmine.createSpyObj('Store', [
-      'dispatch',
-      'select',
-      'selectSignal',
-    ]);
-    storeSpy.selectSignal.and.returnValue(signal(false));
-
     TestBed.configureTestingModule({
       imports: [ThemeToggleButtonComponent],
       providers: [

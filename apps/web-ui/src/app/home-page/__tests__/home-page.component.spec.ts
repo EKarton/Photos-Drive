@@ -35,6 +35,7 @@ describe('HomePageComponent', () => {
     const button = fixture.nativeElement.querySelector('button');
     button.click();
 
-    expect(mockWindow.location.href).toBe(environment.loginUrl);
+    const expectedHref = `${environment.loginUrl}?select_account=true`;
+    expect(mockWindow.location.href).toBe(expectedHref);
   });
 });

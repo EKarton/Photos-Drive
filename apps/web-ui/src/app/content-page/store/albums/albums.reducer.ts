@@ -1,9 +1,9 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 
 import * as albumsActions from './albums.actions';
-import { buildInitialState } from './albums.state';
+import { buildInitialState, FEATURE_KEY } from './albums.state';
 
-/** The theme reducer */
+/** The albums reducer */
 export const albumsReducer = createReducer(
   buildInitialState(),
 
@@ -16,6 +16,6 @@ export const albumsReducer = createReducer(
 );
 
 export const albumsFeature = createFeature({
-  name: 'Albums',
+  name: FEATURE_KEY,
   reducer: albumsReducer,
 });

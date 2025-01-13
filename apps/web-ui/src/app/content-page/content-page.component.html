@@ -28,6 +28,24 @@
         </div>
       </div>
     }
+
+    @if (
+      album.data!.childAlbumIds.length === 0 &&
+      album.data!.mediaItemIds.length === 0
+    ) {
+      <div class="flex items-center justify-center flex-grow p-8">
+        <div>
+          <img
+            src="/assets/content-page/empty-album.jpeg"
+            alt="Empty album"
+            class="w-64 h-64 mx-auto object-cover mb-8 rounded"
+          />
+          <p class="text-lg">
+            There are no albums and no photos in this album.
+          </p>
+        </div>
+      </div>
+    }
   }
 </div>
 <app-content-media-viewer></app-content-media-viewer>

@@ -16,10 +16,21 @@ import { webApiAuthRequestInterceptor } from '../webapi-auth-request.interceptor
 describe('webApiAuthRequestInterceptor', () => {
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
-  let windowMock: { location: { href: string } };
+  let windowMock: {
+    localStorage: { setItem: jasmine.Spy };
+    location: { href: string; pathname: string };
+  };
 
   beforeEach(() => {
-    windowMock = { location: { href: '' } };
+    windowMock = {
+      localStorage: {
+        setItem: jasmine.createSpy('setItem'),
+      },
+      location: {
+        href: '',
+        pathname: '/content/home',
+      },
+    };
     environment.loginUrl = 'http://localhost:3000/auth/v1/google';
     environment.webApiEndpoint = 'http://localhost:3000';
 
@@ -40,7 +51,7 @@ describe('webApiAuthRequestInterceptor', () => {
     httpMock.verify();
   });
 
-  it('should redirect to login page on 401 error for web api requests', (done) => {
+  it('should redirect to login page and save path to local storage when web api request returns 401 error', (done) => {
     const testUrl = `${environment.webApiEndpoint}/test`;
 
     httpClient.get(testUrl).subscribe({
@@ -48,6 +59,10 @@ describe('webApiAuthRequestInterceptor', () => {
       error: () => fail('Should not have failed'),
       complete: () => {
         expect(windowMock.location.href).toBe(environment.loginUrl);
+        expect(windowMock.localStorage.setItem).toHaveBeenCalledWith(
+          'auth_redirect_path',
+          '/content/home',
+        );
         done();
       },
     });

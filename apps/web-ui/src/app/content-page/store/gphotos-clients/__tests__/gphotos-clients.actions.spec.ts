@@ -1,14 +1,14 @@
-import { Result, toSuccess } from '../../../shared/results/results';
+import { Result, toSuccess } from '../../../../shared/results/results';
 import {
   GPhotosClientsListApiResponse,
   RefreshTokenApiResponse,
-} from '../../services/webapi.service';
+} from '../../../services/webapi.service';
 import {
   loadGPhotoClients,
   loadGPhotoClientsResults,
   loadRefreshTokenResult,
   refreshToken,
-} from './gphotos-clients.actions';
+} from '../gphotos-clients.actions';
 
 describe('GPhoto Clients Actions', () => {
   it('should create an action to load GPhoto clients', () => {

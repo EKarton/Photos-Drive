@@ -11,6 +11,8 @@ import { provideState, provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 
 import { routes } from './app.routes';
+import { AuthEffects } from './auth/store/auth.effects';
+import { authFeature } from './auth/store/auth.reducer';
 import { webApiAuthRequestInterceptor } from './content-page/interceptors/webapi-auth-request.interceptor';
 import { AlbumsEffects } from './content-page/store/albums/albums.effects';
 import { albumsFeature } from './content-page/store/albums/albums.reducer';
@@ -33,6 +35,7 @@ export const appConfig: ApplicationConfig = {
     provideStore({}),
 
     provideState(themeFeature),
+    provideState(authFeature),
     provideState(albumsFeature),
     provideState(gPhotosClientsFeature),
     provideState(mediaItemsFeature),
@@ -40,6 +43,7 @@ export const appConfig: ApplicationConfig = {
     provideState(mediaViewerFeature),
 
     provideEffects(ThemeEffects),
+    provideEffects(AuthEffects),
     provideEffects(AlbumsEffects),
     provideEffects(GPhotosClientsEffects),
     provideEffects(MediaItemsEffects),

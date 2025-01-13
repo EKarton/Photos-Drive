@@ -1,12 +1,16 @@
 import { Map as ImmutableMap } from 'immutable';
 
-import { Result, toPending, toSuccess } from '../../../shared/results/results';
+import {
+  Result,
+  toPending,
+  toSuccess,
+} from '../../../../shared/results/results';
 import {
   initialState,
   selectGPhotosClientsState,
   selectToken,
-} from './gphotos-clients.state';
-import { FEATURE_KEY, GPhotoClientsState } from './gphotos-clients.state';
+} from '../gphotos-clients.state';
+import { FEATURE_KEY, GPhotoClientsState } from '../gphotos-clients.state';
 
 describe('GPhotoClients State Selectors', () => {
   it('should select the entire GPhotoClients state', () => {

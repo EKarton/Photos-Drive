@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
+import { authState } from '../../../../../auth/store';
 import { AvatarButtonComponent } from '../avatar-button.component';
 
 describe('AvatarButtonComponent', () => {
@@ -9,6 +11,16 @@ describe('AvatarButtonComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AvatarButtonComponent],
+      providers: [
+        provideMockStore({
+          selectors: [
+            {
+              selector: authState.selectUserProfileUrl,
+              value: 'http://profile.com/1',
+            },
+          ],
+        }),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AvatarButtonComponent);

@@ -1,4 +1,3 @@
-import cookieParser from 'cookie-parser'
 import express from 'express'
 import { mock } from 'jest-mock-extended'
 import { importPKCS8, SignJWT } from 'jose'
@@ -66,12 +65,11 @@ describe('Media Items Router', () => {
       const repo = mock<MediaItemsRepository>()
       repo.getMediaItemById.mockResolvedValue(mockMediaItem)
       const app = express()
-      app.use(cookieParser())
       app.use(await mediaItemsRouter(repo))
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(200)
       expect(res.body).toEqual({
@@ -98,12 +96,11 @@ describe('Media Items Router', () => {
       const repo = mock<MediaItemsRepository>()
       repo.getMediaItemById.mockResolvedValue(mockMediaItem)
       const app = express()
-      app.use(cookieParser())
       app.use(await mediaItemsRouter(repo))
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(200)
       expect(res.body).toEqual({
@@ -120,12 +117,11 @@ describe('Media Items Router', () => {
         new MongoDbClientNotFoundError('mediaItemClientId1:mediaItem1')
       )
       const app = express()
-      app.use(cookieParser())
       app.use(await mediaItemsRouter(repo))
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(404)
       expect(res.body).toEqual({ error: 'Media item not found' })
@@ -141,12 +137,11 @@ describe('Media Items Router', () => {
         new MediaItemNotFoundError(mediaItemId)
       )
       const app = express()
-      app.use(cookieParser())
       app.use(await mediaItemsRouter(repo))
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(404)
       expect(res.body).toEqual({ error: 'Media item not found' })
@@ -156,12 +151,11 @@ describe('Media Items Router', () => {
       const repo = mock<MediaItemsRepository>()
       repo.getMediaItemById.mockRejectedValue(new Error('Random error'))
       const app = express()
-      app.use(cookieParser())
       app.use(await mediaItemsRouter(repo))
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
-        .set('Cookie', [`access_token=${token}`])
+        .set('Authorization', `Bearer ${token}`)
 
       expect(res.statusCode).toEqual(500)
       expect(res.body).toEqual({})

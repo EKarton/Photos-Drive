@@ -4,6 +4,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
 
 import { WINDOW } from '../../../../app.tokens';
+import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
 import { GPhotosMediaItemDetails } from '../../../services/gphotos-api.service';
 import { Album, MediaItem } from '../../../services/webapi.service';
@@ -96,6 +97,9 @@ describe('ImagesListComponent', () => {
             [gPhotosMediaItemsState.FEATURE_KEY]:
               gPhotosMediaItemsState.buildInitialState(),
           },
+          selectors: [
+            { selector: authState.selectAuthToken, value: 'mockAccessToken' },
+          ],
         }),
         {
           provide: WINDOW,

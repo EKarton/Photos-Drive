@@ -3,6 +3,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
 
 import { NAVIGATOR } from '../../../../app.tokens';
+import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
 import { GPhotosMediaItemDetails } from '../../../services/gphotos-api.service';
 import { MediaItem } from '../../../services/webapi.service';
@@ -63,6 +64,9 @@ describe('MediaViewerComponent', () => {
             [gPhotosMediaItemsState.FEATURE_KEY]:
               gPhotosMediaItemsState.buildInitialState(),
           },
+          selectors: [
+            { selector: authState.selectAuthToken, value: 'mockAccessToken' },
+          ],
         }),
         {
           provide: NAVIGATOR,

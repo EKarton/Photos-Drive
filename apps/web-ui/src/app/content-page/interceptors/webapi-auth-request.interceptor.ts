@@ -16,7 +16,12 @@ export const webApiAuthRequestInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (req.url.startsWith(environment.webApiEndpoint)) {
         if (error.status == 401) {
+          window.localStorage.setItem(
+            'auth_redirect_path',
+            window.location.pathname,
+          );
           window.location.href = `${environment.loginUrl}`;
+
           return EMPTY;
         }
       }
