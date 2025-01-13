@@ -10,7 +10,6 @@ import { authActions, authState } from '../store';
   selector: 'app-callback-page',
   imports: [],
   templateUrl: './callback-page.component.html',
-  styleUrl: './callback-page.component.scss',
 })
 export class CallbackPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
