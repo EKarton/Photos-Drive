@@ -8,6 +8,8 @@ name: Deploy to Azure
 on:
   push:
     branches: [main]
+    paths:
+      - "apps/web-api/**"
 
 permissions:
   id-token: write
