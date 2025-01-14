@@ -20,6 +20,7 @@ import {
 } from 'rxjs';
 
 import { WINDOW } from '../../../app.tokens';
+import { zip } from '../../../shared/lists/zip';
 import { HasFailedPipe } from '../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
 import { Result, toPending, toSuccess } from '../../../shared/results/results';
@@ -108,29 +109,31 @@ export class ImagesSectionComponent implements OnInit, OnDestroy {
         mediaItemsListResult,
         gMediaItemsListResult,
         (mediaItems, gMediaItems) => {
-          return mediaItems.map((mediaItem, i) => ({
-            id: mediaItem.id,
-            baseUrl: gMediaItems[i].baseUrl,
-            width: gMediaItems[i].mediaMetadata.width,
-            height: gMediaItems[i].mediaMetadata.height,
-            fileName: mediaItem.fileName,
-            onClick: (event: MouseEvent) => {
-              if (event.ctrlKey) {
-                this.openImageInNewTab(gMediaItems[i]);
-              } else {
-                this.openImageInDialog(mediaItem.id);
-              }
-            },
-            onKeyDown: (event: KeyboardEvent) => {
-              if (event.ctrlKey && event.key === 'Enter') {
-                event.preventDefault();
-                this.openImageInNewTab(gMediaItems[i]);
-              } else if (event.key === 'Enter') {
-                event.preventDefault();
-                this.openImageInDialog(mediaItem.id);
-              }
-            },
-          }));
+          return zip(mediaItems, gMediaItems).map(
+            ([mediaItem, gMediaItem]) => ({
+              id: mediaItem.id,
+              baseUrl: gMediaItem.baseUrl,
+              width: gMediaItem.mediaMetadata.width,
+              height: gMediaItem.mediaMetadata.height,
+              fileName: mediaItem.fileName,
+              onClick: (event: MouseEvent) => {
+                if (event.ctrlKey) {
+                  this.openImageInNewTab(gMediaItem);
+                } else {
+                  this.openImageInDialog(mediaItem.id);
+                }
+              },
+              onKeyDown: (event: KeyboardEvent) => {
+                if (event.ctrlKey && event.key === 'Enter') {
+                  event.preventDefault();
+                  this.openImageInNewTab(gMediaItem);
+                } else if (event.key === 'Enter') {
+                  event.preventDefault();
+                  this.openImageInDialog(mediaItem.id);
+                }
+              },
+            }),
+          );
         },
       );
     }),
