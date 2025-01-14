@@ -2,7 +2,7 @@ import logging
 
 
 from .utils import get_diffs_from_path
-from ..shared.config.config_from_file import ConfigFromFile
+from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
 from ..shared.mongodb.media_items_repository import MediaItemsRepositoryImpl
@@ -19,16 +19,15 @@ logger = logging.getLogger(__name__)
 class DeleteHandler:
     """A class that handles deleting content from cli."""
 
-    def delete(self, path: str, config_file_path: str):
+    def delete(self, path: str, config: Config):
         """
         Deletes content from the system.
 
         Args:
             path (str): The path.
-            config_file_path (str): The file path to the config file.
+            config (Config): The config object
         """
         # Set up the repos
-        config = ConfigFromFile(config_file_path)
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)

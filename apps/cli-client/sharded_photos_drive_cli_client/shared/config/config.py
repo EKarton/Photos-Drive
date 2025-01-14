@@ -31,7 +31,8 @@ class Config(ABC):
     @abstractmethod
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
         """
-        Returns a list of tuples, where each tuple is a Google Photo client ID and a Google Photos client instance.
+        Returns a list of tuples, where each tuple is a Google Photo client ID and a
+        Google Photos client instance.
         """
 
     @abstractmethod

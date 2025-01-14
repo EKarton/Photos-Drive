@@ -1,18 +1,14 @@
-from configparser import ConfigParser
+from ..shared.config.config import Config
 
 
 class CleanHandler:
     """A class that handles cleaning up sharded google photos from cli."""
 
-    def __init__(self, config_parser: ConfigParser = ConfigParser()):
-        self.__config_parser = config_parser
-
-    def clean(self, config_file_path: str):
+    def clean(self, config: Config):
         """
         Cleans the system.
 
         Args:
-            config_file_path (str): The file path to the config file.
+            config (Config): The config object
         """
-        self.__config_parser.read(config_file_path)
         raise NotImplementedError("Cleaning up via CLI not supported yet.")
