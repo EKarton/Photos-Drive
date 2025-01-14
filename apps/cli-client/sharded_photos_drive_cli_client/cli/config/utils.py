@@ -34,10 +34,13 @@ def prompt_user_for_mongodb_connection_string() -> str:
         )
         mongodb_connection_string = getpass.getpass()
         try:
-            mongodb_client: MongoClient = MongoClient(mongodb_connection_string)
+            mongodb_client: MongoClient = MongoClient(
+                mongodb_connection_string,
+            )
             mongodb_client.admin.command("ping")
             return mongodb_connection_string
-        except:
+        except Exception as e:
+            print(f'Error: ${e}')
             print("Failed to connect to Mongo DB with connection string. Try again.")
 
 
@@ -79,8 +82,9 @@ def prompt_user_for_gphotos_credentials(
 
             credentials = iaflow.credentials
             is_login_successful = True
-        except:
-            print(f"Failure in authenticating to Google Photos account. Try again.")
+        except Exception as e:
+            print(f'Error: ${e}')
+            print("Failure in authenticating to Google Photos account. Try again.")
             credentials = None
             is_login_successful = False
 

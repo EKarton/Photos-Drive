@@ -2,6 +2,11 @@ import sys
 import logging
 import argparse
 
+from pymongo.mongo_client import MongoClient
+
+from ..shared.config.config import Config
+from ..shared.config.config_from_file import ConfigFromFile
+from ..shared.config.config_from_mongodb import ConfigFromMongoDb
 from .config.init_handler import InitHandler
 from .config.add_gphotos_handler import AddGPhotosHandler
 from .config.add_mongodb_handler import AddMongoDbHandler
@@ -31,12 +36,12 @@ def main():
 
     # Add subparser for the 'config add gphotos' command
     config_add_gphotos_parser = config_add_subparsers.add_parser("gphotos")
-    __add_config_file_argument(config_add_gphotos_parser)
+    __add_config_argument(config_add_gphotos_parser)
     __add_verbose_argument(config_add_gphotos_parser)
 
     # Add subparser for the 'config add mongodb' command
     config_add_mongodb_parser = config_add_subparsers.add_parser("mongodb")
-    __add_config_file_argument(config_add_mongodb_parser)
+    __add_config_argument(config_add_mongodb_parser)
     __add_verbose_argument(config_add_mongodb_parser)
 
     # Add subparser for the 'config reauthorize gphotos' command
@@ -44,99 +49,117 @@ def main():
     config_reauthorize_parser.add_argument(
         "--account_name", required=True, help="Name of the account"
     )
-    __add_config_file_argument(config_reauthorize_parser)
+    __add_config_argument(config_reauthorize_parser)
     __add_verbose_argument(config_reauthorize_parser)
 
     # Add subparser for the 'add' command
     add_parser = subparsers.add_parser("add")
     add_parser.add_argument("--path", required=True, help="Path to photos to add")
-    __add_config_file_argument(add_parser)
+    __add_config_argument(add_parser)
     __add_verbose_argument(add_parser)
 
     # Add subparser for the 'delete' command
     delete_parser = subparsers.add_parser("delete")
     delete_parser.add_argument("--path", required=True, help="Path to photos to delete")
-    __add_config_file_argument(delete_parser)
+    __add_config_argument(delete_parser)
     __add_verbose_argument(delete_parser)
 
     # Add subparser for the 'backup' command
     backup_parser = subparsers.add_parser("backup")
     __add_diff_file_argument(backup_parser)
-    __add_config_file_argument(backup_parser)
+    __add_config_argument(backup_parser)
     __add_verbose_argument(backup_parser)
 
     # Add subparser for the 'clean' command
     clean_parser = subparsers.add_parser("clean")
-    __add_config_file_argument(clean_parser)
+    __add_config_argument(clean_parser)
     __add_verbose_argument(clean_parser)
 
     # Add subparser for the 'teardown' command
     teardown_parser = subparsers.add_parser("teardown")
-    __add_config_file_argument(teardown_parser)
+    __add_config_argument(teardown_parser)
     __add_verbose_argument(teardown_parser)
 
     # Parse the arguments
     args = parser.parse_args()
 
-    if args.verbose:
-        logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-    else:
-        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
     if args.command == "config":
         if args.cmd_type == "init":
+            __set_logging(args)
             config_init_handler = InitHandler()
             config_init_handler.init()
 
         elif args.cmd_type == "add":
             if args.account_type == "gphotos":
+                __set_logging(args)
+                config = __build_config_based_on_args(args)
                 config_add_handler = AddGPhotosHandler()
-                config_add_handler.add_gphotos(args.config_file)
+                config_add_handler.add_gphotos(config)
 
             elif args.account_type == "mongodb":
+                __set_logging(args)
+                config = __build_config_based_on_args(args)
                 config_mongodb_handler = AddMongoDbHandler()
-                config_mongodb_handler.add_mongodb(args.config_file)
+                config_mongodb_handler.add_mongodb(config)
 
             else:
                 config_add_parser.print_help()
                 exit(-1)
 
         elif args.cmd_type == "reauthorize":
+            __set_logging(args)
+            config = __build_config_based_on_args(args)
             reauthorize_handler = ReauthorizeHandler()
-            reauthorize_handler.reauthorize(args.account_name, args.config_file)
+            reauthorize_handler.reauthorize(args.account_name, config)
 
         else:
             config_parser.print_help()
             exit(-1)
 
     elif args.command == "add":
+        __set_logging(args)
+        config = __build_config_based_on_args(args)
         add_handler = AddHandler()
-        add_handler.add(args.path, args.config_file)
+        add_handler.add(args.path, config)
 
     elif args.command == "delete":
+        __set_logging(args)
+        config = __build_config_based_on_args(args)
         delete_handler = DeleteHandler()
-        delete_handler.delete(args.path, args.config_file)
+        delete_handler.delete(args.path, config)
 
     elif args.command == "backup":
+        __set_logging(args)
+        config = __build_config_based_on_args(args)
         backup_handler = BackupHandler()
-        backup_handler.backup(args.diff_file, args.config_file)
+        backup_handler.backup(args.diff_file, config)
 
     elif args.command == "clean":
+        __set_logging(args)
+        config = __build_config_based_on_args(args)
         clean_handler = CleanHandler()
-        clean_handler.clean(args.config_file)
+        clean_handler.clean(config)
 
     elif args.command == "teardown":
+        __set_logging(args)
+        config = __build_config_based_on_args(args)
         teardown_handler = TeardownHandler()
-        teardown_handler.teardown(args.config_file)
+        teardown_handler.teardown(config)
 
     else:
         parser.print_help()
         exit(-1)
 
 
-def __add_config_file_argument(parser: argparse.ArgumentParser):
-    parser.add_argument(
-        "--config_file", required=True, help="Path to the configuration file"
+def __add_config_argument(parser: argparse.ArgumentParser):
+    exclusive_group = parser.add_mutually_exclusive_group(required=True)
+    exclusive_group.add_argument(
+        "--config_file", type=str, help="Path to the configuration file"
+    )
+    exclusive_group.add_argument(
+        "--config_mongodb",
+        type=str,
+        help="MongoDB connection string to the configuration",
     )
 
 
@@ -151,6 +174,23 @@ def __add_verbose_argument(parser: argparse.ArgumentParser):
         help="Whether to show debug statements or not",
         action=argparse.BooleanOptionalAction,
     )
+
+
+def __build_config_based_on_args(args: argparse.Namespace) -> Config:
+    if args.config_file:
+        return ConfigFromFile(args.config_file)
+    elif args.config_mongodb:
+        print(args.config_mongodb)
+        return ConfigFromMongoDb(MongoClient(args.config_mongodb))
+    else:
+        raise ValueError('Unknown arg type')
+
+
+def __set_logging(args: argparse.Namespace):
+    if args.verbose:
+        logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    else:
+        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 if __name__ == "__main__":

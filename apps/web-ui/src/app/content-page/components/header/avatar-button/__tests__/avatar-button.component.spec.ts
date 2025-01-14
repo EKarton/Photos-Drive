@@ -1,14 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 
+import { WINDOW } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { AvatarButtonComponent } from '../avatar-button.component';
 
 describe('AvatarButtonComponent', () => {
   let component: AvatarButtonComponent;
   let fixture: ComponentFixture<AvatarButtonComponent>;
+  let windowMock: {
+    localStorage: { removeItem: jasmine.Spy };
+    location: { href: string; pathname: string };
+  };
 
   beforeEach(async () => {
+    windowMock = {
+      localStorage: {
+        removeItem: jasmine.createSpy('removeItem'),
+      },
+      location: {
+        href: '',
+        pathname: '/content/home',
+      },
+    };
+
     await TestBed.configureTestingModule({
       imports: [AvatarButtonComponent],
       providers: [
@@ -20,6 +35,7 @@ describe('AvatarButtonComponent', () => {
             },
           ],
         }),
+        { provide: WINDOW, useValue: windowMock },
       ],
     }).compileComponents();
 
@@ -37,7 +53,9 @@ describe('AvatarButtonComponent', () => {
     button.click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.signout-button')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="signout-button"]'),
+    ).toBeTruthy();
   });
 
   it('should close dropdown menu when user clicks on the profile picture again', () => {
@@ -45,11 +63,34 @@ describe('AvatarButtonComponent', () => {
     button.click();
     fixture.detectChanges();
 
-    const element = fixture.nativeElement.querySelector('a');
-    expect(element.textContent).toContain('Sign out');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="signout-button"]'),
+    ).toBeTruthy();
     button.click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.signout-button')).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="signout-button"]'),
+    ).toBeNull();
+  });
+
+  it('should clear local storage, redirect user to home page, and close dropdown menu when user clicks on the profile picture again', () => {
+    const button = fixture.nativeElement.querySelector('button');
+    button.click();
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement.querySelector(
+      '[data-testid="signout-button"]',
+    );
+    element.click();
+    fixture.detectChanges();
+
+    expect(windowMock.localStorage.removeItem).toHaveBeenCalledWith(
+      'auth_redirect_path',
+    );
+    expect(windowMock.location.href).toEqual('#');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="signout-button"]'),
+    ).toBeNull();
   });
 });

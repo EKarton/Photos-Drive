@@ -2,7 +2,7 @@ import logging
 
 
 from .utils import get_diffs_from_path
-from ..shared.config.config_from_file import ConfigFromFile
+from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
 from ..shared.mongodb.media_items_repository import MediaItemsRepositoryImpl
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class AddHandler:
     """A class that handles adding content from cli."""
 
-    def add(self, path: str, config_file_path: str):
+    def add(self, path: str, config: Config):
         """
         Adds content to the system.
 
@@ -28,7 +28,6 @@ class AddHandler:
             config_file_path (str): The file path to the config file.
         """
         # Set up the repos
-        config = ConfigFromFile(config_file_path)
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)

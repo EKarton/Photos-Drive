@@ -14,6 +14,7 @@ IMAGE_FILE_EXTENSIONS = (
     ".ico",
     ".raw",
     ".psd",
+    ".dng",
 )
 
 # A set of video file extensions that Google Photos support

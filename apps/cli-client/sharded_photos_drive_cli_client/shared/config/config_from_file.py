@@ -73,6 +73,7 @@ class ConfigFromFile(Config):
         self._config.set(client_id_str, "type", "mongodb")
         self._config.set(client_id_str, "name", name)
         self._config.set(client_id_str, "connection_string", connection_string)
+        self.flush()
 
         return name
 
@@ -137,6 +138,8 @@ class ConfigFromFile(Config):
         if credentials.token_uri:
             self._config.set(client_id_str, "token_uri", credentials.token_uri)
 
+        self.flush()
+
         return name
 
     @override
@@ -176,6 +179,7 @@ class ConfigFromFile(Config):
         self._config.set(client_id_str, "type", "root_album")
         self._config.set(client_id_str, "client_id", str(album_id.client_id))
         self._config.set(client_id_str, "object_id", str(album_id.object_id))
+        self.flush()
 
     def flush(self):
         """

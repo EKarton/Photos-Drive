@@ -27,14 +27,16 @@
       tabindex="-1"
       (clickOutside)="closeDropdown()"
     >
-      <a
-        href="#"
-        class="block px-4 py-2 text-sm text-gray-700 signout-button"
+      <button
+        type="button"
+        data-testid="signout-button"
+        class="block px-4 py-2 text-sm text-gray-700"
         role="menuitem"
         tabindex="-1"
+        (click)="signOut()"
       >
         Sign out
-      </a>
+      </button>
     </div>
   }
 </div>
