@@ -85,7 +85,7 @@ class SystemCleaner:
             logger.debug("Transaction committed successfully")
 
             return cleanup_results
-        except Exception as e:
+        except BaseException as e:
             logger.error("Aborting transaction due to an error:", str(e))
             for session in sessions:
                 session.abort_transaction()
@@ -138,9 +138,15 @@ class SystemCleaner:
             cur_album_id = albums_queue.popleft()
             cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
 
+            if cur_album_id in album_ids_to_delete:
+                is_empty_leaf_album = (
+                    len(cur_album.child_album_ids) == 0
+                    and len(cur_album.media_item_ids) == 0
+                )
+                if not is_empty_leaf_album:
+                    album_ids_to_delete.remove(cur_album_id)
+
             for child_album_id in cur_album.child_album_ids:
-                if child_album_id in album_ids_to_delete:
-                    album_ids_to_delete.remove(child_album_id)
                 albums_queue.append(child_album_id)
 
             for media_item_id in cur_album.media_item_ids:

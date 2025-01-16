@@ -84,7 +84,7 @@ class PhotosBackup:
             logger.debug("Transaction committed successfully")
 
             return backup_results
-        except Exception as e:
+        except BaseException as e:
             logger.error("Aborting transaction due to an error:", str(e))
             for session in sessions:
                 session.abort_transaction()
