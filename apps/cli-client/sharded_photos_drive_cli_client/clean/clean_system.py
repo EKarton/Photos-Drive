@@ -2,16 +2,18 @@ from dataclasses import dataclass
 from typing import Dict
 from collections import deque
 from bson.objectid import ObjectId
+import logging
 
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
-from sharded_photos_drive_cli_client.shared.gphotos.albums import Album as GAlbum
-from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
-from sharded_photos_drive_cli_client.shared.mongodb.media_items import MediaItemId
-
+from ..shared.gphotos.client import GPhotosClientV2
+from ..shared.gphotos.albums import Album as GAlbum
+from ..shared.mongodb.albums import AlbumId
+from ..shared.mongodb.media_items import MediaItemId
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 from ..shared.config.config import Config
 from ..shared.mongodb.albums_repository import AlbumsRepository
 from ..shared.mongodb.media_items_repository import MediaItemsRepository
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -68,6 +70,31 @@ class SystemCleaner:
         self.__gphotos_clients_repo = gphotos_clients_repo
 
     def clean(self) -> CleanupResults:
+        mongodb_clients = self.__config.get_mongo_db_clients()
+        sessions = [client.start_session() for _, client in mongodb_clients]
+        try:
+            for session in sessions:
+                session.start_transaction()
+
+            cleanup_results = self.__clean_internal()
+
+            for session in sessions:
+                session.commit_transaction()
+                session.end_session()
+
+            logger.debug("Transaction committed successfully")
+
+            return cleanup_results
+        except Exception as e:
+            logger.error("Aborting transaction due to an error:", str(e))
+            for session in sessions:
+                session.abort_transaction()
+                session.end_session()
+
+            logger.error("Aborted transaction")
+            raise e
+
+    def __clean_internal(self) -> CleanupResults:
         # Step 1: Find all of the media item ids and all of the album ids to delete
         media_item_ids_to_delete, album_ids_to_delete = (
             self.__find_media_item_ids_and_album_ids_to_delete()
@@ -85,6 +112,7 @@ class SystemCleaner:
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
 
         # Step 5: Move all the gmedia items marked for trash to a folder called Trash
+        self.__move_gmedia_items_to_trash(gmedia_item_keys_to_trash)
 
         return CleanupResults(
             num_media_items_deleted=len(media_item_ids_to_delete),
@@ -103,6 +131,7 @@ class SystemCleaner:
         )
 
         root_album_id = self.__config.get_root_album_id()
+        album_ids_to_delete.remove(root_album_id)
         albums_queue = deque([root_album_id])
 
         while len(albums_queue) > 0:
@@ -158,6 +187,10 @@ class SystemCleaner:
             client = self.__gphotos_clients_repo.get_client_by_id(client_id)
             trash_album = self.__find_or_create_trash_album(client)
 
+            self.__move_gmedia_item_ids_to_album_safely(
+                client, trash_album.id, client_id_to_gmedia_item_ids[client_id]
+            )
+
     def __find_or_create_trash_album(self, client: GPhotosClientV2) -> GAlbum:
         trash_album: GAlbum | None = None
         for album in client.albums().list_albums(exclude_non_app_created_data=True):
@@ -169,3 +202,14 @@ class SystemCleaner:
             trash_album = client.albums().create_album("To delete")
 
         return trash_album
+
+    def __move_gmedia_item_ids_to_album_safely(
+        self, client: GPhotosClientV2, galbum_id: str, gmedia_item_ids: list[str]
+    ):
+        MAX_UPLOAD_TOKEN_LENGTH_PER_CALL = 50
+
+        for i in range(0, len(gmedia_item_ids), MAX_UPLOAD_TOKEN_LENGTH_PER_CALL):
+            chunked_gmedia_item_ids = gmedia_item_ids[
+                i : i + MAX_UPLOAD_TOKEN_LENGTH_PER_CALL
+            ]
+            client.albums().add_photos_to_album(galbum_id, chunked_gmedia_item_ids)
