@@ -11,7 +11,7 @@ from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.media_items_repository import MediaItemsRepositoryImpl
 from ..backup.diffs import Diff
-from ..backup.processed_diffs import ProcessedDiff, DiffsProcessor
+from ..backup.processed_diffs import DiffsProcessor
 from ..diff.get_diffs import PhotosDiff, DiffResults
 from ..shared.config.config import Config
 

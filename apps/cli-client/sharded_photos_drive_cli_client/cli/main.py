@@ -202,7 +202,6 @@ def __build_config_based_on_args(args: argparse.Namespace) -> Config:
     if args.config_file:
         return ConfigFromFile(args.config_file)
     elif args.config_mongodb:
-        print(args.config_mongodb)
         return ConfigFromMongoDb(MongoClient(args.config_mongodb))
     else:
         raise ValueError('Unknown arg type')
