@@ -92,7 +92,7 @@ class PhotosDiff:
             )
 
         base_album_id = base_album.id
-        queue = deque([(base_album_id, [])])
+        queue: deque = deque([(base_album_id, [])])
 
         while len(queue) > 0:
             album_id, prev_path = queue.popleft()
