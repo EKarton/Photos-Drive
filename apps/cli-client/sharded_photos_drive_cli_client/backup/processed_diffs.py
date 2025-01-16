@@ -63,7 +63,8 @@ class DiffsProcessor:
 
         album_name = os.path.dirname(diff.file_path)
 
-        # Remove the trailing dots / non-chars (ex: ../../Photos/2010/Dog becomes Photos/2010/Dog)
+        # Remove the trailing dots / non-chars
+        # (ex: ../../Photos/2010/Dog becomes Photos/2010/Dog)
         pos = -1
         for i, x in enumerate(album_name):
             if x.isalpha():
@@ -120,7 +121,16 @@ class DiffsProcessor:
         return None
 
     def __convert_to_degrees(self, value) -> float:
-        """Converts GPS coordinates from degrees-minutes-seconds format to decimal degrees."""
+        """
+        Converts GPS coordinates from degrees-minutes-seconds format to
+        decimal degrees.
+
+        Args:
+            value (tuple): The GPS coordinate in different parts
+
+        Returns:
+            float: A single value representing degrees
+        """
         d = float(value.values[0].num) / float(value.values[0].den)
         m = float(value.values[1].num) / float(value.values[1].den)
         s = float(value.values[2].num) / float(value.values[2].den)

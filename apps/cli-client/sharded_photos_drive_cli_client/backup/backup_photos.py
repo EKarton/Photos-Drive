@@ -253,7 +253,8 @@ class PhotosBackup:
                 A set of diff assignments.
 
         Returns:
-            dict[ProcessedDiff, str]: A map of diffs to their media item IDs on Google Photos.
+            dict[ProcessedDiff, str]: A map of diffs to their media item IDs on
+                Google Photos.
         """
         diff_assignments_items = diff_assignments.items()
         upload_requests = [
