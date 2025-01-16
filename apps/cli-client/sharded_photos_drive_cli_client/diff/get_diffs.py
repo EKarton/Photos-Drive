@@ -12,7 +12,7 @@ from ..shared.mongodb.media_items_repository import MediaItemsRepository
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(frozen=True)
 class RemoteFile:
     '''
     Represents a file in the Sharded Photos Drive system.
@@ -29,7 +29,7 @@ class RemoteFile:
     remote_relative_file_path: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class LocalFile:
     '''
     Represents a file stored locally.
@@ -45,7 +45,7 @@ class LocalFile:
     local_relative_file_path: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class DiffResults:
     missing_remote_files_in_local: list[RemoteFile]
     missing_local_files_in_remote: list[LocalFile]
@@ -123,6 +123,9 @@ class PhotosDiff:
         cur_album = self.__albums_repo.get_album_by_id(
             self.__config.get_root_album_id()
         )
+
+        if len(remote_dir_path) == 0:
+            return cur_album
 
         album_names_queue = deque(remote_dir_path.split('/'))
 

@@ -41,7 +41,7 @@ class DiffsProcessor:
             if diff.modifier != "+" and diff.modifier != "-":
                 raise ValueError(f"Modifier {diff.modifier} in {diff} not allowed.")
 
-            if not os.path.exists(diff.file_path):
+            if diff.modifier == "+" and not os.path.exists(diff.file_path):
                 raise ValueError(f"File {diff.file_path} does not exist.")
 
             processed_diffs.append(

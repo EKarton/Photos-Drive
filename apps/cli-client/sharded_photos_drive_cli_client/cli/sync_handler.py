@@ -1,14 +1,15 @@
 import logging
+from prettytable import PrettyTable, NONE
+from termcolor import colored
+from typing import Literal
 
-from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
-    AlbumsRepositoryImpl,
-)
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
-    MongoDbClientsRepository,
-)
-from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
-    MediaItemsRepositoryImpl,
-)
+from ..backup.backup_photos import PhotosBackup, BackupResults
+from ..backup.diffs_assignments import DiffsAssigner
+from ..backup.gphotos_uploader import GPhotosMediaItemUploader
+from ..shared.gphotos.clients_repository import GPhotosClientsRepository
+from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
+from ..shared.mongodb.clients_repository import MongoDbClientsRepository
+from ..shared.mongodb.media_items_repository import MediaItemsRepositoryImpl
 from ..backup.diffs import Diff
 from ..backup.processed_diffs import ProcessedDiff, DiffsProcessor
 from ..diff.get_diffs import PhotosDiff, DiffResults
@@ -45,6 +46,20 @@ class SyncHandler:
             return
 
         self.__print_backup_diffs(backup_diffs)
+        if not self.__prompt_user_to_confirm_to_diff():
+            print("Operation cancelled.")
+            return
+
+        backup_results = self.__backup_diffs_to_system(config, backup_diffs)
+        print("Sync complete.")
+        print(
+            "Number of files added to the system:",
+            backup_results.num_media_items_added,
+        )
+        print(
+            "Number of files deleted in the system:",
+            backup_results.num_media_items_deleted,
+        )
 
     def __convert_diff_results_to_backup_diffs(
         self, diff_results: DiffResults
@@ -65,4 +80,62 @@ class SyncHandler:
 
     def __print_backup_diffs(self, backup_diffs: list[Diff]):
         sorted_backup_diffs = sorted(backup_diffs, key=lambda obj: obj.file_path)
-        print(sorted_backup_diffs)
+        table = PrettyTable()
+        table.field_names = ["M", "File path"]
+
+        for diff in sorted_backup_diffs:
+            color: Literal["green", "red"] = "green" if diff.modifier == "+" else "red"
+            table.add_row(
+                [colored(diff.modifier, color), colored(diff.file_path, color)]
+            )
+
+        # Left align the columns
+        table.align["M"] = "l"
+        table.align["File path"] = "l"
+
+        # Remove the borders
+        table.border = False
+        table.hrules = NONE
+        table.vrules = NONE
+
+        print("============================================================")
+        print("Changes")
+        print("============================================================")
+        print(table)
+
+    def __prompt_user_to_confirm_to_diff(self) -> bool:
+        while True:
+            raw_input = input("Is this correct? (yes / no): ")
+            user_input = raw_input.strip().lower()
+
+            if user_input in ["yes", "y"]:
+                return True
+            elif user_input in ["no", "n"]:
+                return False
+            else:
+                print("Invalid input. Please enter \'y\' or \'n\'")
+
+    def __backup_diffs_to_system(
+        self, config: Config, diffs: list[Diff]
+    ) -> BackupResults:
+        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+        # Process the diffs with metadata
+        diff_processor = DiffsProcessor()
+        processed_diffs = diff_processor.process_raw_diffs(diffs)
+        for processed_diff in processed_diffs:
+            logger.debug(f"Processed diff: {processed_diff}")
+
+        # Process the diffs
+        gphotos_uploader = GPhotosMediaItemUploader(gphoto_clients_repo)
+        diffs_assigner = DiffsAssigner(config)
+        backup_service = PhotosBackup(
+            config, albums_repo, media_items_repo, gphotos_uploader, diffs_assigner
+        )
+        backup_results = backup_service.backup(processed_diffs)
+        logger.debug(f"Backup results: {backup_results}")
+
+        return backup_results
