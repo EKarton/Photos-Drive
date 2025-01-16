@@ -67,10 +67,9 @@ class TeardownHandler:
                 )
 
     def __confirm_deletion_of_everything(self):
+        print("Do you want to delete everything this tool has ever created?")
         while True:
-            raw_input = input(
-                "Do you want to delete everything this tool has ever created? [Yes/Y] or [No/N]: "
-            )
+            raw_input = input("[Yes/Y] or [No/N]: ")
             user_input = raw_input.strip().lower()
 
             if user_input in ["yes", "y"]:
