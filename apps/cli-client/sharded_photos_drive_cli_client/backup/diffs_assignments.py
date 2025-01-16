@@ -23,7 +23,8 @@ class DiffsAssigner:
             diffs (list[ProcessedDiff]): A list of processed diffs
 
         Returns:
-            Dict[ProcessedDiff, ObjectId]: A map of processed diffs to GPhotos client ID.
+            Dict[ProcessedDiff, ObjectId]: A map of processed diffs to GPhotos
+                client ID.
         """
         client_id_to_space_remaining = {}
         for client_id, client in self.__config.get_gphotos_clients():

@@ -52,3 +52,21 @@ class AddHandler:
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")
+
+        print("Add operation complete.")
+        print(
+            "Number of files added to the system:",
+            backup_results.num_media_items_added,
+        )
+        print(
+            "Number of files deleted in the system:",
+            backup_results.num_media_items_deleted,
+        )
+        print(
+            "Number of albums created in the system:",
+            backup_results.num_albums_created,
+        )
+        print(
+            "Number of albums deleted in the system:",
+            backup_results.num_albums_deleted,
+        )

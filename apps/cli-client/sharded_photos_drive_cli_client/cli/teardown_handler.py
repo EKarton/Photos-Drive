@@ -16,7 +16,7 @@ class TeardownHandler:
         and moves all photos uploaded to Google Photos to a trash album.
 
         Args:
-            config_file_path (str): The path to the config file.
+            config (Config): The config.
         """
         self.__confirm_deletion_of_everything()
 

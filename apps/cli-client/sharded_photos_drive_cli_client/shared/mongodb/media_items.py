@@ -8,7 +8,8 @@ from bson.objectid import ObjectId
 class MediaItemId:
     """
     Represents the ID of a media item in MongoDB.
-    Since media items are distributed across different MongoDB clients, it consists of the MongoDB client ID and the object ID.
+    Since media items are distributed across different MongoDB clients, it consists of
+    the MongoDB client ID and the object ID.
 
     Attributes:
         client_id (ObjectId): The ID of the Mongo DB client that it is saved under.
@@ -43,8 +44,10 @@ class MediaItem:
         id (MediaItemId): The ID of the media item.
         file_name (str): The name of the media item.
         hash_code (Optional[str]): The hash code of the media item.
-        location (Optional[GpsLocation]): The gps location of the media item, if it exists. Else none.
-        gphotos_client_id (ObjectId): The Google Photos client ID that it is saved under.
+        location (Optional[GpsLocation]): The gps location of the media item, if it
+            exists. Else none.
+        gphotos_client_id (ObjectId): The Google Photos client ID that it is saved
+            under.
         gphotos_media_item_id (str): The media item ID that is saved in Google Photos.
     """
 

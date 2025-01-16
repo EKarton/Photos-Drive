@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Optional, Mapping, cast, Any
+from typing import Optional, Mapping, cast, Any, Dict
 from abc import ABC, abstractmethod
 
 from bson.objectid import ObjectId
@@ -41,6 +41,15 @@ class AlbumsRepository(ABC):
         """
 
     @abstractmethod
+    def get_all_albums(self) -> list[Album]:
+        '''
+        Returns all of the albums in the system.
+
+        Returns:
+            list[Album]: A list of albums.
+        '''
+
+    @abstractmethod
     def create_album(
         self,
         album_name: str,
@@ -75,6 +84,18 @@ class AlbumsRepository(ABC):
         """
 
     @abstractmethod
+    def delete_many_albums(self, ids: list[AlbumId]):
+        """
+        Deletes a list of albums from the database.
+
+        Args:
+            ids (list[AlbumId): The IDs of the albums to delete.
+
+        Raises:
+            ValueError: If a media item exists.
+        """
+
+    @abstractmethod
     def update_album(self, album_id: AlbumId, updated_album_fields: UpdatedAlbumFields):
         """
         Update an album with new fields.
@@ -93,7 +114,8 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         Creates a AlbumsRepository
 
         Args:
-            mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db clients that stores albums.
+            mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
+                clients that stores albums.
         """
         self._mongodb_clients_repository = mongodb_clients_repository
 
@@ -108,6 +130,16 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             raise ValueError(f"Album {id} does not exist!")
 
         return self.__parse_raw_document_to_album_obj(id.client_id, raw_item)
+
+    def get_all_albums(self) -> list[Album]:
+        albums: list[Album] = []
+        for client_id, client in self._mongodb_clients_repository.get_all_clients():
+            for doc in client["sharded_google_photos"]["albums"].find({}):
+                raw_item = cast(dict, doc)
+                album = self.__parse_raw_document_to_album_obj(client_id, raw_item)
+                albums.append(album)
+
+        return albums
 
     def create_album(
         self,
@@ -153,6 +185,23 @@ class AlbumsRepositoryImpl(AlbumsRepository):
 
         if result.deleted_count != 1:
             raise ValueError(f"Unable to delete album: Album {id} not found")
+
+    def delete_many_albums(self, ids: list[MediaItemId]):
+        client_id_to_object_ids: Dict[ObjectId, list[ObjectId]] = {}
+        for id in ids:
+            if id.client_id not in client_id_to_object_ids:
+                client_id_to_object_ids[id.client_id] = []
+
+            client_id_to_object_ids[id.client_id].append(id.object_id)
+
+        for client_id, object_ids in client_id_to_object_ids.items():
+            client = self._mongodb_clients_repository.get_client_by_id(client_id)
+            result = client["sharded_google_photos"]["albums"].delete_many(
+                {"_id": {"$in": object_ids}}
+            )
+
+            if result.deleted_count != len(object_ids):
+                raise ValueError(f"Unable to delete all media items in {object_ids}")
 
     def update_album(self, album_id: AlbumId, updated_album_fields: UpdatedAlbumFields):
         filter_query: Mapping = {

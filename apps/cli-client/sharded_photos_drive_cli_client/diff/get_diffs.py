@@ -103,11 +103,12 @@ class PhotosDiff:
                 remote_file_path = str.join(
                     '/', prev_path + [album.name, media_item.file_name]
                 )
+                remote_relative_file_path = f'{remote_dir_path}/{remote_file_path}'
 
                 found_files.append(
                     RemoteFile(
                         key=remote_file_path,
-                        remote_relative_file_path=remote_file_path,
+                        remote_relative_file_path=remote_relative_file_path,
                     )
                 )
 

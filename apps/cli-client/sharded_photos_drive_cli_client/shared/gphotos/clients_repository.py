@@ -15,7 +15,8 @@ class GPhotosClientsRepository:
         config_repo: Config,
     ) -> "GPhotosClientsRepository":
         """
-        A factory method that builds the GPhotosClientsRepository from the ConfigFromMongoDbRepository
+        A factory method that builds the GPhotosClientsRepository from the
+        ConfigFromMongoDbRepository.
 
         Args:
             config_repo (ConfigFromMongoDbRepository): The config repository

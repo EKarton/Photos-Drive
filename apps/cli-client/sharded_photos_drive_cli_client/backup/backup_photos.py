@@ -5,9 +5,8 @@ import logging
 
 from bson.objectid import ObjectId
 
-
 from ..shared.config.config import Config
-from ..shared.mongodb.albums import Album
+from ..shared.mongodb.albums import Album, AlbumId
 from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields
 from ..shared.mongodb.media_items import MediaItem, MediaItemId
 from ..shared.mongodb.media_items_repository import MediaItemsRepository
@@ -28,10 +27,14 @@ class BackupResults:
     Attributes:
         num_media_items_added (int): The number of media items added.
         num_media_items_deleted (int): The number of media items deleted.
+        num_albums_created (int): The number of albums created.
+        num_albums_deleted (int): The number of albums deleted.
     """
 
     num_media_items_added: int
     num_media_items_deleted: int
+    num_albums_created: int
+    num_albums_deleted: int
 
 
 @dataclass
@@ -66,13 +69,48 @@ class PhotosBackup:
         Returns:
             BackupResults: A set of results from the backup.
         """
+        mongodb_clients = self.__config.get_mongo_db_clients()
+        sessions = [client.start_session() for _, client in mongodb_clients]
+        try:
+            for session in sessions:
+                session.start_transaction()
+
+            backup_results = self.__backup_internal(diffs)
+
+            for session in sessions:
+                session.commit_transaction()
+                session.end_session()
+
+            logger.debug("Transaction committed successfully")
+
+            return backup_results
+        except Exception as e:
+            logger.error("Aborting transaction due to an error:", str(e))
+            for session in sessions:
+                session.abort_transaction()
+                session.end_session()
+
+            logger.error("Aborted transaction")
+            raise e
+
+    def __backup_internal(self, diffs: list[ProcessedDiff]) -> BackupResults:
+        """Backs up a list of media items based on a list of diffs.
+
+        Args:
+            diffs (list[ProcessedDiff]): A list of processed diffs.
+
+        Returns:
+            BackupResults: A set of results from the backup.
+        """
         # Step 1: Build a tree of albums with diffs on their edge nodes
         root_diffs_tree_node = self.__build_diffs_tree(diffs)
         logger.debug(f"Finished creating initial diff tree: {root_diffs_tree_node}")
 
         # Step 2: Create the missing photo albums in Mongo DB from the diffs tree
         # and attach the albums from database to the DiffTree
-        self.__attach_albums_to_diff_tree(root_diffs_tree_node)
+        total_num_albums_created = self.__attach_albums_to_diff_tree(
+            root_diffs_tree_node
+        )
         logger.debug(f"Finished attaching albums to diff tree: {root_diffs_tree_node}")
 
         # Step 3: Determine which photo to add belongs to which Google Photos account
@@ -106,7 +144,8 @@ class PhotosBackup:
         logger.debug(f"Added diffs to the database: {diff_to_uploaded_media_item}")
 
         # Step 6: Go through the tree
-        media_item_ids_to_delete = []
+        total_media_item_ids_to_delete = []
+        total_album_ids_to_prune = []
         queue = deque([root_diffs_tree_node])
         while len(queue) > 0:
             cur_diffs_tree_node = queue.popleft()
@@ -116,45 +155,58 @@ class PhotosBackup:
             delete_diffs = cur_diffs_tree_node.modifier_to_diffs.get("-", [])
 
             # Step 6a: Find media items to delete
-            deleted_file_names_set = set([diff.file_name for diff in delete_diffs])
-            deleted_media_item_ids = set([])
-            for media_item_id in cur_album.media_item_ids:
-                media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
-
-                if media_item.file_name in deleted_file_names_set:
-                    media_item_ids_to_delete.append(media_item.id)
-                    deleted_media_item_ids.add(media_item.id)
+            file_names_to_delete_set = set([diff.file_name for diff in delete_diffs])
+            media_item_ids_to_delete = set([])
+            if len(delete_diffs) > 0:
+                for media_item_id in cur_album.media_item_ids:
+                    media_item = self.__media_items_repo.get_media_item_by_id(
+                        media_item_id
+                    )
+                    if media_item.file_name in file_names_to_delete_set:
+                        total_media_item_ids_to_delete.append(media_item.id)
+                        media_item_ids_to_delete.add(media_item.id)
 
             # Step 6b: Find the media items to add to the album
-            added_media_item_ids = []
+            media_item_ids_to_add = []
             for add_diff in add_diffs:
                 media_item_id = diff_to_uploaded_media_item[add_diff].id
-                added_media_item_ids.append(media_item_id)
+                media_item_ids_to_add.append(media_item_id)
 
             # Step 6c: Get a new list of media item ids for the album
             new_media_item_ids: list[MediaItemId] = []
             for media_item_id in cur_album.media_item_ids:
-                if media_item_id not in deleted_media_item_ids:
+                if media_item_id not in media_item_ids_to_delete:
                     new_media_item_ids.append(media_item_id)
-            new_media_item_ids += added_media_item_ids
+            new_media_item_ids += media_item_ids_to_add
 
             # Step 6d: Update the album with the new list of media item ids
-            if len(deleted_media_item_ids) > 0 or len(added_media_item_ids) > 0:
+            if len(media_item_ids_to_delete) > 0 or len(media_item_ids_to_add) > 0:
                 self.__albums_repo.update_album(
                     cur_album.id,
                     UpdatedAlbumFields(new_media_item_ids=new_media_item_ids),
                 )
+                print(new_media_item_ids, cur_album.child_album_ids)
+                if len(new_media_item_ids) == 0 and len(cur_album.child_album_ids) == 0:
+                    total_album_ids_to_prune.append(cur_album.id)
 
             for child_diff_tree_node in cur_diffs_tree_node.child_nodes:
                 queue.append(child_diff_tree_node)
 
         # Step 7: Delete the media items marked for deletion
-        self.__media_items_repo.delete_many_media_items(media_item_ids_to_delete)
+        self.__media_items_repo.delete_many_media_items(total_media_item_ids_to_delete)
+
+        # Step 8: Delete albums with no child albums and no media items
+        total_num_albums_deleted = 0
+        for album_id in total_album_ids_to_prune:
+            logger.debug(f"Pruning {album_id}")
+            total_num_albums_deleted += self.__prune_album(album_id)
 
         # Step 8: Return the results of the backup
         return BackupResults(
             num_media_items_added=len(diff_to_uploaded_media_item.keys()),
-            num_media_items_deleted=len(media_item_ids_to_delete),
+            num_media_items_deleted=len(total_media_item_ids_to_delete),
+            num_albums_created=total_num_albums_created,
+            num_albums_deleted=total_num_albums_deleted,
         )
 
     def __build_diffs_tree(self, diffs: list[ProcessedDiff]) -> DiffsTreeNode:
@@ -193,20 +245,28 @@ class PhotosBackup:
 
         return root_diffs_tree_node
 
-    def __attach_albums_to_diff_tree(self, diff_tree: DiffsTreeNode):
+    def __attach_albums_to_diff_tree(self, diff_tree: DiffsTreeNode) -> int:
         """
         Attaches albums from MongoDB to the diff tree
         If there are any albums missing in MongoDB, it will create it.
 
         Args:
             diff_tree (DiffsTreeNode): The root of the diff tree.
+
+        Returns:
+            int: The total number of new albums created.
         """
+        num_albums_created = 0
         root_album_id = self.__config.get_root_album_id()
         root_album = self.__albums_repo.get_album_by_id(root_album_id)
         queue = deque([(diff_tree, root_album)])
 
         while len(queue) > 0:
             cur_diffs_tree_node, cur_album = queue.popleft()
+            if cur_diffs_tree_node.album_name != cur_album.name:
+                raise ValueError(
+                    f"Error: cannot find album {cur_diffs_tree_node.album_name}"
+                )
             cur_diffs_tree_node.album = cur_album
 
             child_album_name_to_album: Dict[str, Album] = {}
@@ -224,6 +284,7 @@ class PhotosBackup:
                         child_album_ids=[],
                         media_item_ids=[],
                     )
+                    num_albums_created += 1
                     child_album_name_to_album[child_diff_node.album_name] = new_album
                     created_child_album_ids.append(new_album.id)
 
@@ -240,6 +301,8 @@ class PhotosBackup:
                         new_child_album_ids=new_child_album_ids
                     ),
                 )
+
+        return num_albums_created
 
     def __upload_diffs_to_gphotos(
         self, diff_assignments: Dict[ProcessedDiff, ObjectId]
@@ -274,3 +337,39 @@ class PhotosBackup:
         }
 
         return upload_diff_to_gphotos_media_item_id
+
+    def __prune_album(self, album_id: AlbumId) -> int:
+        num_albums_deleted = 0
+        prev_album_id_deleted = None
+        cur_album_id = album_id
+        cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
+
+        while True:
+            cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
+            if len(cur_album.child_album_ids) > 0:
+                break
+
+            if len(cur_album.media_item_ids) > 0:
+                break
+
+            if cur_album.parent_album_id is None:
+                break
+
+            parent_album_id = cur_album.parent_album_id
+            self.__albums_repo.delete_album(album_id)
+            num_albums_deleted += 1
+
+            prev_album_id_deleted = album_id
+            cur_album_id = parent_album_id
+            cur_album = self.__albums_repo.get_album_by_id(parent_album_id)
+
+        new_child_album_ids = [
+            child_album_id
+            for child_album_id in cur_album.child_album_ids
+            if child_album_id != prev_album_id_deleted
+        ]
+        self.__albums_repo.update_album(
+            cur_album_id, UpdatedAlbumFields(new_child_album_ids=new_child_album_ids)
+        )
+
+        return num_albums_deleted

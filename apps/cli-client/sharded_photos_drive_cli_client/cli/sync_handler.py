@@ -60,6 +60,14 @@ class SyncHandler:
             "Number of files deleted in the system:",
             backup_results.num_media_items_deleted,
         )
+        print(
+            "Number of albums created in the system:",
+            backup_results.num_albums_created,
+        )
+        print(
+            "Number of albums deleted in the system:",
+            backup_results.num_albums_deleted,
+        )
 
     def __convert_diff_results_to_backup_diffs(
         self, diff_results: DiffResults
