@@ -314,7 +314,7 @@ class GPhotosAlbumClientTests(unittest.TestCase):
 
             self.assertEqual(response, from_dict(Album, mock_response))
 
-    def test_update_album__with_new_cover_media_item_id__returns_new_album_info(self):
+    def test_update_album__new_cover_media_item_id(self):
         mock_response = {
             "id": "123",
             "title": "Photos/2011",
@@ -330,7 +330,8 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.patch(
-                "https://photoslibrary.googleapis.com/v1/albums/123?updateMask=coverPhotoMediaItemId",
+                "https://photoslibrary.googleapis.com/v1/albums/123?updateMask"
+                + "=coverPhotoMediaItemId",
                 json=mock_response,
             )
 
@@ -338,9 +339,7 @@ class GPhotosAlbumClientTests(unittest.TestCase):
 
             self.assertEqual(response, from_dict(Album, mock_response))
 
-    def test_update_album__with_new_title_and_new_cover_media_item_id__returns_new_album_info(
-        self,
-    ):
+    def test_update_album__new_title_new_cover_media_item_id(self):
         mock_response = {
             "id": "123",
             "title": "Photos/2012",
@@ -356,7 +355,8 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.patch(
-                "https://photoslibrary.googleapis.com/v1/albums/123?updateMask=title&updateMask=coverPhotoMediaItemId",
+                "https://photoslibrary.googleapis.com/v1/albums/123"
+                + "?updateMask=title&updateMask=coverPhotoMediaItemId",
                 json=mock_response,
             )
 

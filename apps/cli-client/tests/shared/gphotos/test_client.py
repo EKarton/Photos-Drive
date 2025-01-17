@@ -51,9 +51,7 @@ class GPhotosClientTests(unittest.TestCase):
             self.assertEqual(storage_quota, MOCK_GPHOTOS_STORAGE_QUOTA)
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_get_storage_quota__first_call_5xx_second_call_2xx__success_and_returns_storage_quota(
-        self,
-    ):
+    def test_get_storage_quota__first_call_5xx_second_call_2xx(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
@@ -82,7 +80,10 @@ class GPhotosClientTests(unittest.TestCase):
                 status_code=500,
             )
 
-            expectedException = "500 Server Error: None for url: https://www.googleapis.com/drive/v3/about"
+            expectedException = (
+                "500 Server Error: None for url: "
+                + "https://www.googleapis.com/drive/v3/about"
+            )
             with self.assertRaisesRegex(Exception, expectedException):
                 client.get_storage_quota()
 
