@@ -1,3 +1,4 @@
+from typing import Dict, cast
 import unittest
 from unittest.mock import Mock
 from bson.objectid import ObjectId
@@ -187,8 +188,11 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.repo.update_album(album_id, updated_fields)
 
         # Assert
-        updated_album = self.mock_client["sharded_google_photos"]["albums"].find_one(
-            {"_id": album_id.object_id}
+        updated_album = cast(
+            Dict,
+            self.mock_client["sharded_google_photos"]["albums"].find_one(
+                {"_id": album_id.object_id}
+            ),
         )
         self.assertEqual(updated_album["name"], "New Name")
         self.assertEqual(

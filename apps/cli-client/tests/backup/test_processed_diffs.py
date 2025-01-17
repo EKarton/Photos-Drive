@@ -1,3 +1,4 @@
+from typing import cast
 import unittest
 from unittest.mock import patch
 
@@ -30,8 +31,12 @@ class TestDiffsProcessor(unittest.TestCase):
         )
         self.assertEqual(processed_diffs[0].file_name, "image-with-location.jpg")
         self.assertEqual(processed_diffs[0].file_size, 2622777)
-        self.assertEqual(processed_diffs[0].location.latitude, 43.12446492202323)
-        self.assertEqual(processed_diffs[0].location.longitude, -79.06879274830213)
+        self.assertEqual(
+            cast(GpsLocation, processed_diffs[0].location).latitude, 43.12446492202323
+        )
+        self.assertEqual(
+            cast(GpsLocation, processed_diffs[0].location).longitude, -79.06879274830213
+        )
 
     def test_process_raw_diffs__image_with_inversed_location__returns_processed_diffs_correctly(
         self,
