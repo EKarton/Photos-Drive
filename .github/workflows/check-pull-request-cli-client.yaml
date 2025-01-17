@@ -36,7 +36,8 @@ jobs:
         run: |
           cd ./apps/cli-client
           poetry install --no-interaction
-          poetry run mypy .
+          poetry run mypy . --check-untyped-defs
+          poetry run flake8
           poetry run black --check .
 
   run-tests:
