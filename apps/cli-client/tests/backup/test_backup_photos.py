@@ -176,7 +176,7 @@ class TestPhotosBackup(unittest.TestCase):
         fish_item = next(filter(lambda x: x['file_name'] == 'fish.png', mitems_1))
         bird_item = next(filter(lambda x: x['file_name'] == 'bird.png', mitems_1))
 
-        # Test assert: check that the media items in the db are linked to GPhotos correctly
+        # Test assert: check that the media items in the db are linked to GPhotos
         self.assertEqual(dog_item['gphotos_client_id'], gphotos_client_1_id)
         self.assertEqual(dog_item['gphotos_media_item_id'], dog_gitem.id)
         self.assertEqual(cat_item['gphotos_client_id'], gphotos_client_2_id)
@@ -186,7 +186,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(bird_item['gphotos_client_id'], gphotos_client_2_id)
         self.assertEqual(bird_item['gphotos_media_item_id'], bird_gitem.id)
 
-        # Test assert: check that the media items in the db are linked to the albums in the db
+        # Test assert: check that the media items are linked to the albums in the db
         self.assertIn(
             f'{mongodb_client_1_id}:{dog_item["_id"]}', album_2010['media_item_ids']
         )
@@ -322,7 +322,8 @@ class TestPhotosBackup(unittest.TestCase):
         albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
 
-        # Test assert: Check that cat.png media item is attached to the 2010 album in db, and dog.png is still kept
+        # Test assert: Check that cat.png media item is attached to the 2010 album in
+        # db, and dog.png is still kept
         album_2010 = next(filter(lambda x: x['name'] == '2010', albums_1))
         self.assertEqual(len(album_2010['media_item_ids']), 2)
         self.assertIn(

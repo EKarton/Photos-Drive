@@ -5,12 +5,6 @@ from bson import ObjectId
 from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
 from sharded_photos_drive_cli_client.shared.config.config import Config
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
-    FakeGPhotosClient,
-)
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_items_repository import (
-    FakeItemsRepository,
-)
 
 
 class TestDiffsAssigner(unittest.TestCase):

@@ -54,7 +54,8 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 json={"albums": [albums[1]], "nextPageToken": "b"},
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums?excludeNonAppCreatedData=False&pageToken=b",
+                "https://photoslibrary.googleapis.com/v1/albums"
+                + "?excludeNonAppCreatedData=False&pageToken=b",
                 json={},
             )
 
@@ -64,9 +65,7 @@ class GPhotosAlbumClientTests(unittest.TestCase):
             self.assertEqual(actual_albums[0], from_dict(Album, albums[0]))
             self.assertEqual(actual_albums[1], from_dict(Album, albums[1]))
 
-    def test_list_albums__multiple_pages_with_last_page_containing_no_next_page__returns_albums_list(
-        self,
-    ):
+    def test_list_albums__multiple_pages_last_page_no_page_token(self):
         albums = [
             {
                 "id": "1",
@@ -94,11 +93,13 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums?excludeNonAppCreatedData=False",
+                "https://photoslibrary.googleapis.com/v1/albums?"
+                + "excludeNonAppCreatedData=False",
                 json={"albums": [albums[0]], "nextPageToken": "a"},
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums?excludeNonAppCreatedData=False&pageToken=a",
+                "https://photoslibrary.googleapis.com/v1/albums?"
+                + "excludeNonAppCreatedData=False&pageToken=a",
                 json={"albums": [albums[1]]},
             )
 
@@ -132,9 +133,7 @@ class GPhotosAlbumClientTests(unittest.TestCase):
             self.assertEqual(response, from_dict(Album, mock_response))
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_create_album__first_call_returns_5xx_second_call_returns_2xx__retries_and_returns_response(
-        self,
-    ):
+    def test_create_album__first_call_5xx_second_call_2xx(self):
         mock_response = {
             "id": "1",
             "title": "Photos/2011",
@@ -173,7 +172,10 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 status_code=500,
             )
 
-            expectedException = "500 Server Error: None for url: https://photoslibrary.googleapis.com/v1/albums"
+            expectedException = (
+                "500 Server Error: None for url: "
+                + "https://photoslibrary.googleapis.com/v1/albums"
+            )
             with self.assertRaisesRegex(Exception, expectedException):
                 client.albums().create_album("Photos/2011")
 
@@ -192,16 +194,15 @@ class GPhotosAlbumClientTests(unittest.TestCase):
             self.assertEqual(response, None)
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_add_photos_to_album__first_call_5xx_second_call_2xx__successful_and_returns_nothing(
-        self,
-    ):
+    def test_add_photos_to_album__first_call_5xx_second_call_2xx(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.register_uri(
                 "POST",
-                "https://photoslibrary.googleapis.com/v1/albums/123:batchAddMediaItems",
+                "https://photoslibrary.googleapis.com/v1/albums/123"
+                + ":batchAddMediaItems",
                 [
                     {"text": "", "status_code": 500},
                     {"text": "", "status_code": 200},
@@ -219,11 +220,16 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.post(
-                "https://photoslibrary.googleapis.com/v1/albums/123:batchAddMediaItems",
+                "https://photoslibrary.googleapis.com/v1/albums/123"
+                + ":batchAddMediaItems",
                 status_code=500,
             )
 
-            expectedException = "500 Server Error: None for url: https://photoslibrary.googleapis.com/v1/albums/123:batchAddMediaItems"
+            expectedException = (
+                "500 Server Error: None for url: "
+                + "https://photoslibrary.googleapis.com/v1/albums/123"
+                + ":batchAddMediaItems"
+            )
             with self.assertRaisesRegex(Exception, expectedException):
                 client.albums().add_photos_to_album("123", ["1", "2", "3"])
 
@@ -233,7 +239,8 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.post(
-                "https://photoslibrary.googleapis.com/v1/albums/123:batchRemoveMediaItems",
+                "https://photoslibrary.googleapis.com/v1/albums/123"
+                + ":batchRemoveMediaItems",
                 json={},
             )
 
@@ -242,16 +249,15 @@ class GPhotosAlbumClientTests(unittest.TestCase):
             self.assertEqual(response, None)
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_remove_photos_from_album__first_call_5xx_second_call_2xx__successful_and_returns_nothing(
-        self,
-    ):
+    def test_remove_photos_from_album__first_call_5xx_second_call_2xx(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.register_uri(
                 "POST",
-                "https://photoslibrary.googleapis.com/v1/albums/123:batchRemoveMediaItems",
+                "https://photoslibrary.googleapis.com/v1/albums/123"
+                + ":batchRemoveMediaItems",
                 [
                     {"text": "", "status_code": 500},
                     {"text": "", "status_code": 200},
@@ -269,11 +275,16 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.post(
-                "https://photoslibrary.googleapis.com/v1/albums/123:batchRemoveMediaItems",
+                "https://photoslibrary.googleapis.com/v1/albums/123"
+                + ":batchRemoveMediaItems",
                 status_code=500,
             )
 
-            expectedException = "500 Server Error: None for url: https://photoslibrary.googleapis.com/v1/albums/123:batchRemoveMediaItems"
+            expectedException = (
+                "500 Server Error: None for url: "
+                + "https://photoslibrary.googleapis.com/v1/albums/123"
+                + ":batchRemoveMediaItems"
+            )
             with self.assertRaisesRegex(Exception, expectedException):
                 client.albums().remove_photos_from_album("123", ["1", "2", "3"])
 
