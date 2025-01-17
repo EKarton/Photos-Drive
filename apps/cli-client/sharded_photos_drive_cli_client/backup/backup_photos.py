@@ -5,8 +5,10 @@ import logging
 
 from bson.objectid import ObjectId
 
+from sharded_photos_drive_cli_client.shared.mongodb.albums_pruner import AlbumsPruner
+
 from ..shared.config.config import Config
-from ..shared.mongodb.albums import Album, AlbumId
+from ..shared.mongodb.albums import Album
 from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields
 from ..shared.mongodb.media_items import MediaItem, MediaItemId
 from ..shared.mongodb.media_items_repository import MediaItemsRepository
@@ -59,6 +61,7 @@ class PhotosBackup:
         self.__media_items_repo = media_items_repo
         self.__gphotos_uploader = gphotos_uploader
         self.__diffs_assigner = diffs_assigner
+        self.__albums_pruner = AlbumsPruner(config.get_root_album_id(), albums_repo)
 
     def backup(self, diffs: list[ProcessedDiff]) -> BackupResults:
         """Backs up a list of media items based on a list of diffs.
@@ -165,7 +168,7 @@ class PhotosBackup:
         total_num_albums_deleted = 0
         for album_id in total_album_ids_to_prune:
             logger.debug(f"Pruning {album_id}")
-            total_num_albums_deleted += self.__prune_album(album_id)
+            total_num_albums_deleted += self.__albums_pruner.prune_album(album_id)
 
         # Step 8: Return the results of the backup
         return BackupResults(
@@ -299,39 +302,3 @@ class PhotosBackup:
         }
 
         return upload_diff_to_gphotos_media_item_id
-
-    def __prune_album(self, album_id: AlbumId) -> int:
-        num_albums_deleted = 0
-        prev_album_id_deleted = None
-        cur_album_id = album_id
-        cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
-
-        while True:
-            cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
-            if len(cur_album.child_album_ids) > 1:
-                break
-
-            if len(cur_album.media_item_ids) > 0:
-                break
-
-            if cur_album.parent_album_id is None:
-                break
-
-            parent_album_id = cur_album.parent_album_id
-            self.__albums_repo.delete_album(cur_album_id)
-            num_albums_deleted += 1
-
-            prev_album_id_deleted = cur_album_id
-            cur_album_id = parent_album_id
-            cur_album = self.__albums_repo.get_album_by_id(parent_album_id)
-
-        new_child_album_ids = [
-            child_album_id
-            for child_album_id in cur_album.child_album_ids
-            if child_album_id != prev_album_id_deleted
-        ]
-        self.__albums_repo.update_album(
-            cur_album_id, UpdatedAlbumFields(new_child_album_ids=new_child_album_ids)
-        )
-
-        return num_albums_deleted
