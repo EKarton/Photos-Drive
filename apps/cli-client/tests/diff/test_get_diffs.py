@@ -455,3 +455,97 @@ class FolderSyncDiffTests(TestCase):
                 ],
             ),
         )
+
+    def test_get_diffs__unknown_image_in_remote_dir_path_album(self):
+        # Test setup: create directories
+        self.fs.create_dir('/Archives/Photos/2010')
+        self.fs.create_file('/Archives/Photos/2010/dog.jpg', contents='Dog')
+
+        # Test setup: set up the cloud
+        mongodb_client = create_mock_mongo_client(1000)
+        gphotos_items_repo = FakeItemsRepository()
+        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
+        config = InMemoryConfig()
+        config.add_mongo_db_client(mongodb_client)
+        gphotos_client_id = config.add_gphotos_client(gphotos_client)
+        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+        # Test setup: create content on the cloud
+        root_album = albums_repo.create_album(
+            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
+        )
+        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
+        photos1_album = albums_repo.create_album('Photos', archives_album.id, [], [])
+        album_2010 = albums_repo.create_album('2010', photos1_album.id, [], [])
+        config.set_root_album_id(root_album.id)
+        albums_repo.update_album(
+            root_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
+        )
+        albums_repo.update_album(
+            archives_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos1_album.id]),
+        )
+        albums_repo.update_album(
+            photos1_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
+        )
+        cat_upload_token = gphotos_client.media_items().upload_photo(
+            './Archives/cat.jpg', 'cat.jpg'
+        )
+        cat_media_item = media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name='cat.jpg',
+                hash_code=None,
+                location=None,
+                gphotos_client_id=ObjectId(gphotos_client_id),
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([cat_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
+            )
+        )
+        albums_repo.update_album(
+            archives_album.id,
+            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
+        )
+        dog_upload_token = gphotos_client.media_items().upload_photo(
+            './Archives/Photos/2010/dog.jpg', 'dog.jpg'
+        )
+        dog_media_item = media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name='dog.jpg',
+                hash_code=None,
+                location=None,
+                gphotos_client_id=ObjectId(gphotos_client_id),
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([dog_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
+            )
+        )
+        albums_repo.update_album(
+            album_2010.id,
+            UpdatedAlbumFields(new_media_item_ids=[dog_media_item.id]),
+        )
+
+        # Act: compute the diff
+        diffs_comparator = FolderSyncDiff(config, albums_repo, media_items_repo)
+        diff_results = diffs_comparator.get_diffs('./Archives', 'Archives')
+
+        # Assert: verify diffs while ignoring other folders / albums not prefixed
+        # with 'Archives'
+        self.assertEqual(
+            diff_results,
+            DiffResults(
+                missing_remote_files_in_local=[
+                    RemoteFile(
+                        key='cat.jpg',
+                        remote_relative_file_path='Archives/cat.jpg',
+                    )
+                ],
+                missing_local_files_in_remote=[],
+            ),
+        )

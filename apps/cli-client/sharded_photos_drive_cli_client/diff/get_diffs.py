@@ -100,17 +100,27 @@ class FolderSyncDiff:
 
             for media_item_id in album.media_item_ids:
                 media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
-                remote_file_path = str.join(
-                    '/', prev_path + [album.name, media_item.file_name]
-                )
-                remote_relative_file_path = f'{remote_dir_path}/{remote_file_path}'
 
-                found_files.append(
-                    RemoteFile(
-                        key=remote_file_path,
-                        remote_relative_file_path=remote_relative_file_path,
+                if album_id == base_album_id:
+                    remote_file_path = f'{remote_dir_path}/{media_item.file_name}'
+
+                    found_files.append(
+                        RemoteFile(
+                            key=media_item.file_name,
+                            remote_relative_file_path=remote_file_path,
+                        )
                     )
-                )
+                else:
+                    remote_file_path = str.join(
+                        '/', prev_path + [album.name, media_item.file_name]
+                    )
+                    remote_relative_file_path = f'{remote_dir_path}/{remote_file_path}'
+                    found_files.append(
+                        RemoteFile(
+                            key=remote_file_path,
+                            remote_relative_file_path=remote_relative_file_path,
+                        )
+                    )
 
             for child_album_id in album.child_album_ids:
                 if album_id == base_album_id:
