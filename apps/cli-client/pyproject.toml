@@ -34,6 +34,7 @@ pytest-mock = "^3.14.0"
 requests-mock = "^1.12.1"
 freezegun = "^1.5.1"
 mongomock = "^4.3.0"
+pyfakefs = "^5.7.4"
 
 [build-system]
 requires = ["poetry-core"]

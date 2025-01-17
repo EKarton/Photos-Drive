@@ -51,7 +51,7 @@ class DiffResults:
     missing_local_files_in_remote: list[LocalFile]
 
 
-class PhotosDiff:
+class FolderSyncDiff:
     '''
     A class responsible for returning the difference between the contents of a
     folder and the contents in the Sharded Photos Drive.

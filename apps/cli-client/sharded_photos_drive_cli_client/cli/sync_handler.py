@@ -12,7 +12,7 @@ from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.media_items_repository import MediaItemsRepositoryImpl
 from ..backup.diffs import Diff
 from ..backup.processed_diffs import DiffsProcessor
-from ..diff.get_diffs import PhotosDiff, DiffResults
+from ..diff.get_diffs import FolderSyncDiff, DiffResults
 from ..shared.config.config import Config
 
 logger = logging.getLogger(__name__)
@@ -30,12 +30,12 @@ class SyncHandler:
             config_file_path (str): The file path to the config file.
         """
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-        photo_diff = PhotosDiff(
+        diff_comparator = FolderSyncDiff(
             config=config,
             albums_repo=AlbumsRepositoryImpl(mongodb_clients_repo),
             media_items_repo=MediaItemsRepositoryImpl(mongodb_clients_repo),
         )
-        diff_results = photo_diff.get_diffs(local_dir_path, remote_albums_path)
+        diff_results = diff_comparator.get_diffs(local_dir_path, remote_albums_path)
         logger.debug(f'Diff results: {diff_results}')
 
         backup_diffs = self.__convert_diff_results_to_backup_diffs(diff_results)
