@@ -6,15 +6,16 @@ from typing import Optional
 class SharedAlbumOptions:
     """
     Represents options for a shared album.
-    It has the same data model as in https://developers.google.com/photos/library/reference/rest/v1/albums#sharedalbumoptions.
+    It has the same data model as in:
+    https://developers.google.com/photos/library/reference/rest/v1/albums#sharedalbumoptions.
 
     Attributes:
         isCollaborative (bool):
-            True if the shared album allows collaborators (users who have joined the album) to add media items to it.
-            Defaults to false.
+            True if the shared album allows collaborators (users who have joined the
+            album) to add media items to it. Defaults to false.
         isCommentable (bool):
-            True if the shared album allows collaborators (users who have joined the album) to add comments to the album.
-            Defaults to false.
+            True if the shared album allows collaborators (users who have joined the
+            album) to add comments to the album. Defaults to false.
     """
 
     isCollaborative: bool
@@ -25,7 +26,8 @@ class SharedAlbumOptions:
 class ShareInfo:
     """
     Represents information about sharing for an album in Google Photos.
-    It has the same data model as in https://developers.google.com/photos/library/reference/rest/v1/albums#shareinfo.
+    It has the same data model as in:
+    https://developers.google.com/photos/library/reference/rest/v1/albums#shareinfo.
 
     Attributes:
         sharedAlbumOptions (SharedAlbumOptions):
@@ -65,7 +67,8 @@ class ShareInfo:
 class Album:
     """
     Represents an album to be created in Google Photos.
-    It has the same data model as in https://developers.google.com/photos/library/reference/rest/v1/albums#resource:-album.
+    It has the same data model as in:
+    https://developers.google.com/photos/library/reference/rest/v1/albums#resource:-album.
 
     Attributes:
         id (str): The ID of the album.
@@ -76,8 +79,8 @@ class Album:
         isWriteable (Optional[bool]):
             Whether the album is writeable.
         shareInfo (Optional[ShareInfo]):
-            This field is only populated if the album is a shared album, the developer created the album
-            and the user has granted the photoslibrary.sharing scope.
+            This field is only populated if the album is a shared album, the developer
+            created the album and the user has granted the photoslibrary.sharing scope.
         mediaItemsCount (Optional[str]):
             Number of media items in the album.
         coverPhotoBaseUrl (Optional[str]):
