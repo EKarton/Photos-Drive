@@ -21,7 +21,8 @@ class GPhotosAlbumsClient:
         Returns a list of unshared albums.
 
         Args:
-            exclude_non_app_created_data (bool): Whether to exclude albums not created by the app.
+            exclude_non_app_created_data (bool): Whether to exclude albums not
+                created by the app.
 
         Returns:
             list[Album]: A list of albums.
@@ -44,6 +45,8 @@ class GPhotosAlbumsClient:
                 cur_page_token = res_json["nextPageToken"]
             else:
                 break
+
+        print(albums)
 
         return [from_dict(Album, a) for a in albums]
 
@@ -94,7 +97,8 @@ class GPhotosAlbumsClient:
         Args:
             album_id (str): The ID of the album to update.
             new_title (Optional[str]): The new title, if needed to change.
-            new_cover_media_item_id (Optional[str]): The new cover of the album, if needed to change.
+            new_cover_media_item_id (Optional[str]): The new cover of the album, if
+                needed to change.
 
         Returns:
             Album: The new album object.
@@ -126,9 +130,8 @@ class GPhotosAlbumsClient:
         logger.debug(f"Add photos to album {album_id} {media_item_ids}")
 
         request_body = json.dumps({"mediaItemIds": media_item_ids})
-        uri = "https://photoslibrary.googleapis.com/v1/albums/{0}:batchAddMediaItems".format(
-            album_id
-        )
+        base_url = "https://photoslibrary.googleapis.com/v1/albums"
+        uri = "{0}/{1}:batchAddMediaItems".format(base_url, album_id)
         res = self._session.post(uri, request_body)
         res.raise_for_status()
 
@@ -144,8 +147,7 @@ class GPhotosAlbumsClient:
         logger.debug(f"Removing photos from album {album_id} {media_item_ids}")
 
         request_body = json.dumps({"mediaItemIds": media_item_ids})
-        uri = "https://photoslibrary.googleapis.com/v1/albums/{0}:batchRemoveMediaItems".format(
-            album_id
-        )
+        base_url = "https://photoslibrary.googleapis.com/v1/albums"
+        uri = "{0}/{1}:batchRemoveMediaItems".format(base_url, album_id)
         res = self._session.post(uri, request_body)
         res.raise_for_status()

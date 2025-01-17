@@ -14,10 +14,14 @@ class Diff:
     Attributes:
         modifier (str): The modifier (required).
         file_path (str): The file path (required).
-        album_name (str | None): The album name (optional). If not provided, it will be determined by the file_path.
-        file_name (str | None): The file name (optional). If not provided, it will be determined by the file_path.
-        file_size (int | None): The file size in bytes (optional). If not provided, it will be determined by reading its file.
-        location (GpsLocation | None): The GPS latitude (optional). If not provided, it will be determined by reading its exif data.
+        album_name (str | None): The album name (optional). If not provided, it will be
+            determined by the file_path.
+        file_name (str | None): The file name (optional). If not provided, it will be
+            determined by the file_path.
+        file_size (int | None): The file size in bytes (optional). If not provided, it
+            will be determined by reading its file.
+        location (GpsLocation | None): The GPS latitude (optional). If not provided, it
+            will be determined by reading its exif data.
 
     """
 

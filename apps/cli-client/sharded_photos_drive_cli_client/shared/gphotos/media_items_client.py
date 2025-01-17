@@ -226,7 +226,8 @@ class GPhotosMediaItemsClient:
         file_size_in_bytes = os.stat(photo_file_path).st_size
 
         logger.debug(
-            f"Uploading {photo_file_path} in chunks ({mime_type}, {file_size_in_bytes} bytes)"
+            f"Uploading {photo_file_path} in chunks "
+            + f"({mime_type}, {file_size_in_bytes} bytes)"
         )
 
         res_1 = self._initialize_chunked_upload(

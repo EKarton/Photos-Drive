@@ -1,4 +1,4 @@
-from ..shared.config.config_from_file import ConfigFromFile
+from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl, UpdatedAlbumFields
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
@@ -10,17 +10,16 @@ class TeardownHandler:
     A class that deletes everything.
     """
 
-    def teardown(self, config_file_path: str):
+    def teardown(self, config: Config):
         """
         Deletes everything from MongoDB database (except for the root album)
         and moves all photos uploaded to Google Photos to a trash album.
 
         Args:
-            config_file_path (str): The path to the config file.
+            config (Config): The config.
         """
         self.__confirm_deletion_of_everything()
 
-        config = ConfigFromFile(config_file_path)
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
         root_album_id = config.get_root_album_id()
@@ -42,11 +41,12 @@ class TeardownHandler:
         )
 
         # Delete all media items from the DB
-        for id, client in mongodb_clients_repo.get_all_clients():
+        for _, client in mongodb_clients_repo.get_all_clients():
             client["sharded_google_photos"]["media_items"].delete_many({})
 
-        # Put all the photos that Google Photos has uploaded into a folder called 'To delete'
-        for id, gphotos_client in gphoto_clients_repo.get_all_clients():
+        # Put all the photos that Google Photos has uploaded into a folder
+        # called 'To delete'
+        for _, gphotos_client in gphoto_clients_repo.get_all_clients():
             trash_album_id: str | None = None
             for album in gphotos_client.albums().list_albums(
                 exclude_non_app_created_data=True
@@ -67,10 +67,9 @@ class TeardownHandler:
                 )
 
     def __confirm_deletion_of_everything(self):
+        print("Do you want to delete everything this tool has ever created?")
         while True:
-            raw_input = input(
-                "Do you want to delete everything this tool has ever created? [Yes/Y] or [No/N]: "
-            )
+            raw_input = input("[Yes/Y] or [No/N]: ")
             user_input = raw_input.strip().lower()
 
             if user_input in ["yes", "y"]:

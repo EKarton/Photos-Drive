@@ -1,11 +1,9 @@
 import unittest
 
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosStorageQuota
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
-    FakeGPhotosClient,
-)
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_items_repository import (
+from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeItemsRepository,
+    FakeGPhotosClient,
 )
 
 
@@ -23,9 +21,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
             ),
         )
 
-    def test_get_storage_quota__after_adding_three_photos__should_return_correct_num_photos(
-        self,
-    ):
+    def test_get_storage_quota__added_three_photos(self):
         repo = FakeItemsRepository()
         client = FakeGPhotosClient(repo, max_num_photos=10)
         upload_1 = client.media_items().upload_photo('Archives/dog.png', 'dog.png')
@@ -197,7 +193,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         client_2 = FakeGPhotosClient(repo)
         album_1 = client_2.albums().create_album("Photos/2011")
         new_media_item_ids = []
-        for i in range(100):
+        for _ in range(100):
             upload_token = client_1.media_items().upload_photo(
                 "Photos/2011/dog.jpg", "dog.jpg"
             )
@@ -268,9 +264,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         ):
             client_2.albums().remove_photos_from_album(album_1.id, [new_media_item_id])
 
-    def test_remove_photos_from_album__on_photo_in_album__does_not_remove_photo_from_gphotos(
-        self,
-    ):
+    def test_remove_photos_from_album__remove_photo_in_album(self):
         repo = FakeItemsRepository()
         client_1 = FakeGPhotosClient(repo)
         album_1 = client_1.albums().create_album("Photos/2011")
@@ -288,9 +282,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         self.assertEqual(len(media_items), 1)
         self.assertEqual(media_items[0].id, new_media_item_id)
 
-    def test_remove_photos_from_album__on_photo_in_two_album__does_not_remove_photo_from_other_albums(
-        self,
-    ):
+    def test_remove_photos_from_album__remove_photo_in_two_album(self):
         repo = FakeItemsRepository()
         client_1 = FakeGPhotosClient(repo)
         album_1 = client_1.albums().create_album("Photos/2011")
@@ -354,9 +346,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         self.assertEqual(len(media_items), 1)
         self.assertEqual(media_items[0].id, new_media_item_id)
 
-    def test_add_uploaded_photos_to_gphotos__add_photo_to_someone_elses_album__throws_error(
-        self,
-    ):
+    def test_add_uploaded_photos_to_gphotos__add_photo_to_someone_elses_album(self):
         repo = FakeItemsRepository()
         client_1 = FakeGPhotosClient(repo)
         client_2 = FakeGPhotosClient(repo)

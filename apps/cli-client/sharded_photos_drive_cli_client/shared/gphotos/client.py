@@ -15,9 +15,10 @@ class GPhotosStorageQuota:
 
     Attributes:
         limit (int):
-            The usage limit, if applicable. This will not be present if the user has unlimited storage.
-            For users that are part of an organization with pooled storage, this is the limit for the
-            organization, rather than the individual user.
+            The usage limit, if applicable. This will not be present if the user has
+            unlimited storage. For users that are part of an organization with pooled
+            storage, this is the limit for the organization, rather than the
+            individual user.
 
         usage_in_drive (int):
             The usage by all files in Google Drive.
@@ -26,8 +27,9 @@ class GPhotosStorageQuota:
             The usage by trashed files in Google Drive.
 
         usage (int):
-            The total usage across all services. For users that are part of an organization with pooled storage,
-            this is the usage across all services for the organization, rather than the individual user.
+            The total usage across all services. For users that are part of an
+            organization with pooled storage, this is the usage across all services for
+            the organization, rather than the individual user.
     """
 
     limit: int

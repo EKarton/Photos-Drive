@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, cast, Mapping
 from abc import ABC, abstractmethod
 
 from bson.objectid import ObjectId
@@ -11,13 +11,16 @@ from .clients_repository import MongoDbClientsRepository
 @dataclass(frozen=True)
 class CreateMediaItemRequest:
     """
-    A class that represents the parameters needed to create a new media item in the database.
+    A class that represents the parameters needed to create a new media item
+    in the database.
 
     Attributes:
         file_name (str): The file name of the media item.
         hash_code (Optional[str]): The hash code of the media item (Optional).
-        location (Optional(GpsLocation)): The location of where the media item was taken (Optional).
-        gphotos_client_id (ObjectId): The ID of the Google Photos client that the media item is saved on.
+        location (Optional(GpsLocation)): The location of where the media item was
+            taken.
+        gphotos_client_id (ObjectId): The ID of the Google Photos client that the media
+            item is saved on.
         gphotos_media_item_id (str): The ID of the media item stored on Google Photos
     """
 
@@ -43,6 +46,15 @@ class MediaItemsRepository(ABC):
 
         Returns:
             MediaItem: The media item
+        """
+
+    @abstractmethod
+    def get_all_media_items(self) -> list[MediaItem]:
+        """
+        Returns all media items.
+
+        Returns:
+            list[MediaItem]: A list of all media items.
         """
 
     @abstractmethod
@@ -75,7 +87,7 @@ class MediaItemsRepository(ABC):
         Deletes a list of media items from the database.
 
         Args:
-            ids (list[MediaItemId[]): The IDs of the media items to delete.
+            ids (list[MediaItemId): The IDs of the media items to delete.
 
         Raises:
             ValueError: If a media item exists.
@@ -90,33 +102,36 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         Creates a MediaItemsRepository
 
         Args:
-            mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db clients that stores albums.
+            mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
+                clients that stores albums.
         """
         self._mongodb_clients_repository = mongodb_clients_repository
 
     def get_media_item_by_id(self, id: MediaItemId) -> MediaItem:
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
-        raw_item = client["sharded_google_photos"]["media_items"].find_one(
-            {"_id": id.object_id}
+        raw_item = cast(
+            dict,
+            client["sharded_google_photos"]["media_items"].find_one(
+                {"_id": id.object_id}
+            ),
         )
         if raw_item is None:
             raise ValueError(f"Media item {id} does not exist!")
 
-        location: GpsLocation | None = None
-        if "location" in raw_item and raw_item["location"]:
-            location = GpsLocation(
-                longitude=float(raw_item["location"]["coordinates"][0]),
-                latitude=float(raw_item["location"]["coordinates"][1]),
-            )
+        return self.__parse_raw_document_to_media_item_obj(id.client_id, raw_item)
 
-        return MediaItem(
-            id=id,
-            file_name=raw_item["file_name"],
-            hash_code=raw_item["hash_code"],
-            location=location,
-            gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
-            gphotos_media_item_id=raw_item["gphotos_media_item_id"],
-        )
+    def get_all_media_items(self) -> list[MediaItem]:
+        media_items: list[MediaItem] = []
+
+        for client_id, client in self._mongodb_clients_repository.get_all_clients():
+            for doc in client["sharded_google_photos"]["media_items"].find({}):
+                raw_item = cast(dict, doc)
+                media_item = self.__parse_raw_document_to_media_item_obj(
+                    client_id, raw_item
+                )
+                media_items.append(media_item)
+
+        return media_items
 
     def create_media_item(self, request: CreateMediaItemRequest) -> MediaItem:
         mongodb_client_id = (
@@ -177,3 +192,22 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
 
             if result.deleted_count != len(object_ids):
                 raise ValueError(f"Unable to delete all media items in {object_ids}")
+
+    def __parse_raw_document_to_media_item_obj(
+        self, client_id: ObjectId, raw_item: Mapping[str, Any]
+    ) -> MediaItem:
+        location: GpsLocation | None = None
+        if "location" in raw_item and raw_item["location"]:
+            location = GpsLocation(
+                longitude=float(raw_item["location"]["coordinates"][0]),
+                latitude=float(raw_item["location"]["coordinates"][1]),
+            )
+
+        return MediaItem(
+            id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
+            file_name=raw_item["file_name"],
+            hash_code=raw_item["hash_code"],
+            location=location,
+            gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
+            gphotos_media_item_id=raw_item["gphotos_media_item_id"],
+        )

@@ -1,55 +1,16 @@
 import os
 
-# A set of image file extensions that Google Photos support
-IMAGE_FILE_EXTENSIONS = (
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".bmp",
-    ".tiff",
-    ".heic",
-    ".webp",
-    ".avif",
-    ".ico",
-    ".raw",
-    ".psd",
-    ".dng",
-)
-
-# A set of video file extensions that Google Photos support
-VIDEO_FILE_EXTENSIONS = (
-    ".mp4",
-    ".mov",
-    ".avi",
-    ".mkv",
-    ".3gp",
-    ".3g2",
-    ".asf",
-    ".divx",
-    ".m2t",
-    ".m2ts",
-    ".m4v",
-    ".mmv",
-    ".mod",
-    ".mpg",
-    ".mpeg",
-    ".mts",
-    ".tod",
-    ".wmv",
-    ".flv",
-    ".webm",
-)
-
-# A set of videos or images that Google Photos supports
-MEDIA_ITEM_FILE_EXTENSIONS = IMAGE_FILE_EXTENSIONS + VIDEO_FILE_EXTENSIONS
+from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 
 
 def get_diffs_from_path(path: str) -> list[str]:
     """
     Returns a list of file paths that are under a path.
+
     If the path points to a media item, it will return the file path of that media item.
-    If a path points to a directory, it will return a list of file paths to all media items under that directory.
+
+    If a path points to a directory, it will return a list of file paths to all media
+    items under that directory.
 
     Args:
         path (str): A generic path

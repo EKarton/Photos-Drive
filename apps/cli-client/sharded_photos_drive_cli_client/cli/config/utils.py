@@ -74,8 +74,9 @@ def prompt_user_for_gphotos_credentials(
                 },
                 scopes=scopes,
             )
+            message = "Please visit this URL to authenticate: {{url}}"
             iaflow.run_local_server(
-                authorization_prompt_message=f"Please visit this URL to authenticate: {{url}}",
+                authorization_prompt_message=message,
                 success_message="The auth flow is complete; you may close this window.",
                 open_browser=False,
             )

@@ -16,6 +16,7 @@ from .delete_handler import DeleteHandler
 from .backup_handler import BackupHandler
 from .clean_handler import CleanHandler
 from .teardown_handler import TeardownHandler
+from .sync_handler import SyncHandler
 
 
 def main():
@@ -69,6 +70,21 @@ def main():
     __add_diff_file_argument(backup_parser)
     __add_config_argument(backup_parser)
     __add_verbose_argument(backup_parser)
+
+    # Add subparser for the 'sync' command`
+    sync_parser = subparsers.add_parser('sync')
+    sync_parser.add_argument(
+        "--local_dir_path",
+        required=True,
+        help="Local directory path to photos to sync with",
+    )
+    sync_parser.add_argument(
+        "--remote_albums_path",
+        default='',
+        help="Albums path in the remote to sync with",
+    )
+    __add_config_argument(sync_parser)
+    __add_verbose_argument(sync_parser)
 
     # Add subparser for the 'clean' command
     clean_parser = subparsers.add_parser("clean")
@@ -134,6 +150,12 @@ def main():
         backup_handler = BackupHandler()
         backup_handler.backup(args.diff_file, config)
 
+    elif args.command == 'sync':
+        __set_logging(args)
+        config = __build_config_based_on_args(args)
+        sync_handler = SyncHandler()
+        sync_handler.sync(args.local_dir_path, args.remote_albums_path, config)
+
     elif args.command == "clean":
         __set_logging(args)
         config = __build_config_based_on_args(args)
@@ -180,7 +202,6 @@ def __build_config_based_on_args(args: argparse.Namespace) -> Config:
     if args.config_file:
         return ConfigFromFile(args.config_file)
     elif args.config_mongodb:
-        print(args.config_mongodb)
         return ConfigFromMongoDb(MongoClient(args.config_mongodb))
     else:
         raise ValueError('Unknown arg type')

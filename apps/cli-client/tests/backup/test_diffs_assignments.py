@@ -5,16 +5,9 @@ from bson import ObjectId
 from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
 from sharded_photos_drive_cli_client.shared.config.config import Config
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
-    FakeGPhotosClient,
-)
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_items_repository import (
-    FakeItemsRepository,
-)
 
 
 class TestDiffsAssigner(unittest.TestCase):
-
     def setUp(self):
         """Set up a new DiffsAssigner instance for each test."""
         self.config = MagicMock(spec=Config)
@@ -55,9 +48,7 @@ class TestDiffsAssigner(unittest.TestCase):
         self.assertIn(diff1, assignments)
         self.assertIn(diff2, assignments)
 
-    def test_get_diffs_assignments__gphotos_clients_have_no_available_space__throws_error(
-        self,
-    ):
+    def test_get_diffs_assignments__no_available_space__throws_error(self):
         client1 = MagicMock()
         client1.get_storage_quota.return_value.limit = 1000
         client1.get_storage_quota.return_value.usage = 1000  # No space left

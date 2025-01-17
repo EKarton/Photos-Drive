@@ -1,6 +1,6 @@
+from typing import Dict, cast
 import unittest
 from bson.objectid import ObjectId
-import mongomock
 
 from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
@@ -11,12 +11,15 @@ from sharded_photos_drive_cli_client.shared.config.config_from_mongodb import (
 )
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
 from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
+from sharded_photos_drive_cli_client.shared.mongodb.testing import (
+    create_mock_mongo_client,
+)
 
 
 class TestConfigFromMongoDb(unittest.TestCase):
 
     def setUp(self):
-        self.mock_client = mongomock.MongoClient()
+        self.mock_client = create_mock_mongo_client()
         self.config = ConfigFromMongoDb(self.mock_client)
 
     def tearDown(self):
@@ -42,9 +45,12 @@ class TestConfigFromMongoDb(unittest.TestCase):
             "NewMongoDB", "mongodb://newhost:27017"
         )
 
-        inserted_doc = self.mock_client["sharded_google_photos"][
-            "mongodb_clients"
-        ].find_one({"_id": new_id})
+        inserted_doc = cast(
+            Dict,
+            self.mock_client["sharded_google_photos"]["mongodb_clients"].find_one(
+                {"_id": new_id}
+            ),
+        )
         self.assertIsNotNone(inserted_doc)
         self.assertEqual(inserted_doc["name"], "NewMongoDB")
         self.assertEqual(inserted_doc["connection_string"], "mongodb://newhost:27017")
@@ -80,9 +86,12 @@ class TestConfigFromMongoDb(unittest.TestCase):
 
         new_id = self.config.add_gphotos_client(client)
 
-        inserted_doc = self.mock_client["sharded_google_photos"][
-            "gphotos_clients"
-        ].find_one({"_id": new_id})
+        inserted_doc = cast(
+            Dict,
+            self.mock_client["sharded_google_photos"]["gphotos_clients"].find_one(
+                {"_id": new_id}
+            ),
+        )
         self.assertIsNotNone(inserted_doc)
         self.assertEqual(inserted_doc["name"], "NewGPhotos")
         self.assertEqual(inserted_doc["token"], "new_token")
@@ -116,9 +125,9 @@ class TestConfigFromMongoDb(unittest.TestCase):
 
         self.config.set_root_album_id(new_album_id)
 
-        inserted_doc = self.mock_client["sharded_google_photos"][
-            "root_album"
-        ].find_one()
+        inserted_doc = cast(
+            Dict, self.mock_client["sharded_google_photos"]["root_album"].find_one()
+        )
         self.assertIsNotNone(inserted_doc)
         self.assertEqual(str(inserted_doc["client_id"]), "5f50c31e8a7d4b1c9c9b0b1e")
         self.assertEqual(str(inserted_doc["object_id"]), "5f50c31e8a7d4b1c9c9b0b1f")

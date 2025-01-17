@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import Mock
 from bson.objectid import ObjectId
-import mongomock
 
 from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
     MediaItemsRepositoryImpl,
@@ -12,13 +11,16 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items import (
     MediaItemId,
     GpsLocation,
 )
+from sharded_photos_drive_cli_client.shared.mongodb.testing import (
+    create_mock_mongo_client,
+)
 
 
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
     def setUp(self):
         self.mock_clients_repo = Mock(spec=MongoDbClientsRepository)
-        self.mock_client = mongomock.MongoClient()
+        self.mock_client = create_mock_mongo_client()
         self.mock_clients_repo.get_client_by_id.return_value = self.mock_client
         self.mock_clients_repo.find_id_of_client_with_most_space.return_value = (
             ObjectId()
@@ -48,8 +50,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.file_name, "test_image.jpg")
         self.assertEqual(media_item.hash_code, "abc123")
         self.assertIsNotNone(media_item.location)
-        self.assertEqual(media_item.location.longitude, 12.34)
-        self.assertEqual(media_item.location.latitude, 56.78)
+        self.assertEqual(media_item.location, GpsLocation(56.78, 12.34))
         self.assertEqual(media_item.gphotos_client_id, media_item_id.client_id)
         self.assertEqual(media_item.gphotos_media_item_id, "gphotos_123")
 
@@ -75,8 +76,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.file_name, "new_image.jpg")
         self.assertEqual(media_item.hash_code, "hashcode123")
         self.assertIsNotNone(media_item.location)
-        self.assertEqual(media_item.location.longitude, 12.34)
-        self.assertEqual(media_item.location.latitude, 56.78)
+        self.assertEqual(media_item.location, GpsLocation(56.78, 12.34))
         self.assertEqual(media_item.gphotos_client_id, request.gphotos_client_id)
         self.assertEqual(
             media_item.gphotos_media_item_id, request.gphotos_media_item_id

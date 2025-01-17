@@ -3,18 +3,15 @@ import tempfile
 import unittest
 import requests_mock
 from freezegun import freeze_time
-
 from dacite import from_dict
 from google.auth.transport.requests import AuthorizedSession
 from google.auth.transport import DEFAULT_RETRYABLE_STATUS_CODES
 from google.oauth2.credentials import Credentials
+
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
 from sharded_photos_drive_cli_client.shared.gphotos.media_items import (
     UploadedPhotosToGPhotosResult,
     MediaItem,
-)
-from sharded_photos_drive_cli_client.shared.gphotos.media_items_client import (
-    IllegalStateException,
 )
 
 MOCK_CREDENTIALS = Credentials(
@@ -129,9 +126,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
                 from_dict(UploadedPhotosToGPhotosResult, MOCK_NEW_MEDIA_ITEMS_RESPONSE),
             )
 
-    def test_add_uploaded_photos_to_gphotos__media_item_is_duplicated__returns_unique_media_items(
-        self,
-    ):
+    def test_add_uploaded_photos_to_gphotos__media_item_is_duplicated(self):
         mock_response = {
             "newMediaItemResults": [
                 {
@@ -242,9 +237,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             )
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_add_uploaded_photos_to_gphotos__first_call_returns_5xx_second_call_returns_2xx__retries_and_returns_response(
-        self,
-    ):
+    def test_add_uploaded_photos_to_gphotos__first_call_5xx_second_call_2xx(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
@@ -271,9 +264,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             )
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_add_uploaded_photos_to_gphotos__returns_2xx_but_with_retryable_codes__retries_and_returns_response(
-        self,
-    ):
+    def test_add_uploaded_photos_to_gphotos__returns_2xx_with_retryable_codes(self):
         mock_response_1 = {
             "newMediaItemResults": [
                 {
@@ -348,9 +339,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             )
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_add_uploaded_photos_to_gphotos__returns_2xx_but_with_unknown_codes__throws_exception(
-        self,
-    ):
+    def test_add_uploaded_photos_to_gphotos__returns_2xx_with_unknown_codes(self):
         mock_response = {
             "newMediaItemResults": [
                 {
@@ -409,9 +398,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
                 self.assertEqual(response, "u1")
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_upload_photo__first_call_returns_5xx_second_call_returns_2xx__retries_and_returns_response(
-        self,
-    ):
+    def test_upload_photo__first_call_5xx_second_call_2xx(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
@@ -482,9 +469,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
                 from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1]),
             )
 
-    def test_search_for_media_items__second_page_has_no_mediaItems_field__returns_media_items(
-        self,
-    ):
+    def test_search_for_media_items__second_page_no_mediaItems_field(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
@@ -514,9 +499,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             )
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
-    def test_search_for_media_items__first_call_returns_5xx_second_call_returns_2xx__retries_and_returns_response(
-        self,
-    ):
+    def test_search_for_media_items__first_call_5xx_second_call_2xx(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
@@ -544,9 +527,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
                 from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1]),
             )
 
-    def test_upload_photo_in_chunks__large_file__makes_api_calls_correctly_and_returns_upload_token(
-        self,
-    ):
+    def test_upload_photo_in_chunks__large_file(self):
         get_upload_link_url = "https://photoslibrary.googleapis.com/v1/uploads"
         upload_url = "https://photoslibrary.googleapis.com/v1/upload-url/1"
         with requests_mock.Mocker() as request_mocker:
@@ -595,9 +576,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             self.assertEqual(req_13.headers["X-Goog-Upload-Offset"], "2580237")
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=10000)
-    def test_upload_photo_in_chunks__uploading_middle_chunk_failed__makes_api_calls_correctly_and_returns_upload_token(
-        self,
-    ):
+    def test_upload_photo_in_chunks__uploading_middle_chunk_failed(self):
         get_upload_link_url = "https://photoslibrary.googleapis.com/v1/uploads"
         upload_url = "https://photoslibrary.googleapis.com/v1/upload-url/1"
         upload_token = "1234-upload-token"
@@ -683,9 +662,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             )
             self.assertEqual(req_15.headers["X-Goog-Upload-Offset"], "2580237")
 
-    def test_upload_photo_in_chunks__uploading_middle_chunk_failed_and_query_failed_with_no_upload_status__retries_and_returns_upload_token(
-        self,
-    ):
+    def test_upload_photo_in_chunks__uploading_middle_chunk_failed_query_failed(self):
         get_upload_link_url = "https://photoslibrary.googleapis.com/v1/uploads"
         upload_url = "https://photoslibrary.googleapis.com/v1/upload-url/1"
         upload_token = "1234-upload-token"
@@ -733,7 +710,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
 
             self.assertEqual(received_upload_token, upload_token)
 
-    def test_upload_photo_in_chunks__uploading_middle_chunk_failed_with_retryable_code__retries_and_returns_upload_token(
+    def test_upload_photo_in_chunks__uploading_middle_chunk_failed_with_retryable_code(
         self,
     ):
         get_upload_link_url = "https://photoslibrary.googleapis.com/v1/uploads"
