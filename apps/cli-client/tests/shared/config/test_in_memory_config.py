@@ -7,6 +7,9 @@ from google.oauth2.credentials import Credentials
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
+from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+    create_mock_mongo_client,
+)
 
 
 class TestInMemoryConfig(unittest.TestCase):
@@ -51,8 +54,8 @@ class TestInMemoryConfig(unittest.TestCase):
             self.config.get_root_album_id()
 
     def test_add_mongo_db_client__adds_mongo_db_to_config(self):
-        connection_string = "mongodb://localhost:27017"
-        client_id = self.config.add_mongo_db_client(connection_string)
+        mongo_client = create_mock_mongo_client()
+        client_id = self.config.add_mongo_db_client(mongo_client)
 
         clients = self.config.get_mongo_db_clients()
         self.assertEqual(len(clients), 1)

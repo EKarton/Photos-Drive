@@ -1,6 +1,4 @@
 import unittest
-import mongomock
-from unittest.mock import Mock
 from bson.objectid import ObjectId
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
@@ -22,13 +20,16 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
     MediaItemsRepositoryImpl,
     CreateMediaItemRequest,
 )
+from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+    create_mock_mongo_client,
+)
 
 
 class AlbumsPrunerTests(unittest.TestCase):
     def test_prune_album__descendants_all_empty_albums(self):
         # Test setup: Build the objects
         config = InMemoryConfig()
-        config.add_mongo_db_client(self.__create_mongodb_client__())
+        config.add_mongo_db_client(create_mock_mongo_client())
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
 
@@ -73,7 +74,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(self.__create_mongodb_client__())
+        config.add_mongo_db_client(create_mock_mongo_client())
         gphotos_client_id = config.add_gphotos_client(gphotos_client)
 
         # Test setup 2: Build the wrapper objects
@@ -115,9 +116,9 @@ class AlbumsPrunerTests(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    cat_media_items_results.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -155,7 +156,7 @@ class AlbumsPrunerTests(unittest.TestCase):
 
     def test_backup_pruning_3(self):
         # Test setup 1: Build the config
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -202,9 +203,9 @@ class AlbumsPrunerTests(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    cat_media_items_results.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -244,13 +245,3 @@ class AlbumsPrunerTests(unittest.TestCase):
         self.assertEqual(albums[2].child_album_ids, [])
         self.assertEqual(albums[2].media_item_ids, [cat_media_item.id])
         self.assertEqual(albums[2].parent_album_id, archives_album.id)
-
-    def __create_mongodb_client__(
-        self, total_free_storage_size: int = 1000
-    ) -> mongomock.MongoClient:
-        mock_client: mongomock.MongoClient = mongomock.MongoClient()
-        mock_client["sharded_google_photos"].command = Mock(  # type: ignore
-            return_value={"totalFreeStorageSize": total_free_storage_size}
-        )
-
-        return mock_client

@@ -1,3 +1,4 @@
+from typing import cast
 from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
 from .albums_repository import AlbumsRepository, UpdatedAlbumFields
 
@@ -49,7 +50,7 @@ class AlbumsPruner:
             if cur_album.id == self.__root_album_id:
                 break
 
-            parent_album_id = cur_album.parent_album_id
+            parent_album_id = cast(AlbumId, cur_album.parent_album_id)
             self.__albums_repo.delete_album(cur_album_id)
             num_albums_deleted += 1
 

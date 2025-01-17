@@ -87,7 +87,7 @@ class SystemCleaner:
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
 
         # Step 5: Move all the gmedia items marked for trash to a folder called Trash
-        self.__move_gmedia_items_to_trash(gmedia_item_keys_to_trash)
+        self.__move_gmedia_items_to_trash(list(gmedia_item_keys_to_trash))
 
         return CleanupResults(
             num_media_items_deleted=len(media_item_ids_to_delete),

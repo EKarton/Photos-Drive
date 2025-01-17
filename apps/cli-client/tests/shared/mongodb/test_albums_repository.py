@@ -1,8 +1,6 @@
 from typing import Dict, cast
 import unittest
-from unittest.mock import Mock
 from bson.objectid import ObjectId
-import mongomock
 
 from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
     AlbumsRepository,
@@ -14,6 +12,9 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items import MediaItem
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
+from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+    create_mock_mongo_client,
+)
 
 MONGO_CLIENT_ID = ObjectId("5f50c31e8a7d4b1c9c9b0b1a")
 
@@ -21,7 +22,7 @@ MONGO_CLIENT_ID = ObjectId("5f50c31e8a7d4b1c9c9b0b1a")
 class TestAlbumsRepositoryImpl(unittest.TestCase):
 
     def setUp(self):
-        self.mock_client = self.__create_mongodb_client__()
+        self.mock_client = create_mock_mongo_client()
         self.mongo_clients_repo = MongoDbClientsRepository()
         self.mongo_clients_repo.add_mongodb_client(MONGO_CLIENT_ID, self.mock_client)
         self.repo: AlbumsRepository = AlbumsRepositoryImpl(self.mongo_clients_repo)
@@ -215,7 +216,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         mongo_client_id_2 = ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
         album_id_1 = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
         album_id_2 = AlbumId(mongo_client_id_2, ObjectId("5f50c31e8a7d4b1c9c9b0b1d"))
-        mock_client_2 = self.__create_mongodb_client__()
+        mock_client_2 = create_mock_mongo_client()
         self.mongo_clients_repo.add_mongodb_client(mongo_client_id_2, mock_client_2)
         self.mock_client["sharded_google_photos"]["albums"].insert_one(
             {
@@ -343,11 +344,3 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         # Test
         with self.assertRaisesRegex(ValueError, "Unable to update album .*"):
             self.repo.update_album(album_id, updated_fields)
-
-    def __create_mongodb_client__(self) -> mongomock.MongoClient:
-        mock_client: mongomock.MongoClient = mongomock.MongoClient()
-        mock_client["sharded_google_photos"].command = Mock(
-            return_value={"totalFreeStorageSize": 1000}
-        )
-
-        return mock_client

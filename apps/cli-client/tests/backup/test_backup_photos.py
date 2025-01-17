@@ -1,6 +1,4 @@
 import unittest
-import mongomock
-from unittest.mock import Mock
 from bson.objectid import ObjectId
 
 from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
@@ -31,13 +29,16 @@ from sharded_photos_drive_cli_client.backup.gphotos_uploader import (
 )
 from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
+from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+    create_mock_mongo_client,
+)
 
 
 class TestPhotosBackup(unittest.TestCase):
     def test_backup_adding_items_to_new_db(self):
         # Test setup 1: Set up the config
-        mongodb_client_1 = self.__create_mongodb_client__(1000)
-        mongodb_client_2 = self.__create_mongodb_client__(1000)
+        mongodb_client_1 = create_mock_mongo_client(1000)
+        mongodb_client_2 = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client_1 = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
@@ -202,8 +203,8 @@ class TestPhotosBackup(unittest.TestCase):
 
     def test_backup_adding_items_to_existing_albums(self):
         # Test setup 1: Set up the config
-        mongodb_client_1 = self.__create_mongodb_client__(1000)
-        mongodb_client_2 = self.__create_mongodb_client__(1000)
+        mongodb_client_1 = create_mock_mongo_client(1000)
+        mongodb_client_2 = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client_1 = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
@@ -335,8 +336,8 @@ class TestPhotosBackup(unittest.TestCase):
 
     def test_backup_deleted_one_item_on_album_with_two_items(self):
         # Test setup 1: Set up the essential objects
-        mongodb_client_1 = self.__create_mongodb_client__(1000)
-        mongodb_client_2 = self.__create_mongodb_client__(1000)
+        mongodb_client_1 = create_mock_mongo_client(1000)
+        mongodb_client_2 = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client_1 = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
@@ -411,9 +412,9 @@ class TestPhotosBackup(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
-                gphotos_media_item_id=[
-                    media_items_results_1.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=media_items_results_1.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         cat_mitem_obj = media_items_repo.create_media_item(
@@ -422,9 +423,9 @@ class TestPhotosBackup(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
-                gphotos_media_item_id=[
-                    media_items_results_2.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=media_items_results_2.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -478,7 +479,7 @@ class TestPhotosBackup(unittest.TestCase):
 
     def test_backup_pruning_1(self):
         # Test setup 1: Build the config
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -542,9 +543,9 @@ class TestPhotosBackup(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    media_items_results.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=media_items_results.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -594,7 +595,7 @@ class TestPhotosBackup(unittest.TestCase):
 
     def test_backup_pruning_2(self):
         # Test setup 1: Build the config
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -666,9 +667,9 @@ class TestPhotosBackup(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    media_items_results_1.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=media_items_results_1.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         cat_media_item_obj = media_items_repo.create_media_item(
@@ -677,9 +678,9 @@ class TestPhotosBackup(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    media_items_results_2.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=media_items_results_2.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -740,7 +741,7 @@ class TestPhotosBackup(unittest.TestCase):
 
     def test_backup_pruning_3(self):
         # Test setup 1: Build the config
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -820,9 +821,9 @@ class TestPhotosBackup(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    media_items_results_1.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=media_items_results_1.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         cat_media_item_obj = media_items_repo.create_media_item(
@@ -831,9 +832,9 @@ class TestPhotosBackup(unittest.TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    media_items_results_2.newMediaItemResults[0].mediaItem.id
-                ],
+                gphotos_media_item_id=media_items_results_2.newMediaItemResults[
+                    0
+                ].mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -891,13 +892,3 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(albums[1].child_album_ids, [])
         self.assertEqual(albums[1].media_item_ids, [cat_media_item_obj.id])
         self.assertEqual(albums[1].parent_album_id, root_album_obj.id)
-
-    def __create_mongodb_client__(
-        self, total_free_storage_size: int = 1000
-    ) -> mongomock.MongoClient:
-        mock_client: mongomock.MongoClient = mongomock.MongoClient()
-        mock_client["sharded_google_photos"].command = Mock(  # type: ignore
-            return_value={"totalFreeStorageSize": total_free_storage_size}
-        )
-
-        return mock_client

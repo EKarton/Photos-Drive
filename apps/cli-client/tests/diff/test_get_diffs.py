@@ -1,6 +1,4 @@
 from pyfakefs.fake_filesystem_unittest import TestCase
-import mongomock
-from unittest.mock import Mock
 from bson.objectid import ObjectId
 
 from sharded_photos_drive_cli_client.diff.get_diffs import (
@@ -27,6 +25,9 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
     MediaItemsRepositoryImpl,
     CreateMediaItemRequest,
 )
+from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+    create_mock_mongo_client,
+)
 
 
 class FolderSyncDiffTests(TestCase):
@@ -42,7 +43,7 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Archives/Photos/2011/cat.jpg', contents='Cat')
 
         # Test setup: set up the cloud
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -82,12 +83,10 @@ class FolderSyncDiffTests(TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    gphotos_client.media_items()
-                    .add_uploaded_photos_to_gphotos([dog_upload_token])
-                    .newMediaItemResults[0]
-                    .mediaItem.id
-                ],
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([dog_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -120,7 +119,7 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Archives/Photos/2010/dog.jpg', contents='Dog')
 
         # Test setup: set up the cloud
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -163,12 +162,10 @@ class FolderSyncDiffTests(TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    gphotos_client.media_items()
-                    .add_uploaded_photos_to_gphotos([dog_upload_token])
-                    .newMediaItemResults[0]
-                    .mediaItem.id
-                ],
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([dog_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
             )
         )
         cat_media_item = media_items_repo.create_media_item(
@@ -177,12 +174,10 @@ class FolderSyncDiffTests(TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    gphotos_client.media_items()
-                    .add_uploaded_photos_to_gphotos([cat_upload_token])
-                    .newMediaItemResults[0]
-                    .mediaItem.id
-                ],
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([cat_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -221,7 +216,7 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Archives/Photos/2011/notes.txt', contents='My notes')
 
         # Test setup: set up the cloud
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -260,12 +255,10 @@ class FolderSyncDiffTests(TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    gphotos_client.media_items()
-                    .add_uploaded_photos_to_gphotos([dog_upload_token])
-                    .newMediaItemResults[0]
-                    .mediaItem.id
-                ],
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([dog_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -292,7 +285,7 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Laptop/Photos/2020/car.jpg', contents='Car')
 
         # Test setup: set up the cloud
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -331,12 +324,10 @@ class FolderSyncDiffTests(TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    gphotos_client.media_items()
-                    .add_uploaded_photos_to_gphotos([dog_upload_token])
-                    .newMediaItemResults[0]
-                    .mediaItem.id
-                ],
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([dog_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -361,7 +352,7 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Laptop/Photos/2020/car.jpg', contents='Car')
 
         # Test setup: set up the cloud
-        mongodb_client = self.__create_mongodb_client__(1000)
+        mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
@@ -413,12 +404,10 @@ class FolderSyncDiffTests(TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    gphotos_client.media_items()
-                    .add_uploaded_photos_to_gphotos([cat_upload_token])
-                    .newMediaItemResults[0]
-                    .mediaItem.id
-                ],
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([cat_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -434,12 +423,10 @@ class FolderSyncDiffTests(TestCase):
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=[
-                    gphotos_client.media_items()
-                    .add_uploaded_photos_to_gphotos([boat_upload_token])
-                    .newMediaItemResults[0]
-                    .mediaItem.id
-                ],
+                gphotos_media_item_id=gphotos_client.media_items()
+                .add_uploaded_photos_to_gphotos([boat_upload_token])
+                .newMediaItemResults[0]
+                .mediaItem.id,
             )
         )
         albums_repo.update_album(
@@ -470,13 +457,3 @@ class FolderSyncDiffTests(TestCase):
                 ],
             ),
         )
-
-    def __create_mongodb_client__(
-        self, total_free_storage_size: int = 1000
-    ) -> mongomock.MongoClient:
-        mock_client: mongomock.MongoClient = mongomock.MongoClient()
-        mock_client["sharded_google_photos"].command = Mock(  # type: ignore
-            return_value={"totalFreeStorageSize": total_free_storage_size}
-        )
-
-        return mock_client

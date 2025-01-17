@@ -1,12 +1,14 @@
 import unittest
 from unittest.mock import Mock
 from bson.objectid import ObjectId
-import mongomock
 
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
 from sharded_photos_drive_cli_client.shared.config.config import Config
+from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+    create_mock_mongo_client,
+)
 
 
 class TestMongoDbClientsRepository(unittest.TestCase):
@@ -14,8 +16,8 @@ class TestMongoDbClientsRepository(unittest.TestCase):
         mock_config = Mock(Config)
         client_1_id = ObjectId()
         client_2_id = ObjectId()
-        client_1 = mongomock.MongoClient()
-        client_2 = mongomock.MongoClient()
+        client_1 = create_mock_mongo_client()
+        client_2 = create_mock_mongo_client()
         mock_config.get_mongo_db_clients.return_value = [
             (client_1_id, client_1),
             (client_2_id, client_2),
@@ -32,7 +34,7 @@ class TestMongoDbClientsRepository(unittest.TestCase):
 
     def test_add_mongodb_client__adds_mongodb_client_to_repo(self):
         client_id = ObjectId()
-        client = self.__create_mongodb_client__()
+        client = create_mock_mongo_client()
         repo = MongoDbClientsRepository()
         repo.add_mongodb_client(client_id, client)
 
@@ -42,12 +44,12 @@ class TestMongoDbClientsRepository(unittest.TestCase):
 
     def test_add_mongodb_client__duplicate_mongodb_clients_added__throws_error(self):
         client_id = ObjectId()
-        client = self.__create_mongodb_client__()
+        client = create_mock_mongo_client()
         repo = MongoDbClientsRepository()
         repo.add_mongodb_client(client_id, client)
 
         with self.assertRaisesRegex(ValueError, "Mongo DB Client ID .* already exists"):
-            client_2 = self.__create_mongodb_client__()
+            client_2 = create_mock_mongo_client()
             repo.add_mongodb_client(client_id, client_2)
 
     def test_get_client_by_id__invalid_id__throws_error(self):
@@ -59,13 +61,11 @@ class TestMongoDbClientsRepository(unittest.TestCase):
         ):
             repo.get_client_by_id(non_existent_id)
 
-    def test_find_id_of_client_with_most_space__returns_client_id_with_most_amount_of_space(
-        self,
-    ):
+    def test_find_id_of_client_with_most_space(self):
         client_id_2 = ObjectId()
         client_id_1 = ObjectId()
-        client_1 = self.__create_mongodb_client__(1000)
-        client_2 = self.__create_mongodb_client__(2000)
+        client_1 = create_mock_mongo_client(1000)
+        client_2 = create_mock_mongo_client(2000)
         repo = MongoDbClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
@@ -74,9 +74,7 @@ class TestMongoDbClientsRepository(unittest.TestCase):
 
         self.assertEqual(best_client_id, client_id_2)
 
-    def test_find_id_of_client_with_most_space__with_no_mongodb_client__throws_error(
-        self,
-    ):
+    def test_find_id_of_client_with_most_space__with_no_mongodb_client(self):
         repo = MongoDbClientsRepository()
 
         with self.assertRaisesRegex(ValueError, "No MongoDB Client!"):
@@ -85,8 +83,8 @@ class TestMongoDbClientsRepository(unittest.TestCase):
     def test_get_all_clients__returns_all_mongodb_clients(self):
         client_id_1 = ObjectId()
         client_id_2 = ObjectId()
-        client_1 = self.__create_mongodb_client__()
-        client_2 = self.__create_mongodb_client__()
+        client_1 = create_mock_mongo_client()
+        client_2 = create_mock_mongo_client()
         repo = MongoDbClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
@@ -96,13 +94,3 @@ class TestMongoDbClientsRepository(unittest.TestCase):
         self.assertEqual(len(all_clients), 2)
         self.assertIn((client_id_1, client_1), all_clients)
         self.assertIn((client_id_2, client_2), all_clients)
-
-    def __create_mongodb_client__(
-        self, total_free_storage_size: int = 1000
-    ) -> mongomock.MongoClient:
-        mock_client: mongomock.MongoClient = mongomock.MongoClient()
-        mock_client["sharded_google_photos"].command = Mock(  # type: ignore
-            return_value={"totalFreeStorageSize": total_free_storage_size}
-        )
-
-        return mock_client

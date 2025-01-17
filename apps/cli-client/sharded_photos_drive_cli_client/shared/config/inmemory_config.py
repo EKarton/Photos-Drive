@@ -1,10 +1,6 @@
-import configparser
-from typing import Dict, cast, override
+from typing import Dict, override
 
-from google.oauth2.credentials import Credentials
 from mongomock import MongoClient
-from google.auth.transport.requests import AuthorizedSession
-from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 
 
@@ -23,9 +19,6 @@ class InMemoryConfig(Config):
 
     @override
     def get_mongo_db_clients(self) -> list[tuple[ObjectId, MongoClient]]:
-        """
-        Returns a list of MongoDB clients with their IDs.
-        """
         return [
             (ObjectId(id), client)
             for id, client in self.__id_to_mongodb_clients.items()
@@ -41,9 +34,6 @@ class InMemoryConfig(Config):
 
     @override
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
-        """
-        Returns a list of tuples, where each tuple is a Google Photo client ID and a Google Photos client instance.
-        """
         return [
             (ObjectId(id), client)
             for id, client in self.__id_to_gphotos_clients.items()
@@ -60,15 +50,6 @@ class InMemoryConfig(Config):
 
     @override
     def get_root_album_id(self) -> AlbumId:
-        """
-        Gets the ID of the root album.
-
-        Raises:
-            ValueError: If there is no root album ID.
-
-        Returns:
-            AlbumId: The album ID if it exists; else None.
-        """
         if self.__root_album_id:
             return self.__root_album_id
 
@@ -76,12 +57,6 @@ class InMemoryConfig(Config):
 
     @override
     def set_root_album_id(self, album_id: AlbumId):
-        """
-        Sets the ID of the root album.
-
-        Args:
-            album_id (AlbumId): The album ID of the root album.
-        """
         self.__root_album_id = album_id
 
     def __generate_unique_object_id(self) -> ObjectId:

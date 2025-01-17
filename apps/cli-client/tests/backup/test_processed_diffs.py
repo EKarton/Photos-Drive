@@ -65,8 +65,7 @@ class TestDiffsProcessor(unittest.TestCase):
         )
         self.assertEqual(processed_diffs[0].file_name, "image-with-location-2.jpg")
         self.assertEqual(processed_diffs[0].file_size, 2622777)
-        self.assertEqual(processed_diffs[0].location.latitude, -40.7128)
-        self.assertEqual(processed_diffs[0].location.longitude, -74.006)
+        self.assertEqual(processed_diffs[0].location, GpsLocation(-40.7128, -74.006))
 
     def test_process_raw_diffs__image_with_no_location(self):
         test_file_path = (
@@ -145,8 +144,7 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].album_name, 'Photos/2010')
         self.assertEqual(processed_diffs[0].file_name, 'dog.png')
         self.assertEqual(processed_diffs[0].file_size, 1000)
-        self.assertEqual(processed_diffs[0].location.latitude, 100)
-        self.assertEqual(processed_diffs[0].location.longitude, 200)
+        self.assertEqual(processed_diffs[0].location, GpsLocation(100, 200))
 
     def test_process_raw_diffs__with_deletion_diff(self):
         test_file_path = (
