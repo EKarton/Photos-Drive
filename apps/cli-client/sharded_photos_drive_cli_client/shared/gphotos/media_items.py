@@ -72,7 +72,8 @@ class VideoProcessingStatus(Enum):
     # Video processing status is unknown.
     UNSPECIFIED = "UNSPECIFIED"
 
-    # Video is being processed. The user sees an icon for this video in the Google Photos app; however, it isn't playable yet.
+    # Video is being processed. The user sees an icon for this video in the Google
+    # Photos app; however, it isn't playable yet.
     PROCESSING = "PROCESSING"
 
     # Video processing is complete and it is now ready for viewing.
