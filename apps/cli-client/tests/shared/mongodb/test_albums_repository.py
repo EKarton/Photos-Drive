@@ -12,7 +12,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items import MediaItem
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
 

@@ -2,9 +2,9 @@ import unittest
 import requests_mock
 from freezegun import freeze_time
 from dacite import from_dict
-
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
+
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
 from sharded_photos_drive_cli_client.shared.gphotos.albums import Album
 

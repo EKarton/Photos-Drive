@@ -3,11 +3,9 @@ from bson.objectid import ObjectId
 
 from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_items_repository import (
-    FakeItemsRepository,
-)
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
+from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeGPhotosClient,
+    FakeItemsRepository,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
@@ -29,7 +27,7 @@ from sharded_photos_drive_cli_client.backup.gphotos_uploader import (
 )
 from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
-from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
 

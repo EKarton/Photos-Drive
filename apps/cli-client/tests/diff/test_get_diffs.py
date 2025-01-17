@@ -8,10 +8,8 @@ from sharded_photos_drive_cli_client.diff.get_diffs import (
     RemoteFile,
 )
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_items_repository import (
+from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeItemsRepository,
-)
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
     FakeGPhotosClient,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
@@ -25,7 +23,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
     MediaItemsRepositoryImpl,
     CreateMediaItemRequest,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
 

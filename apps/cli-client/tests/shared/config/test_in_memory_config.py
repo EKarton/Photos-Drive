@@ -7,7 +7,7 @@ from google.oauth2.credentials import Credentials
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
-from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
 
