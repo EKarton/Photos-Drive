@@ -39,7 +39,7 @@ class FakeItemsRepository:
             "productUrl": f"http://google.com/albums/{new_album_id}",
             "isWriteable": True,
             "shareInfo": None,
-            "mediaItemsCount": 0,
+            "mediaItemsCount": "0",
             "coverPhotoBaseUrl": None,
             "coverPhotoMediaItemId": None,
         }

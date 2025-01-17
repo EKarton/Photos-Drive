@@ -70,31 +70,6 @@ class SystemCleaner:
         self.__gphotos_clients_repo = gphotos_clients_repo
 
     def clean(self) -> CleanupResults:
-        mongodb_clients = self.__config.get_mongo_db_clients()
-        sessions = [client.start_session() for _, client in mongodb_clients]
-        try:
-            for session in sessions:
-                session.start_transaction()
-
-            cleanup_results = self.__clean_internal()
-
-            for session in sessions:
-                session.commit_transaction()
-                session.end_session()
-
-            logger.debug("Transaction committed successfully")
-
-            return cleanup_results
-        except BaseException as e:
-            logger.error("Aborting transaction due to an error:", str(e))
-            for session in sessions:
-                session.abort_transaction()
-                session.end_session()
-
-            logger.error("Aborted transaction")
-            raise e
-
-    def __clean_internal(self) -> CleanupResults:
         # Step 1: Find all of the media item ids and all of the album ids to delete
         media_item_ids_to_delete, album_ids_to_delete = (
             self.__find_media_item_ids_and_album_ids_to_delete()

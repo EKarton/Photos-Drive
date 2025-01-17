@@ -34,10 +34,8 @@ from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
 
 
 class TestPhotosBackup(unittest.TestCase):
-    def test_backup__adding_items_to_db_with_only_root_album__adds_item_to_database_and_gphotos(
-        self,
-    ):
-        # Test setup 1: Set up the essential objects
+    def test_backup_adding_items_to_new_db(self):
+        # Test setup 1: Set up the config
         mongodb_client_1 = self.__create_mongodb_client__(1000)
         mongodb_client_2 = self.__create_mongodb_client__(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -45,7 +43,7 @@ class TestPhotosBackup(unittest.TestCase):
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
         config = InMemoryConfig()
         mongodb_client_1_id = config.add_mongo_db_client(mongodb_client_1)
-        mongodb_client_2_id = config.add_mongo_db_client(mongodb_client_2)
+        config.add_mongo_db_client(mongodb_client_2)
         gphotos_client_1_id = config.add_gphotos_client(gphotos_client_1)
         gphotos_client_2_id = config.add_gphotos_client(gphotos_client_2)
 
@@ -202,10 +200,8 @@ class TestPhotosBackup(unittest.TestCase):
             f'{mongodb_client_1_id}:{bird_item["_id"]}', album_2009['media_item_ids']
         )
 
-    def test_backup__adding_items_to_existing_albums__adds_items_to_database_and_gphotos(
-        self,
-    ):
-        # Test setup 1: Set up the essential objects
+    def test_backup_adding_items_to_existing_albums(self):
+        # Test setup 1: Set up the config
         mongodb_client_1 = self.__create_mongodb_client__(1000)
         mongodb_client_2 = self.__create_mongodb_client__(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -213,7 +209,7 @@ class TestPhotosBackup(unittest.TestCase):
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
         config = InMemoryConfig()
         mongodb_client_1_id = config.add_mongo_db_client(mongodb_client_1)
-        mongodb_client_2_id = config.add_mongo_db_client(mongodb_client_2)
+        config.add_mongo_db_client(mongodb_client_2)
         gphotos_client_1_id = config.add_gphotos_client(gphotos_client_1)
         gphotos_client_2_id = config.add_gphotos_client(gphotos_client_2)
 
@@ -336,9 +332,7 @@ class TestPhotosBackup(unittest.TestCase):
             f'{mongodb_client_1_id}:{cat_mitem['_id']}', album_2010['media_item_ids']
         )
 
-    def test_backup__deleted_one_item_on_album_with_two_items__removes_one_item_from_database(
-        self,
-    ):
+    def test_backup_deleted_one_item_on_album_with_two_items(self):
         # Test setup 1: Set up the essential objects
         mongodb_client_1 = self.__create_mongodb_client__(1000)
         mongodb_client_2 = self.__create_mongodb_client__(1000)
@@ -347,9 +341,9 @@ class TestPhotosBackup(unittest.TestCase):
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
         config = InMemoryConfig()
         mongodb_client_1_id = config.add_mongo_db_client(mongodb_client_1)
-        mongodb_client_2_id = config.add_mongo_db_client(mongodb_client_2)
+        config.add_mongo_db_client(mongodb_client_2)
         gphotos_client_1_id = config.add_gphotos_client(gphotos_client_1)
-        gphotos_client_2_id = config.add_gphotos_client(gphotos_client_2)
+        config.add_gphotos_client(gphotos_client_2)
 
         # Test setup 2: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
@@ -480,6 +474,422 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertIn(
             f'{mongodb_client_1_id}:{dog_mitem['_id']}', album_2010['media_item_ids']
         )
+
+    def test_backup_pruning_1(self):
+        # Test setup 1: Build the config
+        mongodb_client = self.__create_mongodb_client__(1000)
+        gphotos_items_repo = FakeItemsRepository()
+        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
+        config = InMemoryConfig()
+        config.add_mongo_db_client(mongodb_client)
+        gphotos_client_id = config.add_gphotos_client(gphotos_client)
+
+        # Test setup 2: Build the wrapper objects
+        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+        # Test setup 3: Set up the existing albums
+        root_album_obj = albums_repo.create_album(
+            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
+        )
+        archives_album_obj = albums_repo.create_album(
+            album_name='Archives',
+            parent_album_id=root_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        photos_album_obj = albums_repo.create_album(
+            album_name='Photos',
+            parent_album_id=archives_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        album_2010_obj = albums_repo.create_album(
+            album_name='2010',
+            parent_album_id=photos_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        config.set_root_album_id(root_album_obj.id)
+        albums_repo.update_album(
+            root_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album_obj.id]),
+        )
+        albums_repo.update_album(
+            archives_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+        )
+        albums_repo.update_album(
+            photos_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+        )
+
+        # Test setup 4: Add dog.png to Archives/Photos/2010
+        dog_upload_token = gphotos_client.media_items().upload_photo(
+            './Archives/Photos/2010/dog.png', 'dog.png'
+        )
+        media_items_results = (
+            gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+                [dog_upload_token]
+            )
+        )
+        media_item_obj = media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name='dog.png',
+                hash_code=None,
+                location=None,
+                gphotos_client_id=ObjectId(gphotos_client_id),
+                gphotos_media_item_id=[
+                    media_items_results.newMediaItemResults[0].mediaItem.id
+                ],
+            )
+        )
+        albums_repo.update_album(
+            album_2010_obj.id,
+            UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
+        )
+
+        # Test setup 5: Build the objects for backup
+        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
+        diffs_assigner = DiffsAssigner(config)
+        backup = PhotosBackup(
+            config, albums_repo, media_items_repo, uploader, diffs_assigner
+        )
+
+        # Act: Upload a set of processed diffs
+        diffs = [
+            ProcessedDiff(
+                modifier='-',
+                file_path='./Archives/Photos/2010/dog.png',
+                album_name="Archives/Photos/2010",
+                file_name="dog.png",
+                file_size=10,
+                location=GpsLocation(latitude=-1, longitude=1),
+            ),
+        ]
+        backup_results = backup.backup(diffs)
+
+        # Test assert: check that there's no media item
+        media_items = media_items_repo.get_all_media_items()
+        self.assertEqual(len(media_items), 0)
+
+        # Test assert: check on backup results
+        self.assertEqual(backup_results.num_media_items_added, 0)
+        self.assertEqual(backup_results.num_media_items_deleted, 1)
+        self.assertEqual(backup_results.num_albums_created, 0)
+        self.assertEqual(backup_results.num_albums_deleted, 3)
+
+        # Test assert: Check that only the root album exists
+        albums = albums_repo.get_all_albums()
+        self.assertEqual(len(albums), 1)
+
+        # Test assert: Check that root albums is updated correctly
+        self.assertEqual(albums[0].id, root_album_obj.id)
+        self.assertEqual(len(albums[0].child_album_ids), 0)
+        self.assertEqual(len(albums[0].media_item_ids), 0)
+        self.assertEqual(albums[0].parent_album_id, None)
+
+    def test_backup_pruning_2(self):
+        # Test setup 1: Build the config
+        mongodb_client = self.__create_mongodb_client__(1000)
+        gphotos_items_repo = FakeItemsRepository()
+        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
+        config = InMemoryConfig()
+        config.add_mongo_db_client(mongodb_client)
+        gphotos_client_id = config.add_gphotos_client(gphotos_client)
+
+        # Test setup 2: Build the wrapper objects
+        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+        # Test setup 3: Set up the existing albums
+        root_album_obj = albums_repo.create_album(
+            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
+        )
+        archives_album_obj = albums_repo.create_album(
+            album_name='Archives',
+            parent_album_id=root_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        photos_album_obj = albums_repo.create_album(
+            album_name='Photos',
+            parent_album_id=archives_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        album_2010_obj = albums_repo.create_album(
+            album_name='2010',
+            parent_album_id=photos_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        config.set_root_album_id(root_album_obj.id)
+        albums_repo.update_album(
+            root_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album_obj.id]),
+        )
+        albums_repo.update_album(
+            archives_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+        )
+        albums_repo.update_album(
+            photos_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+        )
+
+        # Test setup 4: Add dog.png to Archives/Photos/2010 and cat.png to Archives/
+        dog_upload_token = gphotos_client.media_items().upload_photo(
+            './Archives/Photos/2010/dog.png', 'dog.png'
+        )
+        cat_upload_token = gphotos_client.media_items().upload_photo(
+            './Archives/cat.png', 'cat.png'
+        )
+        media_items_results_1 = (
+            gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+                [dog_upload_token]
+            )
+        )
+        media_items_results_2 = (
+            gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+                [cat_upload_token]
+            )
+        )
+        dog_media_item_obj = media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name='dog.png',
+                hash_code=None,
+                location=None,
+                gphotos_client_id=ObjectId(gphotos_client_id),
+                gphotos_media_item_id=[
+                    media_items_results_1.newMediaItemResults[0].mediaItem.id
+                ],
+            )
+        )
+        cat_media_item_obj = media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name='cat.png',
+                hash_code=None,
+                location=None,
+                gphotos_client_id=ObjectId(gphotos_client_id),
+                gphotos_media_item_id=[
+                    media_items_results_2.newMediaItemResults[0].mediaItem.id
+                ],
+            )
+        )
+        albums_repo.update_album(
+            album_2010_obj.id,
+            UpdatedAlbumFields(new_media_item_ids=[dog_media_item_obj.id]),
+        )
+        albums_repo.update_album(
+            archives_album_obj.id,
+            UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
+        )
+
+        # Test setup 5: Build the objects for backup
+        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
+        diffs_assigner = DiffsAssigner(config)
+        backup = PhotosBackup(
+            config, albums_repo, media_items_repo, uploader, diffs_assigner
+        )
+
+        # Act: Upload a set of processed diffs
+        diffs = [
+            ProcessedDiff(
+                modifier='-',
+                file_path='./Archives/Photos/2010/dog.png',
+                album_name="Archives/Photos/2010",
+                file_name="dog.png",
+                file_size=10,
+                location=GpsLocation(latitude=-1, longitude=1),
+            ),
+        ]
+        backup_results = backup.backup(diffs)
+
+        # Test assert: check that there's only one media item
+        media_items = media_items_repo.get_all_media_items()
+        self.assertEqual(len(media_items), 1)
+        self.assertEqual(media_items[0].file_name, 'cat.png')
+
+        # Test assert: check on backup results
+        self.assertEqual(backup_results.num_media_items_added, 0)
+        self.assertEqual(backup_results.num_media_items_deleted, 1)
+        self.assertEqual(backup_results.num_albums_created, 0)
+        self.assertEqual(backup_results.num_albums_deleted, 2)
+
+        # Test assert: Check that only the root/Archives album exists
+        albums = albums_repo.get_all_albums()
+        self.assertEqual(len(albums), 2)
+
+        # Test assert: Check that root album is updated correctly
+        self.assertEqual(albums[0].id, root_album_obj.id)
+        self.assertEqual(albums[0].child_album_ids, [albums[1].id])
+        self.assertEqual(albums[0].media_item_ids, [])
+        self.assertEqual(albums[0].parent_album_id, None)
+
+        # Test assert: Check that archives album is updated correctly
+        self.assertEqual(albums[1].id, archives_album_obj.id)
+        self.assertEqual(albums[1].child_album_ids, [])
+        self.assertEqual(albums[1].media_item_ids, [cat_media_item_obj.id])
+        self.assertEqual(albums[1].parent_album_id, root_album_obj.id)
+
+    def test_backup_pruning_3(self):
+        # Test setup 1: Build the config
+        mongodb_client = self.__create_mongodb_client__(1000)
+        gphotos_items_repo = FakeItemsRepository()
+        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
+        config = InMemoryConfig()
+        config.add_mongo_db_client(mongodb_client)
+        gphotos_client_id = config.add_gphotos_client(gphotos_client)
+
+        # Test setup 2: Build the wrapper objects
+        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+        # Test setup 3: Set up the existing albums
+        root_album_obj = albums_repo.create_album(
+            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
+        )
+        public_album_obj = albums_repo.create_album(
+            album_name='Public',
+            parent_album_id=root_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        archives_album_obj = albums_repo.create_album(
+            album_name='Archives',
+            parent_album_id=root_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        photos_album_obj = albums_repo.create_album(
+            album_name='Photos',
+            parent_album_id=archives_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        album_2010_obj = albums_repo.create_album(
+            album_name='2010',
+            parent_album_id=photos_album_obj.id,
+            child_album_ids=[],
+            media_item_ids=[],
+        )
+        config.set_root_album_id(root_album_obj.id)
+        albums_repo.update_album(
+            root_album_obj.id,
+            UpdatedAlbumFields(
+                new_child_album_ids=[archives_album_obj.id, public_album_obj.id]
+            ),
+        )
+        albums_repo.update_album(
+            archives_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+        )
+        albums_repo.update_album(
+            photos_album_obj.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+        )
+
+        # Test setup 4: Add dog.png to Archives/Photos/2010 and cat.png to Public/
+        dog_upload_token = gphotos_client.media_items().upload_photo(
+            './Archives/Photos/2010/dog.png', 'dog.png'
+        )
+        cat_upload_token = gphotos_client.media_items().upload_photo(
+            './Public/cat.png', 'cat.png'
+        )
+        media_items_results_1 = (
+            gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+                [dog_upload_token]
+            )
+        )
+        media_items_results_2 = (
+            gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+                [cat_upload_token]
+            )
+        )
+        dog_media_item_obj = media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name='dog.png',
+                hash_code=None,
+                location=None,
+                gphotos_client_id=ObjectId(gphotos_client_id),
+                gphotos_media_item_id=[
+                    media_items_results_1.newMediaItemResults[0].mediaItem.id
+                ],
+            )
+        )
+        cat_media_item_obj = media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name='cat.png',
+                hash_code=None,
+                location=None,
+                gphotos_client_id=ObjectId(gphotos_client_id),
+                gphotos_media_item_id=[
+                    media_items_results_2.newMediaItemResults[0].mediaItem.id
+                ],
+            )
+        )
+        albums_repo.update_album(
+            album_2010_obj.id,
+            UpdatedAlbumFields(new_media_item_ids=[dog_media_item_obj.id]),
+        )
+        albums_repo.update_album(
+            public_album_obj.id,
+            UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
+        )
+
+        # Test setup 5: Build the objects for backup
+        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
+        diffs_assigner = DiffsAssigner(config)
+        backup = PhotosBackup(
+            config, albums_repo, media_items_repo, uploader, diffs_assigner
+        )
+
+        # Act: Upload a set of processed diffs
+        diffs = [
+            ProcessedDiff(
+                modifier='-',
+                file_path='./Archives/Photos/2010/dog.png',
+                album_name="Archives/Photos/2010",
+                file_name="dog.png",
+                file_size=10,
+                location=GpsLocation(latitude=-1, longitude=1),
+            ),
+        ]
+        backup_results = backup.backup(diffs)
+
+        # Test assert: check that there's only one media item
+        media_items = media_items_repo.get_all_media_items()
+        self.assertEqual(len(media_items), 1)
+        self.assertEqual(media_items[0].file_name, 'cat.png')
+
+        # Test assert: check on backup results
+        self.assertEqual(backup_results.num_media_items_added, 0)
+        self.assertEqual(backup_results.num_media_items_deleted, 1)
+        self.assertEqual(backup_results.num_albums_created, 0)
+        self.assertEqual(backup_results.num_albums_deleted, 3)
+
+        # Test assert: Check that only the root/Archives album exists
+        albums = albums_repo.get_all_albums()
+        self.assertEqual(len(albums), 2)
+
+        # Test assert: Check that root album is updated correctly
+        self.assertEqual(albums[0].id, root_album_obj.id)
+        self.assertEqual(albums[0].child_album_ids, [albums[1].id])
+        self.assertEqual(albums[0].media_item_ids, [])
+        self.assertEqual(albums[0].parent_album_id, None)
+
+        # Test assert: Check that archives album is updated correctly
+        self.assertEqual(albums[1].id, public_album_obj.id)
+        self.assertEqual(albums[1].child_album_ids, [])
+        self.assertEqual(albums[1].media_item_ids, [cat_media_item_obj.id])
+        self.assertEqual(albums[1].parent_album_id, root_album_obj.id)
 
     def __create_mongodb_client__(
         self, total_free_storage_size: int = 1000

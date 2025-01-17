@@ -6,8 +6,6 @@ This project is the cli client of Sharded Photos Drive.
 
 ## Getting Started
 
-
-
 ## Getting Started to Contribute
 
 1. Ensure Python3, Pip, and Poetry are installed on your machine

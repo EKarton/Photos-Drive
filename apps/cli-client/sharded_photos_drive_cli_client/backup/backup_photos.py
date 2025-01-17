@@ -69,39 +69,6 @@ class PhotosBackup:
         Returns:
             BackupResults: A set of results from the backup.
         """
-        mongodb_clients = self.__config.get_mongo_db_clients()
-        sessions = [client.start_session() for _, client in mongodb_clients]
-        try:
-            for session in sessions:
-                session.start_transaction()
-
-            backup_results = self.__backup_internal(diffs)
-
-            for session in sessions:
-                session.commit_transaction()
-                session.end_session()
-
-            logger.debug("Transaction committed successfully")
-
-            return backup_results
-        except BaseException as e:
-            logger.error("Aborting transaction due to an error:", str(e))
-            for session in sessions:
-                session.abort_transaction()
-                session.end_session()
-
-            logger.error("Aborted transaction")
-            raise e
-
-    def __backup_internal(self, diffs: list[ProcessedDiff]) -> BackupResults:
-        """Backs up a list of media items based on a list of diffs.
-
-        Args:
-            diffs (list[ProcessedDiff]): A list of processed diffs.
-
-        Returns:
-            BackupResults: A set of results from the backup.
-        """
         # Step 1: Build a tree of albums with diffs on their edge nodes
         root_diffs_tree_node = self.__build_diffs_tree(diffs)
         logger.debug(f"Finished creating initial diff tree: {root_diffs_tree_node}")
@@ -185,7 +152,6 @@ class PhotosBackup:
                     cur_album.id,
                     UpdatedAlbumFields(new_media_item_ids=new_media_item_ids),
                 )
-                print(new_media_item_ids, cur_album.child_album_ids)
                 if len(new_media_item_ids) == 0 and len(cur_album.child_album_ids) == 0:
                     total_album_ids_to_prune.append(cur_album.id)
 
@@ -263,10 +229,6 @@ class PhotosBackup:
 
         while len(queue) > 0:
             cur_diffs_tree_node, cur_album = queue.popleft()
-            if cur_diffs_tree_node.album_name != cur_album.name:
-                raise ValueError(
-                    f"Error: cannot find album {cur_diffs_tree_node.album_name}"
-                )
             cur_diffs_tree_node.album = cur_album
 
             child_album_name_to_album: Dict[str, Album] = {}
@@ -346,7 +308,7 @@ class PhotosBackup:
 
         while True:
             cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
-            if len(cur_album.child_album_ids) > 0:
+            if len(cur_album.child_album_ids) > 1:
                 break
 
             if len(cur_album.media_item_ids) > 0:
@@ -356,10 +318,10 @@ class PhotosBackup:
                 break
 
             parent_album_id = cur_album.parent_album_id
-            self.__albums_repo.delete_album(album_id)
+            self.__albums_repo.delete_album(cur_album_id)
             num_albums_deleted += 1
 
-            prev_album_id_deleted = album_id
+            prev_album_id_deleted = cur_album_id
             cur_album_id = parent_album_id
             cur_album = self.__albums_repo.get_album_by_id(parent_album_id)
 
