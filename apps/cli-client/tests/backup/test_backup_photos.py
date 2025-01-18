@@ -1,7 +1,6 @@
 import unittest
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeGPhotosClient,
@@ -21,9 +20,6 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
 from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocation
 from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
     GPhotosClientsRepository,
-)
-from sharded_photos_drive_cli_client.backup.gphotos_uploader import (
-    GPhotosMediaItemUploader,
 )
 from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
@@ -57,13 +53,6 @@ class TestPhotosBackup(unittest.TestCase):
             album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
         )
         config.set_root_album_id(root_album_obj.id)
-
-        # Test setup 4: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
 
         # Act: Upload a set of processed diffs
         diffs = [
@@ -100,6 +89,12 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-4, longitude=4),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check on backup results
@@ -277,13 +272,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -295,6 +283,12 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check on backup results
@@ -431,13 +425,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[dog_mitem_obj.id, cat_mitem_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -449,6 +436,12 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check on backup results
@@ -551,13 +544,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -569,6 +555,12 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check that there's no media item
@@ -690,13 +682,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -708,6 +693,12 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check that there's only one media item
@@ -844,13 +835,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -862,6 +846,12 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check that there's only one media item

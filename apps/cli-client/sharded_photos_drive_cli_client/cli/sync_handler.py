@@ -4,8 +4,6 @@ from termcolor import colored
 from typing import Literal
 
 from ..backup.backup_photos import PhotosBackup, BackupResults
-from ..backup.diffs_assignments import DiffsAssigner
-from ..backup.gphotos_uploader import GPhotosMediaItemUploader
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
@@ -138,10 +136,11 @@ class SyncHandler:
             logger.debug(f"Processed diff: {processed_diff}")
 
         # Process the diffs
-        gphotos_uploader = GPhotosMediaItemUploader(gphoto_clients_repo)
-        diffs_assigner = DiffsAssigner(config)
         backup_service = PhotosBackup(
-            config, albums_repo, media_items_repo, gphotos_uploader, diffs_assigner
+            config,
+            albums_repo,
+            media_items_repo,
+            gphoto_clients_repo,
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")

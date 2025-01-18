@@ -10,8 +10,6 @@ from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 from ..backup.diffs import Diff
 from ..backup.processed_diffs import DiffsProcessor
 from ..backup.backup_photos import PhotosBackup
-from ..backup.diffs_assignments import DiffsAssigner
-from ..backup.gphotos_uploader import GPhotosMediaItemUploader
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +43,11 @@ class DeleteHandler:
             logger.debug(f"Processed diff: {processed_diff}")
 
         # Process the diffs
-        gphotos_uploader = GPhotosMediaItemUploader(gphoto_clients_repo)
-        diffs_assigner = DiffsAssigner(config)
         backup_service = PhotosBackup(
-            config, albums_repo, media_items_repo, gphotos_uploader, diffs_assigner
+            config,
+            albums_repo,
+            media_items_repo,
+            gphoto_clients_repo,
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")

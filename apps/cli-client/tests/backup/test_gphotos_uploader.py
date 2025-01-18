@@ -6,7 +6,7 @@ from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeGPhotosClient,
 )
 from sharded_photos_drive_cli_client.backup.gphotos_uploader import (
-    GPhotosMediaItemUploader,
+    GPhotosMediaItemUploaderImpl,
     UploadRequest,
 )
 from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
@@ -14,7 +14,7 @@ from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
 )
 
 
-class TestGPhotosMediaItemUploader(unittest.TestCase):
+class TestGPhotosMediaItemUploaderImpl(unittest.TestCase):
     def test_upload_photos_success(self):
         gphotos_client_id = ObjectId()
         gphotos_client_id_str = str(gphotos_client_id)
@@ -22,7 +22,7 @@ class TestGPhotosMediaItemUploader(unittest.TestCase):
         gphotos_client = FakeGPhotosClient(gphotos_repo, gphotos_client_id_str)
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
-        uploader = GPhotosMediaItemUploader(gphotos_clients_repo)
+        uploader = GPhotosMediaItemUploaderImpl(gphotos_clients_repo)
 
         upload_requests = [
             UploadRequest(

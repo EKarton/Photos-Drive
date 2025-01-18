@@ -5,8 +5,10 @@ import logging
 
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.mongodb.albums_pruner import AlbumsPruner
-
+from ..shared.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
 from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields
@@ -15,7 +17,10 @@ from ..shared.mongodb.media_items_repository import MediaItemsRepository
 from ..shared.mongodb.media_items_repository import CreateMediaItemRequest
 
 from .processed_diffs import ProcessedDiff
-from .gphotos_uploader import GPhotosMediaItemUploader, UploadRequest
+from .gphotos_uploader import (
+    GPhotosMediaItemUploaderImpl,
+    UploadRequest,
+)
 from .diffs_assignments import DiffsAssigner
 
 logger = logging.getLogger(__name__)
@@ -53,14 +58,13 @@ class PhotosBackup:
         config: Config,
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
-        gphotos_uploader: GPhotosMediaItemUploader,
-        diffs_assigner: DiffsAssigner,
+        gphotos_client_repo: GPhotosClientsRepository,
     ):
         self.__config = config
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
-        self.__gphotos_uploader = gphotos_uploader
-        self.__diffs_assigner = diffs_assigner
+        self.__gphotos_uploader = GPhotosMediaItemUploaderImpl(gphotos_client_repo)
+        self.__diffs_assigner = DiffsAssigner(config)
         self.__albums_pruner = AlbumsPruner(config.get_root_album_id(), albums_repo)
 
     def backup(self, diffs: list[ProcessedDiff]) -> BackupResults:

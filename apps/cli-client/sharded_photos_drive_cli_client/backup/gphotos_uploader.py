@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from abc import ABC, abstractmethod
 from bson.objectid import ObjectId
 
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
@@ -12,7 +12,25 @@ class UploadRequest:
     gphotos_client_id: ObjectId
 
 
-class GPhotosMediaItemUploader:
+class GPhotosMediaItemUploader(ABC):
+    '''A class responsible for uploading media content to Google Photos.'''
+
+    @abstractmethod
+    def upload_photos(self, upload_requests: list[UploadRequest]) -> list[str]:
+        """
+        Uploads a list of photos.
+
+        Args:
+            upload_requests (list[UploadRequest]): A list of upload requests
+
+        Returns:
+            list[str]: A list of Google Photo media item ids for each uploaded photo
+        """
+
+
+class GPhotosMediaItemUploaderImpl:
+    '''Implementation of {@code GPhotosMediaItemUploader} that uploads media content to Google Photos in a single thread.'''
+
     def __init__(self, gphotos_client_repo: GPhotosClientsRepository):
         self.__gphotos_client_repo = gphotos_client_repo
 
