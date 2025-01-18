@@ -63,8 +63,11 @@ class AlbumsPruner:
             for child_album_id in cur_album.child_album_ids
             if child_album_id != prev_album_id_deleted
         ]
-        self.__albums_repo.update_album(
-            cur_album_id, UpdatedAlbumFields(new_child_album_ids=new_child_album_ids)
-        )
+
+        if new_child_album_ids != cur_album.child_album_ids:
+            self.__albums_repo.update_album(
+                cur_album_id,
+                UpdatedAlbumFields(new_child_album_ids=new_child_album_ids),
+            )
 
         return num_albums_deleted
