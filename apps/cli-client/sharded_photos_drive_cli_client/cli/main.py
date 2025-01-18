@@ -13,7 +13,6 @@ from .config.add_mongodb_handler import AddMongoDbHandler
 from .config.reauthorize_handler import ReauthorizeHandler
 from .add_handler import AddHandler
 from .delete_handler import DeleteHandler
-from .backup_handler import BackupHandler
 from .clean_handler import CleanHandler
 from .teardown_handler import TeardownHandler
 from .sync_handler import SyncHandler
@@ -65,12 +64,6 @@ def main():
     __add_config_argument(delete_parser)
     __add_verbose_argument(delete_parser)
 
-    # Add subparser for the 'backup' command
-    backup_parser = subparsers.add_parser("backup")
-    __add_diff_file_argument(backup_parser)
-    __add_config_argument(backup_parser)
-    __add_verbose_argument(backup_parser)
-
     # Add subparser for the 'sync' command`
     sync_parser = subparsers.add_parser('sync')
     sync_parser.add_argument(
@@ -101,19 +94,19 @@ def main():
 
     if args.command == "config":
         if args.cmd_type == "init":
-            __set_logging(args)
+            __set_logging(args.verbose)
             config_init_handler = InitHandler()
             config_init_handler.init()
 
         elif args.cmd_type == "add":
             if args.account_type == "gphotos":
-                __set_logging(args)
+                __set_logging(args.verbose)
                 config = __build_config_based_on_args(args)
                 config_add_handler = AddGPhotosHandler()
                 config_add_handler.add_gphotos(config)
 
             elif args.account_type == "mongodb":
-                __set_logging(args)
+                __set_logging(args.verbose)
                 config = __build_config_based_on_args(args)
                 config_mongodb_handler = AddMongoDbHandler()
                 config_mongodb_handler.add_mongodb(config)
@@ -123,7 +116,7 @@ def main():
                 exit(-1)
 
         elif args.cmd_type == "reauthorize":
-            __set_logging(args)
+            __set_logging(args.verbose)
             config = __build_config_based_on_args(args)
             reauthorize_handler = ReauthorizeHandler()
             reauthorize_handler.reauthorize(args.account_name, config)
@@ -133,37 +126,31 @@ def main():
             exit(-1)
 
     elif args.command == "add":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         add_handler = AddHandler()
         add_handler.add(args.path, config)
 
     elif args.command == "delete":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         delete_handler = DeleteHandler()
         delete_handler.delete(args.path, config)
 
-    elif args.command == "backup":
-        __set_logging(args)
-        config = __build_config_based_on_args(args)
-        backup_handler = BackupHandler()
-        backup_handler.backup(args.diff_file, config)
-
     elif args.command == 'sync':
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         sync_handler = SyncHandler()
         sync_handler.sync(args.local_dir_path, args.remote_albums_path, config)
 
     elif args.command == "clean":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         clean_handler = CleanHandler()
         clean_handler.clean(config)
 
     elif args.command == "teardown":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         teardown_handler = TeardownHandler()
         teardown_handler.teardown(config)
@@ -185,10 +172,6 @@ def __add_config_argument(parser: argparse.ArgumentParser):
     )
 
 
-def __add_diff_file_argument(parser: argparse.ArgumentParser):
-    parser.add_argument("--diff_file", required=True, help="Path to the diff file")
-
-
 def __add_verbose_argument(parser: argparse.ArgumentParser):
     parser.add_argument(
         "--verbose",
@@ -207,8 +190,8 @@ def __build_config_based_on_args(args: argparse.Namespace) -> Config:
         raise ValueError('Unknown arg type')
 
 
-def __set_logging(args: argparse.Namespace):
-    if args.verbose:
+def __set_logging(isVerbose: bool):
+    if isVerbose:
         logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     else:
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)

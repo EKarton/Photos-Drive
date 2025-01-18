@@ -4,6 +4,7 @@ from collections import deque
 from bson.objectid import ObjectId
 import logging
 
+from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.gphotos.client import GPhotosClientV2
 from ..shared.gphotos.albums import Album as GAlbum
 from ..shared.mongodb.albums import AlbumId
@@ -35,7 +36,6 @@ class CleanupResults:
 
 @dataclass(frozen=True)
 class GPhotosMediaItemKey:
-    '''
     """
     Represents the key of a media item in Google Photos.
     Since Google Photos media items are distributed across different Google Photo
@@ -47,10 +47,6 @@ class GPhotosMediaItemKey:
             under.
         object_id (str): The object ID of the media item in Google Photos
     """
-
-    client_id: ObjectId
-    object_id: str
-    '''
 
     client_id: ObjectId
     object_id: str
@@ -105,6 +101,10 @@ class SystemCleaner:
             [item.id for item in self.__albums_repo.get_all_albums()]
         )
 
+        albums_pruner = AlbumsPruner(
+            self.__config.get_root_album_id(), self.__albums_repo
+        )
+
         root_album_id = self.__config.get_root_album_id()
         album_ids_to_delete.remove(root_album_id)
         albums_queue = deque([root_album_id])
@@ -127,6 +127,10 @@ class SystemCleaner:
             for media_item_id in cur_album.media_item_ids:
                 if media_item_id in media_item_ids_to_delete:
                     media_item_ids_to_delete.remove(media_item_id)
+
+            if len(cur_album.child_album_ids) == 0:
+                if len(cur_album.media_item_ids) == 0:
+                    albums_pruner.prune_album(cur_album.id)
 
         return media_item_ids_to_delete, album_ids_to_delete
 
