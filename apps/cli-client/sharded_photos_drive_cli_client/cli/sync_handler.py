@@ -142,7 +142,11 @@ class SyncHandler:
             mongodb_clients_repo,
             parallelize_uploads,
         )
-        backup_results = backup_service.backup(processed_diffs)
-        logger.debug(f"Backup results: {backup_results}")
-
-        return backup_results
+        try:
+            backup_results = backup_service.backup(processed_diffs)
+            logger.debug(f"Backup results: {backup_results}")
+            return backup_results
+        except BaseException as e:
+            logger.error(f'Backup failed: {e}')
+            print("Run sharded_photos_drive cli clean to fix errors")
+            raise e

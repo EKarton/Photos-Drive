@@ -3,16 +3,8 @@ import time
 from typing import Optional, Dict, cast
 from collections import deque
 import logging
-
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
-    MongoDbClientsRepository,
-)
-
-from ..shared.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
@@ -20,13 +12,14 @@ from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFie
 from ..shared.mongodb.media_items import MediaItem, MediaItemId
 from ..shared.mongodb.media_items_repository import MediaItemsRepository
 from ..shared.mongodb.media_items_repository import CreateMediaItemRequest
+from ..shared.mongodb.clients_repository import MongoDbClientsRepository
+from ..shared.mongodb.clients_repository import MongoDbTransactionsContext
+from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 
 from .processed_diffs import ProcessedDiff
-from .gphotos_uploader import (
-    GPhotosMediaItemParallelUploaderImpl,
-    GPhotosMediaItemUploaderImpl,
-    UploadRequest,
-)
+from .gphotos_uploader import GPhotosMediaItemParallelUploaderImpl
+from .gphotos_uploader import GPhotosMediaItemUploaderImpl
+from .gphotos_uploader import UploadRequest
 from .diffs_assignments import DiffsAssigner
 
 logger = logging.getLogger(__name__)
@@ -109,16 +102,11 @@ class PhotosBackup:
             f"Added diffs to Google Photos: {upload_diff_to_gphotos_media_item_id}"
         )
 
-        # Step 3: Start transaction
-        try:
-            self.__mongodb_clients_repo.start_transactions()
-
-            # Step 4: Add the uploaded photos to the database
-            diff_to_uploaded_media_item: Dict[ProcessedDiff, MediaItem] = {}
-            for (
-                diff,
-                gphotos_media_item_id,
-            ) in upload_diff_to_gphotos_media_item_id.items():
+        # Step 3: Add the new media items to the database
+        new_diff_to_media_item: Dict[ProcessedDiff, MediaItem] = {}
+        with MongoDbTransactionsContext(self.__mongodb_clients_repo):
+            for diff in upload_diff_to_gphotos_media_item_id:
+                gphotos_media_item_id = upload_diff_to_gphotos_media_item_id[diff]
                 gphotos_client_id = diff_assignments[diff]
                 create_media_item_request = CreateMediaItemRequest(
                     file_name=diff.file_name,
@@ -131,23 +119,23 @@ class PhotosBackup:
                 media_item = self.__media_items_repo.create_media_item(
                     create_media_item_request
                 )
-                diff_to_uploaded_media_item[diff] = media_item
-            logger.debug(f"Added diffs to the database: {diff_to_uploaded_media_item}")
+                new_diff_to_media_item[diff] = media_item
 
-            # Step 5: Build a tree of albums with diffs on their edge nodes
-            root_diffs_tree_node = self.__build_diffs_tree(diffs)
-            logger.debug(f"Finished creating initial diff tree: {root_diffs_tree_node}")
+            logger.debug(f"Created media items: {new_diff_to_media_item}")
 
-            # Step 6: Create the missing photo albums in Mongo DB from the diffs tree
-            # and attach the albums from database to the DiffTree
-            total_num_albums_created = self.__attach_albums_to_diff_tree(
-                root_diffs_tree_node
-            )
-            logger.debug(f"Attached albums to diff tree: {root_diffs_tree_node}")
+        # Step 4: Build a tree of albums with diffs on their edge nodes
+        root_diffs_tree_node = self.__build_diffs_tree(diffs)
+        logger.debug(f"Finished creating initial diff tree: {root_diffs_tree_node}")
 
-            # Step 7: Go through the tree
-            total_media_item_ids_to_delete = []
-            total_album_ids_to_prune = []
+        # Step 5: Create the missing photo albums in Mongo DB from the diffs tree
+        # and attach the albums from database to the DiffTree
+        total_num_albums_created = self.__build_missing_albums(root_diffs_tree_node)
+        logger.debug(f"Finished building missing albums: {total_num_albums_created}")
+
+        # Step 6: Go through the tree and modify album's media item ids list
+        total_media_item_ids_to_delete = []
+        total_album_ids_to_prune = []
+        with MongoDbTransactionsContext(self.__mongodb_clients_repo):
             queue = deque([root_diffs_tree_node])
             while len(queue) > 0:
                 cur_diffs_tree_node = queue.popleft()
@@ -156,7 +144,7 @@ class PhotosBackup:
                 add_diffs = cur_diffs_tree_node.modifier_to_diffs.get("+", [])
                 delete_diffs = cur_diffs_tree_node.modifier_to_diffs.get("-", [])
 
-                # Step 7a: Find media items to delete
+                # Step 6a: Find media items to delete
                 file_names_to_delete_set = set(
                     [diff.file_name for diff in delete_diffs]
                 )
@@ -170,20 +158,20 @@ class PhotosBackup:
                             total_media_item_ids_to_delete.append(media_item.id)
                             media_item_ids_to_delete.add(media_item.id)
 
-                # Step 7b: Find the media items to add to the album
+                # Step 6b: Find the media items to add to the album
                 media_item_ids_to_add = []
                 for add_diff in add_diffs:
-                    media_item_id = diff_to_uploaded_media_item[add_diff].id
+                    media_item_id = new_diff_to_media_item[add_diff].id
                     media_item_ids_to_add.append(media_item_id)
 
-                # Step 7c: Get a new list of media item ids for the album
+                # Step 6c: Get a new list of media item ids for the album
                 new_media_item_ids: list[MediaItemId] = []
                 for media_item_id in cur_album.media_item_ids:
                     if media_item_id not in media_item_ids_to_delete:
                         new_media_item_ids.append(media_item_id)
                 new_media_item_ids += media_item_ids_to_add
 
-                # Step 7d: Update the album with the new list of media item ids
+                # Step 6d: Update the album with the new list of media item ids
                 if len(media_item_ids_to_delete) > 0 or len(media_item_ids_to_add) > 0:
                     self.__albums_repo.update_album(
                         cur_album.id,
@@ -198,36 +186,24 @@ class PhotosBackup:
                 for child_diff_tree_node in cur_diffs_tree_node.child_nodes:
                     queue.append(child_diff_tree_node)
 
-            # Step 8: Delete the media items marked for deletion
-            self.__media_items_repo.delete_many_media_items(
-                total_media_item_ids_to_delete
-            )
+        # Step 7: Delete the media items marked for deletion
+        self.__media_items_repo.delete_many_media_items(total_media_item_ids_to_delete)
 
-            # Step 9: Delete albums with no child albums and no media items
-            total_num_albums_deleted = 0
-            for album_id in total_album_ids_to_prune:
+        # Step 8: Delete albums with no child albums and no media items
+        total_num_albums_deleted = 0
+        for album_id in total_album_ids_to_prune:
+            with MongoDbTransactionsContext(self.__mongodb_clients_repo):
                 logger.debug(f"Pruning {album_id}")
                 total_num_albums_deleted += self.__albums_pruner.prune_album(album_id)
 
-            if root_diffs_tree_node is not None:
-                raise ValueError("Hehe")
-
-            # Step 10: Commit transaction
-            self.__mongodb_clients_repo.commit_and_end_transactions()
-
-            # Step 11: Return the results of the backup
-            return BackupResults(
-                num_media_items_added=len(diff_to_uploaded_media_item.keys()),
-                num_media_items_deleted=len(total_media_item_ids_to_delete),
-                num_albums_created=total_num_albums_created,
-                num_albums_deleted=total_num_albums_deleted,
-                total_elapsed_time=time.time() - start_time,
-            )
-        except BaseException as e:
-            logger.error(f"Aborting transaction due to error: {e}")
-            self.__mongodb_clients_repo.abort_and_end_transactions()
-            logger.error("Transaction aborted")
-            raise e
+        # Step 10: Return the results of the backup
+        return BackupResults(
+            num_media_items_added=len(new_diff_to_media_item.keys()),
+            num_media_items_deleted=len(total_media_item_ids_to_delete),
+            num_albums_created=total_num_albums_created,
+            num_albums_deleted=total_num_albums_deleted,
+            total_elapsed_time=time.time() - start_time,
+        )
 
     def __build_diffs_tree(self, diffs: list[ProcessedDiff]) -> DiffsTreeNode:
         """
@@ -265,10 +241,9 @@ class PhotosBackup:
 
         return root_diffs_tree_node
 
-    def __attach_albums_to_diff_tree(self, diff_tree: DiffsTreeNode) -> int:
+    def __build_missing_albums(self, diff_tree: DiffsTreeNode) -> int:
         """
-        Attaches albums from MongoDB to the diff tree
-        If there are any albums missing in MongoDB, it will create it.
+        Creates albums that are missing from the diff tree.
 
         Args:
             diff_tree (DiffsTreeNode): The root of the diff tree.
@@ -288,35 +263,35 @@ class PhotosBackup:
             child_album_name_to_album: Dict[str, Album] = {}
             for child_album_id in cur_album.child_album_ids:
                 child_album = self.__albums_repo.get_album_by_id(child_album_id)
-
                 child_album_name_to_album[cast(str, child_album.name)] = child_album
 
-            created_child_album_ids = []
-            for child_diff_node in cur_diffs_tree_node.child_nodes:
-                if child_diff_node.album_name not in child_album_name_to_album:
-                    new_album = self.__albums_repo.create_album(
-                        album_name=child_diff_node.album_name,
-                        parent_album_id=cur_album.id,
-                        child_album_ids=[],
-                        media_item_ids=[],
+            with MongoDbTransactionsContext(self.__mongodb_clients_repo):
+                created_child_album_ids = []
+                for child_diff_node in cur_diffs_tree_node.child_nodes:
+                    if child_diff_node.album_name not in child_album_name_to_album:
+                        new_album = self.__albums_repo.create_album(
+                            album_name=child_diff_node.album_name,
+                            parent_album_id=cur_album.id,
+                            child_album_ids=[],
+                            media_item_ids=[],
+                        )
+                        num_albums_created += 1
+                        child_album_name_to_album[child_diff_node.album_name] = (
+                            new_album
+                        )
+                        created_child_album_ids.append(new_album.id)
+
+                    child_album = child_album_name_to_album[child_diff_node.album_name]
+                    queue.append((child_diff_node, child_album))
+
+                if len(created_child_album_ids) > 0:
+                    self.__albums_repo.update_album(
+                        album_id=cur_album.id,
+                        updated_album_fields=UpdatedAlbumFields(
+                            new_child_album_ids=cur_album.child_album_ids
+                            + created_child_album_ids
+                        ),
                     )
-                    num_albums_created += 1
-                    child_album_name_to_album[child_diff_node.album_name] = new_album
-                    created_child_album_ids.append(new_album.id)
-
-                child_album = child_album_name_to_album[child_diff_node.album_name]
-                queue.append((child_diff_node, child_album))
-
-            if len(created_child_album_ids) > 0:
-                new_child_album_ids = (
-                    cur_album.child_album_ids + created_child_album_ids
-                )
-                self.__albums_repo.update_album(
-                    album_id=cur_album.id,
-                    updated_album_fields=UpdatedAlbumFields(
-                        new_child_album_ids=new_child_album_ids
-                    ),
-                )
 
         return num_albums_created
 

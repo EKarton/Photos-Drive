@@ -1,4 +1,5 @@
 import logging
+from types import TracebackType
 from typing import Dict
 from pymongo.mongo_client import MongoClient
 from pymongo.client_session import ClientSession
@@ -145,7 +146,6 @@ class MongoDbClientsRepository:
         if not self.__transaction_in_progress:
             raise ValueError("Transaction not in progress")
 
-        self.__transaction_in_progress = True
         for client_id, session in self.__client_id_to_session.items():
             if session.in_transaction:
                 logger.debug(f"Commiting transaction for {client_id}")
@@ -153,6 +153,7 @@ class MongoDbClientsRepository:
             session.end_session()
 
         self.__client_id_to_session.clear()
+        self.__transaction_in_progress = False
 
     def abort_and_end_transactions(self):
         '''
@@ -162,7 +163,6 @@ class MongoDbClientsRepository:
         if not self.__transaction_in_progress:
             raise ValueError("Transaction not in progress")
 
-        self.__transaction_in_progress = True
         for client_id, session in self.__client_id_to_session.items():
             if session.in_transaction:
                 logger.debug(f"Ending transaction for {client_id}")
@@ -170,3 +170,26 @@ class MongoDbClientsRepository:
             session.end_session()
 
         self.__client_id_to_session.clear()
+        self.__transaction_in_progress = False
+
+
+class MongoDbTransactionsContext:
+    def __init__(self, repo: MongoDbClientsRepository):
+        self.__repo = repo
+
+    def __enter__(self):
+        self.__repo.start_transactions()
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ):
+        if exc_type:
+            logger.error(f"Aborting transaction due to error: {exc_value}")
+            self.__repo.abort_and_end_transactions()
+            logger.error("Transaction aborted")
+        else:
+            self.__repo.commit_and_end_transactions()
+            logger.debug("Commited transactions")
