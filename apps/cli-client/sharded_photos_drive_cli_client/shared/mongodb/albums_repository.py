@@ -237,7 +237,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             filter=filter_query, update=set_query, upsert=False
         )
 
-        if result.modified_count != 1:
+        if result.matched_count != 1:
             raise ValueError(f"Unable to update album {album_id}")
 
     def __parse_raw_document_to_album_obj(

@@ -38,6 +38,6 @@ class CleanHandler:
         )
         print(f"Number of albums deleted: {cleanup_results.num_albums_deleted}")
         print(
-            "Number of Google Photos media items trashed: "
+            "Number of Google Photos items trashed: "
             + str(cleanup_results.num_gmedia_items_moved_to_trash)
         )

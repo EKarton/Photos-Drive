@@ -52,9 +52,7 @@ class FolderSyncDiffTests(TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
-        root_album = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
+        root_album = albums_repo.create_album('', None, [], [])
         archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
         photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
         album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
