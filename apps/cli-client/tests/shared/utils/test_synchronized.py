@@ -8,7 +8,7 @@ from sharded_photos_drive_cli_client.shared.utils.synchronized import synchroniz
 class TestSynchronizedDecorator(unittest.TestCase):
     def test_synchronization(self):
         shared_resource = []
-        lock = threading.Lock()
+        lock = threading.RLock()
 
         @synchronized(lock)
         def append_with_delay(item):
@@ -32,8 +32,8 @@ class TestSynchronizedDecorator(unittest.TestCase):
     def test_different_locks(self):
         counter1 = 0
         counter2 = 0
-        lock1 = threading.Lock()
-        lock2 = threading.Lock()
+        lock1 = threading.RLock()
+        lock2 = threading.RLock()
 
         @synchronized(lock1)
         def increment_counter1():

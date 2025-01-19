@@ -38,13 +38,15 @@ class BackupResults:
         num_media_items_deleted (int): The number of media items deleted.
         num_albums_created (int): The number of albums created.
         num_albums_deleted (int): The number of albums deleted.
+        total_elapsed_time (float): The total elapsed time for a backup() to finish,
+            in seconds.
     """
 
     num_media_items_added: int
     num_media_items_deleted: int
     num_albums_created: int
     num_albums_deleted: int
-    total_elapsed_time: int
+    total_elapsed_time: float
 
 
 @dataclass

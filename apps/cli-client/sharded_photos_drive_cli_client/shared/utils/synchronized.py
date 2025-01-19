@@ -3,7 +3,7 @@ import threading
 from typing import Optional
 
 
-def synchronized(lock: Optional[threading.Lock] = None):
+def synchronized(lock: Optional[threading.RLock] = None):
     '''
     Decorates a function so that it runs in sync.
 

@@ -760,21 +760,6 @@ files = [
 ]
 
 [[package]]
-name = "parameterized"
-version = "0.9.0"
-description = "Parameterized testing with any Python test framework"
-optional = false
-python-versions = ">=3.7"
-groups = ["dev"]
-files = [
-    {file = "parameterized-0.9.0-py2.py3-none-any.whl", hash = "sha256:4e0758e3d41bea3bbd05ec14fc2c24736723f243b28d702081aef438c9372b1b"},
-    {file = "parameterized-0.9.0.tar.gz", hash = "sha256:7fc905272cefa4f364c1a3429cbbe9c0f98b793988efb5bf90aac80f08db09b1"},
-]
-
-[package.extras]
-dev = ["jinja2"]
-
-[[package]]
 name = "pathspec"
 version = "0.12.1"
 description = "Utility library for gitignore style pattern matching of file paths."
@@ -1352,6 +1337,18 @@ files = [
 ]
 
 [[package]]
+name = "unittest-parametrize"
+version = "1.6.0"
+description = "Parametrize tests within unittest TestCases."
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "unittest_parametrize-1.6.0-py3-none-any.whl", hash = "sha256:fcbc0023304b08624b38a4762d25b691468d66f61fd5f11672b372ed71eee0e2"},
+    {file = "unittest_parametrize-1.6.0.tar.gz", hash = "sha256:d9d2209a265b61b310ce81c1890f0e3a2282025deae758773f04d5a692cf1a3f"},
+]
+
+[[package]]
 name = "uritemplate"
 version = "4.1.1"
 description = "Implementation of RFC 6570 URI Templates"
@@ -1396,4 +1393,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "f37bf7ebe0d05892362a4d942de86aa3106b2d4b4662cfba277257fb0c9d36bd"
+content-hash = "a879cc5f1730404d689ac0d1b030f1ffb83e6b8ea109d519a243d0ac02648d4b"

@@ -114,7 +114,7 @@ class GPhotosMediaItemParallelUploaderImpl:
 
     def __upload_photo(
         self, request: UploadRequest, index: int
-    ) -> tuple[ObjectId, str]:
+    ) -> tuple[ObjectId, str, int]:
         client = self.__gphotos_client_repo.get_client_by_id(request.gphotos_client_id)
         upload_token = client.media_items().upload_photo_in_chunks(
             request.file_path, request.file_name

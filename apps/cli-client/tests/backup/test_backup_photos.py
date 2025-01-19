@@ -1,6 +1,6 @@
-import unittest
 from bson.objectid import ObjectId
-from parameterized import parameterized_class
+from unittest_parametrize import parametrize
+from unittest_parametrize import ParametrizedTestCase
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.gphotos.testing import (
@@ -28,15 +28,16 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
 
-
-@parameterized_class(
-    [
-        {"use_parallelized_uploads": True},
-        {"use_parallelized_uploads": False},
-    ]
+parametrize_use_parallel_uploads = parametrize(
+    "use_parallel_uploads",
+    [(True,), (False,)],
 )
-class TestPhotosBackup(unittest.TestCase):
-    def test_backup_adding_items_to_new_db(self):
+
+
+class TestPhotosBackup(ParametrizedTestCase):
+
+    @parametrize_use_parallel_uploads
+    def test_backup_adding_items_to_new_db(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
@@ -99,7 +100,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
-            parallelize_uploads=self.use_parallelized_uploads,
+            parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -200,7 +201,8 @@ class TestPhotosBackup(unittest.TestCase):
             f'{mongodb_client_1_id}:{bird_item["_id"]}', album_2009['media_item_ids']
         )
 
-    def test_backup_adding_items_to_existing_albums(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
@@ -277,7 +279,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
-            parallelize_uploads=self.use_parallelized_uploads,
+            parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -319,7 +321,10 @@ class TestPhotosBackup(unittest.TestCase):
             album_2010_raw['media_item_ids'],
         )
 
-    def test_backup_deleted_one_item_on_album_with_two_items(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_deleted_one_item_on_album_with_two_items(
+        self, use_parallel_uploads: bool
+    ):
         # Test setup 1: Set up the essential objects
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
@@ -417,7 +422,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
-            parallelize_uploads=self.use_parallelized_uploads,
+            parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -447,7 +452,8 @@ class TestPhotosBackup(unittest.TestCase):
             album_2010_raw['media_item_ids'],
         )
 
-    def test_backup_pruning_1(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_pruning_1(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
         mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -522,7 +528,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
-            parallelize_uploads=self.use_parallelized_uploads,
+            parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -547,7 +553,8 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(len(albums[0].media_item_ids), 0)
         self.assertEqual(albums[0].parent_album_id, None)
 
-    def test_backup_pruning_2(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_pruning_2(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
         mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -645,7 +652,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
-            parallelize_uploads=self.use_parallelized_uploads,
+            parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -677,7 +684,8 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(albums[1].media_item_ids, [cat_media_item.id])
         self.assertEqual(albums[1].parent_album_id, root_album.id)
 
-    def test_backup_pruning_3(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_pruning_3(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
         mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -778,7 +786,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
-            parallelize_uploads=self.use_parallelized_uploads,
+            parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
 
