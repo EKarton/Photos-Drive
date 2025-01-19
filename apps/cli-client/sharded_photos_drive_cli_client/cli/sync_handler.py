@@ -59,22 +59,11 @@ class SyncHandler:
             config, backup_diffs, parallelize_uploads
         )
         print("Sync complete.")
-        print(
-            "Number of files added to the system:",
-            backup_results.num_media_items_added,
-        )
-        print(
-            "Number of files deleted in the system:",
-            backup_results.num_media_items_deleted,
-        )
-        print(
-            "Number of albums created in the system:",
-            backup_results.num_albums_created,
-        )
-        print(
-            "Number of albums deleted in the system:",
-            backup_results.num_albums_deleted,
-        )
+        print(f"Albums created: {backup_results.num_albums_created}")
+        print(f"Albums deleted: {backup_results.num_albums_deleted}")
+        print(f"Media items created: {backup_results.num_media_items_added}")
+        print(f"Media items deleted: {backup_results.num_media_items_deleted}")
+        print(f"Elapsed time: {backup_results.total_elapsed_time:.6f} seconds")
 
     def __convert_diff_results_to_backup_diffs(
         self, diff_results: DiffResults
@@ -154,11 +143,5 @@ class SyncHandler:
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")
-
-        print(f"Albums created: {backup_results.num_albums_created}")
-        print(f"Albums deleted: {backup_results.num_albums_deleted}")
-        print(f"Media items created: {backup_results.num_media_items_added}")
-        print(f"Media items deleted: {backup_results.num_media_items_deleted}")
-        print(f"Elapsed time: {backup_results.total_elapsed_time:.6f} seconds")
 
         return backup_results
