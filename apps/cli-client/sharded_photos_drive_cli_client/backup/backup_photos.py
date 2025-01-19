@@ -310,11 +310,7 @@ class PhotosBackup:
             for diff, client_id in diff_assignments_items
         ]
         gphotos_media_item_ids = self.__gphotos_uploader.upload_photos(upload_requests)
-        if len(upload_requests) != len(gphotos_media_item_ids):
-            raise ValueError(
-                "Number of upload tokens != upload requests:"
-                + f"{len(upload_requests)} -> {len(gphotos_media_item_ids)}"
-            )
+        assert len(gphotos_media_item_ids) == len(upload_requests)
 
         upload_diff_to_gphotos_media_item_id = {
             item[0]: gphotos_media_item_id

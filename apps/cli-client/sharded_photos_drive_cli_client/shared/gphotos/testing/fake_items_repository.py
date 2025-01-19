@@ -1,12 +1,17 @@
+import threading
 import uuid
 from dacite import from_dict
 from typing import Optional
+
+from sharded_photos_drive_cli_client.shared.utils.synchronized import synchronized
 
 from ..albums import Album
 from ..media_items import UploadedPhotosToGPhotosResult, MediaItem
 
 
 class FakeItemsRepository:
+    _lock = threading.RLock()
+
     def __init__(self):
         self.__album_id_to_album = {}
         self.__album_id_to_media_item_ids = {}
@@ -31,8 +36,9 @@ class FakeItemsRepository:
             for a in filter(is_allowed, self.__album_id_to_album.values())
         ]
 
+    @synchronized(_lock)
     def create_album(self, client_id: str, album_name: str) -> Album:
-        new_album_id = str(uuid.uuid4())
+        new_album_id = self.__get_unique_album_id()
         new_album = {
             "id": new_album_id,
             "title": album_name,
@@ -58,6 +64,7 @@ class FakeItemsRepository:
             },
         )
 
+    @synchronized(_lock)
     def add_photos_to_album(
         self, client_id: str, album_id: str, media_item_ids: list[str]
     ):
@@ -73,6 +80,7 @@ class FakeItemsRepository:
 
             self.__album_id_to_media_item_ids[album_id].add(media_id)
 
+    @synchronized(_lock)
     def remove_photos_from_album(
         self, client_id: str, album_id: str, media_item_ids: list[str]
     ):
@@ -88,12 +96,13 @@ class FakeItemsRepository:
 
             self.__album_id_to_media_item_ids[album_id].remove(media_id)
 
+    @synchronized(_lock)
     def add_uploaded_photos_to_gphotos(
         self, client_id: str, upload_tokens: list[str], album_id: Optional[str] = None
     ) -> UploadedPhotosToGPhotosResult:
         new_media_items_results = []
         for upload_token in upload_tokens:
-            new_media_item_id = str(uuid.uuid4())
+            new_media_item_id = self.__get_unique_media_item_id()
 
             if album_id is not None:
                 if client_id not in self.__album_id_to_accessible_client_ids[album_id]:
@@ -145,8 +154,9 @@ class FakeItemsRepository:
             {"newMediaItemResults": new_media_items_results},
         )
 
+    @synchronized(_lock)
     def upload_photo(self, client_id: str, photo_file_path: str, file_name: str) -> str:
-        upload_token = str(uuid.uuid4())
+        upload_token = self.__get_unique_token()
         self.__upload_tokens_to_file_name[upload_token] = file_name
         return upload_token
 
@@ -177,6 +187,7 @@ class FakeItemsRepository:
             all_media_items = list(self.__media_item_id_to_media_item.values())
             return [from_dict(MediaItem, a) for a in filter(is_valid, all_media_items)]
 
+    @synchronized(_lock)
     def update_album(
         self,
         client_id: str,
@@ -208,3 +219,24 @@ class FakeItemsRepository:
                 "coverPhotoMediaItemId": album_info["coverPhotoMediaItemId"],
             },
         )
+
+    def __get_unique_media_item_id(self):
+        media_item_id = str(uuid.uuid4())
+        while media_item_id in self.__media_item_id_to_media_item:
+            media_item_id = str(uuid.uuid4())
+
+        return media_item_id
+
+    def __get_unique_token(self):
+        token = str(uuid.uuid4())
+        while token in self.__upload_tokens_to_file_name:
+            token = str(uuid.uuid4())
+
+        return token
+
+    def __get_unique_album_id(self):
+        album_id = str(uuid.uuid4())
+        while album_id in self.__album_id_to_album:
+            album_id = str(uuid.uuid4())
+
+        return album_id

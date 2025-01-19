@@ -92,6 +92,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            parallelize_uploads=True,
         )
         backup_results = backup.backup(diffs)
 

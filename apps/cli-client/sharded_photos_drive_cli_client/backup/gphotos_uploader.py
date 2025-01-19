@@ -1,4 +1,3 @@
-from collections import defaultdict
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 import logging
@@ -91,15 +90,19 @@ class GPhotosMediaItemParallelUploaderImpl:
         """
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_to_request = {
-                executor.submit(self.__upload_photo, request): request
-                for request in upload_requests
+                executor.submit(self.__upload_photo, request, index): request
+                for index, request in enumerate(upload_requests)
             }
 
-            upload_tokens_by_client = defaultdict(list)
+            media_item_ids = [''] * len(upload_requests)
             for future in concurrent.futures.as_completed(future_to_request):
                 try:
-                    client_id, upload_token = future.result()
-                    upload_tokens_by_client[client_id].append(upload_token)
+                    client_id, upload_token, index = future.result()
+                    client = self.__gphotos_client_repo.get_client_by_id(client_id)
+                    result = client.media_items().add_uploaded_photos_to_gphotos(
+                        [upload_token]
+                    )
+                    media_item_ids[index] = result.newMediaItemResults[0].mediaItem.id
                 except Exception as exc:
                     request = future_to_request[future]
                     logger.error(
@@ -107,18 +110,13 @@ class GPhotosMediaItemParallelUploaderImpl:
                     )
                     raise exc
 
-        media_item_ids = []
-        for client_id, tokens in upload_tokens_by_client.items():
-            client = self.__gphotos_client_repo.get_client_by_id(client_id)
-            for token in tokens:
-                result = client.media_items().add_uploaded_photos_to_gphotos([token])
-                media_item_ids.append(result.newMediaItemResults[0].mediaItem.id)
+            return media_item_ids
 
-        return media_item_ids
-
-    def __upload_photo(self, request: UploadRequest) -> tuple[ObjectId, str]:
+    def __upload_photo(
+        self, request: UploadRequest, index: int
+    ) -> tuple[ObjectId, str]:
         client = self.__gphotos_client_repo.get_client_by_id(request.gphotos_client_id)
         upload_token = client.media_items().upload_photo_in_chunks(
             request.file_path, request.file_name
         )
-        return (request.gphotos_client_id, upload_token)
+        return (request.gphotos_client_id, upload_token, index)
