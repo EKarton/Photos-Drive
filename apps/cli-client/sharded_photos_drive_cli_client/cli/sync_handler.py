@@ -139,6 +139,7 @@ class SyncHandler:
             albums_repo,
             media_items_repo,
             gphoto_clients_repo,
+            mongodb_clients_repo,
             parallelize_uploads,
         )
         backup_results = backup_service.backup(processed_diffs)

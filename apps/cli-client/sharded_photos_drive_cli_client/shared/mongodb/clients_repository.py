@@ -1,14 +1,21 @@
+import logging
 from typing import Dict
-
 from pymongo.mongo_client import MongoClient
+from pymongo.client_session import ClientSession
+from pymongo.read_concern import ReadConcern
+from pymongo.write_concern import WriteConcern
 from bson.objectid import ObjectId
 
 from ..config.config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class MongoDbClientsRepository:
     def __init__(self):
         self.__id_to_client: Dict[str, MongoClient] = {}
+        self.__client_id_to_session: dict[ObjectId, ClientSession] = {}
+        self.__transaction_in_progress = False
 
     @staticmethod
     def build_from_config(
@@ -41,6 +48,9 @@ class MongoDbClientsRepository:
         Raises:
             ValueError: If ID already exists.
         """
+        if self.__transaction_in_progress:
+            raise ValueError("Transaction is still in progress")
+
         str_id = str(id)
         if str_id in self.__id_to_client:
             raise ValueError(f"Mongo DB Client ID {id} already exists")
@@ -94,3 +104,69 @@ class MongoDbClientsRepository:
             ist[(ObjectId, MongoClient)]: A list of clients with their ids
         """
         return [(ObjectId(id), client) for id, client in self.__id_to_client.items()]
+
+    def start_transactions(self):
+        '''
+        Starts a transaction.
+
+        Database transactions are only saved if commit_and_end_transactions() is called.
+
+        A call to abort_and_end_transactions() will abort and roll back all
+        transactions.
+        '''
+        if self.__transaction_in_progress:
+            raise ValueError("Transaction already in progress")
+
+        self.__transaction_in_progress = True
+        for client_id, client in self.get_all_clients():
+            session = client.start_session()
+            session.start_transaction(
+                ReadConcern(level="snapshot"), WriteConcern(w="majority")
+            )
+            self.__client_id_to_session[client_id] = session
+
+    def get_session_for_client_id(self, client_id: ObjectId) -> ClientSession | None:
+        '''
+        Returns the MongoDB session for a ClientID.
+
+        Args:
+            client_id (ObjectId): The ID of the MongoDB client
+
+        Returns:
+            ClientSession | None: The session if it has already started; else None.
+        '''
+        return self.__client_id_to_session.get(client_id, None)
+
+    def commit_and_end_transactions(self):
+        '''
+        Commits the transactions and ends the session.
+        Note: it must call start_transactions() first before calling this method.
+        '''
+        if not self.__transaction_in_progress:
+            raise ValueError("Transaction not in progress")
+
+        self.__transaction_in_progress = True
+        for client_id, session in self.__client_id_to_session.items():
+            if session.in_transaction:
+                logger.debug(f"Commiting transaction for {client_id}")
+                session.commit_transaction()
+            session.end_session()
+
+        self.__client_id_to_session.clear()
+
+    def abort_and_end_transactions(self):
+        '''
+        Aborts the transactions and ends the session.
+        Note: it must call start_transactions() first before calling this method.
+        '''
+        if not self.__transaction_in_progress:
+            raise ValueError("Transaction not in progress")
+
+        self.__transaction_in_progress = True
+        for client_id, session in self.__client_id_to_session.items():
+            if session.in_transaction:
+                logger.debug(f"Ending transaction for {client_id}")
+                session.abort_transaction()
+            session.end_session()
+
+        self.__client_id_to_session.clear()

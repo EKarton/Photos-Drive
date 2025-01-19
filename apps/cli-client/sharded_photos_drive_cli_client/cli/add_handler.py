@@ -44,7 +44,11 @@ class AddHandler:
 
         # Process the diffs
         backup_service = PhotosBackup(
-            config, albums_repo, media_items_repo, gphoto_clients_repo
+            config,
+            albums_repo,
+            media_items_repo,
+            gphoto_clients_repo,
+            mongodb_clients_repo,
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")
