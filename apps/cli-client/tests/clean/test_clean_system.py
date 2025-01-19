@@ -88,7 +88,11 @@ class SystemCleanerTests(unittest.TestCase):
 
         # Act: clean the system
         cleaner = SystemCleaner(
-            config, albums_repo, media_items_repo, gphotos_clients_repo
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_clients_repo,
+            mongodb_clients_repo,
         )
         clean_results = cleaner.clean()
 
@@ -186,7 +190,11 @@ class SystemCleanerTests(unittest.TestCase):
 
         # Act: clean the system
         cleaner = SystemCleaner(
-            config, albums_repo, media_items_repo, gphotos_clients_repo
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_clients_repo,
+            mongodb_clients_repo,
         )
         clean_results = cleaner.clean()
 
@@ -283,7 +291,11 @@ class SystemCleanerTests(unittest.TestCase):
 
         # Act: clean the system
         cleaner = SystemCleaner(
-            config, albums_repo, media_items_repo, gphotos_clients_repo
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_clients_repo,
+            mongodb_clients_repo,
         )
         clean_results = cleaner.clean()
 
@@ -352,7 +364,11 @@ class SystemCleanerTests(unittest.TestCase):
 
         # Act: clean the system
         cleaner = SystemCleaner(
-            config, albums_repo, media_items_repo, gphotos_clients_repo
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_clients_repo,
+            mongodb_clients_repo,
         )
         clean_results = cleaner.clean()
 

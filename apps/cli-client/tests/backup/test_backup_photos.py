@@ -100,6 +100,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
@@ -279,6 +280,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
@@ -422,6 +424,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
@@ -528,6 +531,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
@@ -652,6 +656,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)
@@ -786,6 +791,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
         )
         backup_results = backup.backup(diffs)

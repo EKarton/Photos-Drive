@@ -20,4 +20,13 @@ def create_mock_mongo_client(
         return_value={"totalFreeStorageSize": total_free_storage_size}
     )
 
+    mock_session = Mock()
+    mock_session.__bool__ = Mock(return_value=False)
+    mock_session.start_transaction = Mock()
+    mock_session.commit_transaction = Mock()
+    mock_session.abort_transaction = Mock()
+    mock_session.end_session = Mock()
+
+    mock_client.start_session = Mock(return_value=mock_session)  # type: ignore
+
     return mock_client
