@@ -5,11 +5,7 @@
 
 name: Publish CLI Client to PyPi
 on:
-  push:
-    branches: [main, add-package-to-pypi]
-    paths:
-      - "apps/cli-client/**"
-      - ".github/workflows/publish-cli-client.yaml"
+  workflow_dispatch:
 
 jobs:
   publish:
