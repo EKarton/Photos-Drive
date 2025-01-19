@@ -148,5 +148,5 @@ class SyncHandler:
             return backup_results
         except BaseException as e:
             logger.error(f'Backup failed: {e}')
-            print("Run sharded_photos_drive cli clean to fix errors")
+            print("Run sharded_photos_drive clean to fix errors")
             raise e

@@ -28,7 +28,19 @@ This project is the cli client of Sharded Photos Drive.
    poetry run coverage run -m pytest && poetry run coverage report -m
    ```
 
-5. To publish your app:
+5. To run tests and code coverage, run:
+
+   ```bash
+   poetry run coverage run -m pytest <insert-file-path> && poetry run coverage report -m
+   ```
+
+   For example,
+
+   ```bash
+   poetry run coverage run -m pytest tests/backup/test_backup_photos.py && poetry run coverage report -m
+   ```
+
+6. To publish your app:
 
    1. First, set your PyPI api token to Poetry
 

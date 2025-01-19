@@ -42,7 +42,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-cli = "sharded_photos_drive_cli_client.cli.main:main"
+sharded_photos_drive_cli = "sharded_photos_drive_cli_client.cli.main:main"
 
 [[tool.mypy.overrides]]
 module = "google_auth_oauthlib.*"

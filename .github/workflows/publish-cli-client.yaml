@@ -1,0 +1,34 @@
+##################################################################
+# A Github action used to publish cli client to PyPI
+# More info at https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
+##################################################################
+
+name: Publish CLI Client to PyPi
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Build and package app
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@main
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "2.0.0"
+
+      - name: Publish to PyPI
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          cd ./apps/cli-client
+          poetry config pypi-token.pypi $PYPI_TOKEN
+          poetry publish --build
