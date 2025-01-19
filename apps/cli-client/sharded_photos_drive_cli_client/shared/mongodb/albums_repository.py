@@ -2,7 +2,6 @@ import logging
 from dataclasses import dataclass
 from typing import Optional, Mapping, cast, Any, Dict
 from abc import ABC, abstractmethod
-
 from bson.objectid import ObjectId
 
 from .albums import Album, AlbumId
@@ -121,9 +120,14 @@ class AlbumsRepositoryImpl(AlbumsRepository):
 
     def get_album_by_id(self, id: AlbumId) -> Album:
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            id.client_id
+        )
         raw_item = cast(
             dict,
-            client["sharded_google_photos"]["albums"].find_one({"_id": id.object_id}),
+            client["sharded_google_photos"]["albums"].find_one(
+                {"_id": id.object_id}, session=session
+            ),
         )
 
         if raw_item is None:
@@ -134,7 +138,12 @@ class AlbumsRepositoryImpl(AlbumsRepository):
     def get_all_albums(self) -> list[Album]:
         albums: list[Album] = []
         for client_id, client in self._mongodb_clients_repository.get_all_clients():
-            for doc in client["sharded_google_photos"]["albums"].find({}):
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            for doc in client["sharded_google_photos"]["albums"].find(
+                filter={}, session=session
+            ):
                 raw_item = cast(dict, doc)
                 album = self.__parse_raw_document_to_album_obj(client_id, raw_item)
                 albums.append(album)
@@ -150,10 +159,12 @@ class AlbumsRepositoryImpl(AlbumsRepository):
     ) -> Album:
         client_id = self._mongodb_clients_repository.find_id_of_client_with_most_space()
         client = self._mongodb_clients_repository.get_client_by_id(client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            client_id,
+        )
 
-        collection = client["sharded_google_photos"]["albums"]
-        result = collection.insert_one(
-            {
+        result = client["sharded_google_photos"]["albums"].insert_one(
+            document={
                 "name": album_name,
                 "parent_album_id": (
                     f"{parent_album_id.client_id}:{parent_album_id.object_id}"
@@ -166,7 +177,8 @@ class AlbumsRepositoryImpl(AlbumsRepository):
                 "media_item_ids": [
                     f"{m_id.client_id}/{m_id.object_id}" for m_id in media_item_ids
                 ],
-            }
+            },
+            session=session,
         )
 
         return Album(
@@ -179,8 +191,12 @@ class AlbumsRepositoryImpl(AlbumsRepository):
 
     def delete_album(self, id: AlbumId):
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            id.client_id,
+        )
         result = client["sharded_google_photos"]["albums"].delete_one(
-            {"_id": id.object_id}
+            filter={"_id": id.object_id},
+            session=session,
         )
 
         if result.deleted_count != 1:
@@ -196,8 +212,12 @@ class AlbumsRepositoryImpl(AlbumsRepository):
 
         for client_id, object_ids in client_id_to_object_ids.items():
             client = self._mongodb_clients_repository.get_client_by_id(client_id)
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
             result = client["sharded_google_photos"]["albums"].delete_many(
-                {"_id": {"$in": object_ids}}
+                filter={"_id": {"$in": object_ids}},
+                session=session,
             )
 
             if result.deleted_count != len(object_ids):
@@ -233,8 +253,11 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         logger.debug(f"Updating {album_id} with new fields: {set_query}")
 
         client = self._mongodb_clients_repository.get_client_by_id(album_id.client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            album_id.client_id,
+        )
         result = client["sharded_google_photos"]["albums"].update_one(
-            filter=filter_query, update=set_query, upsert=False
+            filter=filter_query, update=set_query, upsert=False, session=session
         )
 
         if result.matched_count != 1:

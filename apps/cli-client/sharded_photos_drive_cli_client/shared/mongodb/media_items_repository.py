@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, cast, Mapping
 from abc import ABC, abstractmethod
-
 from bson.objectid import ObjectId
 
 from .media_items import MediaItemId, MediaItem, GpsLocation
@@ -109,10 +108,13 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
 
     def get_media_item_by_id(self, id: MediaItemId) -> MediaItem:
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            id.client_id,
+        )
         raw_item = cast(
             dict,
             client["sharded_google_photos"]["media_items"].find_one(
-                {"_id": id.object_id}
+                filter={"_id": id.object_id}, session=session
             ),
         )
         if raw_item is None:
@@ -124,7 +126,12 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         media_items: list[MediaItem] = []
 
         for client_id, client in self._mongodb_clients_repository.get_all_clients():
-            for doc in client["sharded_google_photos"]["media_items"].find({}):
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            for doc in client["sharded_google_photos"]["media_items"].find(
+                filter={}, session=session
+            ):
                 raw_item = cast(dict, doc)
                 media_item = self.__parse_raw_document_to_media_item_obj(
                     client_id, raw_item
@@ -134,14 +141,12 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         return media_items
 
     def create_media_item(self, request: CreateMediaItemRequest) -> MediaItem:
-        mongodb_client_id = (
-            self._mongodb_clients_repository.find_id_of_client_with_most_space()
-        )
-        mongodb_client = self._mongodb_clients_repository.get_client_by_id(
-            mongodb_client_id
+        client_id = self._mongodb_clients_repository.find_id_of_client_with_most_space()
+        client = self._mongodb_clients_repository.get_client_by_id(client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            client_id,
         )
 
-        collection = mongodb_client["sharded_google_photos"]["media_items"]
         data_object: Any = {
             "file_name": request.file_name,
             "hash_code": request.hash_code,
@@ -154,12 +159,12 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 "coordinates": [request.location.longitude, request.location.latitude],
             }
 
-        insert_result = collection.insert_one(data_object)
+        insert_result = client["sharded_google_photos"]["media_items"].insert_one(
+            document=data_object, session=session
+        )
 
         return MediaItem(
-            id=MediaItemId(
-                client_id=mongodb_client_id, object_id=insert_result.inserted_id
-            ),
+            id=MediaItemId(client_id=client_id, object_id=insert_result.inserted_id),
             file_name=request.file_name,
             hash_code=request.hash_code,
             location=request.location,
@@ -169,8 +174,11 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
 
     def delete_media_item(self, id: MediaItemId):
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            id.client_id
+        )
         result = client["sharded_google_photos"]["media_items"].delete_one(
-            {"_id": id.object_id}
+            {"_id": id.object_id}, session=session
         )
 
         if result.deleted_count != 1:
@@ -186,8 +194,11 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
 
         for client_id, object_ids in client_id_to_object_ids.items():
             client = self._mongodb_clients_repository.get_client_by_id(client_id)
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id
+            )
             result = client["sharded_google_photos"]["media_items"].delete_many(
-                {"_id": {"$in": object_ids}}
+                filter={"_id": {"$in": object_ids}}, session=session
             )
 
             if result.deleted_count != len(object_ids):

@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import Mock
 from bson.objectid import ObjectId
 
 from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
@@ -19,20 +18,19 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
     def setUp(self):
-        self.mock_clients_repo = Mock(spec=MongoDbClientsRepository)
-        self.mock_client = create_mock_mongo_client()
-        self.mock_clients_repo.get_client_by_id.return_value = self.mock_client
-        self.mock_clients_repo.find_id_of_client_with_most_space.return_value = (
-            ObjectId()
+        self.mongodb_client_id = ObjectId()
+        self.mongodb_client = create_mock_mongo_client()
+        self.mongodb_clients_repo = MongoDbClientsRepository()
+        self.mongodb_clients_repo.add_mongodb_client(
+            self.mongodb_client_id, self.mongodb_client
         )
-
-        self.repo = MediaItemsRepositoryImpl(self.mock_clients_repo)
+        self.repo = MediaItemsRepositoryImpl(self.mongodb_clients_repo)
 
     def test_get_media_item_by_id(self):
-        media_item_id = MediaItemId(ObjectId(), ObjectId())
+        media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
 
         # Insert a mock media item into the mock database
-        self.mock_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
             {
                 "_id": media_item_id.object_id,
                 "file_name": "test_image.jpg",
@@ -55,7 +53,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.gphotos_media_item_id, "gphotos_123")
 
     def test_get_media_item_by_id_not_found(self):
-        media_item_id = MediaItemId(ObjectId(), ObjectId())
+        media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
 
         with self.assertRaisesRegex(ValueError, "Media item .* does not exist!"):
             self.repo.get_media_item_by_id(media_item_id)
@@ -73,6 +71,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         media_item = self.repo.create_media_item(request)
 
         # Assert that the media item was created correctly
+        self.assertEqual(media_item.id.client_id, self.mongodb_client_id)
         self.assertEqual(media_item.file_name, "new_image.jpg")
         self.assertEqual(media_item.hash_code, "hashcode123")
         self.assertIsNotNone(media_item.location)
@@ -84,8 +83,8 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
     def test_delete_media_item(self):
         # Insert a mock media item into the mock database
-        media_item_id = MediaItemId(ObjectId(), ObjectId())
-        self.mock_client["sharded_google_photos"]["media_items"].insert_one(
+        media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
             {
                 "_id": media_item_id.object_id,
                 "file_name": "to_delete.jpg",
@@ -99,13 +98,13 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.repo.delete_media_item(media_item_id)
 
         # Assert that the media item has been deleted
-        deleted_media = self.mock_client["sharded_google_photos"][
+        deleted_media = self.mongodb_client["sharded_google_photos"][
             "media_items"
         ].find_one({"_id": media_item_id.object_id})
         self.assertIsNone(deleted_media)
 
     def test_delete_media_item_not_found(self):
-        media_item_id = MediaItemId(ObjectId(), ObjectId())
+        media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
 
         with self.assertRaisesRegex(
             ValueError, "Unable to delete media item: .* not found"
@@ -114,13 +113,13 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
     def test_delete_many_media_items(self):
         ids_to_delete = [
-            MediaItemId(ObjectId(), ObjectId()),
-            MediaItemId(ObjectId(), ObjectId()),
+            MediaItemId(self.mongodb_client_id, ObjectId()),
+            MediaItemId(self.mongodb_client_id, ObjectId()),
         ]
 
         # Insert mock media items into the mock database
         for mid in ids_to_delete:
-            self.mock_client["sharded_google_photos"]["media_items"].insert_one(
+            self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
                 {
                     "_id": mid.object_id,
                     "file_name": f"delete_me_{mid.object_id}.jpg",
@@ -135,21 +134,21 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         # Assert that all items have been deleted
         for mid in ids_to_delete:
-            deleted_media = self.mock_client["sharded_google_photos"][
+            deleted_media = self.mongodb_client["sharded_google_photos"][
                 "media_items"
             ].find_one({"_id": mid.object_id})
             self.assertIsNone(deleted_media)
 
     def test_delete_many_media_items_partial_failure(self):
         ids_to_delete = [
-            MediaItemId(ObjectId(), ObjectId()),
-            MediaItemId(ObjectId(), ObjectId()),
+            MediaItemId(self.mongodb_client_id, ObjectId()),
+            MediaItemId(self.mongodb_client_id, ObjectId()),
         ]
 
         # Insert one mock item into the database but not the other
         existing_mid = ids_to_delete[0]
 
-        self.mock_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
             {
                 "_id": existing_mid.object_id,
                 "file_name": f"existing_{existing_mid.object_id}.jpg",

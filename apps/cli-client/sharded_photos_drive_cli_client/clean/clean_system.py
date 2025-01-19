@@ -4,6 +4,11 @@ from collections import deque
 from bson.objectid import ObjectId
 import logging
 
+from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+    MongoDbClientsRepository,
+    MongoDbTransactionsContext,
+)
+
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.gphotos.client import GPhotosClientV2
 from ..shared.gphotos.albums import Album as GAlbum
@@ -61,11 +66,13 @@ class SystemCleaner:
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
         gphotos_clients_repo: GPhotosClientsRepository,
+        mongodb_clients_repo: MongoDbClientsRepository,
     ):
         self.__config = config
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
         self.__gphotos_clients_repo = gphotos_clients_repo
+        self.__mongodb_clients_repo = mongodb_clients_repo
 
     def clean(self) -> CleanupResults:
         # Step 1: Prune all the leaf albums in the tree
@@ -85,11 +92,11 @@ class SystemCleaner:
             gmedia_item_keys
         )
 
-        # Step 6: Delete the media items that were marked to be deleted
-        self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
-
-        # Step 7: Delete the albums that were marked to be deleted
+        # Step 6: Delete the albums that were marked to be deleted
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
+
+        # Step 7: Delete the media items that were marked to be deleted
+        self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
 
         # Step 8: Move all the gmedia items marked for trash to a folder called Trash
         self.__move_gmedia_items_to_trash(list(gmedia_item_keys_to_trash))
@@ -118,7 +125,8 @@ class SystemCleaner:
         total_albums_pruned = 0
         pruner = AlbumsPruner(root_album_id, self.__albums_repo)
         for album_id in empty_leaf_album_ids:
-            total_albums_pruned += pruner.prune_album(album_id)
+            with MongoDbTransactionsContext(self.__mongodb_clients_repo):
+                total_albums_pruned += pruner.prune_album(album_id)
 
         return total_albums_pruned
 

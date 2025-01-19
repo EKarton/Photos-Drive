@@ -28,7 +28,11 @@ class CleanHandler:
 
         # Clean up
         cleaner = SystemCleaner(
-            config, albums_repo, media_items_repo, gphoto_clients_repo
+            config,
+            albums_repo,
+            media_items_repo,
+            gphoto_clients_repo,
+            mongodb_clients_repo,
         )
         cleanup_results = cleaner.clean()
 
