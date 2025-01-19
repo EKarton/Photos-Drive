@@ -96,19 +96,12 @@ class GPhotosMediaItemParallelUploaderImpl:
 
             media_item_ids = [''] * len(upload_requests)
             for future in concurrent.futures.as_completed(future_to_request):
-                try:
-                    client_id, upload_token, index = future.result()
-                    client = self.__gphotos_client_repo.get_client_by_id(client_id)
-                    result = client.media_items().add_uploaded_photos_to_gphotos(
-                        [upload_token]
-                    )
-                    media_item_ids[index] = result.newMediaItemResults[0].mediaItem.id
-                except Exception as exc:
-                    request = future_to_request[future]
-                    logger.error(
-                        f'Upload for {request.file_name} generated an exception: {exc}'
-                    )
-                    raise exc
+                client_id, upload_token, index = future.result()
+                client = self.__gphotos_client_repo.get_client_by_id(client_id)
+                result = client.media_items().add_uploaded_photos_to_gphotos(
+                    [upload_token]
+                )
+                media_item_ids[index] = result.newMediaItemResults[0].mediaItem.id
 
             return media_item_ids
 
