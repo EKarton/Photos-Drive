@@ -49,9 +49,7 @@ class TestPhotosBackup(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the root album
-        root_album_obj = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
+        root_album_obj = albums_repo.create_album('', None, [], [])
         config.set_root_album_id(root_album_obj.id)
 
         # Act: Upload a set of processed diffs
@@ -214,39 +212,22 @@ class TestPhotosBackup(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album_obj = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album_obj = albums_repo.create_album(
-            album_name='Archives',
-            parent_album_id=root_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        photos_album_obj = albums_repo.create_album(
-            album_name='Photos',
-            parent_album_id=archives_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        album_2010_obj = albums_repo.create_album(
-            album_name='2010',
-            parent_album_id=photos_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        config.set_root_album_id(root_album_obj.id)
+        root_album = albums_repo.create_album('', None, [], [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
-            root_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album_obj.id]),
+            root_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
         )
         albums_repo.update_album(
-            archives_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+            archives_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album.id]),
         )
         albums_repo.update_album(
-            photos_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+            photos_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
         # Test setup 4: Add dog.png to Archives/Photos/2010
@@ -268,7 +249,7 @@ class TestPhotosBackup(unittest.TestCase):
             )
         )
         albums_repo.update_album(
-            album_2010_obj.id,
+            album_2010.id,
             UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
@@ -318,13 +299,15 @@ class TestPhotosBackup(unittest.TestCase):
 
         # Test assert: Check that cat.png media item is attached to the 2010 album in
         # db, and dog.png is still kept
-        album_2010 = next(filter(lambda x: x['name'] == '2010', albums_1))
-        self.assertEqual(len(album_2010['media_item_ids']), 2)
+        album_2010_raw = next(filter(lambda x: x['name'] == '2010', albums_1))
+        self.assertEqual(len(album_2010_raw['media_item_ids']), 2)
         self.assertIn(
-            f'{mongodb_client_1_id}:{dog_mitem['_id']}', album_2010['media_item_ids']
+            f'{mongodb_client_1_id}:{dog_mitem['_id']}',
+            album_2010_raw['media_item_ids'],
         )
         self.assertIn(
-            f'{mongodb_client_1_id}:{cat_mitem['_id']}', album_2010['media_item_ids']
+            f'{mongodb_client_1_id}:{cat_mitem['_id']}',
+            album_2010_raw['media_item_ids'],
         )
 
     def test_backup_deleted_one_item_on_album_with_two_items(self):
@@ -347,39 +330,22 @@ class TestPhotosBackup(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album_obj = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album_obj = albums_repo.create_album(
-            album_name='Archives',
-            parent_album_id=root_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        photos_album_obj = albums_repo.create_album(
-            album_name='Photos',
-            parent_album_id=archives_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        album_2010_obj = albums_repo.create_album(
-            album_name='2010',
-            parent_album_id=photos_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        config.set_root_album_id(root_album_obj.id)
+        root_album = albums_repo.create_album('', None, [], [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
-            root_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album_obj.id]),
+            root_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
         )
         albums_repo.update_album(
-            archives_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+            archives_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album.id]),
         )
         albums_repo.update_album(
-            photos_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+            photos_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
         # Test setup 4: Add dog.png and cat.png to Archives/Photos/2010
@@ -422,7 +388,7 @@ class TestPhotosBackup(unittest.TestCase):
             )
         )
         albums_repo.update_album(
-            album_2010_obj.id,
+            album_2010.id,
             UpdatedAlbumFields(new_media_item_ids=[dog_mitem_obj.id, cat_mitem_obj.id]),
         )
 
@@ -464,10 +430,11 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(len(albums_1), 4)
 
         # Test assert: Check that cat.png is removed from album and dog.png is kept
-        album_2010 = next(filter(lambda x: x['name'] == '2010', albums_1))
-        self.assertEqual(len(album_2010['media_item_ids']), 1)
+        album_2010_raw = next(filter(lambda x: x['name'] == '2010', albums_1))
+        self.assertEqual(len(album_2010_raw['media_item_ids']), 1)
         self.assertIn(
-            f'{mongodb_client_1_id}:{dog_mitem['_id']}', album_2010['media_item_ids']
+            f'{mongodb_client_1_id}:{dog_mitem['_id']}',
+            album_2010_raw['media_item_ids'],
         )
 
     def test_backup_pruning_1(self):
@@ -486,39 +453,22 @@ class TestPhotosBackup(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album_obj = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album_obj = albums_repo.create_album(
-            album_name='Archives',
-            parent_album_id=root_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        photos_album_obj = albums_repo.create_album(
-            album_name='Photos',
-            parent_album_id=archives_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        album_2010_obj = albums_repo.create_album(
-            album_name='2010',
-            parent_album_id=photos_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        config.set_root_album_id(root_album_obj.id)
+        root_album = albums_repo.create_album('', None, [], [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
-            root_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album_obj.id]),
+            root_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
         )
         albums_repo.update_album(
-            archives_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+            archives_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album.id]),
         )
         albums_repo.update_album(
-            photos_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+            photos_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
         # Test setup 4: Add dog.png to Archives/Photos/2010
@@ -542,7 +492,7 @@ class TestPhotosBackup(unittest.TestCase):
             )
         )
         albums_repo.update_album(
-            album_2010_obj.id,
+            album_2010.id,
             UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
@@ -581,7 +531,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(len(albums), 1)
 
         # Test assert: Check that root albums is updated correctly
-        self.assertEqual(albums[0].id, root_album_obj.id)
+        self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(len(albums[0].child_album_ids), 0)
         self.assertEqual(len(albums[0].media_item_ids), 0)
         self.assertEqual(albums[0].parent_album_id, None)
@@ -602,39 +552,22 @@ class TestPhotosBackup(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album_obj = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album_obj = albums_repo.create_album(
-            album_name='Archives',
-            parent_album_id=root_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        photos_album_obj = albums_repo.create_album(
-            album_name='Photos',
-            parent_album_id=archives_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        album_2010_obj = albums_repo.create_album(
-            album_name='2010',
-            parent_album_id=photos_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        config.set_root_album_id(root_album_obj.id)
+        root_album = albums_repo.create_album('', None, [], [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
-            root_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album_obj.id]),
+            root_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
         )
         albums_repo.update_album(
-            archives_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+            archives_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album.id]),
         )
         albums_repo.update_album(
-            photos_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+            photos_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
         # Test setup 4: Add dog.png to Archives/Photos/2010 and cat.png to Archives/
@@ -644,45 +577,45 @@ class TestPhotosBackup(unittest.TestCase):
         cat_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/cat.png', 'cat.png'
         )
-        media_items_results_1 = (
+        dog_media_items_results = (
             gphotos_client.media_items().add_uploaded_photos_to_gphotos(
                 [dog_upload_token]
             )
         )
-        media_items_results_2 = (
+        cat_media_items_results = (
             gphotos_client.media_items().add_uploaded_photos_to_gphotos(
                 [cat_upload_token]
             )
         )
-        dog_media_item_obj = media_items_repo.create_media_item(
+        dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=media_items_results_1.newMediaItemResults[
+                gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
             )
         )
-        cat_media_item_obj = media_items_repo.create_media_item(
+        cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 hash_code=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=media_items_results_2.newMediaItemResults[
+                gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
             )
         )
         albums_repo.update_album(
-            album_2010_obj.id,
-            UpdatedAlbumFields(new_media_item_ids=[dog_media_item_obj.id]),
+            album_2010.id,
+            UpdatedAlbumFields(new_media_item_ids=[dog_media_item.id]),
         )
         albums_repo.update_album(
-            archives_album_obj.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
+            archives_album.id,
+            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
         )
 
         # Act: Upload a set of processed diffs
@@ -721,16 +654,16 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(len(albums), 2)
 
         # Test assert: Check that root album is updated correctly
-        self.assertEqual(albums[0].id, root_album_obj.id)
+        self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(albums[0].child_album_ids, [albums[1].id])
         self.assertEqual(albums[0].media_item_ids, [])
         self.assertEqual(albums[0].parent_album_id, None)
 
         # Test assert: Check that archives album is updated correctly
-        self.assertEqual(albums[1].id, archives_album_obj.id)
+        self.assertEqual(albums[1].id, archives_album.id)
         self.assertEqual(albums[1].child_album_ids, [])
-        self.assertEqual(albums[1].media_item_ids, [cat_media_item_obj.id])
-        self.assertEqual(albums[1].parent_album_id, root_album_obj.id)
+        self.assertEqual(albums[1].media_item_ids, [cat_media_item.id])
+        self.assertEqual(albums[1].parent_album_id, root_album.id)
 
     def test_backup_pruning_3(self):
         # Test setup 1: Build the config
@@ -748,47 +681,25 @@ class TestPhotosBackup(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album_obj = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        public_album_obj = albums_repo.create_album(
-            album_name='Public',
-            parent_album_id=root_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        archives_album_obj = albums_repo.create_album(
-            album_name='Archives',
-            parent_album_id=root_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        photos_album_obj = albums_repo.create_album(
-            album_name='Photos',
-            parent_album_id=archives_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        album_2010_obj = albums_repo.create_album(
-            album_name='2010',
-            parent_album_id=photos_album_obj.id,
-            child_album_ids=[],
-            media_item_ids=[],
-        )
-        config.set_root_album_id(root_album_obj.id)
+        root_album = albums_repo.create_album('', None, [], [])
+        public_album = albums_repo.create_album('Public', root_album.id, [], [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
-            root_album_obj.id,
+            root_album.id,
             UpdatedAlbumFields(
-                new_child_album_ids=[archives_album_obj.id, public_album_obj.id]
+                new_child_album_ids=[archives_album.id, public_album.id]
             ),
         )
         albums_repo.update_album(
-            archives_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[photos_album_obj.id]),
+            archives_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[photos_album.id]),
         )
         albums_repo.update_album(
-            photos_album_obj.id,
-            UpdatedAlbumFields(new_child_album_ids=[album_2010_obj.id]),
+            photos_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
         # Test setup 4: Add dog.png to Archives/Photos/2010 and cat.png to Public/
@@ -831,11 +742,11 @@ class TestPhotosBackup(unittest.TestCase):
             )
         )
         albums_repo.update_album(
-            album_2010_obj.id,
+            album_2010.id,
             UpdatedAlbumFields(new_media_item_ids=[dog_media_item_obj.id]),
         )
         albums_repo.update_album(
-            public_album_obj.id,
+            public_album.id,
             UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
         )
 
@@ -875,13 +786,13 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(len(albums), 2)
 
         # Test assert: Check that root album is updated correctly
-        self.assertEqual(albums[0].id, root_album_obj.id)
+        self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(albums[0].child_album_ids, [albums[1].id])
         self.assertEqual(albums[0].media_item_ids, [])
         self.assertEqual(albums[0].parent_album_id, None)
 
         # Test assert: Check that archives album is updated correctly
-        self.assertEqual(albums[1].id, public_album_obj.id)
+        self.assertEqual(albums[1].id, public_album.id)
         self.assertEqual(albums[1].child_album_ids, [])
         self.assertEqual(albums[1].media_item_ids, [cat_media_item_obj.id])
-        self.assertEqual(albums[1].parent_album_id, root_album_obj.id)
+        self.assertEqual(albums[1].parent_album_id, root_album.id)

@@ -100,19 +100,19 @@ def main():
 
     if args.command == "config":
         if args.cmd_type == "init":
-            __set_logging(args)
+            __set_logging(args.verbose)
             config_init_handler = InitHandler()
             config_init_handler.init()
 
         elif args.cmd_type == "add":
             if args.account_type == "gphotos":
-                __set_logging(args)
+                __set_logging(args.verbose)
                 config = __build_config_based_on_args(args)
                 config_add_handler = AddGPhotosHandler()
                 config_add_handler.add_gphotos(config)
 
             elif args.account_type == "mongodb":
-                __set_logging(args)
+                __set_logging(args.verbose)
                 config = __build_config_based_on_args(args)
                 config_mongodb_handler = AddMongoDbHandler()
                 config_mongodb_handler.add_mongodb(config)
@@ -122,7 +122,7 @@ def main():
                 exit(-1)
 
         elif args.cmd_type == "reauthorize":
-            __set_logging(args)
+            __set_logging(args.verbose)
             config = __build_config_based_on_args(args)
             reauthorize_handler = ReauthorizeHandler()
             reauthorize_handler.reauthorize(args.account_name, config)
@@ -132,19 +132,19 @@ def main():
             exit(-1)
 
     elif args.command == "add":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         add_handler = AddHandler()
         add_handler.add(args.path, config)
 
     elif args.command == "delete":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         delete_handler = DeleteHandler()
         delete_handler.delete(args.path, config)
 
     elif args.command == 'sync':
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         sync_handler = SyncHandler()
         sync_handler.sync(
@@ -155,13 +155,13 @@ def main():
         )
 
     elif args.command == "clean":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         clean_handler = CleanHandler()
         clean_handler.clean(config)
 
     elif args.command == "teardown":
-        __set_logging(args)
+        __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         teardown_handler = TeardownHandler()
         teardown_handler.teardown(config)
@@ -201,8 +201,8 @@ def __build_config_based_on_args(args: argparse.Namespace) -> Config:
         raise ValueError('Unknown arg type')
 
 
-def __set_logging(args: argparse.Namespace):
-    if args.verbose:
+def __set_logging(isVerbose: bool):
+    if isVerbose:
         logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     else:
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
