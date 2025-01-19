@@ -1,5 +1,6 @@
 import unittest
 from bson.objectid import ObjectId
+from parameterized import parameterized_class
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.gphotos.testing import (
@@ -28,6 +29,12 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
 )
 
 
+@parameterized_class(
+    [
+        {"use_parallelized_uploads": True},
+        {"use_parallelized_uploads": False},
+    ]
+)
 class TestPhotosBackup(unittest.TestCase):
     def test_backup_adding_items_to_new_db(self):
         # Test setup 1: Set up the config
@@ -92,7 +99,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
-            parallelize_uploads=True,
+            parallelize_uploads=self.use_parallelized_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -270,6 +277,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            parallelize_uploads=self.use_parallelized_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -409,6 +417,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            parallelize_uploads=self.use_parallelized_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -513,6 +522,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            parallelize_uploads=self.use_parallelized_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -635,6 +645,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            parallelize_uploads=self.use_parallelized_uploads,
         )
         backup_results = backup.backup(diffs)
 
@@ -767,6 +778,7 @@ class TestPhotosBackup(unittest.TestCase):
             albums_repo,
             media_items_repo,
             gphotos_client_repo,
+            parallelize_uploads=self.use_parallelized_uploads,
         )
         backup_results = backup.backup(diffs)
 
