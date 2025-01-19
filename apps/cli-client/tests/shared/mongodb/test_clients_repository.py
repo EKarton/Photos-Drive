@@ -1,3 +1,4 @@
+from typing import cast
 import unittest
 from unittest.mock import Mock
 from bson.objectid import ObjectId
@@ -144,8 +145,8 @@ class TestMongoDbClientsRepository(unittest.TestCase):
 
         repo.commit_and_end_transactions()
 
-        client_1_session = client_1.start_session.return_value
-        client_2_session = client_1.start_session.return_value
+        client_1_session = cast(Mock, client_1.start_session).return_value
+        client_2_session = cast(Mock, client_1.start_session).return_value
         self.assertTrue(client_1_session.commit_transaction.call_count == 1)
         self.assertTrue(client_2_session.commit_transaction.call_count == 1)
         self.assertTrue(client_1_session.end_session.call_count == 1)
@@ -190,8 +191,8 @@ class TestMongoDbClientsRepository(unittest.TestCase):
 
         repo.abort_and_end_transactions()
 
-        client_1_session = client_1.start_session.return_value
-        client_2_session = client_1.start_session.return_value
+        client_1_session = cast(Mock, client_1.start_session).return_value
+        client_2_session = cast(Mock, client_1.start_session).return_value
         self.assertTrue(client_1_session.abort_transaction.call_count == 1)
         self.assertTrue(client_2_session.abort_transaction.call_count == 1)
         self.assertTrue(client_1_session.end_session.call_count == 1)
@@ -223,8 +224,8 @@ class TestMongoDbTransactionsContext(unittest.TestCase):
         with MongoDbTransactionsContext(repo):
             pass
 
-        client_1_session = client_1.start_session.return_value
-        client_2_session = client_1.start_session.return_value
+        client_1_session = cast(Mock, client_1.start_session).return_value
+        client_2_session = cast(Mock, client_1.start_session).return_value
         self.assertTrue(client_1_session.commit_transaction.call_count == 1)
         self.assertTrue(client_2_session.commit_transaction.call_count == 1)
         self.assertTrue(client_1_session.end_session.call_count == 1)
@@ -243,8 +244,8 @@ class TestMongoDbTransactionsContext(unittest.TestCase):
             with MongoDbTransactionsContext(repo):
                 raise ValueError("Random error")
 
-        client_1_session = client_1.start_session.return_value
-        client_2_session = client_1.start_session.return_value
+        client_1_session = cast(Mock, client_1.start_session).return_value
+        client_2_session = cast(Mock, client_1.start_session).return_value
         self.assertTrue(client_1_session.abort_transaction.call_count == 1)
         self.assertTrue(client_2_session.abort_transaction.call_count == 1)
         self.assertTrue(client_1_session.end_session.call_count == 1)
