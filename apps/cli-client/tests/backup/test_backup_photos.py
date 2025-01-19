@@ -294,6 +294,7 @@ class TestPhotosBackup(unittest.TestCase):
         # Test assert: check on backup results
         self.assertEqual(backup_results.num_media_items_added, 1)
         self.assertEqual(backup_results.num_media_items_deleted, 0)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that there is a new gphotos item for cat.png
         gitems_1 = gphotos_client_1.media_items().search_for_media_items()
@@ -447,6 +448,7 @@ class TestPhotosBackup(unittest.TestCase):
         # Test assert: check on backup results
         self.assertEqual(backup_results.num_media_items_added, 0)
         self.assertEqual(backup_results.num_media_items_deleted, 1)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that there is dog.png but no cat.png media item in the db
         mitems_1 = list(
@@ -572,6 +574,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(backup_results.num_media_items_deleted, 1)
         self.assertEqual(backup_results.num_albums_created, 0)
         self.assertEqual(backup_results.num_albums_deleted, 3)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that only the root album exists
         albums = albums_repo.get_all_albums()
@@ -711,6 +714,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(backup_results.num_media_items_deleted, 1)
         self.assertEqual(backup_results.num_albums_created, 0)
         self.assertEqual(backup_results.num_albums_deleted, 2)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that only the root/Archives album exists
         albums = albums_repo.get_all_albums()
@@ -864,6 +868,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(backup_results.num_media_items_deleted, 1)
         self.assertEqual(backup_results.num_albums_created, 0)
         self.assertEqual(backup_results.num_albums_deleted, 3)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that only the root/Archives album exists
         albums = albums_repo.get_all_albums()

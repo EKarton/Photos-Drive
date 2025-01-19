@@ -13,7 +13,6 @@ from .config.add_mongodb_handler import AddMongoDbHandler
 from .config.reauthorize_handler import ReauthorizeHandler
 from .add_handler import AddHandler
 from .delete_handler import DeleteHandler
-from .backup_handler import BackupHandler
 from .clean_handler import CleanHandler
 from .teardown_handler import TeardownHandler
 from .sync_handler import SyncHandler
@@ -65,12 +64,6 @@ def main():
     __add_config_argument(delete_parser)
     __add_verbose_argument(delete_parser)
 
-    # Add subparser for the 'backup' command
-    backup_parser = subparsers.add_parser("backup")
-    __add_diff_file_argument(backup_parser)
-    __add_config_argument(backup_parser)
-    __add_verbose_argument(backup_parser)
-
     # Add subparser for the 'sync' command`
     sync_parser = subparsers.add_parser('sync')
     sync_parser.add_argument(
@@ -82,6 +75,12 @@ def main():
         "--remote_albums_path",
         default='',
         help="Albums path in the remote to sync with",
+    )
+    sync_parser.add_argument(
+        "--parallelize_uploads",
+        default=False,
+        help="Parallelizes uploads to Google Photos [experimental]",
+        action=argparse.BooleanOptionalAction,
     )
     __add_config_argument(sync_parser)
     __add_verbose_argument(sync_parser)
@@ -144,17 +143,16 @@ def main():
         delete_handler = DeleteHandler()
         delete_handler.delete(args.path, config)
 
-    elif args.command == "backup":
-        __set_logging(args)
-        config = __build_config_based_on_args(args)
-        backup_handler = BackupHandler()
-        backup_handler.backup(args.diff_file, config)
-
     elif args.command == 'sync':
         __set_logging(args)
         config = __build_config_based_on_args(args)
         sync_handler = SyncHandler()
-        sync_handler.sync(args.local_dir_path, args.remote_albums_path, config)
+        sync_handler.sync(
+            args.local_dir_path,
+            args.remote_albums_path,
+            config,
+            args.parallelize_uploads,
+        )
 
     elif args.command == "clean":
         __set_logging(args)
@@ -183,10 +181,6 @@ def __add_config_argument(parser: argparse.ArgumentParser):
         type=str,
         help="MongoDB connection string to the configuration",
     )
-
-
-def __add_diff_file_argument(parser: argparse.ArgumentParser):
-    parser.add_argument("--diff_file", required=True, help="Path to the diff file")
 
 
 def __add_verbose_argument(parser: argparse.ArgumentParser):

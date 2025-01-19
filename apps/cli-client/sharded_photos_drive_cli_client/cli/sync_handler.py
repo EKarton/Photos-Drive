@@ -19,13 +19,20 @@ logger = logging.getLogger(__name__)
 class SyncHandler:
     """A class that handles syncing content from local to remote via cli."""
 
-    def sync(self, local_dir_path: str, remote_albums_path: str, config: Config):
+    def sync(
+        self,
+        local_dir_path: str,
+        remote_albums_path: str,
+        config: Config,
+        parallelize_uploads: bool,
+    ):
         """
         Adds content to the system.
 
         Args:
             path (str): The path to the media items to add.
             config_file_path (str): The file path to the config file.
+            parallelize_uploads (bool): Whether to parallelize uploads or not.
         """
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         diff_comparator = FolderSyncDiff(
@@ -48,7 +55,9 @@ class SyncHandler:
             print("Operation cancelled.")
             return
 
-        backup_results = self.__backup_diffs_to_system(config, backup_diffs)
+        backup_results = self.__backup_diffs_to_system(
+            config, backup_diffs, parallelize_uploads
+        )
         print("Sync complete.")
         print(
             "Number of files added to the system:",
@@ -122,7 +131,7 @@ class SyncHandler:
                 print("Invalid input. Please enter \'y\' or \'n\'")
 
     def __backup_diffs_to_system(
-        self, config: Config, diffs: list[Diff]
+        self, config: Config, diffs: list[Diff], parallelize_uploads: bool
     ) -> BackupResults:
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
@@ -141,8 +150,15 @@ class SyncHandler:
             albums_repo,
             media_items_repo,
             gphoto_clients_repo,
+            parallelize_uploads,
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")
+
+        print(f"Albums created: {backup_results.num_albums_created}")
+        print(f"Albums deleted: {backup_results.num_albums_deleted}")
+        print(f"Media items created: {backup_results.num_media_items_added}")
+        print(f"Media items deleted: {backup_results.num_media_items_deleted}")
+        print(f"Elapsed time: {backup_results.total_elapsed_time:.6f} seconds")
 
         return backup_results
