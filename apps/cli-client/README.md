@@ -40,25 +40,27 @@ This project is the cli client of Sharded Photos Drive.
    poetry run coverage run -m pytest tests/backup/test_backup_photos.py && poetry run coverage report -m
    ```
 
-6. To publish your app:
+6. To publish a new version of the app:
 
-   1. First, set your PyPI api token to Poetry
-
-      ```bash
-      poetry config pypi-token.pypi <YOUR_API_TOKEN>
-      ```
-
-   2. Then, build the app by running:
+   1. First, bump up the package version by running:
 
       ```bash
-      poetry build
+      poetry version [patch|minor|major]
       ```
 
-   3. Finally, publish the app by running:
+      For instance, if the app is on 0.1.0 and you want to increment it to version 0.1.1, run:
 
       ```bash
-      poetry publish
+      poetry version patch
       ```
+
+   2. Then, create a pull request with the new version number.
+
+   3. Once the pull request is submitted, go to <https://github.com/EKarton/Sharded-Photos-Drive/actions/workflows/publish-cli-client.yaml>, click on the `Run workflow`, ensure that it's on the `main` branch, and click on `Run workflow`:
+
+      ![Screenshot of publish workflow](docs/images/publish-cli-client-screenshot.png)
+
+   4. Once the action is complete, it will publish a new version of the app on <https://pypi.org/project/sharded_photos_drive_cli_client/>.
 
 ### Usage
 
@@ -70,4 +72,4 @@ Emilio Kartono, who made the entire project.
 
 ### License
 
-This project is protected under the GNU licence. Please refer to the LICENSE.txt for more information.
+This project is protected under the GNU licence. Please refer to the root project's LICENSE.txt for more information.
