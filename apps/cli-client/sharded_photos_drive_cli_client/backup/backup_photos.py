@@ -1,12 +1,15 @@
 from dataclasses import dataclass, field
+import time
 from typing import Optional, Dict, cast
 from collections import deque
 import logging
 
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.mongodb.albums_pruner import AlbumsPruner
-
+from ..shared.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
 from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields
@@ -15,7 +18,11 @@ from ..shared.mongodb.media_items_repository import MediaItemsRepository
 from ..shared.mongodb.media_items_repository import CreateMediaItemRequest
 
 from .processed_diffs import ProcessedDiff
-from .gphotos_uploader import GPhotosMediaItemUploader, UploadRequest
+from .gphotos_uploader import (
+    GPhotosMediaItemParallelUploaderImpl,
+    GPhotosMediaItemUploaderImpl,
+    UploadRequest,
+)
 from .diffs_assignments import DiffsAssigner
 
 logger = logging.getLogger(__name__)
@@ -31,12 +38,15 @@ class BackupResults:
         num_media_items_deleted (int): The number of media items deleted.
         num_albums_created (int): The number of albums created.
         num_albums_deleted (int): The number of albums deleted.
+        total_elapsed_time (float): The total elapsed time for a backup() to finish,
+            in seconds.
     """
 
     num_media_items_added: int
     num_media_items_deleted: int
     num_albums_created: int
     num_albums_deleted: int
+    total_elapsed_time: float
 
 
 @dataclass
@@ -53,15 +63,21 @@ class PhotosBackup:
         config: Config,
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
-        gphotos_uploader: GPhotosMediaItemUploader,
-        diffs_assigner: DiffsAssigner,
+        gphotos_client_repo: GPhotosClientsRepository,
+        parallelize_uploads: bool = False,
     ):
         self.__config = config
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
-        self.__gphotos_uploader = gphotos_uploader
-        self.__diffs_assigner = diffs_assigner
+        self.__diffs_assigner = DiffsAssigner(config)
         self.__albums_pruner = AlbumsPruner(config.get_root_album_id(), albums_repo)
+
+        logger.debug(f"Parallelizing uploads: {parallelize_uploads}")
+        self.__gphotos_uploader = (
+            GPhotosMediaItemParallelUploaderImpl(gphotos_client_repo)
+            if parallelize_uploads
+            else GPhotosMediaItemUploaderImpl(gphotos_client_repo)
+        )
 
     def backup(self, diffs: list[ProcessedDiff]) -> BackupResults:
         """Backs up a list of media items based on a list of diffs.
@@ -72,6 +88,7 @@ class PhotosBackup:
         Returns:
             BackupResults: A set of results from the backup.
         """
+        start_time = time.time()
         # Step 1: Build a tree of albums with diffs on their edge nodes
         root_diffs_tree_node = self.__build_diffs_tree(diffs)
         logger.debug(f"Finished creating initial diff tree: {root_diffs_tree_node}")
@@ -176,6 +193,7 @@ class PhotosBackup:
             num_media_items_deleted=len(total_media_item_ids_to_delete),
             num_albums_created=total_num_albums_created,
             num_albums_deleted=total_num_albums_deleted,
+            total_elapsed_time=time.time() - start_time,
         )
 
     def __build_diffs_tree(self, diffs: list[ProcessedDiff]) -> DiffsTreeNode:
@@ -294,6 +312,8 @@ class PhotosBackup:
             for diff, client_id in diff_assignments_items
         ]
         gphotos_media_item_ids = self.__gphotos_uploader.upload_photos(upload_requests)
+        assert len(gphotos_media_item_ids) == len(upload_requests)
+
         upload_diff_to_gphotos_media_item_id = {
             item[0]: gphotos_media_item_id
             for item, gphotos_media_item_id in zip(

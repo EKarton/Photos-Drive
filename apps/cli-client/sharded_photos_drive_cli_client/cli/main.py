@@ -76,6 +76,12 @@ def main():
         default='',
         help="Albums path in the remote to sync with",
     )
+    sync_parser.add_argument(
+        "--parallelize_uploads",
+        default=False,
+        help="Parallelizes uploads to Google Photos [experimental]",
+        action=argparse.BooleanOptionalAction,
+    )
     __add_config_argument(sync_parser)
     __add_verbose_argument(sync_parser)
 
@@ -141,7 +147,12 @@ def main():
         __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         sync_handler = SyncHandler()
-        sync_handler.sync(args.local_dir_path, args.remote_albums_path, config)
+        sync_handler.sync(
+            args.local_dir_path,
+            args.remote_albums_path,
+            config,
+            args.parallelize_uploads,
+        )
 
     elif args.command == "clean":
         __set_logging(args.verbose)

@@ -1,7 +1,7 @@
-import unittest
 from bson.objectid import ObjectId
+from unittest_parametrize import parametrize
+from unittest_parametrize import ParametrizedTestCase
 
-from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeGPhotosClient,
@@ -22,18 +22,22 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocati
 from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.backup.gphotos_uploader import (
-    GPhotosMediaItemUploader,
-)
 from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
 from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
 
+parametrize_use_parallel_uploads = parametrize(
+    "use_parallel_uploads",
+    [(True,), (False,)],
+)
 
-class TestPhotosBackup(unittest.TestCase):
-    def test_backup_adding_items_to_new_db(self):
+
+class TestPhotosBackup(ParametrizedTestCase):
+
+    @parametrize_use_parallel_uploads
+    def test_backup_adding_items_to_new_db(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
@@ -55,13 +59,6 @@ class TestPhotosBackup(unittest.TestCase):
         # Test setup 3: Set up the root album
         root_album_obj = albums_repo.create_album('', None, [], [])
         config.set_root_album_id(root_album_obj.id)
-
-        # Test setup 4: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
 
         # Act: Upload a set of processed diffs
         diffs = [
@@ -98,6 +95,13 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-4, longitude=4),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+            parallelize_uploads=use_parallel_uploads,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check on backup results
@@ -197,7 +201,8 @@ class TestPhotosBackup(unittest.TestCase):
             f'{mongodb_client_1_id}:{bird_item["_id"]}', album_2009['media_item_ids']
         )
 
-    def test_backup_adding_items_to_existing_albums(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
@@ -258,13 +263,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -276,11 +274,19 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+            parallelize_uploads=use_parallel_uploads,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check on backup results
         self.assertEqual(backup_results.num_media_items_added, 1)
         self.assertEqual(backup_results.num_media_items_deleted, 0)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that there is a new gphotos item for cat.png
         gitems_1 = gphotos_client_1.media_items().search_for_media_items()
@@ -315,7 +321,10 @@ class TestPhotosBackup(unittest.TestCase):
             album_2010_raw['media_item_ids'],
         )
 
-    def test_backup_deleted_one_item_on_album_with_two_items(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_deleted_one_item_on_album_with_two_items(
+        self, use_parallel_uploads: bool
+    ):
         # Test setup 1: Set up the essential objects
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
@@ -397,13 +406,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[dog_mitem_obj.id, cat_mitem_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -415,11 +417,19 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+            parallelize_uploads=use_parallel_uploads,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check on backup results
         self.assertEqual(backup_results.num_media_items_added, 0)
         self.assertEqual(backup_results.num_media_items_deleted, 1)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that there is dog.png but no cat.png media item in the db
         mitems_1 = list(
@@ -442,7 +452,8 @@ class TestPhotosBackup(unittest.TestCase):
             album_2010_raw['media_item_ids'],
         )
 
-    def test_backup_pruning_1(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_pruning_1(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
         mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -501,13 +512,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -519,6 +523,13 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+            parallelize_uploads=use_parallel_uploads,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check that there's no media item
@@ -530,6 +541,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(backup_results.num_media_items_deleted, 1)
         self.assertEqual(backup_results.num_albums_created, 0)
         self.assertEqual(backup_results.num_albums_deleted, 3)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that only the root album exists
         albums = albums_repo.get_all_albums()
@@ -541,7 +553,8 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(len(albums[0].media_item_ids), 0)
         self.assertEqual(albums[0].parent_album_id, None)
 
-    def test_backup_pruning_2(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_pruning_2(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
         mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -623,13 +636,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -641,6 +647,13 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+            parallelize_uploads=use_parallel_uploads,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check that there's only one media item
@@ -653,6 +666,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(backup_results.num_media_items_deleted, 1)
         self.assertEqual(backup_results.num_albums_created, 0)
         self.assertEqual(backup_results.num_albums_deleted, 2)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that only the root/Archives album exists
         albums = albums_repo.get_all_albums()
@@ -670,7 +684,8 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(albums[1].media_item_ids, [cat_media_item.id])
         self.assertEqual(albums[1].parent_album_id, root_album.id)
 
-    def test_backup_pruning_3(self):
+    @parametrize_use_parallel_uploads
+    def test_backup_pruning_3(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
         mongodb_client = create_mock_mongo_client(1000)
         gphotos_items_repo = FakeItemsRepository()
@@ -755,13 +770,6 @@ class TestPhotosBackup(unittest.TestCase):
             UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
         )
 
-        # Test setup 5: Build the objects for backup
-        uploader = GPhotosMediaItemUploader(gphotos_client_repo)
-        diffs_assigner = DiffsAssigner(config)
-        backup = PhotosBackup(
-            config, albums_repo, media_items_repo, uploader, diffs_assigner
-        )
-
         # Act: Upload a set of processed diffs
         diffs = [
             ProcessedDiff(
@@ -773,6 +781,13 @@ class TestPhotosBackup(unittest.TestCase):
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
+        backup = PhotosBackup(
+            config,
+            albums_repo,
+            media_items_repo,
+            gphotos_client_repo,
+            parallelize_uploads=use_parallel_uploads,
+        )
         backup_results = backup.backup(diffs)
 
         # Test assert: check that there's only one media item
@@ -785,6 +800,7 @@ class TestPhotosBackup(unittest.TestCase):
         self.assertEqual(backup_results.num_media_items_deleted, 1)
         self.assertEqual(backup_results.num_albums_created, 0)
         self.assertEqual(backup_results.num_albums_deleted, 3)
+        self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that only the root/Archives album exists
         albums = albums_repo.get_all_albums()

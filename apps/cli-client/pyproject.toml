@@ -35,6 +35,7 @@ requests-mock = "^1.12.1"
 freezegun = "^1.5.1"
 mongomock = "^4.3.0"
 pyfakefs = "^5.7.4"
+unittest-parametrize = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core"]
