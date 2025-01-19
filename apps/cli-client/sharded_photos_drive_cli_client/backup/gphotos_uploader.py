@@ -5,8 +5,6 @@ import logging
 from bson.objectid import ObjectId
 import concurrent
 
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
-
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 
 logger = logging.getLogger(__name__)
