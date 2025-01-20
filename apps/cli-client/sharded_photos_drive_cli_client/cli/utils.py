@@ -1,5 +1,9 @@
 import os
+from typing import Literal
+from prettytable import PrettyTable, NONE
+from termcolor import colored
 
+from ..backup.diffs import Diff
 from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 
 
@@ -59,3 +63,40 @@ def get_diffs_from_dir_path(dir_path: str) -> list[str]:
             diffs.append(formatted_path)
 
     return diffs
+
+
+def pretty_print_diffs(backup_diffs: list[Diff]):
+    sorted_backup_diffs = sorted(backup_diffs, key=lambda obj: obj.file_path)
+    table = PrettyTable()
+    table.field_names = ["M", "File path"]
+
+    for diff in sorted_backup_diffs:
+        color: Literal["green", "red"] = "green" if diff.modifier == "+" else "red"
+        table.add_row([colored(diff.modifier, color), colored(diff.file_path, color)])
+
+    # Left align the columns
+    table.align["M"] = "l"
+    table.align["File path"] = "l"
+
+    # Remove the borders
+    table.border = False
+    table.hrules = NONE
+    table.vrules = NONE
+
+    print("============================================================")
+    print("Changes")
+    print("============================================================")
+    print(table)
+
+
+def prompt_user_to_confirm() -> bool:
+    while True:
+        raw_input = input("Is this correct? (yes / no): ")
+        user_input = raw_input.strip().lower()
+
+        if user_input in ["yes", "y"]:
+            return True
+        elif user_input in ["no", "n"]:
+            return False
+        else:
+            print("Invalid input. Please enter \'y\' or \'n\'")

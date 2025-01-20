@@ -1,7 +1,7 @@
 import logging
 
 
-from .utils import get_diffs_from_path
+from .utils import get_diffs_from_path, pretty_print_diffs, prompt_user_to_confirm
 from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
@@ -36,6 +36,12 @@ class DeleteHandler:
             Diff(modifier="-", file_path=path) for path in get_diffs_from_path(path)
         ]
 
+        # Confirm if diffs are correct by the user
+        pretty_print_diffs(diffs)
+        if not prompt_user_to_confirm():
+            print("Operation cancelled.")
+            return
+
         # Process the diffs with metadata
         diff_processor = DiffsProcessor()
         processed_diffs = diff_processor.process_raw_diffs(diffs)
@@ -52,3 +58,9 @@ class DeleteHandler:
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")
+
+        print(f"Deleted {len(diffs)} items.")
+        print(f"Items added: {backup_results.num_media_items_added}")
+        print(f"Items deleted: {backup_results.num_media_items_deleted}")
+        print(f"Albums created: {backup_results.num_albums_created}")
+        print(f"Albums deleted: {backup_results.num_albums_deleted}")
