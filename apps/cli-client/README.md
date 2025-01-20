@@ -20,39 +20,15 @@ This CLI will never delete content from your machine - it should only mirror the
 
 1. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
 
-2. It will then prompt you with this:
+2. It will ask you information on what the command will do:
 
-   ```terminal
-   $sharded_photos_drive_cli_client config init
-   Welcome!
-   Before you get started with sharded_google_photos, you need the following:
-
-   1. A place to store your config files (MongoDB or in a config file).
-
-   2. A place to store your photo metadata (MongoDB).
-
-   3. A place to store your photos (Google Photos account).
-
-
-   Press [enter] to continue
-   ```
+   ![Intro](./docs/images/setting-up-infra/intro.png)
 
    Press `[enter]` to continue.
 
 3. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
 
-   ```terminal
-   Where do you want to store your config?
-
-   1. Mongo DB (mongodb)
-
-   2. File (file)
-
-   The config saves the accounts of where your photos metadata are, and
-   the accounts of where your photos are
-
-   Enter your choice: 
-   ```
+   ![Config choices](./docs/images/setting-up-infra/config-choices.png)
 
    Select `2` for now.
 
@@ -65,7 +41,7 @@ This CLI will never delete content from your machine - it should only mirror the
    Enter name of your first Mongo DB account: 
    ```
 
-6. Finally, 
+6. Finally,
 
 ## Getting Started to Contribute
 
@@ -130,6 +106,8 @@ Please note that this project is used for educational purposes and is not intend
 ### Credits
 
 Emilio Kartono, who made the entire project.
+
+CLI images were provided by <https://carbon.now.sh/>.
 
 ### License
 
