@@ -2,9 +2,71 @@
 
 ## Description
 
-This project is the cli client of Sharded Photos Drive.
+The Sharded-Photos-Drive-CLI-Client is the cli client for Sharded Photos Drive. This CLI helps set up your infrastructure, syncs, adds, and delete your pictures and videos from your machine to Sharded Photos Drive.
+
+This CLI will never delete content from your machine - it should only mirror the content from your machine to the cloud.
 
 ## Getting Started
+
+### Installation
+
+1. First, install the package by running:
+
+   ```bash
+   pip3 install sharded_photos_drive_cli_client
+   ```
+
+### Setting up your infrastructure
+
+1. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
+
+2. It will then prompt you with this:
+
+   ```terminal
+   $sharded_photos_drive_cli_client config init
+   Welcome!
+   Before you get started with sharded_google_photos, you need the following:
+
+   1. A place to store your config files (MongoDB or in a config file).
+
+   2. A place to store your photo metadata (MongoDB).
+
+   3. A place to store your photos (Google Photos account).
+
+
+   Press [enter] to continue
+   ```
+
+   Press `[enter]` to continue.
+
+3. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
+
+   ```terminal
+   Where do you want to store your config?
+
+   1. Mongo DB (mongodb)
+
+   2. File (file)
+
+   The config saves the accounts of where your photos metadata are, and
+   the accounts of where your photos are
+
+   Enter your choice: 
+   ```
+
+   Select `2` for now.
+
+4. It will now prompt you to log into MongoDB.
+
+5. Next, it will ask you to add a MongoDB database to store your photos metadata:
+
+   ```terminal
+   First, let's log into your first Mongo DB account.
+   Enter name of your first Mongo DB account: 
+   ```
+
+
+   Enter a name for this database
 
 ## Getting Started to Contribute
 
