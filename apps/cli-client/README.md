@@ -95,6 +95,8 @@ This CLI will never delete content from your machine - it should only mirror the
    sharded_photos_drive_cli sync --local_dir_path . --config_file config.conf --parallelize_uploads
    ```
 
+   though it is experimental right now.
+
 ### Adding custom content to Sharded Photos Drive
 
 ### Deleting content to Sharded Photos Drive
