@@ -62,7 +62,7 @@ This CLI will never delete content from your machine - it should only mirror the
    │   │           ├── 2024-01a Wallpaper.jpg
    │   │           ├── 2024-03-01 Wallpaper.jpg
    │   │           ├── 2024-04-02 Wallpaper.DNG
-   │   │           ├── 2024-05 Wallpaper.png
+   │   │           └── 2024-05 Wallpaper.png
    │   └── Random.jpg
    └── my-config.conf
    ```
@@ -99,7 +99,92 @@ This CLI will never delete content from your machine - it should only mirror the
 
 ### Adding custom content to Sharded Photos Drive
 
+1. Suppose your Sharded Photos Drive has the following content:
+
+   ```bash
+   root
+   └── Archives
+       ├── Photos
+       │   └── 2024
+       │       └── Wallpapers
+       │           ├── 2024-01a Wallpaper.jpg
+       │           ├── 2024-03-01 Wallpaper.jpg
+       │           ├── 2024-04-02 Wallpaper.DNG
+       │           └── 2024-05 Wallpaper.png
+       └── Random.jpg
+   ```
+
+   and you want to upload the current content in your working directory:
+
+   ```bash
+   .
+   └── Current
+       └── Dog.jpg
+   ```
+
+2. You can run:
+
+   ```bash
+   sharded_photos_drive_cli add ./Current --config_file my-config.conf
+   ```
+
+   and your system will add all contents under `./Current` without deleting any existing content in your system.
+
+3. In other words, you will have these contents:
+
+   ```bash
+   root
+   ├── Archives
+   │   ├── Photos
+   │   │   └── 2024
+   │   │       └── Wallpapers
+   │   │           ├── 2024-01a Wallpaper.jpg
+   │   │           ├── 2024-03-01 Wallpaper.jpg
+   │   │           ├── 2024-04-02 Wallpaper.DNG
+   │   │           ├── 2024-05 Wallpaper.png
+   │   └── Random.jpg
+   └── Current
+       └── Dog.jpg
+   ```
+
 ### Deleting content to Sharded Photos Drive
+
+1. Similarly, if your system has this content:
+
+   ```bash
+   root
+   └── Archives
+       ├── Photos
+       │   └── 2024
+       │       └── Wallpapers
+       │           ├── 2024-01a Wallpaper.jpg
+       │           ├── 2024-03-01 Wallpaper.jpg
+       │           ├── 2024-04-02 Wallpaper.DNG
+       │           ├── 2024-05 Wallpaper.png
+       └── Random.jpg
+   ```
+
+2. If you want to delete the `Archives/Random.jpg` picture, you can run:
+
+   ```bash
+   sharded_photos_drive_cli delete Archives/Random.jpg --config_file my-config.conf
+   ```
+
+   and the photo `Archives/Random.jpg` will be deleted from the system.
+
+3. Similarly, if you want to delete everything under the `Archives/Photos` album, you can run:
+
+   ```bash
+   sharded_photos_drive_cli delete Archives/Photos --config_file my-config.conf
+   ```
+
+   and the system will have these new contents:
+
+   ```bash
+   root
+   └── Archives
+       └── Random.jpg
+   ```
 
 ### Cleaning trailing Sharded Photos Drive
 
