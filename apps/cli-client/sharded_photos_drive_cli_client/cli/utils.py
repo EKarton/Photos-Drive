@@ -88,6 +88,14 @@ def pretty_print_diffs(backup_diffs: list[Diff]):
     print("============================================================")
     print(table)
 
+    # Get total number of + and -:
+    total_additions = len([x for x in backup_diffs if x.modifier == '+'])
+    total_deletions = len([x for x in backup_diffs if x.modifier == '-'])
+    print('')
+    print(f'Number of media items to add: {total_additions}')
+    print(f'Number of media items to delete: {total_deletions}')
+    print('')
+
 
 def prompt_user_to_confirm() -> bool:
     while True:
