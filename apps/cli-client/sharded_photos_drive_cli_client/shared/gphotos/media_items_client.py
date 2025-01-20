@@ -263,12 +263,13 @@ class GPhotosMediaItemsClient:
                     )
 
                     req_3 = self._query_chunked_upload(upload_url)
+                    logger.debug(f"Query chunked upload res: {req_3.headers}")
                     upload_status = req_3.headers["X-Goog-Upload-Status"]
-                    size_received = int(req_3.headers["X-Goog-Upload-Size-Received"])
 
                     if upload_status != "active":
                         raise IllegalStateException("Upload is no longer active")
 
+                    size_received = int(req_3.headers["X-Goog-Upload-Size-Received"])
                     logger.debug(f"Adjusted seek to {size_received}")
                     file_obj.seek(size_received, 0)
                     cur_offset = size_received
