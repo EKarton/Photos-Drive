@@ -32,16 +32,33 @@ This CLI will never delete content from your machine - it should only mirror the
 
    ![Config choices](./docs/images/setting-up-infra/config-choices.png)
 
-4. Next, it will ask you to add a MongoDB database to store your pictures / videos metadata. It will prompt you to enter a name for your first database, and its read-write connection string:
+4. Next, it will ask you to add a MongoDB database to store your pictures / videos metadata. It will prompt you to enter a name for your database, and its read-write connection string:
 
-   ```terminal
-   First, let's log into your first Mongo DB account.
-   Enter name of your first Mongo DB account: 
-   ```
+   ![Adding MongoDB client](./docs/images/setting-up-infra/add-mongodb.png)
 
 5. Finally, it will ask you to add your Google Photos account to store your pictures / videos. It will prompt you to enter a name for your first Google Photos account, and a Google Photos Client ID and Google Photos Client Secret.
 
+   ![Adding Google Photos account](./docs/images/setting-up-infra/add-gphotos.png)
+
 6. After specifying the name, client ID, and client secret, it will return a URL to authenticate. Copy-paste the URL to your browser and follow the instructions on the browser:
+
+   ![Google OAuth2 steps](./docs/images/setting-up-infra/google-oauth2.gif)
+
+7. It saves the config to `my-config.conf` to your current working directory.
+
+### Syncing your photos / videos
+
+1. From the previous step, assume you have `config.conf` as your config file, and assume your current working directory looks like this:
+
+2. To sync your photos / videos to the system, run:
+
+   ```bash
+   sharded_photos_drive_cli sync --local_dir_path . --config config.conf
+   ```
+
+3. It will then ask you to confirm if these are the contents that you want to upload to the system. Type in `yes`:
+
+4. After a while, the contents should be uploaded.
 
 ## Getting Started to Contribute
 
