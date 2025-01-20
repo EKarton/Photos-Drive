@@ -46,8 +46,6 @@ class GPhotosAlbumsClient:
             else:
                 break
 
-        print(albums)
-
         return [from_dict(Album, a) for a in albums]
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)

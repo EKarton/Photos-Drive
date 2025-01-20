@@ -116,16 +116,21 @@ class MediaMetadata:
     https://developers.google.com/photos/library/reference/rest/v1/mediaItems#mediametadata.
 
     Attributes:
-        creationTime (str):
+        creationTime (Optional[str]):
             Time when the media item was first created (not when it was uploaded to
             Google Photos).
             A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up
             to nine fractional digits.
             Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-        width (str):
+            It is null when the video is still processing.
+        width (Optional[str]):
             Original width (in pixels) of the media item.
-        height (str):
+            If the video is still processing, the width can be unavailable and will be
+            null.
+        height (Optional[str]):
             Original height (in pixels) of the media item.
+            If the video is still processing, the height can be unavailable and will be
+            null.
         photo (Optional[PhotoMetadata]):
             If it's a photo, it will have photo-specific metadata
         video (Optional[VideoMetadata]):
@@ -133,9 +138,9 @@ class MediaMetadata:
 
     """
 
-    creationTime: str
-    width: str
-    height: str
+    creationTime: Optional[str]
+    width: Optional[str]
+    height: Optional[str]
     photo: Optional[PhotoMetadata]
     video: Optional[VideoMetadata]
 
