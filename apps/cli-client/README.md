@@ -36,33 +36,38 @@ This CLI will never delete content from your machine - it should only mirror the
 
 ### Setting up your infrastructure
 
-1. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
+1. First, you need to have the following:
 
-2. It will ask you information on what the command will do.
+   1. A connection string to your MongoDB database (follow [this doc](./docs/get_mongodb_connection_string.md) for step-by-step instructions).
+   2. Your Google Account's client ID and client secrets (follow [this doc](./docs/create_client_id.md) for step-by-step instructions).
+
+2. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
+
+3. It will ask you information on what the command will do.
 
    ![Intro](./docs/images/setting-up-infra/intro.png)
 
    Press `[enter]` to continue.
 
-3. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
+4. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
 
    For simplicity, select `2`. It will then ask you to enter the file name of your config.
 
    ![Config choices](./docs/images/setting-up-infra/config-choices.png)
 
-4. Next, it will ask you to add a MongoDB database to store your pictures / videos metadata. It will prompt you to enter a name for your database, and its read-write connection string:
+5. Next, it will ask you to add a MongoDB database to store your pictures / videos metadata. It will prompt you to enter a name for your database, and its read-write connection string:
 
    ![Adding MongoDB client](./docs/images/setting-up-infra/add-mongodb.png)
 
-5. Finally, it will ask you to add your Google Photos account to store your pictures / videos. It will prompt you to enter a name for your first Google Photos account, and a Google Photos Client ID and Google Photos Client Secret.
+6. Finally, it will ask you to add your Google Photos account to store your pictures / videos. It will prompt you to enter a name for your first Google Photos account, and a Google Photos Client ID and Google Photos Client Secret.
 
    ![Adding Google Photos account](./docs/images/setting-up-infra/add-gphotos.png)
 
-6. After specifying the name, client ID, and client secret, it will return a URL to authenticate. Copy-paste the URL to your browser and follow the instructions on the browser:
+7. After specifying the name, client ID, and client secret, it will return a URL to authenticate. Copy-paste the URL to your browser and follow the instructions on the browser:
 
    ![Google OAuth2 steps](./docs/images/setting-up-infra/google-oauth2.gif)
 
-7. It saves the config to `my-config.conf` to your current working directory.
+8. It saves the config to `my-config.conf` to your current working directory.
 
 ### Syncing your photos / videos
 
