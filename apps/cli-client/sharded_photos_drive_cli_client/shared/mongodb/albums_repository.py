@@ -24,7 +24,7 @@ class UpdatedAlbumFields:
 @dataclass(frozen=True)
 class UpdateAlbumRequest:
     """
-    Represents an update to an existing album.
+    Represents a request to update an existing album.
 
     Attributes:
         album_id (AlbumId): The ID of the album.
@@ -131,13 +131,12 @@ class AlbumsRepository(ABC):
         """
 
     @abstractmethod
-    def update_albums(self, update_requests: list[UpdateAlbumRequest]):
+    def update_many_albums(self, requests: list[UpdateAlbumRequest]):
         '''
         Performs a bulk update on albums with new fields.
 
         Args:
-            update_requests (list[UpdateAlbumRequest]): A list of bulk album update
-                requests
+            requests (list[UpdateAlbumRequest]): A list of album update requests.
         '''
 
 
@@ -299,7 +298,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         if result.matched_count != 1:
             raise ValueError(f"Unable to update album {album_id}")
 
-    def update_albums(self, update_requests: list[UpdateAlbumRequest]):
+    def update_many_albums(self, update_requests: list[UpdateAlbumRequest]):
         client_id_to_operations: Dict[ObjectId, list[pymongo.UpdateOne]] = defaultdict(
             list
         )

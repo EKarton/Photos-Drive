@@ -358,7 +358,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
             UpdateAlbumRequest(album_2012.id, new_parent_album_id=photo_album.id),
             UpdateAlbumRequest(album_2013.id, new_parent_album_id=photo_album.id),
         ]
-        self.repo.update_albums(requests)
+        self.repo.update_many_albums(requests)
 
         self.assertEqual(
             self.repo.get_album_by_id(album_2010.id).parent_album_id, photo_album.id

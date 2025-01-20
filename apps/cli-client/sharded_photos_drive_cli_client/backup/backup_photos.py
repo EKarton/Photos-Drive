@@ -186,7 +186,7 @@ class PhotosBackup:
             for child_diff_tree_node in cur_diffs_tree_node.child_nodes:
                 queue.append(child_diff_tree_node)
 
-        self.__albums_repo.update_albums(update_album_requests)
+        self.__albums_repo.update_many_albums(update_album_requests)
 
         # Step 7: Delete the media items marked for deletion
         self.__media_items_repo.delete_many_media_items(total_media_item_ids_to_delete)
