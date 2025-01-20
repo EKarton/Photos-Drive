@@ -79,6 +79,44 @@ This CLI will never delete content from your machine - it should only mirror the
 
 4. After a while, the contents should be uploaded and will output statistics on the upload.
 
+   ![Stats](./docs/images/syncing/sync-stats.png)
+
+5. If you want to sync your photos/videos in a particular path in the system, you can specify the `--remote_albums_path` field, like:
+
+   ```bash
+   sharded_photos_drive_cli sync --local_dir_path ./Archives --remote_albums_path Archives  --config_file config.conf
+   ```
+
+   It will compare all contents under the local directory `./Archives` to all content under the albums path `Archives`.
+
+6. You can also upload photos / videos in parallel with the `--parallelize_uploads` flag, like:
+
+   ```bash
+   sharded_photos_drive_cli sync --local_dir_path . --config_file config.conf --parallelize_uploads
+   ```
+
+### Adding custom content to Sharded Photos Drive
+
+### Deleting content to Sharded Photos Drive
+
+### Cleaning trailing Sharded Photos Drive
+
+In case any of the `sync`, `add`, or `delete` commands fail, there are data that can be cleaned up. Moreover, when a photo / video is deleted, due to the limitations of the Google Photos API, it will remain in your Google Photos account.
+
+Hence, the `clean` script is provided to clean up the system.
+
+Running:
+
+```bash
+sharded_photos_drive_cli clean --config_file config.conf
+```
+
+will:
+
+1. Delete all media items from the metadata database that is not being used
+2. Delete all albums from the metadata database that is not being used
+3. Move photos / videos in Google Photos that are not used to a special album called `To delete` where you can manually delete the content in your Google Photos account.
+
 ## Getting Started to Contribute
 
 1. Ensure Python3, Pip, and Poetry are installed on your machine
