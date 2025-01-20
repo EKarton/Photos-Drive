@@ -63,22 +63,6 @@ This CLI will never delete content from your machine - it should only mirror the
    │   │           ├── 2024-03-01 Wallpaper.jpg
    │   │           ├── 2024-04-02 Wallpaper.DNG
    │   │           ├── 2024-05 Wallpaper.png
-   │   │           ├── 2024-06-01 Wallpaper.jpg
-   │   │           ├── 2024-06-02 Wallpaper.jpg
-   │   │           ├── 2024-06-03 Wallpaper.jpg
-   │   │           ├── 2024-06-04 Wallpaper.jpg
-   │   │           ├── 2024-06-11 Wallpaper.png
-   │   │           ├── 2024-06-13 Wallpaper.jpg
-   │   │           ├── 2024-06-16 Wallpaper.jpg
-   │   │           ├── 2024-09-01 Wallpaper.jpg
-   │   │           ├── 2024-11-01 Wallpaper.DNG
-   │   │           ├── 2024-11-02 Wallpaper.DNG
-   │   │           ├── 2024-11-03 Wallpaper.DNG
-   │   │           ├── 2024-12-01 Wallpaper.DNG
-   │   │           ├── 2024-12-02 Wallpaper.DNG
-   │   │           ├── 2024-12-03 Wallpaper.DNG
-   │   │           ├── 2024-12-04 Wallpaper.jpg
-   │   │           └── 2024-12-05 Wallpaper.jpg
    │   └── Random.jpg
    └── my-config.conf
 
