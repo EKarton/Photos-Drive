@@ -124,7 +124,7 @@ Please note that this project is used for educational purposes and is not intend
 
 Emilio Kartono, who made the entire project.
 
-CLI images were provided by <https://carbon.now.sh/>.
+CLI images were provided by <https://ray.so/>.
 
 ### License
 
