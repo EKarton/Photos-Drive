@@ -20,7 +20,7 @@ This CLI will never delete content from your machine - it should only mirror the
 
 1. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
 
-2. It will ask you information on what the command will do:
+2. It will ask you information on what the command will do.
 
    ![Intro](./docs/images/setting-up-infra/intro.png)
 
