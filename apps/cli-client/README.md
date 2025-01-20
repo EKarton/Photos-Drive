@@ -58,15 +58,14 @@ This CLI will never delete content from your machine - it should only mirror the
 
 4. It will now prompt you to log into MongoDB.
 
-5. Next, it will ask you to add a MongoDB database to store your photos metadata:
+5. Next, it will ask you to add a MongoDB database to store your photos metadata. It will prompt you to enter a name for your first database, and to log into the database account:
 
    ```terminal
    First, let's log into your first Mongo DB account.
    Enter name of your first Mongo DB account: 
    ```
 
-
-   Enter a name for this database
+6. Finally, 
 
 ## Getting Started to Contribute
 
