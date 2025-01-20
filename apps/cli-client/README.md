@@ -28,20 +28,20 @@ This CLI will never delete content from your machine - it should only mirror the
 
 3. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
 
+   For simplicity, select `2`. It will then ask you to enter the file name of your config.
+
    ![Config choices](./docs/images/setting-up-infra/config-choices.png)
 
-   Select `2` for now.
-
-4. It will now prompt you to log into MongoDB.
-
-5. Next, it will ask you to add a MongoDB database to store your photos metadata. It will prompt you to enter a name for your first database, and to log into the database account:
+4. Next, it will ask you to add a MongoDB database to store your pictures / videos metadata. It will prompt you to enter a name for your first database, and its read-write connection string:
 
    ```terminal
    First, let's log into your first Mongo DB account.
    Enter name of your first Mongo DB account: 
    ```
 
-6. Finally,
+5. Finally, it will ask you to add your Google Photos account to store your pictures / videos. It will prompt you to enter a name for your first Google Photos account, and a Google Photos Client ID and Google Photos Client Secret.
+
+6. After specifying the name, client ID, and client secret, it will return a URL to authenticate. Copy-paste the URL to your browser and follow the instructions on the browser:
 
 ## Getting Started to Contribute
 
