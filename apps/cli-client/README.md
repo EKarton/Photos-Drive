@@ -50,6 +50,40 @@ This CLI will never delete content from your machine - it should only mirror the
 
 1. From the previous step, assume you have `config.conf` as your config file, and assume your current working directory looks like this:
 
+   ```bash
+      .
+   ├── Archives
+   │   ├── Photos
+   │   │   ├── 2023
+   │   │   │   └── Wallpapers
+   │   │   │       └── 2023-11a Wallpaper.DNG
+   │   │   └── 2024
+   │   │       └── Wallpapers
+   │   │           ├── 2024-01a Wallpaper.jpg
+   │   │           ├── 2024-03-01 Wallpaper.jpg
+   │   │           ├── 2024-04-02 Wallpaper.DNG
+   │   │           ├── 2024-05 Wallpaper.png
+   │   │           ├── 2024-06-01 Wallpaper.jpg
+   │   │           ├── 2024-06-02 Wallpaper.jpg
+   │   │           ├── 2024-06-03 Wallpaper.jpg
+   │   │           ├── 2024-06-04 Wallpaper.jpg
+   │   │           ├── 2024-06-11 Wallpaper.png
+   │   │           ├── 2024-06-13 Wallpaper.jpg
+   │   │           ├── 2024-06-16 Wallpaper.jpg
+   │   │           ├── 2024-09-01 Wallpaper.jpg
+   │   │           ├── 2024-11-01 Wallpaper.DNG
+   │   │           ├── 2024-11-02 Wallpaper.DNG
+   │   │           ├── 2024-11-03 Wallpaper.DNG
+   │   │           ├── 2024-12-01 Wallpaper.DNG
+   │   │           ├── 2024-12-02 Wallpaper.DNG
+   │   │           ├── 2024-12-03 Wallpaper.DNG
+   │   │           ├── 2024-12-04 Wallpaper.jpg
+   │   │           └── 2024-12-05 Wallpaper.jpg
+   │   └── Random.jpg
+   └── my-config.conf
+
+   ```
+
 2. To sync your photos / videos to the system, run:
 
    ```bash
@@ -58,7 +92,9 @@ This CLI will never delete content from your machine - it should only mirror the
 
 3. It will then ask you to confirm if these are the contents that you want to upload to the system. Type in `yes`:
 
-4. After a while, the contents should be uploaded.
+   ![Diff](./docs/images/syncing/diff.png)
+
+4. After a while, the contents should be uploaded and will output statistics on the upload.
 
 ## Getting Started to Contribute
 
