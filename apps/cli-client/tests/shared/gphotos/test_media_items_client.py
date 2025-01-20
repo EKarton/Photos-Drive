@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+import dacite
 import requests_mock
 from freezegun import freeze_time
 from dacite import from_dict
@@ -12,6 +13,7 @@ from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV
 from sharded_photos_drive_cli_client.shared.gphotos.media_items import (
     UploadedPhotosToGPhotosResult,
     MediaItem,
+    VideoProcessingStatus,
 )
 
 MOCK_CREDENTIALS = Credentials(
@@ -75,6 +77,25 @@ MOCK_NEW_MEDIA_ITEMS_RESPONSE = {
     ]
 }
 
+MOCK_NEW_MEDIA_ITEMS_RESPONSE_VIDEO_STILL_PROCESSING = {
+    "newMediaItemResults": [
+        {
+            "status": {"message": "Success"},
+            "mediaItem": {
+                "id": "1",
+                "description": "item-description",
+                "productUrl": "https://photos.google.com/photo/photo-path",
+                "mimeType": "video/mp4",
+                "mediaMetadata": {
+                    "creationTime": "creation-time",
+                    "video": {"status": 'PROCESSING'},
+                },
+                "filename": "filename",
+            },
+        },
+    ]
+}
+
 MOCK_GET_MEDIA_ITEMS_RESPONSE = {
     "mediaItems": [
         {
@@ -124,6 +145,29 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             self.assertEqual(
                 response,
                 from_dict(UploadedPhotosToGPhotosResult, MOCK_NEW_MEDIA_ITEMS_RESPONSE),
+            )
+
+    def test_add_uploaded_photos_to_gphotos__2xx_and_video_still_processing(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            request_mocker.post(
+                "https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate",
+                json=MOCK_NEW_MEDIA_ITEMS_RESPONSE_VIDEO_STILL_PROCESSING,
+            )
+
+            response = client.media_items().add_uploaded_photos_to_gphotos(
+                ["u1"], "123"
+            )
+
+            self.assertEqual(
+                response,
+                from_dict(
+                    UploadedPhotosToGPhotosResult,
+                    MOCK_NEW_MEDIA_ITEMS_RESPONSE_VIDEO_STILL_PROCESSING,
+                    config=dacite.Config(cast=[VideoProcessingStatus]),
+                ),
             )
 
     def test_add_uploaded_photos_to_gphotos__media_item_is_duplicated(self):

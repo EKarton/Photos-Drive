@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import backoff
+import dacite
 import magic
 from typing import Optional, Any
 from requests.exceptions import HTTPError, RequestException
@@ -10,7 +11,7 @@ from dacite import from_dict
 from google.auth.transport.requests import AuthorizedSession
 from google.auth.transport import DEFAULT_RETRYABLE_STATUS_CODES
 
-from .media_items import UploadedPhotosToGPhotosResult, MediaItem
+from .media_items import UploadedPhotosToGPhotosResult, MediaItem, VideoProcessingStatus
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +112,11 @@ class GPhotosMediaItemsClient:
                     raise ValueError(f"code: {code}, message: {message}")
 
         new_res = {"newMediaItemResults": new_media_items}
-        return from_dict(UploadedPhotosToGPhotosResult, new_res)
+        return from_dict(
+            UploadedPhotosToGPhotosResult,
+            new_res,
+            config=dacite.Config(cast=[VideoProcessingStatus]),
+        )
 
     def search_for_media_items(
         self,
