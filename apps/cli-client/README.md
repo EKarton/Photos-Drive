@@ -70,7 +70,7 @@ This CLI will never delete content from your machine - it should only mirror the
 2. To sync your photos / videos to the system, run:
 
    ```bash
-   sharded_photos_drive_cli sync --local_dir_path . --config config.conf
+   sharded_photos_drive_cli sync --local_dir_path . --config_file config.conf
    ```
 
 3. It will then ask you to confirm if these are the contents that you want to upload to the system. Type in `yes`:
