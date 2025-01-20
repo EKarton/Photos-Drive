@@ -28,10 +28,6 @@ def prompt_user_for_mongodb_connection_string() -> str:
         print(
             "Enter your MongoDB connection string",
         )
-        print(
-            "(follow go/mongodb for instructions to get a ",
-            "connection string to your MongoDB account): ",
-        )
         mongodb_connection_string = getpass.getpass()
         try:
             mongodb_client: MongoClient = MongoClient(
@@ -74,7 +70,7 @@ def prompt_user_for_gphotos_credentials(
                 },
                 scopes=scopes,
             )
-            message = "Please visit this URL to authenticate: {{url}}"
+            message = "Please visit this URL to authenticate: {url}"
             iaflow.run_local_server(
                 authorization_prompt_message=message,
                 success_message="The auth flow is complete; you may close this window.",

@@ -2,9 +2,207 @@
 
 ## Description
 
-This project is the cli client of Sharded Photos Drive.
+The Sharded-Photos-Drive-CLI-Client is the cli client for Sharded Photos Drive. This CLI helps set up your infrastructure, syncs, adds, and delete your pictures and videos from your machine to Sharded Photos Drive.
+
+This CLI will never delete content from your machine - it should only mirror the content from your machine to the cloud.
 
 ## Getting Started
+
+### Installation
+
+1. First, install the package by running:
+
+   ```bash
+   pip3 install sharded_photos_drive_cli_client
+   ```
+
+### Setting up your infrastructure
+
+1. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
+
+2. It will ask you information on what the command will do.
+
+   ![Intro](./docs/images/setting-up-infra/intro.png)
+
+   Press `[enter]` to continue.
+
+3. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
+
+   For simplicity, select `2`. It will then ask you to enter the file name of your config.
+
+   ![Config choices](./docs/images/setting-up-infra/config-choices.png)
+
+4. Next, it will ask you to add a MongoDB database to store your pictures / videos metadata. It will prompt you to enter a name for your database, and its read-write connection string:
+
+   ![Adding MongoDB client](./docs/images/setting-up-infra/add-mongodb.png)
+
+5. Finally, it will ask you to add your Google Photos account to store your pictures / videos. It will prompt you to enter a name for your first Google Photos account, and a Google Photos Client ID and Google Photos Client Secret.
+
+   ![Adding Google Photos account](./docs/images/setting-up-infra/add-gphotos.png)
+
+6. After specifying the name, client ID, and client secret, it will return a URL to authenticate. Copy-paste the URL to your browser and follow the instructions on the browser:
+
+   ![Google OAuth2 steps](./docs/images/setting-up-infra/google-oauth2.gif)
+
+7. It saves the config to `my-config.conf` to your current working directory.
+
+### Syncing your photos / videos
+
+1. From the previous step, assume you have `config.conf` as your config file, and assume your current working directory looks like this:
+
+   ```bash
+   .
+   ├── Archives
+   │   ├── Photos
+   │   │   ├── 2023
+   │   │   │   └── Wallpapers
+   │   │   │       └── 2023-11a Wallpaper.DNG
+   │   │   └── 2024
+   │   │       └── Wallpapers
+   │   │           ├── 2024-01a Wallpaper.jpg
+   │   │           ├── 2024-03-01 Wallpaper.jpg
+   │   │           ├── 2024-04-02 Wallpaper.DNG
+   │   │           └── 2024-05 Wallpaper.png
+   │   └── Random.jpg
+   └── my-config.conf
+   ```
+
+2. To sync your photos / videos to the system, run:
+
+   ```bash
+   sharded_photos_drive_cli sync --local_dir_path . --config_file config.conf
+   ```
+
+3. It will then ask you to confirm if these are the contents that you want to upload to the system. Type in `yes`:
+
+   ![Diff](./docs/images/syncing/diff.png)
+
+4. After a while, the contents should be uploaded and will output statistics on the upload.
+
+   ![Stats](./docs/images/syncing/sync-stats.png)
+
+5. If you want to sync your photos/videos in a particular path in the system, you can specify the `--remote_albums_path` field, like:
+
+   ```bash
+   sharded_photos_drive_cli sync --local_dir_path ./Archives --remote_albums_path Archives  --config_file config.conf
+   ```
+
+   It will compare all contents under the local directory `./Archives` to all content under the albums path `Archives`.
+
+6. You can also upload photos / videos in parallel with the `--parallelize_uploads` flag, like:
+
+   ```bash
+   sharded_photos_drive_cli sync --local_dir_path . --config_file config.conf --parallelize_uploads
+   ```
+
+   though it is experimental right now.
+
+### Adding custom content to Sharded Photos Drive
+
+1. Suppose your Sharded Photos Drive has the following content:
+
+   ```bash
+   root
+   └── Archives
+       ├── Photos
+       │   └── 2024
+       │       └── Wallpapers
+       │           ├── 2024-01a Wallpaper.jpg
+       │           ├── 2024-03-01 Wallpaper.jpg
+       │           ├── 2024-04-02 Wallpaper.DNG
+       │           └── 2024-05 Wallpaper.png
+       └── Random.jpg
+   ```
+
+   and you want to upload the current content in your working directory:
+
+   ```bash
+   .
+   └── Current
+       └── Dog.jpg
+   ```
+
+2. You can run:
+
+   ```bash
+   sharded_photos_drive_cli add ./Current --config_file my-config.conf
+   ```
+
+   and your system will add all contents under `./Current` without deleting any existing content in your system.
+
+3. In other words, you will have these contents:
+
+   ```bash
+   root
+   ├── Archives
+   │   ├── Photos
+   │   │   └── 2024
+   │   │       └── Wallpapers
+   │   │           ├── 2024-01a Wallpaper.jpg
+   │   │           ├── 2024-03-01 Wallpaper.jpg
+   │   │           ├── 2024-04-02 Wallpaper.DNG
+   │   │           ├── 2024-05 Wallpaper.png
+   │   └── Random.jpg
+   └── Current
+       └── Dog.jpg
+   ```
+
+### Deleting content to Sharded Photos Drive
+
+1. Similarly, if your system has this content:
+
+   ```bash
+   root
+   └── Archives
+       ├── Photos
+       │   └── 2024
+       │       └── Wallpapers
+       │           ├── 2024-01a Wallpaper.jpg
+       │           ├── 2024-03-01 Wallpaper.jpg
+       │           ├── 2024-04-02 Wallpaper.DNG
+       │           ├── 2024-05 Wallpaper.png
+       └── Random.jpg
+   ```
+
+2. If you want to delete the `Archives/Random.jpg` picture, you can run:
+
+   ```bash
+   sharded_photos_drive_cli delete Archives/Random.jpg --config_file my-config.conf
+   ```
+
+   and the photo `Archives/Random.jpg` will be deleted from the system.
+
+3. Similarly, if you want to delete everything under the `Archives/Photos` album, you can run:
+
+   ```bash
+   sharded_photos_drive_cli delete Archives/Photos --config_file my-config.conf
+   ```
+
+   and the system will have these new contents:
+
+   ```bash
+   root
+   └── Archives
+       └── Random.jpg
+   ```
+
+### Cleaning trailing Sharded Photos Drive
+
+In case any of the `sync`, `add`, or `delete` commands fail, there are data that can be cleaned up. Moreover, when a photo / video is deleted, due to the limitations of the Google Photos API, it will remain in your Google Photos account.
+
+Hence, the `clean` script is provided to clean up the system.
+
+Running:
+
+```bash
+sharded_photos_drive_cli clean --config_file config.conf
+```
+
+will:
+
+1. Delete all media items from the metadata database that is not being used
+2. Delete all albums from the metadata database that is not being used
+3. Move photos / videos in Google Photos that are not used to a special album called `To delete` where you can manually delete the content in your Google Photos account.
 
 ## Getting Started to Contribute
 
@@ -69,6 +267,8 @@ Please note that this project is used for educational purposes and is not intend
 ### Credits
 
 Emilio Kartono, who made the entire project.
+
+CLI images were provided by <https://ray.so/>.
 
 ### License
 

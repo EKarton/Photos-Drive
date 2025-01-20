@@ -1,5 +1,4 @@
 import os
-
 from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
 
@@ -30,7 +29,7 @@ class InitHandler:
 
         # Step 2: Ask for Google Photo account
         print("Now it's time to log in to your first Google Photos account.")
-        gphotos_name = self.__get_non_empty_name_for_gphotos(mongodb_name)
+        gphotos_name = self.__get_non_empty_name_for_gphotos()
         gphotos_credentials = prompt_user_for_gphotos_credentials()
         gphotos_session = AuthorizedSession(gphotos_credentials)
         gphotos_client = GPhotosClientV2(gphotos_name, gphotos_session)
@@ -99,7 +98,7 @@ class InitHandler:
             "\n  1. A place to store your config files (MongoDB or in a config file)."
         )
         print("\n  2. A place to store your photo metadata (MongoDB).")
-        print("\n  3. A place to store your photos (Google Photos account).\n")
+        print("\n  3. A place to store your photos (Google Photos account).")
         print("")
         input("Press [enter] to continue")
 
@@ -160,7 +159,7 @@ class InitHandler:
             else:
                 return stripped_name
 
-    def __get_non_empty_name_for_gphotos(self, mongodb_name: str) -> str:
+    def __get_non_empty_name_for_gphotos(self) -> str:
         """Prompts the user for a name and ensures it's not empty."""
 
         while True:
@@ -173,12 +172,6 @@ class InitHandler:
 
             if not stripped_name:
                 print("Name cannot be empty. Please try again.")
-
-            if mongodb_name == stripped_name:
-                print(
-                    "Name cannot be the same as your Mongo DB account. "
-                    + "Please try again.",
-                )
 
             else:
                 return stripped_name
