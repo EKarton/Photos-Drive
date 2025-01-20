@@ -38,8 +38,8 @@ This CLI will never delete content from your machine - it should only mirror the
 
 1. First, you need to have the following:
 
-   1. A connection string to your MongoDB database (follow [this doc](./docs/get_mongodb_connection_string.md) for step-by-step instructions).
-   2. Your Google Account's client ID and client secrets (follow [this doc](./docs/create_client_id.md) for step-by-step instructions).
+   1. A connection string to your MongoDB database (follow [this doc](./docs/create_mongodb_connection_string.md) for step-by-step instructions).
+   2. Your Google Account's client ID and client secrets (follow [this doc](./docs/create_google_client_id.md) for step-by-step instructions).
 
 2. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
 
@@ -289,7 +289,7 @@ It will delete all photos / videos from your system, and move all photos / video
 
    3. Once the pull request is submitted, go to <https://github.com/EKarton/Sharded-Photos-Drive/actions/workflows/publish-cli-client.yaml>, click on the `Run workflow`, ensure that it's on the `main` branch, and click on `Run workflow`:
 
-      ![Screenshot of publish workflow](docs/images/publish-cli-client-screenshot.png)
+      ![Screenshot of publish workflow](docs/images/publish-package/publish-cli-client-screenshot.png)
 
    4. Once the action is complete, it will publish a new version of the app on <https://pypi.org/project/sharded_photos_drive_cli_client/>.
 
