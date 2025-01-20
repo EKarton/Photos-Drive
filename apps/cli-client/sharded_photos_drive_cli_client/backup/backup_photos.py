@@ -8,7 +8,11 @@ from bson.objectid import ObjectId
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
-from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields
+from ..shared.mongodb.albums_repository import (
+    AlbumsRepository,
+    UpdateAlbumRequest,
+    UpdatedAlbumFields,
+)
 from ..shared.mongodb.media_items import MediaItem, MediaItemId
 from ..shared.mongodb.media_items_repository import MediaItemsRepository
 from ..shared.mongodb.media_items_repository import CreateMediaItemRequest
@@ -104,24 +108,23 @@ class PhotosBackup:
 
         # Step 3: Add the new media items to the database
         new_diff_to_media_item: Dict[ProcessedDiff, MediaItem] = {}
-        with MongoDbTransactionsContext(self.__mongodb_clients_repo):
-            for diff in upload_diff_to_gphotos_media_item_id:
-                gphotos_media_item_id = upload_diff_to_gphotos_media_item_id[diff]
-                gphotos_client_id = diff_assignments[diff]
-                create_media_item_request = CreateMediaItemRequest(
-                    file_name=diff.file_name,
-                    hash_code=None,
-                    location=diff.location,
-                    gphotos_client_id=gphotos_client_id,
-                    gphotos_media_item_id=gphotos_media_item_id,
-                )
+        for diff in upload_diff_to_gphotos_media_item_id:
+            gphotos_media_item_id = upload_diff_to_gphotos_media_item_id[diff]
+            gphotos_client_id = diff_assignments[diff]
+            create_media_item_request = CreateMediaItemRequest(
+                file_name=diff.file_name,
+                hash_code=None,
+                location=diff.location,
+                gphotos_client_id=gphotos_client_id,
+                gphotos_media_item_id=gphotos_media_item_id,
+            )
 
-                media_item = self.__media_items_repo.create_media_item(
-                    create_media_item_request
-                )
-                new_diff_to_media_item[diff] = media_item
+            media_item = self.__media_items_repo.create_media_item(
+                create_media_item_request
+            )
+            new_diff_to_media_item[diff] = media_item
 
-            logger.debug(f"Created media items: {new_diff_to_media_item}")
+        logger.debug(f"Created media items: {new_diff_to_media_item}")
 
         # Step 4: Build a tree of albums with diffs on their edge nodes
         root_diffs_tree_node = self.__build_diffs_tree(diffs)
@@ -135,56 +138,55 @@ class PhotosBackup:
         # Step 6: Go through the tree and modify album's media item ids list
         total_media_item_ids_to_delete = []
         total_album_ids_to_prune = []
-        with MongoDbTransactionsContext(self.__mongodb_clients_repo):
-            queue = deque([root_diffs_tree_node])
-            while len(queue) > 0:
-                cur_diffs_tree_node = queue.popleft()
-                cur_album = cast(Album, cur_diffs_tree_node.album)
+        update_album_requests = []
+        queue = deque([root_diffs_tree_node])
+        while len(queue) > 0:
+            cur_diffs_tree_node = queue.popleft()
+            cur_album = cast(Album, cur_diffs_tree_node.album)
 
-                add_diffs = cur_diffs_tree_node.modifier_to_diffs.get("+", [])
-                delete_diffs = cur_diffs_tree_node.modifier_to_diffs.get("-", [])
+            add_diffs = cur_diffs_tree_node.modifier_to_diffs.get("+", [])
+            delete_diffs = cur_diffs_tree_node.modifier_to_diffs.get("-", [])
 
-                # Step 6a: Find media items to delete
-                file_names_to_delete_set = set(
-                    [diff.file_name for diff in delete_diffs]
-                )
-                media_item_ids_to_delete = set([])
-                if len(delete_diffs) > 0:
-                    for media_item_id in cur_album.media_item_ids:
-                        media_item = self.__media_items_repo.get_media_item_by_id(
-                            media_item_id
-                        )
-                        if media_item.file_name in file_names_to_delete_set:
-                            total_media_item_ids_to_delete.append(media_item.id)
-                            media_item_ids_to_delete.add(media_item.id)
-
-                # Step 6b: Find the media items to add to the album
-                media_item_ids_to_add = []
-                for add_diff in add_diffs:
-                    media_item_id = new_diff_to_media_item[add_diff].id
-                    media_item_ids_to_add.append(media_item_id)
-
-                # Step 6c: Get a new list of media item ids for the album
-                new_media_item_ids: list[MediaItemId] = []
+            # Step 6a: Find media items to delete
+            file_names_to_delete_set = set([diff.file_name for diff in delete_diffs])
+            media_item_ids_to_delete = set([])
+            if len(delete_diffs) > 0:
                 for media_item_id in cur_album.media_item_ids:
-                    if media_item_id not in media_item_ids_to_delete:
-                        new_media_item_ids.append(media_item_id)
-                new_media_item_ids += media_item_ids_to_add
-
-                # Step 6d: Update the album with the new list of media item ids
-                if len(media_item_ids_to_delete) > 0 or len(media_item_ids_to_add) > 0:
-                    self.__albums_repo.update_album(
-                        cur_album.id,
-                        UpdatedAlbumFields(new_media_item_ids=new_media_item_ids),
+                    media_item = self.__media_items_repo.get_media_item_by_id(
+                        media_item_id
                     )
-                    if (
-                        len(new_media_item_ids) == 0
-                        and len(cur_album.child_album_ids) == 0
-                    ):
-                        total_album_ids_to_prune.append(cur_album.id)
+                    if media_item.file_name in file_names_to_delete_set:
+                        total_media_item_ids_to_delete.append(media_item.id)
+                        media_item_ids_to_delete.add(media_item.id)
 
-                for child_diff_tree_node in cur_diffs_tree_node.child_nodes:
-                    queue.append(child_diff_tree_node)
+            # Step 6b: Find the media items to add to the album
+            media_item_ids_to_add = []
+            for add_diff in add_diffs:
+                media_item_id = new_diff_to_media_item[add_diff].id
+                media_item_ids_to_add.append(media_item_id)
+
+            # Step 6c: Get a new list of media item ids for the album
+            new_media_item_ids: list[MediaItemId] = []
+            for media_item_id in cur_album.media_item_ids:
+                if media_item_id not in media_item_ids_to_delete:
+                    new_media_item_ids.append(media_item_id)
+            new_media_item_ids += media_item_ids_to_add
+
+            # Step 6d: Update the album with the new list of media item ids
+            if len(media_item_ids_to_delete) > 0 or len(media_item_ids_to_add) > 0:
+                update_album_requests.append(
+                    UpdateAlbumRequest(
+                        album_id=cur_album.id, new_media_item_ids=new_media_item_ids
+                    )
+                )
+
+                if len(new_media_item_ids) == 0 and len(cur_album.child_album_ids) == 0:
+                    total_album_ids_to_prune.append(cur_album.id)
+
+            for child_diff_tree_node in cur_diffs_tree_node.child_nodes:
+                queue.append(child_diff_tree_node)
+
+        self.__albums_repo.update_albums(update_album_requests)
 
         # Step 7: Delete the media items marked for deletion
         self.__media_items_repo.delete_many_media_items(total_media_item_ids_to_delete)

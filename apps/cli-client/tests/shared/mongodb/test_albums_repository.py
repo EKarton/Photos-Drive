@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
     AlbumsRepository,
     AlbumsRepositoryImpl,
+    UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
@@ -341,6 +342,33 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
             new_media_item_ids=[MediaItemId(ObjectId(), ObjectId())],
         )
 
-        # Test
         with self.assertRaisesRegex(ValueError, "Unable to update album .*"):
             self.repo.update_album(album_id, updated_fields)
+
+    def test_update_albums__with_new_fields(self):
+        album_2010 = self.repo.create_album('2010', None, [], [])
+        album_2011 = self.repo.create_album('2011', None, [], [])
+        album_2012 = self.repo.create_album('2012', None, [], [])
+        album_2013 = self.repo.create_album('2013', None, [], [])
+        photo_album = self.repo.create_album('Photos', None, [], [])
+
+        requests = [
+            UpdateAlbumRequest(album_2010.id, new_parent_album_id=photo_album.id),
+            UpdateAlbumRequest(album_2011.id, new_parent_album_id=photo_album.id),
+            UpdateAlbumRequest(album_2012.id, new_parent_album_id=photo_album.id),
+            UpdateAlbumRequest(album_2013.id, new_parent_album_id=photo_album.id),
+        ]
+        self.repo.update_albums(requests)
+
+        self.assertEqual(
+            self.repo.get_album_by_id(album_2010.id).parent_album_id, photo_album.id
+        )
+        self.assertEqual(
+            self.repo.get_album_by_id(album_2011.id).parent_album_id, photo_album.id
+        )
+        self.assertEqual(
+            self.repo.get_album_by_id(album_2012.id).parent_album_id, photo_album.id
+        )
+        self.assertEqual(
+            self.repo.get_album_by_id(album_2013.id).parent_album_id, photo_album.id
+        )

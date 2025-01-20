@@ -1,8 +1,10 @@
+from collections import defaultdict
 import logging
 from dataclasses import dataclass
 from typing import Optional, Mapping, cast, Any, Dict
 from abc import ABC, abstractmethod
 from bson.objectid import ObjectId
+import pymongo
 
 from .albums import Album, AlbumId
 from .clients_repository import MongoDbClientsRepository
@@ -13,6 +15,30 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class UpdatedAlbumFields:
+    new_name: Optional[str] = None
+    new_parent_album_id: Optional[AlbumId] = None
+    new_child_album_ids: Optional[list[AlbumId]] = None
+    new_media_item_ids: Optional[list[MediaItemId]] = None
+
+
+@dataclass(frozen=True)
+class UpdateAlbumRequest:
+    """
+    Represents an update to an existing album.
+
+    Attributes:
+        album_id (AlbumId): The ID of the album.
+        new_name (Optional[str]): The new name of the album,
+            if present.
+        new_parent_album_id (Optional[AlbumId]): The new parent album ID,
+            if present.
+        new_child_album_ids (Optional[list[AlbumId]]): The new child album IDs,
+            if present.
+        new_media_item_ids (Optional[list[MediaItemId]]): The new media item IDs,
+            if present.
+    """
+
+    album_id: AlbumId
     new_name: Optional[str] = None
     new_parent_album_id: Optional[AlbumId] = None
     new_child_album_ids: Optional[list[AlbumId]] = None
@@ -103,6 +129,16 @@ class AlbumsRepository(ABC):
             album_id (AlbumId): The album ID.
             updated_album_fields (UpdatedAlbumFields): A set of updated album fields.
         """
+
+    @abstractmethod
+    def update_albums(self, update_requests: list[UpdateAlbumRequest]):
+        '''
+        Performs a bulk update on albums with new fields.
+
+        Args:
+            update_requests (list[UpdateAlbumRequest]): A list of bulk album update
+                requests
+        '''
 
 
 class AlbumsRepositoryImpl(AlbumsRepository):
@@ -262,6 +298,58 @@ class AlbumsRepositoryImpl(AlbumsRepository):
 
         if result.matched_count != 1:
             raise ValueError(f"Unable to update album {album_id}")
+
+    def update_albums(self, update_requests: list[UpdateAlbumRequest]):
+        client_id_to_operations: Dict[ObjectId, list[pymongo.UpdateOne]] = defaultdict(
+            list
+        )
+
+        for request in update_requests:
+            filter_query: Mapping = {
+                "_id": request.album_id.object_id,
+            }
+
+            set_query: Mapping = {"$set": {}}
+
+            if request.new_name is not None:
+                set_query["$set"]["name"] = request.new_name
+
+            if request.new_child_album_ids is not None:
+                set_query["$set"]["child_album_ids"] = [
+                    f"{c_id.client_id}:{c_id.object_id}"
+                    for c_id in request.new_child_album_ids
+                ]
+
+            if request.new_media_item_ids is not None:
+                set_query["$set"]["media_item_ids"] = [
+                    f"{m_id.client_id}:{m_id.object_id}"
+                    for m_id in request.new_media_item_ids
+                ]
+
+            if request.new_parent_album_id is not None:
+                c_id = request.new_parent_album_id.client_id
+                o_id = request.new_parent_album_id.object_id
+                set_query["$set"]["parent_album_id"] = f"{c_id}:{o_id}"
+
+            operation = pymongo.UpdateOne(
+                filter=filter_query, update=set_query, upsert=False
+            )
+            client_id_to_operations[request.album_id.client_id].append(operation)
+
+        for client_id, operations in client_id_to_operations.items():
+            client = self._mongodb_clients_repository.get_client_by_id(client_id)
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            result = client["sharded_google_photos"]["albums"].bulk_write(
+                requests=operations, session=session
+            )
+
+            if result.matched_count != len(operations):
+                raise ValueError(
+                    f"Unable to update all albums: {result.matched_count} "
+                    + f"vs {len(operations)}"
+                )
 
     def __parse_raw_document_to_album_obj(
         self, client_id: ObjectId, raw_item: Mapping[str, Any]
