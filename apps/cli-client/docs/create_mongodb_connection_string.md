@@ -18,11 +18,9 @@ This document outlines how to create your own connection string to your MongoDB 
 
     ![DB access 2](./images/creating-mongodb-connection-string/db-access-2.png)
 
-3. A new window appears. Set the authentication method to `Password`, specify the user's name, and click on auto-generate password:
+3. A new window appears. Set the authentication method to `Password`, specify the user's name, and click on auto-generate password. Copy the password to a notepad (it will be used later):
 
     ![Create user 1](./images/creating-mongodb-connection-string/create-user-1.png)
-
-    Copy the password to a notepad (it will be used later).
 
 4. Scroll down, and set the built-in role to `Read and write to any database`, and then click on `Add user`:
 
