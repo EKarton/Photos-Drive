@@ -1,5 +1,7 @@
 # Sharded-Photos-Drive-CLI-Client
 
+![PyPI - Version](https://img.shields.io/pypi/v/sharded_photos_drive_cli_client) ![check-code-coverage](https://img.shields.io/badge/code--coverage-99%-brightgreen)
+
 ## Description
 
 The Sharded-Photos-Drive-CLI-Client is the cli client for Sharded Photos Drive. This CLI helps set up your infrastructure, syncs, adds, and delete your pictures and videos from your machine to Sharded Photos Drive.
