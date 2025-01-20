@@ -1,6 +1,7 @@
 # Sharded-Photos-Drive-CLI-Client
 
-![PyPI - Version](https://img.shields.io/pypi/v/sharded_photos_drive_cli_client) ![check-code-coverage](https://img.shields.io/badge/code--coverage-99%-brightgreen)
+![PyPI - Version](https://img.shields.io/pypi/v/sharded_photos_drive_cli_client)
+![check-code-coverage](https://img.shields.io/badge/code--coverage-99%-brightgreen)
 
 ## Description
 
