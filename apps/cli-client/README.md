@@ -6,6 +6,21 @@ The Sharded-Photos-Drive-CLI-Client is the cli client for Sharded Photos Drive. 
 
 This CLI will never delete content from your machine - it should only mirror the content from your machine to the cloud.
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [Setting up your infrastructure](#setting-up-your-infrastructure)
+  - [Syncing your photos / videos](#syncing-your-photos--videos)
+  - [Adding custom content](#adding-custom-content-to-sharded-photos-drive)
+  - [Deleting custom content](#deleting-content-to-sharded-photos-drive)
+  - [Cleaning](#cleaning-trailing-sharded-photos-drive)
+  - [Deleting everything](#deleting-all-content-in-sharded-photos-drive)
+- [Getting Started to Contribute](#getting-started-to-contribute)
+- [Usage](#usage)
+- [Credits](#credits)
+- [License](#license)
+
 ## Getting Started
 
 ### Installation
@@ -203,6 +218,16 @@ will:
 1. Delete all media items from the metadata database that is not being used
 2. Delete all albums from the metadata database that is not being used
 3. Move photos / videos in Google Photos that are not used to a special album called `To delete` where you can manually delete the content in your Google Photos account.
+
+### Deleting all content in Sharded Photos Drive
+
+In case you want to delete everything, you can run:
+
+```bash
+sharded_photos_drive_cli teardown --config_file config.conf
+```
+
+It will delete all photos / videos from your system, and move all photos / videos in your Google Photo accounts to their `To delete` albums.
 
 ## Getting Started to Contribute
 
