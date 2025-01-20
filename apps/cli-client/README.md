@@ -51,7 +51,7 @@ This CLI will never delete content from your machine - it should only mirror the
 1. From the previous step, assume you have `config.conf` as your config file, and assume your current working directory looks like this:
 
    ```bash
-      .
+   .
    ├── Archives
    │   ├── Photos
    │   │   ├── 2023
@@ -65,7 +65,6 @@ This CLI will never delete content from your machine - it should only mirror the
    │   │           ├── 2024-05 Wallpaper.png
    │   └── Random.jpg
    └── my-config.conf
-
    ```
 
 2. To sync your photos / videos to the system, run:
