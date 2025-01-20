@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 class AddHandler:
     """A class that handles adding content from cli."""
 
-    def add(self, path: str, config: Config):
+    def add(self, path: str, config: Config, parallelize_uploads: bool):
         """
         Adds content to the system.
 
         Args:
             path (str): The path to the media items to add.
             config_file_path (str): The file path to the config file.
+            parallelize_uploads (bool): Whether to parallelize uploads or not.
         """
         # Set up the repos
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
@@ -55,6 +56,7 @@ class AddHandler:
             media_items_repo,
             gphoto_clients_repo,
             mongodb_clients_repo,
+            parallelize_uploads,
         )
         backup_results = backup_service.backup(processed_diffs)
         logger.debug(f"Backup results: {backup_results}")

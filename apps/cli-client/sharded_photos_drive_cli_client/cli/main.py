@@ -55,6 +55,12 @@ def main():
     # Add subparser for the 'add' command
     add_parser = subparsers.add_parser("add")
     add_parser.add_argument("--path", required=True, help="Path to photos to add")
+    add_parser.add_argument(
+        "--parallelize_uploads",
+        default=False,
+        help="Parallelizes uploads to Google Photos [experimental]",
+        action=argparse.BooleanOptionalAction,
+    )
     __add_config_argument(add_parser)
     __add_verbose_argument(add_parser)
 
@@ -135,7 +141,7 @@ def main():
         __set_logging(args.verbose)
         config = __build_config_based_on_args(args)
         add_handler = AddHandler()
-        add_handler.add(args.path, config)
+        add_handler.add(args.path, config, args.parallelize_uploads)
 
     elif args.command == "delete":
         __set_logging(args.verbose)
