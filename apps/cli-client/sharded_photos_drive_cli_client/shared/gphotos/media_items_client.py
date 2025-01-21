@@ -4,7 +4,8 @@ import os
 import backoff
 import dacite
 import magic
-from typing import Optional, Any
+from typing import Optional
+from requests import Response
 from requests.exceptions import HTTPError, RequestException
 
 from dacite import from_dict
@@ -170,7 +171,7 @@ class GPhotosMediaItemsClient:
         filters: Optional[object] | None,
         order_by: Optional[object] | None,
         page_token: Optional[str] | None,
-    ) -> Any:
+    ) -> Response:
         res = self._session.post(
             "https://photoslibrary.googleapis.com/v1/mediaItems:search",
             json.dumps(
@@ -267,7 +268,8 @@ class GPhotosMediaItemsClient:
 
                 if res_2.status_code != 200:
                     logger.error(
-                        f"Failed uploading chunk: {res_2.status_code} {res_2.content}"
+                        f"Failed uploading chunk: {res_2.status_code} "
+                        + f"{res_2.content.decode('utf-8', errors='replace')}"
                     )
 
                     req_3 = self._query_chunked_upload(upload_url)
@@ -277,7 +279,12 @@ class GPhotosMediaItemsClient:
                     if upload_status != "active":
                         raise IllegalStateException("Upload is no longer active")
 
-                    size_received = int(req_3.headers["X-Goog-Upload-Size-Received"])
+                    size_received = 0
+                    if "X-Goog-Upload-Size-Received" in req_3.headers:
+                        size_received = int(
+                            req_3.headers["X-Goog-Upload-Size-Received"]
+                        )
+
                     logger.debug(f"Adjusted seek to {size_received}")
                     file_obj.seek(size_received, 0)
                     cur_offset = size_received
@@ -301,7 +308,7 @@ class GPhotosMediaItemsClient:
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
     def _initialize_chunked_upload(
         self, mime_type: str, file_name: str, file_size_in_bytes: int
-    ) -> Any:
+    ) -> Response:
         self._session.headers["Content-Length"] = "0"
         self._session.headers["X-Goog-Upload-Command"] = "start"
         self._session.headers["X-Goog-Upload-Content-Type"] = mime_type
@@ -317,7 +324,7 @@ class GPhotosMediaItemsClient:
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
     def _upload_photo_chunk(
         self, upload_url: str, cur_offset: int, chunk: bytes, is_last_chunk: bool
-    ) -> Any:
+    ) -> Response:
         upload_cmd = "upload, finalize" if is_last_chunk else "upload"
         self._session.headers["X-Goog-Upload-Command"] = upload_cmd
         self._session.headers["X-Goog-Upload-Offset"] = str(cur_offset)
@@ -329,7 +336,7 @@ class GPhotosMediaItemsClient:
         return res
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
-    def _query_chunked_upload(self, upload_url) -> Any:
+    def _query_chunked_upload(self, upload_url) -> Response:
         self._session.headers["Content-Length"] = "0"
         self._session.headers["X-Goog-Upload-Command"] = "query"
 
