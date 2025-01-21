@@ -158,7 +158,10 @@ class GPhotosMediaItemsClient:
             else:
                 break
 
-        return [from_dict(MediaItem, m) for m in media_items]
+        return [
+            from_dict(MediaItem, m, config=dacite.Config(cast=[VideoProcessingStatus]))
+            for m in media_items
+        ]
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
     def _search_media_items_in_pages(

@@ -122,6 +122,19 @@ MOCK_GET_MEDIA_ITEMS_RESPONSE = {
                 "creationTime": "creation-time",
             },
         },
+        {
+            "id": "3",
+            "productUrl": "http://google.com/photos/2011/2",
+            "baseUrl": "http://google.com/photos/2011/2",
+            "mimeType": "jpeg",
+            "filename": "cat.jpeg",
+            "mediaMetadata": {
+                "creationTime": "creation-time",
+                "video": {
+                    "status": "PROCESSING",
+                },
+            },
+        },
     ]
 }
 
@@ -475,11 +488,27 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
 
             self.assertEqual(
                 response[0],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][0]),
+                from_dict(
+                    MediaItem,
+                    MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][0],
+                    config=dacite.Config(cast=[VideoProcessingStatus]),
+                ),
             )
             self.assertEqual(
                 response[1],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1]),
+                from_dict(
+                    MediaItem,
+                    MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1],
+                    config=dacite.Config(cast=[VideoProcessingStatus]),
+                ),
+            )
+            self.assertEqual(
+                response[2],
+                from_dict(
+                    MediaItem,
+                    MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][2],
+                    config=dacite.Config(cast=[VideoProcessingStatus]),
+                ),
             )
 
     def test_search_for_media_items__response_in_two_pages__returns_media_items(self):
@@ -490,14 +519,19 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             request_mocker.post(
                 "https://photoslibrary.googleapis.com/v1/mediaItems:search",
                 json={
-                    "mediaItems": [MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][0]],
+                    "mediaItems": [
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][0],
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][1],
+                    ],
                     "nextPageToken": "a",
                 },
             )
             request_mocker.post(
                 "https://photoslibrary.googleapis.com/v1/mediaItems:search",
                 json={
-                    "mediaItems": [MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][1]],
+                    "mediaItems": [
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][2],
+                    ],
                 },
                 additional_matcher=lambda request: request.json()['pageToken'] == 'a',
             )
@@ -505,12 +539,15 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             response = client.media_items().search_for_media_items(album_id="123")
 
             self.assertEqual(
-                response[0],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][0]),
-            )
-            self.assertEqual(
-                response[1],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1]),
+                response,
+                [
+                    from_dict(
+                        MediaItem,
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][i],
+                        config=dacite.Config(cast=[VideoProcessingStatus]),
+                    )
+                    for i in range(len(MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems']))
+                ],
             )
 
     def test_search_for_media_items__second_page_no_mediaItems_field(self):
@@ -534,12 +571,15 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             response = client.media_items().search_for_media_items(album_id="123")
 
             self.assertEqual(
-                response[0],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][0]),
-            )
-            self.assertEqual(
-                response[1],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1]),
+                response,
+                [
+                    from_dict(
+                        MediaItem,
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][i],
+                        config=dacite.Config(cast=[VideoProcessingStatus]),
+                    )
+                    for i in range(len(MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems']))
+                ],
             )
 
     @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
@@ -563,12 +603,15 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             response = client.media_items().search_for_media_items(album_id="123")
 
             self.assertEqual(
-                response[0],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][0]),
-            )
-            self.assertEqual(
-                response[1],
-                from_dict(MediaItem, MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1]),
+                response,
+                [
+                    from_dict(
+                        MediaItem,
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][i],
+                        config=dacite.Config(cast=[VideoProcessingStatus]),
+                    )
+                    for i in range(len(MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems']))
+                ],
             )
 
     def test_upload_photo_in_chunks__large_file(self):
