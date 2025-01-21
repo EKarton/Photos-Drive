@@ -5,6 +5,7 @@ import backoff
 import dacite
 import magic
 from typing import Optional, Any
+from requests import Response
 from requests.exceptions import HTTPError, RequestException
 
 from dacite import from_dict
@@ -277,7 +278,12 @@ class GPhotosMediaItemsClient:
                     if upload_status != "active":
                         raise IllegalStateException("Upload is no longer active")
 
-                    size_received = int(req_3.headers["X-Goog-Upload-Size-Received"])
+                    size_received = 0
+                    if "X-Goog-Upload-Size-Received" in req_3.headers:
+                        size_received = int(
+                            req_3.headers["X-Goog-Upload-Size-Received"]
+                        )
+
                     logger.debug(f"Adjusted seek to {size_received}")
                     file_obj.seek(size_received, 0)
                     cur_offset = size_received
@@ -329,7 +335,7 @@ class GPhotosMediaItemsClient:
         return res
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
-    def _query_chunked_upload(self, upload_url) -> Any:
+    def _query_chunked_upload(self, upload_url) -> Response:
         self._session.headers["Content-Length"] = "0"
         self._session.headers["X-Goog-Upload-Command"] = "query"
 
