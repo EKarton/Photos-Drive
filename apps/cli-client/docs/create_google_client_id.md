@@ -86,5 +86,3 @@ This document outlines how to create your own OAuth2 client ID and client secret
 13. Finally, click on the `Create` button. A dialog will appear with your Client ID and Client secrets. Download the file named as `client_secrets.json` and you now have your own client ID and client secrets:
 
     ![image-28](./images/create-google-client-id-client-secrets/image-28.png)
-
-    ![image-29](./images/create-google-client-id-client-secrets/image-29.png)
