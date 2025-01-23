@@ -293,16 +293,16 @@ It will delete all photos / videos from your system, and move all photos / video
 
    4. Once the action is complete, it will publish a new version of the app on <https://pypi.org/project/sharded_photos_drive_cli_client/>.
 
-### Usage
+## Usage
 
 Please note that this project is used for educational purposes and is not intended to be used commercially. We are not liable for any damages/changes done by this project.
 
-### Credits
+## Credits
 
 Emilio Kartono, who made the entire project.
 
 CLI images were provided by <https://ray.so/>.
 
-### License
+## License
 
 This project is protected under the GNU licence. Please refer to the root project's LICENSE.txt for more information.

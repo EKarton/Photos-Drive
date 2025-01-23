@@ -4,6 +4,10 @@
 
 This is the web api app used to serve content to the web ui.
 
+## Getting Started
+
+1. First, create a Google OAuth2 project.
+
 ## Running them locally without Docker
 
 1. Install dependencies by running: `pnpm install`
