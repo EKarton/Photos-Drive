@@ -22,7 +22,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
     npm install
     ```
 
-3. Then, create a `.env` file to store your environment variables:
+3. Then, create a `.env` file to store your environment variables, like:
 
     ```text
     NG_APP_LOGIN_URL=http://localhost:3000/auth/v1/google
