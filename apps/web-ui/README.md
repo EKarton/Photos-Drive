@@ -89,6 +89,8 @@ To run all unit tests, run:
 ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage
 ```
 
+It will check for code coverage, which you can see from the `./coverage` directory.
+
 To only run specific unit test(s), run:
 
 ```bash
