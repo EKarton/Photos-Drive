@@ -1,5 +1,8 @@
 # Sharded Photos Drive Web UI
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/36282e46-c4ab-407f-8a6e-b6dbb4f40748/deploy-status)](https://app.netlify.com/sites/sharded-photos-drive-demo/deploys)
+![check-code-coverage](https://img.shields.io/badge/code--coverage-100-brightgreen)
+
 ## Description
 
 This project is a web app for Sharded Photos Drive. This web app allows users to list and see their photos and videos on a web browser. This web app will only read photos and videos and never modify anything in the database.
