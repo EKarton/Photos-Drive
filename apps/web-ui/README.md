@@ -2,7 +2,7 @@
 
 ## Description
 
-This project is a web app for the Sharded Photos Drive project. This web app allows users to list and see their photos and videos on a web browser. This web app will only read photos and videos and never modify anything in the database.
+This project is a web app for Sharded Photos Drive. This web app allows users to list and see their photos and videos on a web browser. This web app will only read photos and videos and never modify anything in the database.
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
 
