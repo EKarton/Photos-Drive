@@ -184,7 +184,6 @@ export class ImageComponent implements OnInit, OnDestroy {
   }
 
   setIsInViewport(visible: boolean) {
-    console.log(visible);
     this.isInViewport$.next(visible);
   }
 
