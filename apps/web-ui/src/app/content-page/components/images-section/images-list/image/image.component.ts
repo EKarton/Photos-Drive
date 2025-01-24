@@ -153,27 +153,37 @@ export class ImageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription.add(
-      combineLatest([
-        this.isInViewport$.pipe(filter(Boolean)),
-        this.mediaItemId$,
-      ]).subscribe(([, mediaItemId]) => {
-        this.store.dispatch(
-          mediaItemsActions.loadMediaItemDetails({ mediaItemId }),
-        );
-      }),
+      this.isInViewport$
+        .pipe(
+          filter(Boolean),
+          switchMap(() => this.mediaItemId$),
+          distinctUntilChanged(),
+        )
+        .subscribe((mediaItemId) => {
+          this.store.dispatch(
+            mediaItemsActions.loadMediaItemDetails({ mediaItemId }),
+          );
+        }),
     );
 
     this.subscription.add(
-      combineLatest([
-        this.isInViewport$.pipe(filter(Boolean)),
-        this.mediaItemResult$.pipe(filterOnlySuccess(), distinctUntilChanged()),
-      ]).subscribe(([, mediaItem]) => {
-        this.store.dispatch(
-          gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-            gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
+      this.isInViewport$
+        .pipe(
+          filter(Boolean),
+          switchMap(() => {
+            return this.mediaItemResult$.pipe(
+              filterOnlySuccess(),
+              distinctUntilChanged(),
+            );
           }),
-        );
-      }),
+        )
+        .subscribe((mediaItem) => {
+          this.store.dispatch(
+            gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
+              gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
+            }),
+          );
+        }),
     );
 
     this.subscription.add(
