@@ -9,10 +9,12 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { NgxMasonryModule } from 'ngx-masonry';
+import { InViewportModule } from 'ng-in-viewport';
 import {
+  BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
+  filter,
   map,
   Observable,
   Subscription,
@@ -50,9 +52,8 @@ export interface ImageData {
 
 @Component({
   selector: 'app-image',
-  imports: [NgxMasonryModule, HasFailedPipe, IsPendingPipe],
+  imports: [InViewportModule, HasFailedPipe, IsPendingPipe],
   templateUrl: './image.component.html',
-  styleUrl: './image.component.scss',
 })
 export class ImageComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
@@ -65,6 +66,8 @@ export class ImageComponent implements OnInit, OnDestroy {
   private readonly width$ = toObservable(this.width);
 
   readonly imageSizeChanged = output<void>();
+
+  private readonly isInViewport$ = new BehaviorSubject(false);
 
   private subscription = new Subscription();
 
@@ -152,7 +155,10 @@ export class ImageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription.add(
-      this.mediaItemId$.subscribe((mediaItemId: string) => {
+      combineLatest([
+        this.isInViewport$.pipe(filter(Boolean)),
+        this.mediaItemId$,
+      ]).subscribe(([, mediaItemId]) => {
         this.store.dispatch(
           mediaItemsActions.loadMediaItemDetails({ mediaItemId }),
         );
@@ -160,15 +166,16 @@ export class ImageComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(
-      this.mediaItemResult$
-        .pipe(filterOnlySuccess(), distinctUntilChanged())
-        .subscribe((mediaItem: MediaItem) => {
-          this.store.dispatch(
-            gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-              gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
-            }),
-          );
-        }),
+      combineLatest([
+        this.isInViewport$.pipe(filter(Boolean)),
+        this.mediaItemResult$.pipe(filterOnlySuccess(), distinctUntilChanged()),
+      ]).subscribe(([, mediaItem]) => {
+        this.store.dispatch(
+          gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
+            gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
+          }),
+        );
+      }),
     );
 
     this.subscription.add(
@@ -176,6 +183,11 @@ export class ImageComponent implements OnInit, OnDestroy {
         this.imageSizeChanged.emit(undefined);
       }),
     );
+  }
+
+  setIsInViewport(visible: boolean) {
+    console.log(visible);
+    this.isInViewport$.next(visible);
   }
 
   ngOnDestroy(): void {

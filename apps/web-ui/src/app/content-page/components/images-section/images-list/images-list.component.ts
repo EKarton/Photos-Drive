@@ -10,6 +10,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
@@ -18,7 +19,12 @@ import { ImageComponent } from './image/image.component';
 @Component({
   standalone: true,
   selector: 'app-content-images-list',
-  imports: [CommonModule, NgxMasonryModule, ImageComponent],
+  imports: [
+    CommonModule,
+    NgxMasonryModule,
+    InfiniteScrollDirective,
+    ImageComponent,
+  ],
   templateUrl: './images-list.component.html',
   styleUrl: './images-list.component.scss',
 })
@@ -45,13 +51,11 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     };
   });
 
-  private readonly pageSize = 5;
-  private currentPage = signal(1);
+  private readonly pageSize = 15;
+  private maxMediaItemIds = signal(this.pageSize);
 
   readonly paginatedMediaItemIds = computed(() => {
-    const startIndex = (this.currentPage() - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.mediaItemIds().slice(startIndex, endIndex);
+    return this.mediaItemIds().slice(0, this.maxMediaItemIds());
   });
 
   ngAfterViewInit() {
@@ -78,6 +82,12 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
 
   imageSizesChanged() {
     this.ngxMasonryComponent?.layout();
+  }
+
+  getMoreMediaItemIds() {
+    console.log('Scrolled');
+    this.maxMediaItemIds.set(this.maxMediaItemIds() + this.pageSize);
+    this.ngxMasonryComponent?.reloadItems();
   }
 
   ngOnDestroy(): void {

@@ -1,8 +1,15 @@
-<div #masonryContainer>
+<div
+  #masonryContainer
+  infiniteScroll
+  [infiniteScrollDistance]="0.01"
+  [infiniteScrollThrottle]="200"
+  (scrolled)="getMoreMediaItemIds()"
+>
   <ngx-masonry [options]="masonryOptions()">
     @for (mediaItemId of paginatedMediaItemIds(); track mediaItemId) {
       <div ngxMasonryItem class="masonry-item">
         <app-image
+          masonryLazy
           [mediaItemId]="mediaItemId"
           [width]="columnWidth()"
           (imageSizeChanged)="imageSizesChanged()"

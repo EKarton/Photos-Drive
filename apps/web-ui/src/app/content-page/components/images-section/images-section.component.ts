@@ -9,13 +9,7 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  Subscription,
-  switchMap,
-} from 'rxjs';
+import { Observable, Subscription, switchMap } from 'rxjs';
 
 import { HasFailedPipe } from '../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
@@ -38,17 +32,12 @@ export class ImagesSectionComponent implements OnInit, OnDestroy {
   readonly albumId = input.required<string>();
   private readonly albumId$ = toObservable(this.albumId);
 
-  private readonly pageSize = 5;
-  private currentPage$ = new BehaviorSubject(1);
-
   private readonly mediaItemIdsResult$: Observable<Result<string[]>> =
-    combineLatest([this.albumId$, this.currentPage$]).pipe(
-      switchMap(([albumId, currentPage]) =>
+    this.albumId$.pipe(
+      switchMap((albumId: string) =>
         this.store.select(albumsState.selectAlbumDetailsById(albumId)).pipe(
           mapResultRxJs((album: Album) => {
-            const startIndex = (currentPage - 1) * this.pageSize;
-            const endIndex = startIndex + this.pageSize;
-            return album.mediaItemIds.slice(startIndex, endIndex);
+            return album.mediaItemIds;
           }),
         ),
       ),
@@ -62,7 +51,6 @@ export class ImagesSectionComponent implements OnInit, OnDestroy {
   );
 
   ngOnInit(): void {
-    // Fetch the album details
     this.subscription.add(
       this.albumId$.subscribe((albumId) => {
         this.store.dispatch(albumsActions.loadAlbumDetails({ albumId }));
