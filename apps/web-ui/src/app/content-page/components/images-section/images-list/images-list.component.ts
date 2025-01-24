@@ -16,6 +16,8 @@ import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
 import { ImageComponent } from './image/image.component';
 
+const PAGE_SIZE = 15;
+
 @Component({
   standalone: true,
   selector: 'app-content-images-list',
@@ -51,8 +53,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     };
   });
 
-  private readonly pageSize = 15;
-  private maxMediaItemIds = signal(this.pageSize);
+  private maxMediaItemIds = signal(PAGE_SIZE);
 
   readonly paginatedMediaItemIds = computed(() => {
     return this.mediaItemIds().slice(0, this.maxMediaItemIds());
@@ -86,7 +87,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
 
   getMoreMediaItemIds() {
     console.log('Scrolled');
-    this.maxMediaItemIds.set(this.maxMediaItemIds() + this.pageSize);
+    this.maxMediaItemIds.set(this.maxMediaItemIds() + PAGE_SIZE);
     this.ngxMasonryComponent?.reloadItems();
   }
 

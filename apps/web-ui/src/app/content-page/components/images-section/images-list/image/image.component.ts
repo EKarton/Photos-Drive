@@ -60,13 +60,11 @@ export class ImageComponent implements OnInit, OnDestroy {
   private readonly window = inject(WINDOW);
 
   readonly mediaItemId = input.required<string>();
-  private readonly mediaItemId$ = toObservable(this.mediaItemId);
-
   readonly width = input.required<number>();
-  private readonly width$ = toObservable(this.width);
-
   readonly imageSizeChanged = output<void>();
 
+  private readonly mediaItemId$ = toObservable(this.mediaItemId);
+  private readonly width$ = toObservable(this.width);
   private readonly isInViewport$ = new BehaviorSubject(false);
 
   private subscription = new Subscription();

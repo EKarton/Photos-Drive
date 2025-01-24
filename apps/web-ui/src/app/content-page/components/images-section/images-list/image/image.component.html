@@ -1,12 +1,14 @@
 <div inViewport (inViewportAction)="setIsInViewport($event.visible)">
   @if (imageDataResult() | isPending) {
     <div
+      data-testid="image-loading"
       class="skeleton animate-pulse"
       [style.height.px]="width()"
       [style.width.px]="width()"
     ></div>
   } @else if (imageDataResult() | hasFailed) {
     <div
+      data-testid="image-error"
       class="skeleton"
       [style.height.px]="width()"
       [style.width.px]="width()"

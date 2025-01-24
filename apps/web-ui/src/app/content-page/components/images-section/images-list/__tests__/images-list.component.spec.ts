@@ -1,39 +1,43 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideMockStore } from '@ngrx/store/testing';
+import { Map as ImmutableMap } from 'immutable';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { MockResizeObserverFactory } from '../../../../../shared/resize-observer-factory/__mocks__/MockResizeObserverFactory';
-import { ImageData, ImagesListComponent } from '../images-list.component';
+import { toSuccess } from '../../../../../shared/results/results';
+import { GPhotosMediaItemDetails } from '../../../../services/gphotos-api.service';
+import { MediaItem } from '../../../../services/webapi.service';
+import { gPhotosMediaItemsState } from '../../../../store/gphoto-media-items';
+import { mediaItemsState } from '../../../../store/media-items';
+import { mediaViewerState } from '../../../../store/media-viewer';
+import { ImagesListComponent } from '../images-list.component';
 
-const SAMPLE_IMAGES: ImageData[] = [
-  {
-    id: 'image1',
-    baseUrl: 'https://www.google.com/photos/1',
+const MEDIA_ITEM_DETAILS_PHOTOS_1: MediaItem = {
+  id: 'photos1',
+  fileName: 'cat.png',
+  hashCode: '',
+  gPhotosClientId: 'gPhotosClient1',
+  gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+};
+
+const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItemDetails = {
+  id: 'gPhotosMediaItem1',
+  description: '',
+  productUrl: '',
+  baseUrl: 'https://www.google.com/photos/1',
+  mimeType: 'image/jpeg',
+  mediaMetadata: {
+    creationTime: '',
     width: 4032,
     height: 3024,
-    fileName: 'Image-1.pngs',
-    onClick: jasmine.createSpy(),
-    onKeyDown: jasmine.createSpy(),
   },
-  {
-    id: 'image2',
-    baseUrl: 'https://www.google.com/photos/2',
-    width: 3024,
-    height: 4032,
-    fileName: 'Image-1.pngs',
-    onClick: jasmine.createSpy(),
-    onKeyDown: jasmine.createSpy(),
+  contributorInfo: {
+    profilePictureBaseUrl: '',
+    displayName: '',
   },
-  {
-    id: 'image3',
-    baseUrl: 'https://www.google.com/photos/3',
-    width: 5161,
-    height: 3100,
-    fileName: 'Image-1.pngs',
-    onClick: jasmine.createSpy(),
-    onKeyDown: jasmine.createSpy(),
-  },
-];
+  filename: '',
+};
 
 describe('ImagesListComponent', () => {
   let mockResizeObserverFactory: MockResizeObserverFactory;
@@ -43,6 +47,23 @@ describe('ImagesListComponent', () => {
       imports: [ImagesListComponent],
       providers: [
         provideNoopAnimations(),
+        provideMockStore({
+          initialState: {
+            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+            [mediaItemsState.FEATURE_KEY]: {
+              idToDetails: ImmutableMap().set(
+                'photos1',
+                toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_1),
+              ),
+            },
+            [gPhotosMediaItemsState.FEATURE_KEY]: {
+              idToDetails: ImmutableMap().set(
+                'gPhotosClient1:gPhotosMediaItem1',
+                toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+              ),
+            },
+          },
+        }),
         {
           provide: RESIZE_OBSERVER_FACTORY_TOKEN,
           useValue: new MockResizeObserverFactory(),
@@ -57,74 +78,44 @@ describe('ImagesListComponent', () => {
 
   it('should render images', () => {
     const fixture = TestBed.createComponent(ImagesListComponent);
-    fixture.componentRef.setInput('images', SAMPLE_IMAGES);
+    fixture.componentRef.setInput('mediaItemIds', ['photos1']);
     fixture.detectChanges();
 
     const elements = fixture.nativeElement.querySelectorAll('img');
-    expect(elements.length).toEqual(3);
+    expect(elements.length).toEqual(1);
     expect(elements[0].src).toEqual('https://www.google.com/photos/1');
-    expect(elements[1].src).toEqual('https://www.google.com/photos/2');
-    expect(elements[2].src).toEqual('https://www.google.com/photos/3');
 
     const component = fixture.componentInstance;
     expect(component).toBeTruthy();
   });
 
-  it('should call onKeyDown() when user presses key on an image', () => {
-    const fixture = TestBed.createComponent(ImagesListComponent);
-    fixture.componentRef.setInput('images', SAMPLE_IMAGES);
-    fixture.detectChanges();
-
-    const image = fixture.nativeElement.querySelector('img');
-    const event = new KeyboardEvent('keydown', { key: 'Enter' });
-    image.dispatchEvent(event);
-
-    expect(SAMPLE_IMAGES[0].onKeyDown).toHaveBeenCalledWith(event);
-  });
-
-  it('should call onClick() when user clicks on an image', () => {
-    const fixture = TestBed.createComponent(ImagesListComponent);
-    fixture.componentRef.setInput('images', SAMPLE_IMAGES);
-    fixture.detectChanges();
-
-    const image = fixture.nativeElement.querySelector('img');
-    const event = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-    });
-    image.dispatchEvent(event);
-
-    expect(SAMPLE_IMAGES[0].onClick).toHaveBeenCalledWith(event);
-  });
-
   [
     {
       hostElementWidth: 200,
-      expectedImageWidths: [200, 200, 200],
-      expectedImageHeights: [150, 267, 120],
+      expectedImageWidths: [200],
+      expectedImageHeights: [150],
     },
     {
       hostElementWidth: 500,
-      expectedImageWidths: [245, 245, 245],
-      expectedImageHeights: [184, 327, 147],
+      expectedImageWidths: [245],
+      expectedImageHeights: [184],
     },
     {
       hostElementWidth: 1200,
-      expectedImageWidths: [393, 393, 393],
-      expectedImageHeights: [295, 524, 236],
+      expectedImageWidths: [393],
+      expectedImageHeights: [295],
     },
     {
       hostElementWidth: 1600,
-      expectedImageWidths: [392, 392, 392],
-      expectedImageHeights: [294, 523, 235],
+      expectedImageWidths: [392],
+      expectedImageHeights: [294],
     },
   ].forEach(
     ({ hostElementWidth, expectedImageWidths, expectedImageHeights }) => {
       it(`should resize images correctly when the component width changes to ${hostElementWidth}`, async () => {
         // Render the component
         const fixture = TestBed.createComponent(ImagesListComponent);
-        fixture.componentRef.setInput('images', SAMPLE_IMAGES);
+        fixture.componentRef.setInput('mediaItemIds', ['photos1']);
         fixture.detectChanges();
 
         // Simulate a resize event
@@ -162,4 +153,21 @@ describe('ImagesListComponent', () => {
       });
     },
   );
+
+  it('should fetch more images given user has scrolled', () => {
+    const mediaItemIds = Array.from(
+      { length: 100 },
+      (_, i) => `photos${i + 1}`,
+    );
+    const fixture = TestBed.createComponent(ImagesListComponent);
+    fixture.componentRef.setInput('mediaItemIds', mediaItemIds);
+    fixture.detectChanges();
+
+    fixture.componentInstance.getMoreMediaItemIds();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.paginatedMediaItemIds().length).toEqual(
+      30,
+    );
+  });
 });
