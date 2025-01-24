@@ -86,7 +86,6 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   }
 
   getMoreMediaItemIds() {
-    console.log('Scrolled');
     this.maxMediaItemIds.set(this.maxMediaItemIds() + PAGE_SIZE);
     this.ngxMasonryComponent?.reloadItems();
   }
