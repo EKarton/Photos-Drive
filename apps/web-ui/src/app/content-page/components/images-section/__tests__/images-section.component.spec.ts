@@ -9,15 +9,9 @@ import { toSuccess } from '../../../../shared/results/results';
 import { GPhotosMediaItemDetails } from '../../../services/gphotos-api.service';
 import { Album, MediaItem } from '../../../services/webapi.service';
 import { albumsActions, albumsState } from '../../../store/albums';
-import {
-  gPhotosMediaItemsActions,
-  gPhotosMediaItemsState,
-} from '../../../store/gphoto-media-items';
-import { mediaItemsActions, mediaItemsState } from '../../../store/media-items';
-import {
-  mediaViewerActions,
-  mediaViewerState,
-} from '../../../store/media-viewer';
+import { gPhotosMediaItemsState } from '../../../store/gphoto-media-items';
+import { mediaItemsState } from '../../../store/media-items';
+import { mediaViewerState } from '../../../store/media-viewer';
 import { ImagesSectionComponent } from '../images-section.component';
 
 const ALBUM_DETAILS_PHOTOS: Album = {
@@ -80,9 +74,8 @@ const G_MEDIA_ITEM_DETAILS_PHOTO_2: GPhotosMediaItemDetails = {
   filename: '',
 };
 
-describe('ImagesListComponent', () => {
+describe('ImagesSectionComponent', () => {
   let store: MockStore;
-  let mockWindow: Window;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -110,8 +103,6 @@ describe('ImagesListComponent', () => {
 
     store = TestBed.inject(MockStore);
     spyOn(store, 'dispatch');
-
-    mockWindow = TestBed.inject(WINDOW);
   });
 
   it('should render spinner and dispatch correctly given current album is not loaded yet', () => {
@@ -155,79 +146,7 @@ describe('ImagesListComponent', () => {
     expect(spinner).toBeFalsy();
   });
 
-  it('should render spinner and dispatch correctly given media items have not loaded yet', () => {
-    const fixture = TestBed.createComponent(ImagesSectionComponent);
-    fixture.componentRef.setInput('albumId', 'album1');
-    fixture.detectChanges();
-
-    store.setState({
-      [albumsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'album1',
-          toSuccess(ALBUM_DETAILS_PHOTOS),
-        ),
-      },
-      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      [mediaItemsState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-      [gPhotosMediaItemsState.FEATURE_KEY]:
-        gPhotosMediaItemsState.buildInitialState(),
-    });
-    store.refreshState();
-    fixture.detectChanges();
-
-    const spinner = fixture.nativeElement.querySelector(
-      '[data-testid="images-section-spinner"]',
-    );
-    expect(spinner).toBeTruthy();
-    expect(store.dispatch).toHaveBeenCalledWith(
-      mediaItemsActions.loadMediaItemDetails({ mediaItemId: 'photos1' }),
-    );
-    expect(store.dispatch).toHaveBeenCalledWith(
-      mediaItemsActions.loadMediaItemDetails({ mediaItemId: 'photos2' }),
-    );
-  });
-
-  it('should render spinner and dispatch correctly given gphotos media items have not loaded yet', () => {
-    const fixture = TestBed.createComponent(ImagesSectionComponent);
-    fixture.componentRef.setInput('albumId', 'album1');
-    fixture.detectChanges();
-
-    store.setState({
-      [albumsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'album1',
-          toSuccess(ALBUM_DETAILS_PHOTOS),
-        ),
-      },
-      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set('photos1', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_1))
-          .set('photos2', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_2)),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]:
-        gPhotosMediaItemsState.buildInitialState(),
-    });
-    store.refreshState();
-    fixture.detectChanges();
-
-    const spinner = fixture.nativeElement.querySelector(
-      '[data-testid="images-section-spinner"]',
-    );
-    expect(spinner).toBeTruthy();
-    expect(store.dispatch).toHaveBeenCalledWith(
-      gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
-      }),
-    );
-    expect(store.dispatch).toHaveBeenCalledWith(
-      gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
-      }),
-    );
-  });
-
-  it('should render images given gphotos media items have loaded yet', () => {
+  it('should render images given album, media items, and gphotos media items have loaded yet', () => {
     const fixture = TestBed.createComponent(ImagesSectionComponent);
     fixture.componentRef.setInput('albumId', 'album1');
     fixture.detectChanges();
@@ -266,113 +185,5 @@ describe('ImagesListComponent', () => {
     expect(elements.length).toEqual(2);
     expect(elements[0].src).toEqual('http://www.google.com/photos/1');
     expect(elements[1].src).toEqual('http://www.google.com/photos/2');
-  });
-
-  [
-    {
-      event: new KeyboardEvent('keydown', {
-        key: 'Enter',
-        code: 'Enter',
-      }),
-    },
-    {
-      event: new MouseEvent('click'),
-    },
-  ].forEach(({ event }) => {
-    it(`should dispatch request to open media viewer when user emits ${event} on image`, () => {
-      store.setState({
-        [albumsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap().set(
-            'album1',
-            toSuccess(ALBUM_DETAILS_PHOTOS),
-          ),
-        },
-        [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-        [mediaItemsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap()
-            .set('photos1', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_1))
-            .set('photos2', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_2)),
-        },
-        [gPhotosMediaItemsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap()
-            .set(
-              'gPhotosClient1:gPhotosMediaItem1',
-              toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-            )
-            .set(
-              'gPhotosClient1:gPhotosMediaItem2',
-              toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_2),
-            ),
-        },
-      });
-      store.refreshState();
-      const fixture = TestBed.createComponent(ImagesSectionComponent);
-      fixture.componentRef.setInput('albumId', 'album1');
-      fixture.detectChanges();
-
-      fixture.nativeElement
-        .querySelector('[data-testid="media-item-image"]')
-        .dispatchEvent(event);
-
-      expect(store.dispatch).toHaveBeenCalledWith(
-        mediaViewerActions.openMediaViewer({
-          request: { mediaItemId: 'photos1' },
-        }),
-      );
-    });
-  });
-
-  [
-    {
-      event: new KeyboardEvent('keydown', {
-        key: 'Enter',
-        code: 'Enter',
-        ctrlKey: true,
-      }),
-    },
-    {
-      event: new MouseEvent('click', { ctrlKey: true }),
-    },
-  ].forEach(({ event }) => {
-    it(`should dispatch request to open image in new tab when user emits event ${event} on image`, () => {
-      store.setState({
-        [albumsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap().set(
-            'album1',
-            toSuccess(ALBUM_DETAILS_PHOTOS),
-          ),
-        },
-        [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-        [mediaItemsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap()
-            .set('photos1', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_1))
-            .set('photos2', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_2)),
-        },
-        [gPhotosMediaItemsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap()
-            .set(
-              'gPhotosClient1:gPhotosMediaItem1',
-              toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-            )
-            .set(
-              'gPhotosClient1:gPhotosMediaItem2',
-              toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_2),
-            ),
-        },
-      });
-      store.refreshState();
-      const fixture = TestBed.createComponent(ImagesSectionComponent);
-      fixture.componentRef.setInput('albumId', 'album1');
-      fixture.detectChanges();
-
-      fixture.nativeElement
-        .querySelector('[data-testid="media-item-image"]')
-        .dispatchEvent(event);
-
-      expect(mockWindow.open).toHaveBeenCalledWith(
-        'http://www.google.com/photos/1=w200-h200',
-        '_blank',
-      );
-    });
   });
 });

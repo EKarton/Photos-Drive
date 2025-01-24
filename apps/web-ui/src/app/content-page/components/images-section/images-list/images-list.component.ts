@@ -10,24 +10,23 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
+import { ImageComponent } from './image/image.component';
 
-export interface ImageData {
-  id: string;
-  baseUrl: string;
-  width: number;
-  height: number;
-  fileName: string;
-  onClick: (event: MouseEvent) => void;
-  onKeyDown: (event: KeyboardEvent) => void;
-}
+const PAGE_SIZE = 15;
 
 @Component({
   standalone: true,
   selector: 'app-content-images-list',
-  imports: [CommonModule, NgxMasonryModule],
+  imports: [
+    CommonModule,
+    NgxMasonryModule,
+    InfiniteScrollDirective,
+    ImageComponent,
+  ],
   templateUrl: './images-list.component.html',
   styleUrl: './images-list.component.scss',
 })
@@ -35,7 +34,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   private readonly resizeObserverFactory = inject(
     RESIZE_OBSERVER_FACTORY_TOKEN,
   );
-  readonly images = input.required<ImageData[]>();
+  readonly mediaItemIds = input.required<string[]>();
 
   @ViewChild(NgxMasonryComponent) ngxMasonryComponent?: NgxMasonryComponent;
   @ViewChild('masonryContainer') masonryContainer?: ElementRef;
@@ -43,7 +42,8 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   private observer?: ResizeObserver;
   private readonly gutterSizePx = 10;
   private readonly numColumns = signal(3);
-  private readonly columnWidth = signal(200);
+
+  readonly columnWidth = signal(200);
 
   readonly masonryOptions = computed(() => {
     return {
@@ -53,16 +53,10 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     };
   });
 
-  readonly processedImages = computed(() => {
-    return this.images().map((image: ImageData) => {
-      const height = (image.height / image.width) * this.columnWidth();
+  private maxMediaItemIds = signal(PAGE_SIZE);
 
-      return {
-        ...image,
-        width: this.columnWidth(),
-        height,
-      };
-    });
+  readonly paginatedMediaItemIds = computed(() => {
+    return this.mediaItemIds().slice(0, this.maxMediaItemIds());
   });
 
   ngAfterViewInit() {
@@ -85,6 +79,15 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     if (this.masonryContainer) {
       this.observer.observe(this.masonryContainer.nativeElement);
     }
+  }
+
+  imageSizesChanged() {
+    this.ngxMasonryComponent?.layout();
+  }
+
+  getMoreMediaItemIds() {
+    this.maxMediaItemIds.set(this.maxMediaItemIds() + PAGE_SIZE);
+    this.ngxMasonryComponent?.reloadItems();
   }
 
   ngOnDestroy(): void {

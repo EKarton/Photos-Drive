@@ -1,0 +1,39 @@
+<div inViewport (inViewportAction)="setIsInViewport($event.visible)">
+  @if (imageDataResult() | isPending) {
+    <div
+      data-testid="image-loading"
+      class="skeleton animate-pulse"
+      [style.height.px]="width()"
+      [style.width.px]="width()"
+    ></div>
+  } @else if (imageDataResult() | hasFailed) {
+    <div
+      data-testid="image-error"
+      class="skeleton"
+      [style.height.px]="width()"
+      [style.width.px]="width()"
+    >
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div
+          class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm"
+        >
+          <span class="font-bold">Error:</span> Failed to load image
+        </div>
+      </div>
+    </div>
+  } @else {
+    @let imageData = imageDataResult().data!;
+    <img
+      loading="lazy"
+      data-testid="media-item-image"
+      [src]="imageData.baseUrl"
+      [style.height.px]="imageData.height"
+      [style.width.px]="imageData.width"
+      [alt]="imageData.fileName"
+      (click)="imageData.onClick($event)"
+      (keydown)="imageData.onKeyDown($event)"
+      tabindex="0"
+      role="button"
+    />
+  }
+</div>
