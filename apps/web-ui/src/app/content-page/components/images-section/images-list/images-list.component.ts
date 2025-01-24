@@ -13,21 +13,12 @@ import {
 import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
-
-export interface ImageData {
-  id: string;
-  baseUrl: string;
-  width: number;
-  height: number;
-  fileName: string;
-  onClick: (event: MouseEvent) => void;
-  onKeyDown: (event: KeyboardEvent) => void;
-}
+import { ImageComponent } from './image/image.component';
 
 @Component({
   standalone: true,
   selector: 'app-content-images-list',
-  imports: [CommonModule, NgxMasonryModule],
+  imports: [CommonModule, NgxMasonryModule, ImageComponent],
   templateUrl: './images-list.component.html',
   styleUrl: './images-list.component.scss',
 })
@@ -35,7 +26,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   private readonly resizeObserverFactory = inject(
     RESIZE_OBSERVER_FACTORY_TOKEN,
   );
-  readonly images = input.required<ImageData[]>();
+  readonly mediaItemIds = input.required<string[]>();
 
   @ViewChild(NgxMasonryComponent) ngxMasonryComponent?: NgxMasonryComponent;
   @ViewChild('masonryContainer') masonryContainer?: ElementRef;
@@ -43,7 +34,8 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   private observer?: ResizeObserver;
   private readonly gutterSizePx = 10;
   private readonly numColumns = signal(3);
-  private readonly columnWidth = signal(200);
+
+  readonly columnWidth = signal(200);
 
   readonly masonryOptions = computed(() => {
     return {
@@ -53,16 +45,13 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     };
   });
 
-  readonly processedImages = computed(() => {
-    return this.images().map((image: ImageData) => {
-      const height = (image.height / image.width) * this.columnWidth();
+  private readonly pageSize = 5;
+  private currentPage = signal(1);
 
-      return {
-        ...image,
-        width: this.columnWidth(),
-        height,
-      };
-    });
+  readonly paginatedMediaItemIds = computed(() => {
+    const startIndex = (this.currentPage() - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.mediaItemIds().slice(startIndex, endIndex);
   });
 
   ngAfterViewInit() {
@@ -85,6 +74,10 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     if (this.masonryContainer) {
       this.observer.observe(this.masonryContainer.nativeElement);
     }
+  }
+
+  imageSizesChanged() {
+    this.ngxMasonryComponent?.layout();
   }
 
   ngOnDestroy(): void {
