@@ -4,6 +4,10 @@ import argparse
 
 from pymongo.mongo_client import MongoClient
 
+from sharded_photos_drive_cli_client.cli.add_file_hashes_handler import (
+    AddFileHashesHandler,
+)
+
 from ..shared.config.config import Config
 from ..shared.config.config_from_file import ConfigFromFile
 from ..shared.config.config_from_mongodb import ConfigFromMongoDb
@@ -91,6 +95,11 @@ def main():
     __add_config_argument(sync_parser)
     __add_verbose_argument(sync_parser)
 
+    # Add subparser for the 'add-file-hashes' command
+    add_file_hashes_parser = subparsers.add_parser('add-file-hashes')
+    __add_config_argument(add_file_hashes_parser)
+    __add_verbose_argument(add_file_hashes_parser)
+
     # Add subparser for the 'clean' command
     clean_parser = subparsers.add_parser("clean")
     __add_config_argument(clean_parser)
@@ -159,6 +168,12 @@ def main():
             config,
             args.parallelize_uploads,
         )
+
+    elif args.command == 'add-file-hashes':
+        __set_logging(args.verbose)
+        config = __build_config_based_on_args(args)
+        add_file_hashes_handler = AddFileHashesHandler()
+        add_file_hashes_handler.run(config)
 
     elif args.command == "clean":
         __set_logging(args.verbose)
