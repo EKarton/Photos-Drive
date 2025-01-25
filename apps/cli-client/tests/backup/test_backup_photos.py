@@ -33,6 +33,8 @@ parametrize_use_parallel_uploads = parametrize(
     [(True,), (False,)],
 )
 
+MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
 
 class TestPhotosBackup(ParametrizedTestCase):
 
@@ -68,6 +70,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
             ProcessedDiff(
@@ -76,6 +79,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="cat.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-2, longitude=2),
             ),
             ProcessedDiff(
@@ -84,6 +88,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2009",
                 file_name="fish.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-3, longitude=3),
             ),
             ProcessedDiff(
@@ -92,6 +97,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2009",
                 file_name="bird.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-4, longitude=4),
             ),
         ]
@@ -251,7 +257,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=gmedia_item_obj.newMediaItemResults[
@@ -272,6 +278,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="cat.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
@@ -384,7 +391,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_mitem_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
@@ -395,7 +402,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_mitem_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
@@ -416,6 +423,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="cat.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
@@ -502,7 +510,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results.newMediaItemResults[
@@ -522,6 +530,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_path='./Archives/Photos/2010/dog.png',
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
+                file_hash=MOCK_FILE_HASH,
                 file_size=10,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
@@ -612,7 +621,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
@@ -623,7 +632,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
@@ -648,6 +657,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
@@ -747,7 +757,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
@@ -758,7 +768,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
@@ -783,6 +793,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]

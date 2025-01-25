@@ -103,7 +103,7 @@ class FolderSyncDiff:
             for media_item_id in album.media_item_ids:
                 media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
                 file_hash_str = (
-                    media_item.file_hash.decode('utf-8') if media_item.file_hash else ''
+                    media_item.file_hash.hex() if media_item.file_hash else ''
                 )
 
                 if album_id == base_album_id:
@@ -179,7 +179,7 @@ class FolderSyncDiff:
                 local_file_path = os.path.join(
                     ".", os.path.relpath(os.path.join(root, file))
                 )
-                file_hash = compute_file_hash(local_file_path).decode('utf-8')
+                file_hash = compute_file_hash(local_file_path).hex()
 
                 found_files.append(
                     LocalFile(
