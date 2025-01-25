@@ -31,6 +31,32 @@ class CreateMediaItemRequest:
     gphotos_media_item_id: str
 
 
+@dataclass(frozen=True)
+class UpdateMediaItemRequest:
+    '''
+    A class that represents the parameters needed to update an existing media item in
+    the database.
+
+    Attributes:
+        media_item_id (MediaItemId): The ID of the media item to update.
+        new_file_name (Optional[str]): The new file name, if present.
+        new_file_hash (Optional[bytes]): The new file hash, if present.
+        new_location (Optional[GpsLocation | None]): The new gps location,
+            if present.
+        new_gphotos_client_id (Optional[ObjectId]): The new GPhotos client ID,
+            if present.
+        new_gphotos_media_item_id (Optional[str]): The new GPhotos media item ID,
+            if present.
+    '''
+
+    media_item_id: MediaItemId
+    new_file_name: Optional[str]
+    new_file_hash: Optional[bytes]
+    new_location: Optional[GpsLocation | None]
+    new_gphotos_client_id: Optional[ObjectId]
+    new_gphotos_media_item_id: Optional[str]
+
+
 class MediaItemsRepository(ABC):
     """
     A class that represents a repository of all of the media items in the database.
@@ -68,6 +94,25 @@ class MediaItemsRepository(ABC):
         Returns:
             MediaItem: The media item.
         """
+
+    @abstractmethod
+    def update_media_item(self, request: UpdateMediaItemRequest):
+        '''
+        Updates a media item in the database.
+
+        Args:
+            requests (UpdateMediaItemRequest): A request to update a media item.
+        '''
+
+    @abstractmethod
+    def update_many_media_items(self, requests: list[UpdateMediaItemRequest]):
+        '''
+        Updates many media items in the database.
+
+        Args:
+            requests (list[UpdateMediaItemRequest]):
+                A list of requests to update many media item.
+        '''
 
     @abstractmethod
     def delete_media_item(self, id: MediaItemId):
@@ -173,6 +218,12 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             gphotos_client_id=request.gphotos_client_id,
             gphotos_media_item_id=request.gphotos_media_item_id,
         )
+
+    def update_media_item(self, request: UpdateMediaItemRequest):
+        raise NotImplementedError("Not implemented yet")
+
+    def update_many_media_items(self, requests):
+        raise NotImplementedError("Not implemented yet")
 
     def delete_media_item(self, id: MediaItemId):
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
