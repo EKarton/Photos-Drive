@@ -188,6 +188,37 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(new_media_item_2.gphotos_client_id, new_gphotos_client_id)
         self.assertEqual(new_media_item_2.gphotos_media_item_id, 'gphotos_1')
 
+    def test_update_many_media_items_update_file_name(self):
+        media_item_1 = self.repo.create_media_item(
+            CreateMediaItemRequest(
+                'dog.jpg',
+                MOCK_FILE_HASH,
+                GpsLocation(longitude=12.34, latitude=56.78),
+                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+                gphotos_media_item_id="gphotos_456",
+            )
+        )
+
+        self.repo.update_many_media_items(
+            [
+                UpdateMediaItemRequest(
+                    media_item_id=media_item_1.id, new_file_name="cat.jpg"
+                )
+            ]
+        )
+
+        new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
+        self.assertEqual(new_media_item_1.id, media_item_1.id)
+        self.assertEqual(new_media_item_1.file_name, "cat.jpg")
+        self.assertEqual(new_media_item_1.file_hash, media_item_1.file_hash)
+        self.assertEqual(new_media_item_1.location, media_item_1.location)
+        self.assertEqual(
+            new_media_item_1.gphotos_client_id, media_item_1.gphotos_client_id
+        )
+        self.assertEqual(
+            new_media_item_1.gphotos_media_item_id, media_item_1.gphotos_media_item_id
+        )
+
     def test_update_many_media_items_clear_location(self):
         media_item_1 = self.repo.create_media_item(
             CreateMediaItemRequest(
