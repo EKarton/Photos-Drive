@@ -113,7 +113,7 @@ class PhotosBackup:
             gphotos_client_id = diff_assignments[diff]
             create_media_item_request = CreateMediaItemRequest(
                 file_name=diff.file_name,
-                hash_code=None,
+                file_hash=None,
                 location=diff.location,
                 gphotos_client_id=gphotos_client_id,
                 gphotos_media_item_id=gphotos_media_item_id,

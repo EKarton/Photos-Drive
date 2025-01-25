@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, cast, Mapping
 from abc import ABC, abstractmethod
+from bson import Binary
 from bson.objectid import ObjectId
 
 from .media_items import MediaItemId, MediaItem, GpsLocation
@@ -15,7 +16,7 @@ class CreateMediaItemRequest:
 
     Attributes:
         file_name (str): The file name of the media item.
-        hash_code (Optional[str]): The hash code of the media item (Optional).
+        file_hash (Optional[bytes]): The hash of the media item, in bytes.
         location (Optional(GpsLocation)): The location of where the media item was
             taken.
         gphotos_client_id (ObjectId): The ID of the Google Photos client that the media
@@ -24,7 +25,7 @@ class CreateMediaItemRequest:
     """
 
     file_name: str
-    hash_code: Optional[str]
+    file_hash: Optional[bytes]
     location: Optional[GpsLocation]
     gphotos_client_id: ObjectId
     gphotos_media_item_id: str
@@ -149,10 +150,12 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
 
         data_object: Any = {
             "file_name": request.file_name,
-            "hash_code": request.hash_code,
             "gphotos_client_id": str(request.gphotos_client_id),
             "gphotos_media_item_id": str(request.gphotos_media_item_id),
         }
+        if request.file_hash:
+            data_object['file_hash'] = Binary(request.file_hash)
+
         if request.location:
             data_object["location"] = {
                 "type": "Point",
@@ -166,7 +169,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         return MediaItem(
             id=MediaItemId(client_id=client_id, object_id=insert_result.inserted_id),
             file_name=request.file_name,
-            hash_code=request.hash_code,
+            file_hash=request.file_hash,
             location=request.location,
             gphotos_client_id=request.gphotos_client_id,
             gphotos_media_item_id=request.gphotos_media_item_id,
@@ -214,10 +217,14 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 latitude=float(raw_item["location"]["coordinates"][1]),
             )
 
+        file_hash: bytes | None = None
+        if 'file_hash' in raw_item and raw_item['file_hash']:
+            file_hash = bytes(raw_item["file_hash"])
+
         return MediaItem(
             id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
             file_name=raw_item["file_name"],
-            hash_code=raw_item["hash_code"],
+            file_hash=file_hash,
             location=location,
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],

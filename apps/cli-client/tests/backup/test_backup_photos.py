@@ -251,7 +251,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=gmedia_item_obj.newMediaItemResults[
@@ -384,7 +384,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_mitem_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
@@ -395,7 +395,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_mitem_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
@@ -502,7 +502,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results.newMediaItemResults[
@@ -612,7 +612,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
@@ -623,7 +623,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
@@ -747,7 +747,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
@@ -758,7 +758,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[

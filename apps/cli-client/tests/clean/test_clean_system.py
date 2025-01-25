@@ -73,7 +73,7 @@ class SystemCleanerTests(unittest.TestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results.newMediaItemResults[
@@ -153,7 +153,7 @@ class SystemCleanerTests(unittest.TestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
@@ -176,7 +176,7 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
@@ -257,7 +257,7 @@ class SystemCleanerTests(unittest.TestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
@@ -280,7 +280,7 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[

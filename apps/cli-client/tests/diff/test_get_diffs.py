@@ -76,7 +76,7 @@ class FolderSyncDiffTests(TestCase):
         media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -155,7 +155,7 @@ class FolderSyncDiffTests(TestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -167,7 +167,7 @@ class FolderSyncDiffTests(TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -248,7 +248,7 @@ class FolderSyncDiffTests(TestCase):
         media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -317,7 +317,7 @@ class FolderSyncDiffTests(TestCase):
         media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -397,7 +397,7 @@ class FolderSyncDiffTests(TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -416,7 +416,7 @@ class FolderSyncDiffTests(TestCase):
         boat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='boat.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -496,7 +496,7 @@ class FolderSyncDiffTests(TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -515,7 +515,7 @@ class FolderSyncDiffTests(TestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=None,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()

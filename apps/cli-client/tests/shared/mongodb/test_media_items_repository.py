@@ -1,3 +1,5 @@
+import os
+from bson import Binary
 import unittest
 from bson.objectid import ObjectId
 
@@ -27,6 +29,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.repo = MediaItemsRepositoryImpl(self.mongodb_clients_repo)
 
     def test_get_media_item_by_id(self):
+        fake_file_hash = os.urandom(16)
         media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
 
         # Insert a mock media item into the mock database
@@ -34,7 +37,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             {
                 "_id": media_item_id.object_id,
                 "file_name": "test_image.jpg",
-                "hash_code": "abc123",
+                "file_hash": Binary(fake_file_hash),
                 "location": {"type": "Point", "coordinates": [12.34, 56.78]},
                 "gphotos_client_id": str(media_item_id.client_id),
                 "gphotos_media_item_id": "gphotos_123",
@@ -46,7 +49,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         # Assert the retrieved media item matches the inserted data
         self.assertEqual(media_item.file_name, "test_image.jpg")
-        self.assertEqual(media_item.hash_code, "abc123")
+        self.assertEqual(media_item.file_hash, fake_file_hash)
         self.assertIsNotNone(media_item.location)
         self.assertEqual(media_item.location, GpsLocation(56.78, 12.34))
         self.assertEqual(media_item.gphotos_client_id, media_item_id.client_id)
@@ -59,9 +62,10 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             self.repo.get_media_item_by_id(media_item_id)
 
     def test_create_media_item(self):
+        fake_file_hash = os.urandom(16)
         request = CreateMediaItemRequest(
             file_name="new_image.jpg",
-            hash_code="hashcode123",
+            file_hash=fake_file_hash,
             location=GpsLocation(longitude=12.34, latitude=56.78),
             gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
             gphotos_media_item_id="gphotos_456",
@@ -73,7 +77,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         # Assert that the media item was created correctly
         self.assertEqual(media_item.id.client_id, self.mongodb_client_id)
         self.assertEqual(media_item.file_name, "new_image.jpg")
-        self.assertEqual(media_item.hash_code, "hashcode123")
+        self.assertEqual(media_item.file_hash, fake_file_hash)
         self.assertIsNotNone(media_item.location)
         self.assertEqual(media_item.location, GpsLocation(56.78, 12.34))
         self.assertEqual(media_item.gphotos_client_id, request.gphotos_client_id)
@@ -88,7 +92,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             {
                 "_id": media_item_id.object_id,
                 "file_name": "to_delete.jpg",
-                "hash_code": "hashcode456",
+                "file_hash": Binary(os.urandom(16)),
                 "gphotos_client_id": str(media_item_id.client_id),
                 "gphotos_media_item_id": "gphotos_789",
             }
@@ -123,7 +127,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 {
                     "_id": mid.object_id,
                     "file_name": f"delete_me_{mid.object_id}.jpg",
-                    "hash_code": f"hashcode_{mid.object_id}",
+                    "file_hash": f"hashcode_{mid.object_id}",
                     "gphotos_client_id": str(mid.client_id),
                     "gphotos_media_item_id": f"gphotos_{mid.object_id}",
                 }
@@ -152,7 +156,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             {
                 "_id": existing_mid.object_id,
                 "file_name": f"existing_{existing_mid.object_id}.jpg",
-                "hash_code": f"hashcode_{existing_mid.object_id}",
+                "file_hash": Binary(os.urandom(16)),
                 "gphotos_client_id": str(existing_mid.client_id),
                 "gphotos_media_item_id": f"gphotos_{existing_mid.object_id}",
             }
