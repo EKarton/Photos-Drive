@@ -236,12 +236,13 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 "_id": request.media_item_id.object_id,
             }
 
-            set_query: Mapping = {"$set": {}}
+            set_query: Mapping = {"$set": {}, "$unset": {}}
 
             if request.new_file_name is not None:
                 set_query["$set"]["file_name"] = request.new_file_name
             if request.new_file_hash is not None:
                 set_query["$set"]["file_hash"] = Binary(request.new_file_hash)
+                set_query["$unset"]["hash_code"] = 1
             if request.new_gphotos_client_id is not None:
                 set_query["$set"]['gphotos_client_id'] = str(
                     request.new_gphotos_client_id
@@ -324,10 +325,16 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 latitude=float(raw_item["location"]["coordinates"][1]),
             )
 
+        file_hash = None
+        if 'file_hash' in raw_item and raw_item['file_hash']:
+            file_hash = bytes(raw_item["file_hash"])
+        else:
+            file_hash = b''
+
         return MediaItem(
             id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
             file_name=raw_item["file_name"],
-            file_hash=bytes(raw_item["file_hash"]),
+            file_hash=file_hash,
             location=location,
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],
