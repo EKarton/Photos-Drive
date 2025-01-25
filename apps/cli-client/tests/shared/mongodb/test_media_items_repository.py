@@ -7,6 +7,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
     MediaItemsRepositoryImpl,
     CreateMediaItemRequest,
     MongoDbClientsRepository,
+    UpdateMediaItemRequest,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.media_items import (
     MediaItemId,
@@ -15,6 +16,8 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items import (
 from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
+
+MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
 
 
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
@@ -84,6 +87,124 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(
             media_item.gphotos_media_item_id, request.gphotos_media_item_id
         )
+
+    def test_update_media_item(self):
+        media_item_1 = self.repo.create_media_item(
+            CreateMediaItemRequest(
+                'dog.jpg',
+                MOCK_FILE_HASH,
+                GpsLocation(longitude=12.34, latitude=56.78),
+                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+                gphotos_media_item_id="gphotos_456",
+            )
+        )
+
+        new_file_hash = b'\x8b\x19\xdd\xdeg\xdd\x96\xf0'
+        new_gphotos_client_id = ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
+        self.repo.update_media_item(
+            UpdateMediaItemRequest(
+                media_item_id=media_item_1.id,
+                new_file_name="dog1.jpg",
+                new_file_hash=new_file_hash,
+                clear_location=False,
+                new_location=GpsLocation(latitude=10, longitude=20),
+                new_gphotos_client_id=new_gphotos_client_id,
+                new_gphotos_media_item_id="gphotos_1",
+            ),
+        )
+
+        new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
+        self.assertEqual(new_media_item_1.id, media_item_1.id)
+        self.assertEqual(new_media_item_1.file_name, 'dog1.jpg')
+        self.assertEqual(new_media_item_1.file_hash, new_file_hash)
+        self.assertEqual(
+            new_media_item_1.location, GpsLocation(latitude=10, longitude=20)
+        )
+        self.assertEqual(new_media_item_1.gphotos_client_id, new_gphotos_client_id)
+        self.assertEqual(new_media_item_1.gphotos_media_item_id, 'gphotos_1')
+
+    def test_update_many_media_items(self):
+        media_item_1 = self.repo.create_media_item(
+            CreateMediaItemRequest(
+                'dog.jpg',
+                MOCK_FILE_HASH,
+                GpsLocation(longitude=12.34, latitude=56.78),
+                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+                gphotos_media_item_id="gphotos_456",
+            )
+        )
+        media_item_2 = self.repo.create_media_item(
+            CreateMediaItemRequest(
+                'cat.jpg',
+                MOCK_FILE_HASH,
+                GpsLocation(longitude=2, latitude=3),
+                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+                gphotos_media_item_id="gphotos_456",
+            )
+        )
+
+        new_file_hash = b'\x8b\x19\xdd\xdeg\xdd\x96\xf0'
+        new_gphotos_client_id = ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
+        self.repo.update_many_media_items(
+            [
+                UpdateMediaItemRequest(
+                    media_item_id=media_item_1.id,
+                    new_file_name="dog1.jpg",
+                    new_file_hash=new_file_hash,
+                    clear_location=False,
+                    new_location=GpsLocation(latitude=10, longitude=20),
+                    new_gphotos_client_id=new_gphotos_client_id,
+                    new_gphotos_media_item_id="gphotos_1",
+                ),
+                UpdateMediaItemRequest(
+                    media_item_id=media_item_2.id,
+                    new_file_name="cat1.jpg",
+                    new_file_hash=new_file_hash,
+                    clear_location=False,
+                    new_location=GpsLocation(latitude=20, longitude=30),
+                    new_gphotos_client_id=new_gphotos_client_id,
+                    new_gphotos_media_item_id="gphotos_1",
+                ),
+            ]
+        )
+
+        new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
+        self.assertEqual(new_media_item_1.id, media_item_1.id)
+        self.assertEqual(new_media_item_1.file_name, 'dog1.jpg')
+        self.assertEqual(new_media_item_1.file_hash, new_file_hash)
+        self.assertEqual(
+            new_media_item_1.location, GpsLocation(latitude=10, longitude=20)
+        )
+        self.assertEqual(new_media_item_1.gphotos_client_id, new_gphotos_client_id)
+        self.assertEqual(new_media_item_1.gphotos_media_item_id, 'gphotos_1')
+
+        new_media_item_2 = self.repo.get_media_item_by_id(media_item_2.id)
+        self.assertEqual(new_media_item_2.id, media_item_2.id)
+        self.assertEqual(new_media_item_2.file_name, 'cat1.jpg')
+        self.assertEqual(new_media_item_2.file_hash, new_file_hash)
+        self.assertEqual(
+            new_media_item_2.location, GpsLocation(latitude=20, longitude=30)
+        )
+        self.assertEqual(new_media_item_2.gphotos_client_id, new_gphotos_client_id)
+        self.assertEqual(new_media_item_2.gphotos_media_item_id, 'gphotos_1')
+
+    def test_update_many_media_items_clear_location(self):
+        media_item_1 = self.repo.create_media_item(
+            CreateMediaItemRequest(
+                'dog.jpg',
+                MOCK_FILE_HASH,
+                GpsLocation(longitude=12.34, latitude=56.78),
+                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+                gphotos_media_item_id="gphotos_456",
+            )
+        )
+
+        self.repo.update_many_media_items(
+            [UpdateMediaItemRequest(media_item_id=media_item_1.id, clear_location=True)]
+        )
+
+        new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
+        self.assertIsNone(new_media_item_1.location)
 
     def test_delete_media_item(self):
         # Insert a mock media item into the mock database

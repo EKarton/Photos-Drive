@@ -1,8 +1,10 @@
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, cast, Mapping
 from abc import ABC, abstractmethod
 from bson import Binary
 from bson.objectid import ObjectId
+import pymongo
 
 from .media_items import MediaItemId, MediaItem, GpsLocation
 from .clients_repository import MongoDbClientsRepository
@@ -41,6 +43,8 @@ class UpdateMediaItemRequest:
         media_item_id (MediaItemId): The ID of the media item to update.
         new_file_name (Optional[str]): The new file name, if present.
         new_file_hash (Optional[bytes]): The new file hash, if present.
+        clear_location (Optional[bool]): Whether to clear the gps location or not,
+            if present.
         new_location (Optional[GpsLocation | None]): The new gps location,
             if present.
         new_gphotos_client_id (Optional[ObjectId]): The new GPhotos client ID,
@@ -50,11 +54,12 @@ class UpdateMediaItemRequest:
     '''
 
     media_item_id: MediaItemId
-    new_file_name: Optional[str]
-    new_file_hash: Optional[bytes]
-    new_location: Optional[GpsLocation | None]
-    new_gphotos_client_id: Optional[ObjectId]
-    new_gphotos_media_item_id: Optional[str]
+    new_file_name: Optional[str] = None
+    new_file_hash: Optional[bytes] = None
+    clear_location: Optional[bool] = False
+    new_location: Optional[GpsLocation] = None
+    new_gphotos_client_id: Optional[ObjectId] = None
+    new_gphotos_media_item_id: Optional[str] = None
 
 
 class MediaItemsRepository(ABC):
@@ -220,10 +225,62 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         )
 
     def update_media_item(self, request: UpdateMediaItemRequest):
-        raise NotImplementedError("Not implemented yet")
+        self.update_many_media_items([request])
 
-    def update_many_media_items(self, requests):
-        raise NotImplementedError("Not implemented yet")
+    def update_many_media_items(self, requests: list[UpdateMediaItemRequest]):
+        client_id_to_operations: Dict[ObjectId, list[pymongo.UpdateOne]] = defaultdict(
+            list
+        )
+        for request in requests:
+            filter_query: Mapping = {
+                "_id": request.media_item_id.object_id,
+            }
+
+            set_query: Mapping = {"$set": {}}
+
+            if request.new_file_name is not None:
+                set_query["$set"]["file_name"] = request.new_file_name
+            if request.new_file_hash is not None:
+                set_query["$set"]["file_hash"] = Binary(request.new_file_hash)
+            if request.new_gphotos_client_id is not None:
+                set_query["$set"]['gphotos_client_id'] = str(
+                    request.new_gphotos_client_id
+                )
+            if request.new_gphotos_media_item_id is not None:
+                set_query["$set"]['gphotos_media_item_id'] = str(
+                    request.new_gphotos_media_item_id
+                )
+
+            if request.clear_location:
+                set_query["$set"]['location'] = None
+            elif request.new_location is not None:
+                set_query["$set"]['location'] = {
+                    "type": "Point",
+                    "coordinates": [
+                        request.new_location.longitude,
+                        request.new_location.latitude,
+                    ],
+                }
+
+            operation = pymongo.UpdateOne(
+                filter=filter_query, update=set_query, upsert=False
+            )
+            client_id_to_operations[request.media_item_id.client_id].append(operation)
+
+        for client_id, operations in client_id_to_operations.items():
+            client = self._mongodb_clients_repository.get_client_by_id(client_id)
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            result = client["sharded_google_photos"]["media_items"].bulk_write(
+                requests=operations, session=session
+            )
+
+            if result.matched_count != len(operations):
+                raise ValueError(
+                    f"Unable to update all media items: {result.matched_count} "
+                    + f"vs {len(operations)}"
+                )
 
     def delete_media_item(self, id: MediaItemId):
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
