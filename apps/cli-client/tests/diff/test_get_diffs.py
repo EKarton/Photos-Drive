@@ -12,6 +12,7 @@ from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeItemsRepository,
     FakeGPhotosClient,
 )
+from sharded_photos_drive_cli_client.shared.hashes.xxhash import compute_file_hash
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
@@ -76,7 +77,7 @@ class FolderSyncDiffTests(TestCase):
         media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -101,9 +102,9 @@ class FolderSyncDiffTests(TestCase):
                 missing_remote_files_in_local=[],
                 missing_local_files_in_remote=[
                     LocalFile(
-                        key='Archives/Photos/2011/cat.jpg',
+                        key='Archives/Photos/2011/cat.jpg:cfe93190249dd0d3',
                         local_relative_file_path='./Archives/Photos/2011/cat.jpg',
-                    ),
+                    )
                 ],
             ),
         )
@@ -155,7 +156,7 @@ class FolderSyncDiffTests(TestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -167,7 +168,7 @@ class FolderSyncDiffTests(TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
-                hash_code=None,
+                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -195,7 +196,7 @@ class FolderSyncDiffTests(TestCase):
             DiffResults(
                 missing_remote_files_in_local=[
                     RemoteFile(
-                        key='Archives/Photos/2011/cat.jpg',
+                        key='Archives/Photos/2011/cat.jpg:8a19ddde67dd96f2',
                         remote_relative_file_path='/Archives/Photos/2011/cat.jpg',
                     )
                 ],
@@ -248,7 +249,7 @@ class FolderSyncDiffTests(TestCase):
         media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -317,7 +318,7 @@ class FolderSyncDiffTests(TestCase):
         media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -397,7 +398,7 @@ class FolderSyncDiffTests(TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
-                hash_code=None,
+                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -416,7 +417,7 @@ class FolderSyncDiffTests(TestCase):
         boat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='boat.jpg',
-                hash_code=None,
+                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -441,13 +442,13 @@ class FolderSyncDiffTests(TestCase):
             DiffResults(
                 missing_remote_files_in_local=[
                     RemoteFile(
-                        key='Photos/2010/cat.jpg',
+                        key='Photos/2010/cat.jpg:8a19ddde67dd96f2',
                         remote_relative_file_path='Archives/Photos/2010/cat.jpg',
                     )
                 ],
                 missing_local_files_in_remote=[
                     LocalFile(
-                        key='Photos/2010/dog.jpg',
+                        key='Photos/2010/dog.jpg:33aaa5ec9adeadaa',
                         local_relative_file_path='./Archives/Photos/2010/dog.jpg',
                     )
                 ],
@@ -496,7 +497,7 @@ class FolderSyncDiffTests(TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
-                hash_code=None,
+                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -515,7 +516,7 @@ class FolderSyncDiffTests(TestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                hash_code=None,
+                file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
@@ -540,7 +541,7 @@ class FolderSyncDiffTests(TestCase):
             DiffResults(
                 missing_remote_files_in_local=[
                     RemoteFile(
-                        key='cat.jpg',
+                        key='cat.jpg:8a19ddde67dd96f2',
                         remote_relative_file_path='Archives/cat.jpg',
                     )
                 ],

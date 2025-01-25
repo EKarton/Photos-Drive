@@ -6,6 +6,8 @@ from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssign
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
 from sharded_photos_drive_cli_client.shared.config.config import Config
 
+MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
 
 class TestDiffsAssigner(unittest.TestCase):
     def setUp(self):
@@ -33,6 +35,7 @@ class TestDiffsAssigner(unittest.TestCase):
             album_name='Archives',
             file_name='photo1.jpg',
             location=None,
+            file_hash=MOCK_FILE_HASH,
         )
         diff2 = ProcessedDiff(
             modifier="+",
@@ -41,6 +44,7 @@ class TestDiffsAssigner(unittest.TestCase):
             album_name='Archives',
             file_name='photo2.jpg',
             location=None,
+            file_hash=MOCK_FILE_HASH,
         )
         assignments = self.diffs_assigner.get_diffs_assignments([diff1, diff2])
 
@@ -63,6 +67,7 @@ class TestDiffsAssigner(unittest.TestCase):
             album_name='Archives',
             file_name='photo1.jpg',
             location=None,
+            file_hash=MOCK_FILE_HASH,
         )
         with self.assertRaisesRegex(
             ValueError, "Cannot allocate .* to any GPhotos client"
@@ -89,6 +94,7 @@ class TestDiffsAssigner(unittest.TestCase):
             album_name='Archives',
             file_name='photo1.jpg',
             location=None,
+            file_hash=MOCK_FILE_HASH,
         )
         diff2 = ProcessedDiff(
             modifier="+",
@@ -97,6 +103,7 @@ class TestDiffsAssigner(unittest.TestCase):
             album_name='Archives',
             file_name='photo2.jpg',
             location=None,
+            file_hash=MOCK_FILE_HASH,
         )
         diff3 = ProcessedDiff(
             modifier="+",
@@ -105,6 +112,7 @@ class TestDiffsAssigner(unittest.TestCase):
             album_name='Archives',
             file_name='photo3.jpg',
             location=None,
+            file_hash=MOCK_FILE_HASH,
         )
 
         with self.assertRaisesRegex(

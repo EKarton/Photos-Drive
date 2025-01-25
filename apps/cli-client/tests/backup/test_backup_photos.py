@@ -1,3 +1,4 @@
+from bson import Binary
 from bson.objectid import ObjectId
 from unittest_parametrize import parametrize
 from unittest_parametrize import ParametrizedTestCase
@@ -32,6 +33,8 @@ parametrize_use_parallel_uploads = parametrize(
     "use_parallel_uploads",
     [(True,), (False,)],
 )
+
+MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
 
 
 class TestPhotosBackup(ParametrizedTestCase):
@@ -68,6 +71,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
             ProcessedDiff(
@@ -76,6 +80,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="cat.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-2, longitude=2),
             ),
             ProcessedDiff(
@@ -84,6 +89,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2009",
                 file_name="fish.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-3, longitude=3),
             ),
             ProcessedDiff(
@@ -92,6 +98,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2009",
                 file_name="bird.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-4, longitude=4),
             ),
         ]
@@ -202,6 +209,12 @@ class TestPhotosBackup(ParametrizedTestCase):
             f'{mongodb_client_1_id}:{bird_item["_id"]}', album_2009['media_item_ids']
         )
 
+        # Test assert: check that the file hash is added to the media items
+        self.assertEqual(dog_item['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(cat_item['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(fish_item['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(bird_item['file_hash'], Binary(MOCK_FILE_HASH))
+
     @parametrize_use_parallel_uploads
     def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
@@ -251,7 +264,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=gmedia_item_obj.newMediaItemResults[
@@ -272,6 +285,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="cat.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
@@ -322,6 +336,9 @@ class TestPhotosBackup(ParametrizedTestCase):
             f'{mongodb_client_1_id}:{cat_mitem['_id']}',
             album_2010_raw['media_item_ids'],
         )
+
+        # Test assert: check that the file hash is added to the new media items
+        self.assertEqual(cat_mitem['file_hash'], Binary(MOCK_FILE_HASH))
 
     @parametrize_use_parallel_uploads
     def test_backup_deleted_one_item_on_album_with_two_items(
@@ -384,7 +401,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_mitem_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
@@ -395,7 +412,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_mitem_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
@@ -416,6 +433,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="cat.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
@@ -502,7 +520,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results.newMediaItemResults[
@@ -522,6 +540,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_path='./Archives/Photos/2010/dog.png',
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
+                file_hash=MOCK_FILE_HASH,
                 file_size=10,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
@@ -612,7 +631,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
@@ -623,7 +642,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
@@ -648,6 +667,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]
@@ -747,7 +767,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
@@ -758,7 +778,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_media_item_obj = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                hash_code=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
@@ -783,6 +803,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_name="Archives/Photos/2010",
                 file_name="dog.png",
                 file_size=10,
+                file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
             ),
         ]

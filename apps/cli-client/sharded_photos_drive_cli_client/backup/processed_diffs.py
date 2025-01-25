@@ -3,6 +3,7 @@ import os
 
 import exifread
 
+from ..shared.hashes.xxhash import compute_file_hash
 from ..shared.mongodb.media_items import GpsLocation
 from .diffs import Diff
 
@@ -18,9 +19,9 @@ class ProcessedDiff:
         file_path (str): The file path.
         album_name (str): The album name.
         file_name (str): The file name
-        file_size (int): The file size, in bytes.
+        file_size (int): The file size, in the number of bytes.
+        file_hash (bytes): The file hash, in bytes.
         location (GpsLocation | None): The GPS latitude if it exists; else None.
-
     """
 
     modifier: str
@@ -28,6 +29,7 @@ class ProcessedDiff:
     album_name: str
     file_name: str
     file_size: int
+    file_hash: bytes
     location: GpsLocation | None
 
 
@@ -48,6 +50,7 @@ class DiffsProcessor:
                 ProcessedDiff(
                     modifier=diff.modifier,
                     file_path=diff.file_path,
+                    file_hash=compute_file_hash(diff.file_path),
                     album_name=self.__get_album_name(diff),
                     file_name=self.__get_file_name(diff),
                     file_size=self.__get_file_size_in_bytes(diff),

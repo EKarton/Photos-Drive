@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from sharded_photos_drive_cli_client.backup.diffs import Diff
 from sharded_photos_drive_cli_client.backup.processed_diffs import DiffsProcessor
+from sharded_photos_drive_cli_client.shared.hashes.xxhash import compute_file_hash
 from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocation
 
 
@@ -40,6 +41,9 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(
             cast(GpsLocation, processed_diffs[0].location).longitude, -79.06879274830213
         )
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
 
     def test_process_raw_diffs__image_with_inversed_location(self):
         test_file_path = (
@@ -66,6 +70,9 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_name, "image-with-location-2.jpg")
         self.assertEqual(processed_diffs[0].file_size, 2622777)
         self.assertEqual(processed_diffs[0].location, GpsLocation(-40.7128, -74.006))
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
 
     def test_process_raw_diffs__image_with_no_location(self):
         test_file_path = (
@@ -92,6 +99,9 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_name, "image-without-location.jpg")
         self.assertEqual(processed_diffs[0].file_size, 2622651)
         self.assertIsNone(processed_diffs[0].location)
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
 
     @patch('exifread.process_file')
     def test_process_raw_diffs__exifread_throws_error(self, mock_process_file):
@@ -120,6 +130,9 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_name, "image-with-location.jpg")
         self.assertEqual(processed_diffs[0].file_size, 2622777)
         self.assertIsNone(processed_diffs[0].location)
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
 
     def test_process_raw_diffs__with_fields_set(
         self,
@@ -145,6 +158,9 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_name, 'dog.png')
         self.assertEqual(processed_diffs[0].file_size, 1000)
         self.assertEqual(processed_diffs[0].location, GpsLocation(100, 200))
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
 
     def test_process_raw_diffs__with_deletion_diff(self):
         test_file_path = (
@@ -171,6 +187,9 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_name, "image-with-location.jpg")
         self.assertEqual(processed_diffs[0].file_size, 0)
         self.assertIsNone(processed_diffs[0].location)
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
 
     def test_process_raw_diffs__file_not_exist(self):
         diff = Diff(

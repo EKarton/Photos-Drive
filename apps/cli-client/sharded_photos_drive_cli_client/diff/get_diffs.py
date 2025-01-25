@@ -3,6 +3,8 @@ from collections import deque
 import logging
 import os
 
+from sharded_photos_drive_cli_client.shared.hashes.xxhash import compute_file_hash
+
 from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
@@ -36,7 +38,7 @@ class LocalFile:
 
     Attributes:
         key: The unique key of the local file. It should contain the
-            remote file path + its hash code
+            file path + its hash code
         local_relative_file_path: The relative file path pointing to a file saved
             locally. This path should allow the CLI to add photos to the system.
     '''
@@ -100,13 +102,15 @@ class FolderSyncDiff:
 
             for media_item_id in album.media_item_ids:
                 media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
+                file_hash_str = (
+                    media_item.file_hash.hex() if media_item.file_hash else ''
+                )
 
                 if album_id == base_album_id:
                     remote_file_path = f'{remote_dir_path}/{media_item.file_name}'
-
                     found_files.append(
                         RemoteFile(
-                            key=media_item.file_name,
+                            key=f'{media_item.file_name}:{file_hash_str}',
                             remote_relative_file_path=remote_file_path,
                         )
                     )
@@ -117,7 +121,7 @@ class FolderSyncDiff:
                     remote_relative_file_path = f'{remote_dir_path}/{remote_file_path}'
                     found_files.append(
                         RemoteFile(
-                            key=remote_file_path,
+                            key=f'{remote_file_path}:{file_hash_str}',
                             remote_relative_file_path=remote_relative_file_path,
                         )
                     )
@@ -175,10 +179,11 @@ class FolderSyncDiff:
                 local_file_path = os.path.join(
                     ".", os.path.relpath(os.path.join(root, file))
                 )
+                file_hash = compute_file_hash(local_file_path).hex()
 
                 found_files.append(
                     LocalFile(
-                        key=remote_file_path,
+                        key=f'{remote_file_path}:{file_hash}',
                         local_relative_file_path=local_file_path,
                     )
                 )
