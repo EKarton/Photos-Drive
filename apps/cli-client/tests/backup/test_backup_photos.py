@@ -1,3 +1,4 @@
+from bson import Binary
 from bson.objectid import ObjectId
 from unittest_parametrize import parametrize
 from unittest_parametrize import ParametrizedTestCase
@@ -208,6 +209,12 @@ class TestPhotosBackup(ParametrizedTestCase):
             f'{mongodb_client_1_id}:{bird_item["_id"]}', album_2009['media_item_ids']
         )
 
+        # Test assert: check that the file hash is added to the media items
+        self.assertEqual(dog_item['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(cat_item['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(fish_item['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(bird_item['file_hash'], Binary(MOCK_FILE_HASH))
+
     @parametrize_use_parallel_uploads
     def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
@@ -329,6 +336,9 @@ class TestPhotosBackup(ParametrizedTestCase):
             f'{mongodb_client_1_id}:{cat_mitem['_id']}',
             album_2010_raw['media_item_ids'],
         )
+
+        # Test assert: check that the file hash is added to the new media items
+        self.assertEqual(cat_mitem['file_hash'], Binary(MOCK_FILE_HASH))
 
     @parametrize_use_parallel_uploads
     def test_backup_deleted_one_item_on_album_with_two_items(

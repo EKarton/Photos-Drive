@@ -216,14 +216,10 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 latitude=float(raw_item["location"]["coordinates"][1]),
             )
 
-        file_hash: bytes | None = None
-        if 'file_hash' in raw_item and raw_item['file_hash']:
-            file_hash = bytes(raw_item["file_hash"])
-
         return MediaItem(
             id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
             file_name=raw_item["file_name"],
-            file_hash=file_hash,
+            file_hash=bytes(raw_item["file_hash"]),
             location=location,
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],
