@@ -22,6 +22,8 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
 
+MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
 
 class AlbumsPrunerTests(unittest.TestCase):
     def test_prune_album__descendants_all_empty_albums(self):
@@ -111,7 +113,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
@@ -198,7 +200,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
-                file_hash=None,
+                file_hash=MOCK_FILE_HASH,
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[

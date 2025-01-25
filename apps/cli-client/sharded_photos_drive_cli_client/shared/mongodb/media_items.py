@@ -43,7 +43,7 @@ class MediaItem:
     Attributes:
         id (MediaItemId): The ID of the media item.
         file_name (str): The name of the media item.
-        file_hash (Optional[bytes]): The hash code of the media item, in bytes.
+        file_hash (bytes): The hash code of the media item, in bytes.
         location (Optional[GpsLocation]): The gps location of the media item, if it
             exists. Else none.
         gphotos_client_id (ObjectId): The Google Photos client ID that it is saved
@@ -53,7 +53,7 @@ class MediaItem:
 
     id: MediaItemId
     file_name: str
-    file_hash: Optional[bytes]
+    file_hash: bytes
     location: Optional[GpsLocation]
     gphotos_client_id: ObjectId
     gphotos_media_item_id: str

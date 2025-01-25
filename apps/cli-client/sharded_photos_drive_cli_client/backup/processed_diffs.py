@@ -19,9 +19,9 @@ class ProcessedDiff:
         file_path (str): The file path.
         album_name (str): The album name.
         file_name (str): The file name
-        file_size (int): The file size, in bytes.
+        file_size (int): The file size, in the number of bytes.
+        file_hash (bytes): The file hash, in bytes.
         location (GpsLocation | None): The GPS latitude if it exists; else None.
-        file_hash (bytes | None): The bytes of the file.
     """
 
     modifier: str
@@ -29,8 +29,8 @@ class ProcessedDiff:
     album_name: str
     file_name: str
     file_size: int
+    file_hash: bytes
     location: GpsLocation | None
-    file_hash: bytes | None
 
 
 class DiffsProcessor:

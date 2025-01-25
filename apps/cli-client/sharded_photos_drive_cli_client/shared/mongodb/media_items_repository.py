@@ -16,7 +16,7 @@ class CreateMediaItemRequest:
 
     Attributes:
         file_name (str): The file name of the media item.
-        file_hash (Optional[bytes]): The hash of the media item, in bytes.
+        file_hash (bytes): The hash of the media item, in bytes.
         location (Optional(GpsLocation)): The location of where the media item was
             taken.
         gphotos_client_id (ObjectId): The ID of the Google Photos client that the media
@@ -25,7 +25,7 @@ class CreateMediaItemRequest:
     """
 
     file_name: str
-    file_hash: Optional[bytes]
+    file_hash: bytes
     location: Optional[GpsLocation]
     gphotos_client_id: ObjectId
     gphotos_media_item_id: str
@@ -150,11 +150,10 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
 
         data_object: Any = {
             "file_name": request.file_name,
+            'file_hash': Binary(request.file_hash),
             "gphotos_client_id": str(request.gphotos_client_id),
             "gphotos_media_item_id": str(request.gphotos_media_item_id),
         }
-        if request.file_hash:
-            data_object['file_hash'] = Binary(request.file_hash)
 
         if request.location:
             data_object["location"] = {

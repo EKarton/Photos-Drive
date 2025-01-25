@@ -318,7 +318,7 @@ class FolderSyncDiffTests(TestCase):
         media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
-                file_hash=None,
+                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id=gphotos_client.media_items()
