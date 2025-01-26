@@ -15,7 +15,9 @@ class TestDiffsProcessor(unittest.TestCase):
             "heic-image.heic",
             "image-with-location-2.jpg",
             "image-with-location.jpg",
-            "/image-without-location.jpg",
+            "image-without-location.jpg",
+            "heic-image-2.heic",
+            "video.mov",
         ]
         diffs = [
             Diff(
@@ -71,6 +73,26 @@ class TestDiffsProcessor(unittest.TestCase):
                     file_size=2622651,
                     file_hash=b'v\x04\x83s]\xe3tw',
                     location=None,
+                ),
+                ProcessedDiff(
+                    modifier='+',
+                    file_path=diffs[4].file_path,
+                    album_name='tests/backup/resources/test_processed_diffs_files',
+                    file_name='heic-image-2.heic',
+                    file_size=3054916,
+                    file_hash=b'\xd0\xf5m\xdc\xfaI\x1dc',
+                    location=GpsLocation(
+                        latitude=39.1834944444444, longitude=-119.926863888889
+                    ),
+                ),
+                ProcessedDiff(
+                    modifier='+',
+                    file_path=diffs[5].file_path,
+                    album_name='tests/backup/resources/test_processed_diffs_files',
+                    file_name='video.mov',
+                    file_size=2571720,
+                    file_hash=b'\xc6K\xa09\x17Wq\x9d',
+                    location=GpsLocation(latitude=40.1872, longitude=-121.1004),
                 ),
             ],
         )
