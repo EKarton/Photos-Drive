@@ -68,7 +68,7 @@ class DiffsProcessor:
         return processed_diffs
 
     def __get_locations(self, diffs: list[Diff]) -> list[GpsLocation | None]:
-        locations = [None] * len(diffs)
+        locations: list[GpsLocation | None] = [None] * len(diffs)
 
         missing_locations_and_idx: list[tuple[Diff, int]] = []
         for i, diff in enumerate(diffs):
