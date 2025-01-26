@@ -901,6 +901,23 @@ files = [
 ]
 
 [[package]]
+name = "pyexiftool"
+version = "0.5.6"
+description = "Python wrapper for exiftool"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "PyExifTool-0.5.6-py3-none-any.whl", hash = "sha256:ac7d7836d2bf373f20aa558528f6b2222c4c0d896ed28c951a3ff8e6cec05a87"},
+    {file = "PyExifTool-0.5.6.tar.gz", hash = "sha256:22a972c1c212d1ad5f61916fded5057333dcc48fb8e42eed12d2ff9665b367ae"},
+]
+
+[package.extras]
+docs = ["packaging", "sphinx", "sphinx-autoapi", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
+json = ["orjson", "simplejson", "ujson"]
+test = ["packaging"]
+
+[[package]]
 name = "pyfakefs"
 version = "5.7.4"
 description = "pyfakefs implements a fake file system that mocks the Python file system modules."
@@ -1526,4 +1543,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "ce55cbd5ae949d1daea9192c155ba45fbb6c0b155302da64296977bf1a2b0662"
+content-hash = "4af033ab01cf5b481086bfd911e17f2d9abf5c6ca50cc7f9dbabcc75a6ea5899"

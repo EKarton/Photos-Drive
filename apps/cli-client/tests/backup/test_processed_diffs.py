@@ -1,6 +1,5 @@
 from typing import cast
 import unittest
-from unittest.mock import patch
 
 from sharded_photos_drive_cli_client.backup.diffs import Diff
 from sharded_photos_drive_cli_client.backup.processed_diffs import DiffsProcessor
@@ -9,9 +8,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocati
 
 
 class TestDiffsProcessor(unittest.TestCase):
-    def test_process_raw_diffs__image_with_location__returns_processed_diffs_correctly(
-        self,
-    ):
+    def test_process_raw_diffs_image_with_location(self):
         test_file_path = (
             "./tests/backup/resources/test_processed_diffs_files"
             + "/image-with-location.jpg"
@@ -36,16 +33,49 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_name, "image-with-location.jpg")
         self.assertEqual(processed_diffs[0].file_size, 2622777)
         self.assertEqual(
-            cast(GpsLocation, processed_diffs[0].location).latitude, 43.12446492202323
+            cast(GpsLocation, processed_diffs[0].location).latitude, 43.1244649220222
         )
         self.assertEqual(
-            cast(GpsLocation, processed_diffs[0].location).longitude, -79.06879274830213
+            cast(GpsLocation, processed_diffs[0].location).longitude, -79.0687927483022
         )
         self.assertEqual(
             processed_diffs[0].file_hash, compute_file_hash(test_file_path)
         )
 
-    def test_process_raw_diffs__image_with_inversed_location(self):
+    def test_process_raw_diffs_heif_image_location(self):
+        test_file_path = (
+            "./tests/backup/resources/test_processed_diffs_files/heic-image.heic"
+        )
+        diff = Diff(
+            modifier="+",
+            file_path=test_file_path,
+            album_name=None,
+            file_name=None,
+        )
+
+        processor = DiffsProcessor()
+        processed_diffs = processor.process_raw_diffs([diff])
+
+        self.assertEqual(len(processed_diffs), 1)
+        self.assertEqual(processed_diffs[0].modifier, '+')
+        self.assertEqual(processed_diffs[0].file_path, test_file_path)
+        self.assertEqual(
+            processed_diffs[0].album_name,
+            'tests/backup/resources/test_processed_diffs_files',
+        )
+        self.assertEqual(processed_diffs[0].file_name, "heic-image.heic")
+        self.assertEqual(processed_diffs[0].file_size, 3271280)
+        self.assertEqual(
+            cast(GpsLocation, processed_diffs[0].location).latitude, 40.7425527777778
+        )
+        self.assertEqual(
+            cast(GpsLocation, processed_diffs[0].location).longitude, -74.0101694444444
+        )
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
+
+    def test_process_raw_diffs_image_with_inversed_location(self):
         test_file_path = (
             "./tests/backup/resources/test_processed_diffs_files"
             + "/image-with-location-2.jpg"
@@ -74,7 +104,7 @@ class TestDiffsProcessor(unittest.TestCase):
             processed_diffs[0].file_hash, compute_file_hash(test_file_path)
         )
 
-    def test_process_raw_diffs__image_with_no_location(self):
+    def test_process_raw_diffs_image_with_no_location(self):
         test_file_path = (
             "./tests/backup/resources/test_processed_diffs_files"
             + "/image-without-location.jpg"
@@ -103,40 +133,7 @@ class TestDiffsProcessor(unittest.TestCase):
             processed_diffs[0].file_hash, compute_file_hash(test_file_path)
         )
 
-    @patch('exifread.process_file')
-    def test_process_raw_diffs__exifread_throws_error(self, mock_process_file):
-        mock_process_file.side_effect = Exception("Error reading EXIF data")
-        test_file_path = (
-            "./tests/backup/resources/test_processed_diffs_files"
-            + "/image-with-location.jpg"
-        )
-        diff = Diff(
-            modifier="+",
-            file_path=test_file_path,
-            album_name=None,
-            file_name=None,
-        )
-
-        processor = DiffsProcessor()
-        processed_diffs = processor.process_raw_diffs([diff])
-
-        self.assertEqual(len(processed_diffs), 1)
-        self.assertEqual(processed_diffs[0].modifier, '+')
-        self.assertEqual(processed_diffs[0].file_path, test_file_path)
-        self.assertEqual(
-            processed_diffs[0].album_name,
-            'tests/backup/resources/test_processed_diffs_files',
-        )
-        self.assertEqual(processed_diffs[0].file_name, "image-with-location.jpg")
-        self.assertEqual(processed_diffs[0].file_size, 2622777)
-        self.assertIsNone(processed_diffs[0].location)
-        self.assertEqual(
-            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
-        )
-
-    def test_process_raw_diffs__with_fields_set(
-        self,
-    ):
+    def test_process_raw_diffs_with_fields_set(self):
         test_file_path = (
             "./tests/backup/resources/test_processed_diffs_files"
             + "/image-with-location.jpg"
@@ -162,7 +159,7 @@ class TestDiffsProcessor(unittest.TestCase):
             processed_diffs[0].file_hash, compute_file_hash(test_file_path)
         )
 
-    def test_process_raw_diffs__with_deletion_diff(self):
+    def test_process_raw_diffs_with_deletion_diff(self):
         test_file_path = (
             "./tests/backup/resources/test_processed_diffs_files"
             + "/image-with-location.jpg"
@@ -191,7 +188,7 @@ class TestDiffsProcessor(unittest.TestCase):
             processed_diffs[0].file_hash, compute_file_hash(test_file_path)
         )
 
-    def test_process_raw_diffs__file_not_exist(self):
+    def test_process_raw_diffs_file_not_exist(self):
         diff = Diff(
             modifier="+", file_path="path/to/nonexistent_photo.jpg", album_name=None
         )
@@ -200,7 +197,7 @@ class TestDiffsProcessor(unittest.TestCase):
             processor = DiffsProcessor()
             processor.process_raw_diffs([diff])
 
-    def test_process_raw_diffs__invalid_modifier(self):
+    def test_process_raw_diffs_invalid_modifier(self):
         diff = Diff(modifier="*", file_path="path/to/photo.jpg")
 
         with self.assertRaisesRegex(ValueError, "Modifier * .*"):

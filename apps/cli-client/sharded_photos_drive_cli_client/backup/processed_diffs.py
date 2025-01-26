@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 import os
-
-import exifread
+from typing import cast
+from exiftool import ExifToolHelper  # type: ignore
 
 from ..shared.hashes.xxhash import compute_file_hash
 from ..shared.mongodb.media_items import GpsLocation
+
 from .diffs import Diff
 
 
@@ -102,39 +103,20 @@ class DiffsProcessor:
         if diff.location:
             return diff.location
 
-        try:
-            with open(diff.file_path, "rb") as f:
-                tags = exifread.process_file(f)
-            latitude = tags.get("GPS GPSLatitude")
-            latitude_ref = tags.get("GPS GPSLatitudeRef")
-            longitude = tags.get("GPS GPSLongitude")
-            longitude_ref = tags.get("GPS GPSLongitudeRef")
+        with ExifToolHelper() as exiftool_client:
+            metadatas = exiftool_client.get_metadata([diff.file_path])
+            latitude = metadatas[0].get("EXIF:GPSLatitude")
+            latitude_ref = metadatas[0].get("EXIF:GPSLatitudeRef")
+            longitude = metadatas[0].get("EXIF:GPSLongitude")
+            longitude_ref = metadatas[0].get("EXIF:GPSLongitudeRef")
 
             if latitude and latitude_ref and longitude and longitude_ref:
-                lat = self.__convert_to_degrees(latitude)
-                if latitude_ref.values[0] != "N":
+                lat = cast(int, latitude)
+                if latitude_ref != "N":
                     lat = -lat
-                lon = self.__convert_to_degrees(longitude)
-                if longitude_ref.values[0] != "E":
+                lon = cast(int, longitude)
+                if longitude_ref != "E":
                     lon = -lon
                 return GpsLocation(latitude=lat, longitude=lon)
 
-        except Exception as e:
-            print(f"Error reading GPS info: {e}")
-        return None
-
-    def __convert_to_degrees(self, value) -> float:
-        """
-        Converts GPS coordinates from degrees-minutes-seconds format to
-        decimal degrees.
-
-        Args:
-            value (tuple): The GPS coordinate in different parts
-
-        Returns:
-            float: A single value representing degrees
-        """
-        d = float(value.values[0].num) / float(value.values[0].den)
-        m = float(value.values[1].num) / float(value.values[1].den)
-        s = float(value.values[2].num) / float(value.values[2].den)
-        return d + (m / 60.0) + (s / 3600.0)
+            return None

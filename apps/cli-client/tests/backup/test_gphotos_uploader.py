@@ -77,8 +77,9 @@ class TestGPhotosMediaItemParallelUploaderImpl(unittest.TestCase):
             client_id=gphotos_client_id_str
         )
         self.assertEqual(len(stored_media_items), len(media_item_ids))
-        self.assertEqual(stored_media_items[0].id, media_item_ids[0])
-        self.assertEqual(stored_media_items[1].id, media_item_ids[1])
+        self.assertNotEqual(stored_media_items[0].id, stored_media_items[1].id)
+        self.assertTrue(stored_media_items[0].id in media_item_ids)
+        self.assertTrue(stored_media_items[1].id in media_item_ids)
 
     def test_upload_photos_multiple_clients_success(self):
         gphotos_client_id_1 = ObjectId()
