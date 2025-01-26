@@ -77,7 +77,6 @@ class DiffsProcessor:
 
             if diff.location:
                 locations[i] = diff.location
-                print("I am here")
                 continue
 
             missing_locations_and_idx.append((diff, i))
