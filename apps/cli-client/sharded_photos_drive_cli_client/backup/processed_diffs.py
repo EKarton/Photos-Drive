@@ -86,26 +86,43 @@ class DiffsProcessor:
 
         with ExifToolHelper() as exiftool_client:
             file_paths = [d[0].file_path for d in missing_locations_and_idx]
-            metadatas = exiftool_client.get_metadata(file_paths)
+            metadatas = exiftool_client.get_tags(
+                file_paths, ['gpslatitude', 'gpslongitude']
+            )
+
             for i, metadata in enumerate(metadatas):
-                latitude = metadata.get("EXIF:GPSLatitude")
-                latitude_ref = metadata.get("EXIF:GPSLatitudeRef")
-                longitude = metadata.get("EXIF:GPSLongitude")
-                longitude_ref = metadata.get("EXIF:GPSLongitudeRef")
+                latitude = metadata.get("Composite:GPSLatitude")
+                longitude = metadata.get("Composite:GPSLongitude")
 
                 location = None
-                if latitude and latitude_ref and longitude and longitude_ref:
-                    lat = cast(int, latitude)
-                    if latitude_ref != "N":
-                        lat = -lat
-                    lon = cast(int, longitude)
-                    if longitude_ref != "E":
-                        lon = -lon
-                    location = GpsLocation(latitude=lat, longitude=lon)
+                if latitude and longitude:
+                    location = GpsLocation(
+                        latitude=cast(int, latitude), longitude=cast(int, longitude)
+                    )
 
                 locations[missing_locations_and_idx[i][1]] = location
 
         return locations
+
+    def __parse_image_gps_location_1(
+        self, metadata: dict[str, any]
+    ) -> GpsLocation | None:
+        latitude = metadata.get("EXIF:GPSLatitude")
+        latitude_ref = metadata.get("EXIF:GPSLatitudeRef")
+        longitude = metadata.get("EXIF:GPSLongitude")
+        longitude_ref = metadata.get("EXIF:GPSLongitudeRef")
+
+        location = None
+        if latitude and latitude_ref and longitude and longitude_ref:
+            lat = cast(int, latitude)
+            if latitude_ref != "N":
+                lat = -lat
+            lon = cast(int, longitude)
+            if longitude_ref != "E":
+                lon = -lon
+            location = GpsLocation(latitude=lat, longitude=lon)
+
+        return location
 
     def __get_album_name(self, diff: Diff) -> str:
         if diff.album_name:
