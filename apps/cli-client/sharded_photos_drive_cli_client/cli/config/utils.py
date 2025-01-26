@@ -78,6 +78,19 @@ def prompt_user_for_gphotos_credentials(
             )
 
             credentials = iaflow.credentials
+            if not credentials:
+                raise ValueError("Credentials is None!")
+
+            if not credentials.scopes:
+                raise ValueError("Missing scopes! Please try again.")
+
+            chosen_scopes: set[str] = set(credentials.scopes)
+            required_scopes: set[str] = set(scopes)
+            if not required_scopes.issubset(chosen_scopes):
+                raise ValueError(
+                    f"Missing scopes! Got {chosen_scopes}, needed {required_scopes}"
+                )
+
             is_login_successful = True
         except Exception as e:
             print(f'Error: ${e}')

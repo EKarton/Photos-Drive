@@ -6,10 +6,13 @@ from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.media_items_repository import MediaItemsRepositoryImpl
 from ..backup.diffs import Diff
-from ..backup.processed_diffs import DiffsProcessor
+from ..backup.processed_diffs import DiffsProcessor, ProcessedDiff
 from ..diff.get_diffs import FolderSyncDiff, DiffResults
 from ..shared.config.config import Config
-from .utils import pretty_print_diffs, prompt_user_to_confirm
+from .utils import (
+    pretty_print_processed_diffs,
+    prompt_user_to_confirm,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,19 +45,20 @@ class SyncHandler:
         logger.debug(f'Diff results: {diff_results}')
 
         backup_diffs = self.__convert_diff_results_to_backup_diffs(diff_results)
-        logger.debug(f'Backup diffs: {backup_diffs}')
-
         if len(backup_diffs) == 0:
             print("No changes")
             return
 
-        pretty_print_diffs(backup_diffs)
+        diff_processor = DiffsProcessor()
+        processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
+
+        pretty_print_processed_diffs(processed_diffs)
         if not prompt_user_to_confirm():
             print("Operation cancelled.")
             return
 
         backup_results = self.__backup_diffs_to_system(
-            config, backup_diffs, parallelize_uploads
+            config, processed_diffs, parallelize_uploads
         )
         print("Sync complete.")
         print(f"Albums created: {backup_results.num_albums_created}")
@@ -81,18 +85,15 @@ class SyncHandler:
         return backup_diffs
 
     def __backup_diffs_to_system(
-        self, config: Config, diffs: list[Diff], parallelize_uploads: bool
+        self,
+        config: Config,
+        processed_diffs: list[ProcessedDiff],
+        parallelize_uploads: bool,
     ) -> BackupResults:
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
-
-        # Process the diffs with metadata
-        diff_processor = DiffsProcessor()
-        processed_diffs = diff_processor.process_raw_diffs(diffs)
-        for processed_diff in processed_diffs:
-            logger.debug(f"Processed diff: {processed_diff}")
 
         # Process the diffs
         backup_service = PhotosBackup(

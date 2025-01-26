@@ -1,7 +1,11 @@
 import logging
 
 
-from .utils import get_diffs_from_path, pretty_print_diffs, prompt_user_to_confirm
+from .utils import (
+    get_diffs_from_path,
+    pretty_print_processed_diffs,
+    prompt_user_to_confirm,
+)
 from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
@@ -37,17 +41,17 @@ class AddHandler:
             Diff(modifier="+", file_path=path) for path in get_diffs_from_path(path)
         ]
 
-        # Confirm if diffs are correct by the user
-        pretty_print_diffs(diffs)
-        if not prompt_user_to_confirm():
-            print("Operation cancelled.")
-            return
-
         # Process the diffs with metadata
         diff_processor = DiffsProcessor()
         processed_diffs = diff_processor.process_raw_diffs(diffs)
         for processed_diff in processed_diffs:
             logger.debug(f"Processed diff: {processed_diff}")
+
+        # Confirm if diffs are correct by the user
+        pretty_print_processed_diffs(processed_diffs)
+        if not prompt_user_to_confirm():
+            print("Operation cancelled.")
+            return
 
         # Process the diffs
         backup_service = PhotosBackup(
