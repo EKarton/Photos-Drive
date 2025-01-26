@@ -28,7 +28,10 @@ This CLI will never delete content from your machine - it should only mirror the
 
 ### Installation
 
-1. First, install the package by running:
+1. First, install a tool called [Exiftool](https://exiftool.org/)
+   - It's a tool used to parse through exif metadata in your photos / videos.
+
+2. Second, install this Python package by running:
 
    ```bash
    pip3 install sharded_photos_drive_cli_client
