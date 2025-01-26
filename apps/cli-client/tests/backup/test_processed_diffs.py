@@ -16,7 +16,7 @@ class TestDiffsProcessor(unittest.TestCase):
             "image-with-location-2.jpg",
             "image-with-location.jpg",
             "image-without-location.jpg",
-            "hehe-image-2.heic",
+            "heic-image-2.heic",
             "video.mov",
         ]
         diffs = [
@@ -78,7 +78,7 @@ class TestDiffsProcessor(unittest.TestCase):
                     modifier='+',
                     file_path=diffs[4].file_path,
                     album_name='tests/backup/resources/test_processed_diffs_files',
-                    file_name='hehe-image-2.heic',
+                    file_name='heic-image-2.heic',
                     file_size=3054916,
                     file_hash=b'\xd0\xf5m\xdc\xfaI\x1dc',
                     location=GpsLocation(
