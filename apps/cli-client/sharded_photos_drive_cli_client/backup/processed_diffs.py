@@ -40,6 +40,7 @@ class DiffsProcessor:
 
         processed_diffs = []
 
+        # Verify diffs
         for diff in diffs:
             if diff.modifier != "+" and diff.modifier != "-":
                 raise ValueError(f"Modifier {diff.modifier} in {diff} not allowed.")
@@ -47,6 +48,11 @@ class DiffsProcessor:
             if diff.modifier == "+" and not os.path.exists(diff.file_path):
                 raise ValueError(f"File {diff.file_path} does not exist.")
 
+        # Get locations from all diffs
+        locations = self.__get_locations(diffs)
+
+        # Process diffs
+        for i, diff in enumerate(diffs):
             processed_diffs.append(
                 ProcessedDiff(
                     modifier=diff.modifier,
@@ -55,11 +61,52 @@ class DiffsProcessor:
                     album_name=self.__get_album_name(diff),
                     file_name=self.__get_file_name(diff),
                     file_size=self.__get_file_size_in_bytes(diff),
-                    location=self.__get_location(diff),
+                    location=locations[i],
                 )
             )
 
         return processed_diffs
+
+    def __get_locations(self, diffs: list[Diff]) -> list[GpsLocation | None]:
+        locations = [None] * len(diffs)
+
+        missing_locations_and_idx: list[tuple[Diff, int]] = []
+        for i, diff in enumerate(diffs):
+            if diff.modifier == "-":
+                continue
+
+            if diff.location:
+                locations[i] = diff.location
+                print("I am here")
+                continue
+
+            missing_locations_and_idx.append((diff, i))
+
+        if len(missing_locations_and_idx) == 0:
+            return locations
+
+        with ExifToolHelper() as exiftool_client:
+            file_paths = [d[0].file_path for d in missing_locations_and_idx]
+            metadatas = exiftool_client.get_metadata(file_paths)
+            for i, metadata in enumerate(metadatas):
+                latitude = metadata.get("EXIF:GPSLatitude")
+                latitude_ref = metadata.get("EXIF:GPSLatitudeRef")
+                longitude = metadata.get("EXIF:GPSLongitude")
+                longitude_ref = metadata.get("EXIF:GPSLongitudeRef")
+
+                location = None
+                if latitude and latitude_ref and longitude and longitude_ref:
+                    lat = cast(int, latitude)
+                    if latitude_ref != "N":
+                        lat = -lat
+                    lon = cast(int, longitude)
+                    if longitude_ref != "E":
+                        lon = -lon
+                    location = GpsLocation(latitude=lat, longitude=lon)
+
+                locations[missing_locations_and_idx[i][1]] = location
+
+        return locations
 
     def __get_album_name(self, diff: Diff) -> str:
         if diff.album_name:
@@ -95,28 +142,3 @@ class DiffsProcessor:
             return diff.file_size
 
         return os.path.getsize(diff.file_path)
-
-    def __get_location(self, diff: Diff) -> GpsLocation | None:
-        if diff.modifier == "-":
-            return None
-
-        if diff.location:
-            return diff.location
-
-        with ExifToolHelper() as exiftool_client:
-            metadatas = exiftool_client.get_metadata([diff.file_path])
-            latitude = metadatas[0].get("EXIF:GPSLatitude")
-            latitude_ref = metadatas[0].get("EXIF:GPSLatitudeRef")
-            longitude = metadatas[0].get("EXIF:GPSLongitude")
-            longitude_ref = metadatas[0].get("EXIF:GPSLongitudeRef")
-
-            if latitude and latitude_ref and longitude and longitude_ref:
-                lat = cast(int, latitude)
-                if latitude_ref != "N":
-                    lat = -lat
-                lon = cast(int, longitude)
-                if longitude_ref != "E":
-                    lon = -lon
-                return GpsLocation(latitude=lat, longitude=lon)
-
-            return None
