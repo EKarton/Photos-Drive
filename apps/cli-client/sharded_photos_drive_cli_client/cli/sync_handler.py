@@ -52,7 +52,7 @@ class SyncHandler:
         diff_processor = DiffsProcessor()
         processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
 
-        pretty_print_processed_diffs(backup_diffs)
+        pretty_print_processed_diffs(processed_diffs)
         if not prompt_user_to_confirm():
             print("Operation cancelled.")
             return
