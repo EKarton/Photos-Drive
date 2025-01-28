@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Callable, Optional
 from google.oauth2.credentials import Credentials
 from requests.exceptions import RequestException
 from google.auth.transport.requests import AuthorizedSession
@@ -95,6 +96,11 @@ class GPhotosClientV2:
 
 
 class ListenableCredentials(Credentials):
+    '''
+    A type of Credential where every time the token refreshes,
+    it calls the callback function.
+    '''
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.token_refresh_callback = None
@@ -104,5 +110,15 @@ class ListenableCredentials(Credentials):
         if self.token_refresh_callback:
             self.token_refresh_callback(self)
 
-    def set_token_refresh_callback(self, callback):
+    def set_token_refresh_callback(
+        self, callback: Optional[Callable[[Credentials], None]]
+    ):
+        '''
+        Sets the token refresh callback.
+
+        Args:
+            callback (Optional[Callable[[Credentials], None]]):
+                The callback function, which returns the new credentials whenever the
+                token is refreshed.
+        '''
         self.token_refresh_callback = callback
