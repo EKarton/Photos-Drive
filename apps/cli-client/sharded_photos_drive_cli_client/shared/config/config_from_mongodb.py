@@ -1,3 +1,4 @@
+import logging
 from typing import Mapping, cast, override
 
 from google.oauth2.credentials import Credentials
@@ -8,7 +9,9 @@ from bson.objectid import ObjectId
 
 from .config import Config
 from ..mongodb.albums import AlbumId
-from ..gphotos.client import GPhotosClientV2
+from ..gphotos.client import GPhotosClientV2, ListenableCredentials
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigFromMongoDb(Config):
@@ -74,20 +77,42 @@ class ConfigFromMongoDb(Config):
 
         clients = []
         for document in collection.find({}):
-            creds = Credentials(
+            client_id = document["_id"]
+            creds = ListenableCredentials(
                 token=document["token"],
                 refresh_token=document["refresh_token"],
                 token_uri=document["token_uri"],
                 client_id=document["client_id"],
                 client_secret=document["client_secret"],
             )
+
+            creds.set_token_refresh_callback(
+                self.__create_new_credentials_handler(client_id)
+            )
             gphotos_client = GPhotosClientV2(
                 name=document["name"], session=AuthorizedSession(creds)
             )
 
-            clients.append((document["_id"], gphotos_client))
+            clients.append((client_id, gphotos_client))
 
         return clients
+
+    def __create_new_credentials_handler(self, client_id: ObjectId):
+        collection = self.__mongodb_client["sharded_google_photos"]["gphotos_clients"]
+
+        def new_credentials_handler(new_creds: Credentials):
+            logger.debug(f'Updated {client_id} credentials to MongoDB config')
+            filter_obj: Mapping = {'_id': client_id}
+            update_obj: Mapping = {
+                "$set": {
+                    "token": new_creds.token,
+                    "refresh_token": new_creds.refresh_token,
+                },
+            }
+
+            collection.update_one(filter=filter_obj, update=update_obj, upsert=False)
+
+        return new_credentials_handler
 
     @override
     def add_gphotos_client(self, gphotos_client: GPhotosClientV2) -> str:
