@@ -4,11 +4,6 @@ import argparse
 
 from pymongo.mongo_client import MongoClient
 
-from sharded_photos_drive_cli_client.cli.add_file_hashes_handler import (
-    AddFileHashesHandler,
-)
-from sharded_photos_drive_cli_client.cli.usage_handler import UsageHandler
-
 from ..shared.config.config import Config
 from ..shared.config.config_from_file import ConfigFromFile
 from ..shared.config.config_from_mongodb import ConfigFromMongoDb
@@ -16,6 +11,8 @@ from .config.init_handler import InitHandler
 from .config.add_gphotos_handler import AddGPhotosHandler
 from .config.add_mongodb_handler import AddMongoDbHandler
 from .config.reauthorize_handler import ReauthorizeHandler
+from .add_file_hashes_handler import AddFileHashesHandler
+from .usage_handler import UsageHandler
 from .add_handler import AddHandler
 from .delete_handler import DeleteHandler
 from .clean_handler import CleanHandler
