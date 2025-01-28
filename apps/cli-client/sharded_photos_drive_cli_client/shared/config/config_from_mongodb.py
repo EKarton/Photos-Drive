@@ -101,7 +101,7 @@ class ConfigFromMongoDb(Config):
         collection = self.__mongodb_client["sharded_google_photos"]["gphotos_clients"]
 
         def new_credentials_handler(new_creds: Credentials):
-            logger.debug(f'Updated {client_id} credentials to MongoDB config')
+            logger.debug(f'Updated {client_id} gphoto credentials to MongoDB')
             filter_obj: Mapping = {'_id': client_id}
             update_obj: Mapping = {
                 "$set": {
