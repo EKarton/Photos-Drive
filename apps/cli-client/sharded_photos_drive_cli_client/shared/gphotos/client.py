@@ -1,6 +1,6 @@
 from dataclasses import dataclass
+from google.oauth2.credentials import Credentials
 from requests.exceptions import RequestException
-
 from google.auth.transport.requests import AuthorizedSession
 import backoff
 
@@ -92,3 +92,17 @@ class GPhotosClientV2:
     def media_items(self) -> GPhotosMediaItemsClient:
         """Returns the media items client of the Google Photos account."""
         return self._media_items_client
+
+
+class ListenableCredentials(Credentials):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.token_refresh_callback = None
+
+    def refresh(self, request):
+        super().refresh(request)
+        if self.token_refresh_callback:
+            self.token_refresh_callback(self)
+
+    def set_token_refresh_callback(self, callback):
+        self.token_refresh_callback = callback
