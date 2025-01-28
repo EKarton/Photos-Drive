@@ -7,6 +7,7 @@ from pymongo.mongo_client import MongoClient
 from sharded_photos_drive_cli_client.cli.add_file_hashes_handler import (
     AddFileHashesHandler,
 )
+from sharded_photos_drive_cli_client.cli.usage_handler import UsageHandler
 
 from ..shared.config.config import Config
 from ..shared.config.config_from_file import ConfigFromFile
@@ -110,6 +111,10 @@ def main():
     __add_config_argument(teardown_parser)
     __add_verbose_argument(teardown_parser)
 
+    usage_parser = subparsers.add_parser("usage")
+    __add_config_argument(usage_parser)
+    __add_verbose_argument(usage_parser)
+
     # Parse the arguments
     args = parser.parse_args()
 
@@ -186,6 +191,11 @@ def main():
         config = __build_config_based_on_args(args)
         teardown_handler = TeardownHandler()
         teardown_handler.teardown(config)
+
+    elif args.command == "usage":
+        config = __build_config_based_on_args(args)
+        usage_handler = UsageHandler()
+        usage_handler.run(config)
 
     else:
         parser.print_help()
