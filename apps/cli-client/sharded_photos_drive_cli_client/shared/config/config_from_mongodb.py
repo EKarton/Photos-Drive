@@ -22,7 +22,6 @@ class ConfigFromMongoDb(Config):
             mongodb_client (MongoClient): The MongoDB client used to access the config
               database
         """
-        self.__cached_root_album_id: AlbumId | None = None
         self.__mongodb_client = mongodb_client
         self.__mongodb_client["sharded_google_photos"].command("ping")
 
