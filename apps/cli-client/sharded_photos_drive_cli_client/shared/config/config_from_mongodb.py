@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 
 from .config import Config
 from ..mongodb.albums import AlbumId
-from ..gphotos.client import GPhotosClientV2, ListenableCredentials
+from ..gphotos.client import GPhotosClientV2
 
 logger = logging.getLogger(__name__)
 
@@ -78,16 +78,12 @@ class ConfigFromMongoDb(Config):
         clients = []
         for document in collection.find({}):
             client_id = document["_id"]
-            creds = ListenableCredentials(
+            creds = Credentials(
                 token=document["token"],
                 refresh_token=document["refresh_token"],
                 token_uri=document["token_uri"],
                 client_id=document["client_id"],
                 client_secret=document["client_secret"],
-            )
-
-            creds.set_token_refresh_callback(
-                self.__create_new_credentials_handler(client_id)
             )
             gphotos_client = GPhotosClientV2(
                 name=document["name"], session=AuthorizedSession(creds)
@@ -96,23 +92,6 @@ class ConfigFromMongoDb(Config):
             clients.append((client_id, gphotos_client))
 
         return clients
-
-    def __create_new_credentials_handler(self, client_id: ObjectId):
-        collection = self.__mongodb_client["sharded_google_photos"]["gphotos_clients"]
-
-        def new_credentials_handler(new_creds: Credentials):
-            logger.debug(f'Updated {client_id} gphoto credentials to MongoDB')
-            filter_obj: Mapping = {'_id': client_id}
-            update_obj: Mapping = {
-                "$set": {
-                    "token": new_creds.token,
-                    "refresh_token": new_creds.refresh_token,
-                },
-            }
-
-            collection.update_one(filter=filter_obj, update=update_obj, upsert=False)
-
-        return new_credentials_handler
 
     @override
     def add_gphotos_client(self, gphotos_client: GPhotosClientV2) -> str:
