@@ -41,25 +41,30 @@ class TestPhotosBackup(ParametrizedTestCase):
 
     @parametrize_use_parallel_uploads
     def test_backup_adding_items_to_new_db(self, use_parallel_uploads: bool):
-        # Test setup 1: Set up the config
+        # Test setup 1: Build the wrapper objects
+        config = InMemoryConfig()
+
+        mongodb_client_1_id = ObjectId()
+        mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
+
+        gphotos_client_1_id = ObjectId()
+        gphotos_client_2_id = ObjectId()
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client_1 = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
-        config = InMemoryConfig()
-        mongodb_client_1_id = config.add_mongo_db_client(mongodb_client_1)
-        config.add_mongo_db_client(mongodb_client_2)
-        gphotos_client_1_id = config.add_gphotos_client(gphotos_client_1)
-        gphotos_client_2_id = config.add_gphotos_client(gphotos_client_2)
+        gphotos_client_repo = GPhotosClientsRepository()
+        gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
+        gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
-        # Test setup 3: Set up the root album
+        # Test setup 2: Set up the root album
         root_album_obj = albums_repo.create_album('', None, [], [])
         config.set_root_album_id(root_album_obj.id)
 
@@ -186,13 +191,13 @@ class TestPhotosBackup(ParametrizedTestCase):
         bird_item = next(filter(lambda x: x['file_name'] == 'bird.png', mitems_1))
 
         # Test assert: check that the media items in the db are linked to GPhotos
-        self.assertEqual(dog_item['gphotos_client_id'], gphotos_client_1_id)
+        self.assertEqual(dog_item['gphotos_client_id'], str(gphotos_client_1_id))
         self.assertEqual(dog_item['gphotos_media_item_id'], dog_gitem.id)
-        self.assertEqual(cat_item['gphotos_client_id'], gphotos_client_2_id)
+        self.assertEqual(cat_item['gphotos_client_id'], str(gphotos_client_2_id))
         self.assertEqual(cat_item['gphotos_media_item_id'], cat_gitem.id)
-        self.assertEqual(fish_item['gphotos_client_id'], gphotos_client_1_id)
+        self.assertEqual(fish_item['gphotos_client_id'], str(gphotos_client_1_id))
         self.assertEqual(fish_item['gphotos_media_item_id'], fish_gitem.id)
-        self.assertEqual(bird_item['gphotos_client_id'], gphotos_client_2_id)
+        self.assertEqual(bird_item['gphotos_client_id'], str(gphotos_client_2_id))
         self.assertEqual(bird_item['gphotos_media_item_id'], bird_gitem.id)
 
         # Test assert: check that the media items are linked to the albums in the db
@@ -218,24 +223,29 @@ class TestPhotosBackup(ParametrizedTestCase):
     @parametrize_use_parallel_uploads
     def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
+        config = InMemoryConfig()
+
+        mongodb_client_1_id = ObjectId()
+        mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
+
+        gphotos_client_1_id = ObjectId()
+        gphotos_client_2_id = ObjectId()
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client_1 = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
-        config = InMemoryConfig()
-        mongodb_client_1_id = config.add_mongo_db_client(mongodb_client_1)
-        config.add_mongo_db_client(mongodb_client_2)
-        gphotos_client_1_id = config.add_gphotos_client(gphotos_client_1)
-        gphotos_client_2_id = config.add_gphotos_client(gphotos_client_2)
+        gphotos_client_repo = GPhotosClientsRepository()
+        gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
+        gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
-        # Test setup 3: Set up the existing albums
+        # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None, [], [])
         archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
         photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
@@ -254,7 +264,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
-        # Test setup 4: Add dog.png to Archives/Photos/2010
+        # Test setup 3: Add dog.png to Archives/Photos/2010
         gupload_token = gphotos_client_1.media_items().upload_photo(
             './Archives/Photos/2010/dog.png', 'dog.png'
         )
@@ -317,8 +327,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
         dog_mitem = next(filter(lambda x: x['file_name'] == 'dog.png', mitems_1))
         cat_mitem = next(filter(lambda x: x['file_name'] == 'cat.png', mitems_1))
-        self.assertEqual(gphotos_client_2_id, cat_mitem['gphotos_client_id'])
-        self.assertEqual(cat_gitem.id, cat_mitem['gphotos_media_item_id'])
+        self.assertEqual(cat_mitem['gphotos_client_id'], str(gphotos_client_2_id))
+        self.assertEqual(cat_mitem['gphotos_media_item_id'], cat_gitem.id)
 
         # Test assert: Check that no new albums have been made
         albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
@@ -344,21 +354,26 @@ class TestPhotosBackup(ParametrizedTestCase):
     def test_backup_deleted_one_item_on_album_with_two_items(
         self, use_parallel_uploads: bool
     ):
-        # Test setup 1: Set up the essential objects
+        # Test setup 1: Set up the config
+        config = InMemoryConfig()
+
+        mongodb_client_1_id = ObjectId()
+        mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
+
+        gphotos_client_1_id = ObjectId()
+        gphotos_client_2_id = ObjectId()
         gphotos_items_repo = FakeItemsRepository()
         gphotos_client_1 = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         gphotos_client_2 = FakeGPhotosClient(gphotos_items_repo, 'sam@gmail.com')
-        config = InMemoryConfig()
-        mongodb_client_1_id = config.add_mongo_db_client(mongodb_client_1)
-        config.add_mongo_db_client(mongodb_client_2)
-        gphotos_client_1_id = config.add_gphotos_client(gphotos_client_1)
-        config.add_gphotos_client(gphotos_client_2)
+        gphotos_client_repo = GPhotosClientsRepository()
+        gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
+        gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -476,20 +491,22 @@ class TestPhotosBackup(ParametrizedTestCase):
     @parametrize_use_parallel_uploads
     def test_backup_pruning_1(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
 
-        # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        mongodb_client_id = ObjectId()
+        mongodb_client = create_mock_mongo_client(1000)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
+
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        gphotos_client_repo = GPhotosClientsRepository()
+        gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
+
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
-        # Test setup 3: Set up the existing albums
+        # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None, [], [])
         archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
         photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
@@ -508,7 +525,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
-        # Test setup 4: Add dog.png to Archives/Photos/2010
+        # Test setup 3: Add dog.png to Archives/Photos/2010
         dog_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/dog.png', 'dog.png'
         )
@@ -579,20 +596,22 @@ class TestPhotosBackup(ParametrizedTestCase):
     @parametrize_use_parallel_uploads
     def test_backup_pruning_2(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
 
-        # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        mongodb_client_id = ObjectId()
+        mongodb_client = create_mock_mongo_client(1000)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
+
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        gphotos_client_repo = GPhotosClientsRepository()
+        gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
+
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
-        # Test setup 3: Set up the existing albums
+        # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None, [], [])
         archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
         photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
@@ -611,7 +630,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
-        # Test setup 4: Add dog.png to Archives/Photos/2010 and cat.png to Archives/
+        # Test setup 3: Add dog.png to Archives/Photos/2010 and cat.png to Archives/
         dog_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/dog.png', 'dog.png'
         )
@@ -712,20 +731,22 @@ class TestPhotosBackup(ParametrizedTestCase):
     @parametrize_use_parallel_uploads
     def test_backup_pruning_3(self, use_parallel_uploads: bool):
         # Test setup 1: Build the config
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
 
-        # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-        gphotos_client_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        mongodb_client_id = ObjectId()
+        mongodb_client = create_mock_mongo_client(1000)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
+
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        gphotos_client_repo = GPhotosClientsRepository()
+        gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
+
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
-        # Test setup 3: Set up the existing albums
+        # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None, [], [])
         public_album = albums_repo.create_album('Public', root_album.id, [], [])
         archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
@@ -747,7 +768,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
         )
 
-        # Test setup 4: Add dog.png to Archives/Photos/2010 and cat.png to Public/
+        # Test setup 3: Add dog.png to Archives/Photos/2010 and cat.png to Public/
         dog_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/dog.png', 'dog.png'
         )

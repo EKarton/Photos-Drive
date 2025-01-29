@@ -4,17 +4,14 @@ from bson import ObjectId
 
 from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
-from sharded_photos_drive_cli_client.shared.config.config import Config
+from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
 
 
 class TestDiffsAssigner(unittest.TestCase):
-    def setUp(self):
-        """Set up a new DiffsAssigner instance for each test."""
-        self.config = MagicMock(spec=Config)
-        self.diffs_assigner = DiffsAssigner(self.config)
-
     def test_get_diffs_assignments__spreads_diffs_across_clients(self):
         client1 = MagicMock()
         client1.get_storage_quota.return_value.limit = 1000
@@ -22,12 +19,12 @@ class TestDiffsAssigner(unittest.TestCase):
         client2 = MagicMock()
         client2.get_storage_quota.return_value.limit = 2000
         client2.get_storage_quota.return_value.usage = 1000
-        self.config.get_gphotos_clients.return_value = [
-            (ObjectId(), client1),
-            (ObjectId(), client2),
-        ]
+        repo = GPhotosClientsRepository()
+        repo.add_gphotos_client(ObjectId(), client1)
+        repo.add_gphotos_client(ObjectId(), client2)
 
         # Create processed diffs with "+" modifier
+        diffs_assigner = DiffsAssigner(repo)
         diff1 = ProcessedDiff(
             modifier="+",
             file_path="Archives/photo1.jpg",
@@ -46,7 +43,7 @@ class TestDiffsAssigner(unittest.TestCase):
             location=None,
             file_hash=MOCK_FILE_HASH,
         )
-        assignments = self.diffs_assigner.get_diffs_assignments([diff1, diff2])
+        assignments = diffs_assigner.get_diffs_assignments([diff1, diff2])
 
         self.assertEqual(len(assignments), 2)
         self.assertIn(diff1, assignments)
@@ -56,10 +53,10 @@ class TestDiffsAssigner(unittest.TestCase):
         client1 = MagicMock()
         client1.get_storage_quota.return_value.limit = 1000
         client1.get_storage_quota.return_value.usage = 1000  # No space left
-        self.config.get_gphotos_clients.return_value = [
-            (ObjectId(), client1),
-        ]
+        repo = GPhotosClientsRepository()
+        repo.add_gphotos_client(ObjectId(), client1)
 
+        diffs_assigner = DiffsAssigner(repo)
         diff1 = ProcessedDiff(
             modifier="+",
             file_path="Archives/photo1.jpg",
@@ -72,7 +69,7 @@ class TestDiffsAssigner(unittest.TestCase):
         with self.assertRaisesRegex(
             ValueError, "Cannot allocate .* to any GPhotos client"
         ):
-            self.diffs_assigner.get_diffs_assignments([diff1])
+            diffs_assigner.get_diffs_assignments([diff1])
 
     def test_get_diffs_assignments__no_assignment_possible__throws_error(self):
         # Mocking Google Photos clients with limited space
@@ -82,11 +79,11 @@ class TestDiffsAssigner(unittest.TestCase):
         client2 = MagicMock()
         client2.get_storage_quota.return_value.limit = 500
         client2.get_storage_quota.return_value.usage = 200
-        self.config.get_gphotos_clients.return_value = [
-            (ObjectId(), client1),
-            (ObjectId(), client2),
-        ]
+        repo = GPhotosClientsRepository()
+        repo.add_gphotos_client(ObjectId(), client1)
+        repo.add_gphotos_client(ObjectId(), client2)
 
+        diffs_assigner = DiffsAssigner(repo)
         diff1 = ProcessedDiff(
             modifier="+",
             file_path="Archives/photo1.jpg",
@@ -118,4 +115,4 @@ class TestDiffsAssigner(unittest.TestCase):
         with self.assertRaisesRegex(
             ValueError, "Cannot allocate .* to any GPhotos client"
         ):
-            self.diffs_assigner.get_diffs_assignments([diff1, diff2, diff3])
+            diffs_assigner.get_diffs_assignments([diff1, diff2, diff3])
