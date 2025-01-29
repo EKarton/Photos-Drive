@@ -387,7 +387,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
             },
         )
 
-    def test_update_gphotos_config_with_invalid_id(self):
+    def test_update_gphotos_config_with_unknown_id(self):
         update_request = UpdateGPhotosConfigRequest(
             id=ObjectId("5f50c31e8a7d4b1c9c9b0b1c"),
             new_name='sam@gmail.com',
@@ -407,10 +407,10 @@ class TestConfigFromMongoDb(unittest.TestCase):
             ),
         )
 
-        with self.assertRaisesRegex(ValueError, "Unable to update GPhotos config .*"):
+        with self.assertRaisesRegex(ValueError, "Cannot find GPhotos config .*"):
             self.config.update_gphotos_config(update_request)
 
-    def test_get_root_album_id__returns_root_album_id_from_database(self):
+    def test_get_root_album_id(self):
         self.mock_client["sharded_google_photos"]["root_album"].insert_one(
             {
                 "client_id": ObjectId("5f50c31e8a7d4b1c9c9b0b1c"),
@@ -423,11 +423,11 @@ class TestConfigFromMongoDb(unittest.TestCase):
         self.assertEqual(str(root_album.client_id), "5f50c31e8a7d4b1c9c9b0b1c")
         self.assertEqual(str(root_album.object_id), "5f50c31e8a7d4b1c9c9b0b1d")
 
-    def test_get_root_album_id__no_root_album_id_set__throws_error(self):
+    def test_get_root_album_id_with_no_root_album_id_set(self):
         with self.assertRaisesRegex(ValueError, 'No root album ID!'):
             self.config.get_root_album_id()
 
-    def test_set_root_album_id__sets_root_album_id_in_database(self):
+    def test_set_root_album_id(self):
         new_album_id = AlbumId(
             client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1e"),
             object_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1f"),

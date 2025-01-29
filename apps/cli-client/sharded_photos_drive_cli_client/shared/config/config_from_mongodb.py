@@ -249,7 +249,7 @@ class ConfigFromMongoDb(Config):
         )
 
         if result.matched_count != 1:
-            raise ValueError(f"Unable to update GPhotos config {request.id}")
+            raise ValueError(f"Cannot find GPhotos config {request.id}")
 
     @override
     def get_root_album_id(self) -> AlbumId:
