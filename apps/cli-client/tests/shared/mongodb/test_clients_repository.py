@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+    BYTES_512MB,
     MongoDbClientsRepository,
     MongoDbTransactionsContext,
 )
@@ -93,8 +94,44 @@ class TestMongoDbClientsRepository(unittest.TestCase):
     def test_find_id_of_client_with_most_space__with_no_mongodb_client(self):
         repo = MongoDbClientsRepository()
 
-        with self.assertRaisesRegex(ValueError, "No MongoDB Client!"):
+        with self.assertRaisesRegex(
+            ValueError, "No MongoDB client found with free space!"
+        ):
             repo.find_id_of_client_with_most_space()
+
+    def test_find_id_of_client_with_most_space__no_mongodb_client_with_free_space(self):
+        client_id_1 = ObjectId()
+        client_id_2 = ObjectId()
+        client_1 = create_mock_mongo_client(
+            total_free_storage_size=0, storage_size=BYTES_512MB
+        )
+        client_2 = create_mock_mongo_client(
+            total_free_storage_size=0, storage_size=BYTES_512MB
+        )
+        repo = MongoDbClientsRepository()
+        repo.add_mongodb_client(client_id_1, client_1)
+        repo.add_mongodb_client(client_id_2, client_2)
+        with self.assertRaisesRegex(
+            ValueError, "No MongoDB client found with free space!"
+        ):
+            repo.find_id_of_client_with_most_space()
+
+    def test_find_id_of_client_with_most_space__no_total_free_storage_size(self):
+        client_id_1 = ObjectId()
+        client_id_2 = ObjectId()
+        client_1 = create_mock_mongo_client(
+            total_free_storage_size=0, storage_size=1000
+        )
+        client_2 = create_mock_mongo_client(
+            total_free_storage_size=0, storage_size=2000
+        )
+        repo = MongoDbClientsRepository()
+        repo.add_mongodb_client(client_id_1, client_1)
+        repo.add_mongodb_client(client_id_2, client_2)
+
+        best_client_id = repo.find_id_of_client_with_most_space()
+
+        self.assertEqual(best_client_id, client_id_1)
 
     def test_get_all_clients__returns_all_mongodb_clients(self):
         client_id_1 = ObjectId()

@@ -4,13 +4,17 @@ import argparse
 
 from pymongo.mongo_client import MongoClient
 
+from sharded_photos_drive_cli_client.cli.config.reauthorize_mongodb_handler import (
+    ReauthorizeMongoDbHandler,
+)
+
 from ..shared.config.config import Config
 from ..shared.config.config_from_file import ConfigFromFile
 from ..shared.config.config_from_mongodb import ConfigFromMongoDb
 from .config.init_handler import InitHandler
 from .config.add_gphotos_handler import AddGPhotosHandler
 from .config.add_mongodb_handler import AddMongoDbHandler
-from .config.reauthorize_handler import ReauthorizeHandler
+from .config.reauthorize_gphotos_handler import ReauthorizeGPhotosHandler
 from .add_file_hashes_handler import AddFileHashesHandler
 from .usage_handler import UsageHandler
 from .add_handler import AddHandler
@@ -48,11 +52,23 @@ def main():
 
     # Add subparser for the 'config reauthorize gphotos' command
     config_reauthorize_parser = config_subparsers.add_parser("reauthorize")
-    config_reauthorize_parser.add_argument(
-        "--account_name", required=True, help="Name of the account"
+    config_reauthorize_subparsers = config_reauthorize_parser.add_subparsers(
+        dest="account_type"
     )
-    __add_config_argument(config_reauthorize_parser)
-    __add_verbose_argument(config_reauthorize_parser)
+    config_reauthorize_gphotos_parsers = config_reauthorize_subparsers.add_parser(
+        "gphotos"
+    )
+    config_reauthorize_gphotos_parsers.add_argument('id')
+    __add_config_argument(config_reauthorize_gphotos_parsers)
+    __add_verbose_argument(config_reauthorize_gphotos_parsers)
+
+    # Add subparser for the 'config reauthorize mongodb' command
+    config_reauthorize_mongodb_parsers = config_reauthorize_subparsers.add_parser(
+        "mongodb"
+    )
+    config_reauthorize_mongodb_parsers.add_argument('id')
+    __add_config_argument(config_reauthorize_mongodb_parsers)
+    __add_verbose_argument(config_reauthorize_mongodb_parsers)
 
     # Add subparser for the 'add' command
     add_parser = subparsers.add_parser("add")
@@ -139,10 +155,21 @@ def main():
                 exit(-1)
 
         elif args.cmd_type == "reauthorize":
-            __set_logging(args.verbose)
-            config = __build_config_based_on_args(args)
-            reauthorize_handler = ReauthorizeHandler()
-            reauthorize_handler.reauthorize(args.account_name, config)
+            if args.account_type == 'gphotos':
+                __set_logging(args.verbose)
+                config = __build_config_based_on_args(args)
+                reauthorize_gphotos_handler = ReauthorizeGPhotosHandler()
+                reauthorize_gphotos_handler.run(args.id, config)
+
+            elif args.account_type == 'mongodb':
+                __set_logging(args.verbose)
+                config = __build_config_based_on_args(args)
+                reauthorize_mongodb_handler = ReauthorizeMongoDbHandler()
+                reauthorize_mongodb_handler.run(args.id, config)
+
+            else:
+                config_add_parser.print_help()
+                exit(-1)
 
         else:
             config_parser.print_help()

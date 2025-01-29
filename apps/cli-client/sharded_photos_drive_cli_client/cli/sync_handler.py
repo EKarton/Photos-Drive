@@ -1,5 +1,8 @@
 import logging
 
+from .config.common_prompts import (
+    prompt_user_for_yes_no_answer,
+)
 from ..backup.backup_photos import PhotosBackup, BackupResults
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
@@ -9,10 +12,7 @@ from ..backup.diffs import Diff
 from ..backup.processed_diffs import DiffsProcessor, ProcessedDiff
 from ..diff.get_diffs import FolderSyncDiff, DiffResults
 from ..shared.config.config import Config
-from .utils import (
-    pretty_print_processed_diffs,
-    prompt_user_to_confirm,
-)
+from .utils import pretty_print_processed_diffs
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class SyncHandler:
         processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
 
         pretty_print_processed_diffs(processed_diffs)
-        if not prompt_user_to_confirm():
+        if not prompt_user_for_yes_no_answer("Is this correct? (Y/N): "):
             print("Operation cancelled.")
             return
 

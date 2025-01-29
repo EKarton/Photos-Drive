@@ -144,16 +144,3 @@ def pretty_print_processed_diffs(processed_diffs: list[ProcessedDiff]):
     print(f'Number of media items to add: {total_additions}')
     print(f'Number of media items to delete: {total_deletions}')
     print('')
-
-
-def prompt_user_to_confirm() -> bool:
-    while True:
-        raw_input = input("Is this correct? (yes / no): ")
-        user_input = raw_input.strip().lower()
-
-        if user_input in ["yes", "y"]:
-            return True
-        elif user_input in ["no", "n"]:
-            return False
-        else:
-            print("Invalid input. Please enter \'y\' or \'n\'")

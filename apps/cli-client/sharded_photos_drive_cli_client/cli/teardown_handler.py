@@ -1,3 +1,6 @@
+from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+    prompt_user_for_yes_no_answer,
+)
 from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl, UpdatedAlbumFields
@@ -18,7 +21,10 @@ class TeardownHandler:
         Args:
             config (Config): The config.
         """
-        self.__confirm_deletion_of_everything()
+        if not prompt_user_for_yes_no_answer(
+            "Do you want to delete everything this tool has ever created? (Y/N): "
+        ):
+            return
 
         mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
         gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)

@@ -12,6 +12,8 @@ from ..config.config import Config
 
 logger = logging.getLogger(__name__)
 
+BYTES_512MB = 536870912
+
 
 class MongoDbClientsRepository:
     def __init__(self):
@@ -90,15 +92,24 @@ class MongoDbClientsRepository:
 
         for id, client in self.__id_to_client.items():
             db = client["sharded_google_photos"]
-            db_stats = db.command("dbstats")
-            used_space = db_stats["totalFreeStorageSize"]
+            db_stats = db.command({'dbStats': 1, 'freeStorage': 1})
+            raw_total_free_storage = db_stats["totalFreeStorageSize"]
 
-            if used_space > most_unused_space:
+            # Handle case of free tier: they return 0 for `totalFreeStorageSize`
+            # even though it is 512 MB
+            free_space = raw_total_free_storage
+            if raw_total_free_storage == 0:
+                free_space = BYTES_512MB - db_stats["storageSize"]
+
+            if free_space <= 0:
+                continue
+
+            if free_space > most_unused_space:
                 best_client_id = id
-                most_unused_space = used_space
+                most_unused_space = free_space
 
         if best_client_id is None:
-            raise ValueError("No MongoDB Client!")
+            raise ValueError("No MongoDB client found with free space!")
 
         return ObjectId(best_client_id)
 
