@@ -4,7 +4,15 @@ from mongomock import MongoClient
 from bson.objectid import ObjectId
 
 
-from .config import Config
+from .config import (
+    AddGPhotosConfigRequest,
+    AddMongoDbConfigRequest,
+    Config,
+    GPhotosConfig,
+    MongoDbConfig,
+    UpdateGPhotosConfigRequest,
+    UpdateMongoDbConfigRequest,
+)
 from ..gphotos.client import GPhotosClientV2
 from ..mongodb.albums import AlbumId
 
@@ -33,6 +41,18 @@ class InMemoryConfig(Config):
         return client_id_str
 
     @override
+    def get_mongodb_configs(self) -> list[MongoDbConfig]:
+        raise NotImplementedError()
+
+    @override
+    def add_mongodb_config(self, request: AddMongoDbConfigRequest) -> MongoDbConfig:
+        raise NotImplementedError()
+
+    @override
+    def update_mongodb_config(self, request: UpdateMongoDbConfigRequest):
+        raise NotADirectoryError()
+
+    @override
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
         return [
             (ObjectId(id), client)
@@ -47,6 +67,18 @@ class InMemoryConfig(Config):
         self.__id_to_gphotos_clients[client_id_str] = gphotos_client
 
         return client_id_str
+
+    @override
+    def get_gphotos_configs(self) -> list[GPhotosConfig]:
+        raise NotImplementedError()
+
+    @override
+    def add_gphotos_config(self, request: AddGPhotosConfigRequest) -> GPhotosConfig:
+        raise NotImplementedError()
+
+    @override
+    def update_gphotos_config(self, request: UpdateGPhotosConfigRequest):
+        raise NotImplementedError()
 
     @override
     def get_root_album_id(self) -> AlbumId:
