@@ -21,7 +21,10 @@ class TestConfigFromFile(unittest.TestCase):
         self.temp_file_path = self.temp_file.name
         self.temp_file.close()
 
-        # Write initial config
+    def tearDown(self):
+        os.unlink(self.temp_file_path)
+
+    def test_get_mongo_db_clients(self):
         with open(self.temp_file_path, 'w') as f:
             f.write(
                 '[5f50c31e8a7d4b1c9c9b0b1a]\n'
@@ -43,24 +46,18 @@ class TestConfigFromFile(unittest.TestCase):
                 + 'client_id = 5f50c31e8a7d4b1c9c9b0b1b\n'
                 + 'object_id = 5f50c31e8a7d4b1c9c9b0b1d\n'
             )
-        self.config = ConfigFromFile(self.temp_file_path)
 
-    def tearDown(self):
-        os.unlink(self.temp_file_path)
-
-    def test_get_mongo_db_clients(self):
-        clients = self.config.get_mongo_db_clients()
+        config = ConfigFromFile(self.temp_file_path)
+        clients = config.get_mongo_db_clients()
 
         self.assertEqual(len(clients), 1)
         self.assertEqual(str(clients[0][0]), "5f50c31e8a7d4b1c9c9b0b1a")
         self.assertIsInstance(clients[0][1], MongoClient)
 
     def test_add_mongo_db_client(self):
-        new_id = self.config.add_mongo_db_client(
-            "NewMongoDB", "mongodb://newhost:27017"
-        )
+        config = ConfigFromFile(self.temp_file_path)
+        new_id = config.add_mongo_db_client("NewMongoDB", "mongodb://newhost:27017")
 
-        self.config.flush()
         with open(self.temp_file_path, 'r') as f:
             content = f.read()
 
@@ -69,7 +66,30 @@ class TestConfigFromFile(unittest.TestCase):
             self.assertIn(str(new_id), content)
 
     def test_get_gphotos_clients(self):
-        clients = self.config.get_gphotos_clients()
+        with open(self.temp_file_path, 'w') as f:
+            f.write(
+                '[5f50c31e8a7d4b1c9c9b0b1a]\n'
+                + 'type = mongodb\n'
+                + 'name = TestMongoDB\n'
+                + 'connection_string = mongodb://localhost:27017\n'
+                + '\n'
+                + '[5f50c31e8a7d4b1c9c9b0b1b]\n'
+                + 'type = gphotos\n'
+                + 'name = TestGPhotos\n'
+                + 'token = test_token\n'
+                + 'refresh_token = test_refresh_token\n'
+                + 'client_id = test_client_id\n'
+                + 'client_secret = test_client_secret\n'
+                + 'token_uri = https://oauth2.googleapis.com/token\n'
+                + '\n'
+                + '[5f50c31e8a7d4b1c9c9b0b1c]\n'
+                + 'type = root_album\n'
+                + 'client_id = 5f50c31e8a7d4b1c9c9b0b1b\n'
+                + 'object_id = 5f50c31e8a7d4b1c9c9b0b1d\n'
+            )
+
+        config = ConfigFromFile(self.temp_file_path)
+        clients = config.get_gphotos_clients()
 
         self.assertEqual(len(clients), 1)
         self.assertEqual(str(clients[0][0]), "5f50c31e8a7d4b1c9c9b0b1b")
@@ -85,9 +105,9 @@ class TestConfigFromFile(unittest.TestCase):
         )
         client = GPhotosClientV2('NewGPhotos', AuthorizedSession(creds))
 
-        new_id = self.config.add_gphotos_client(client)
+        config = ConfigFromFile(self.temp_file_path)
+        new_id = config.add_gphotos_client(client)
 
-        self.config.flush()
         with open(self.temp_file_path, 'r') as f:
             content = f.read()
 
@@ -100,18 +120,36 @@ class TestConfigFromFile(unittest.TestCase):
             self.assertIn("https://new.token.uri", content)
 
     def test_get_root_album_id(self):
-        root_album = self.config.get_root_album_id()
+        with open(self.temp_file_path, 'w') as f:
+            f.write(
+                '[5f50c31e8a7d4b1c9c9b0b1a]\n'
+                + 'type = mongodb\n'
+                + 'name = TestMongoDB\n'
+                + 'connection_string = mongodb://localhost:27017\n'
+                + '\n'
+                + '[5f50c31e8a7d4b1c9c9b0b1b]\n'
+                + 'type = gphotos\n'
+                + 'name = TestGPhotos\n'
+                + 'token = test_token\n'
+                + 'refresh_token = test_refresh_token\n'
+                + 'client_id = test_client_id\n'
+                + 'client_secret = test_client_secret\n'
+                + 'token_uri = https://oauth2.googleapis.com/token\n'
+                + '\n'
+                + '[5f50c31e8a7d4b1c9c9b0b1c]\n'
+                + 'type = root_album\n'
+                + 'client_id = 5f50c31e8a7d4b1c9c9b0b1b\n'
+                + 'object_id = 5f50c31e8a7d4b1c9c9b0b1d\n'
+            )
+
+        config = ConfigFromFile(self.temp_file_path)
+        root_album = config.get_root_album_id()
 
         self.assertEqual(str(root_album.client_id), "5f50c31e8a7d4b1c9c9b0b1b")
         self.assertEqual(str(root_album.object_id), "5f50c31e8a7d4b1c9c9b0b1d")
 
     def test_get_root_album_id__no_root_id_in_file(self):
-        temp_file = tempfile.NamedTemporaryFile(delete=False)
-        temp_file_path = temp_file.name
-        temp_file.close()
-
-        # Write initial config
-        with open(temp_file_path, 'w') as f:
+        with open(self.temp_file_path, 'w') as f:
             f.write(
                 '[5f50c31e8a7d4b1c9c9b0b1a]\n'
                 + 'type = mongodb\n'
@@ -127,22 +165,42 @@ class TestConfigFromFile(unittest.TestCase):
                 + 'client_secret = test_client_secret\n'
                 + 'token_uri = https://oauth2.googleapis.com/token\n',
             )
-        config = ConfigFromFile(temp_file_path)
 
+        config = ConfigFromFile(self.temp_file_path)
         with self.assertRaisesRegex(ValueError, "Cannot find root album"):
             config.get_root_album_id()
 
     def test_set_root_album_id(self):
+        with open(self.temp_file_path, 'w') as f:
+            f.write(
+                '[5f50c31e8a7d4b1c9c9b0b1a]\n'
+                + 'type = mongodb\n'
+                + 'name = TestMongoDB\n'
+                + 'connection_string = mongodb://localhost:27017\n'
+                + '\n'
+                + '[5f50c31e8a7d4b1c9c9b0b1b]\n'
+                + 'type = gphotos\n'
+                + 'name = TestGPhotos\n'
+                + 'token = test_token\n'
+                + 'refresh_token = test_refresh_token\n'
+                + 'client_id = test_client_id\n'
+                + 'client_secret = test_client_secret\n'
+                + 'token_uri = https://oauth2.googleapis.com/token\n'
+                + '\n'
+                + '[5f50c31e8a7d4b1c9c9b0b1c]\n'
+                + 'type = root_album\n'
+                + 'client_id = 5f50c31e8a7d4b1c9c9b0b1b\n'
+                + 'object_id = 5f50c31e8a7d4b1c9c9b0b1d\n'
+            )
+
         new_album_id = AlbumId(
             client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1e"),
             object_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1f"),
         )
+        config = ConfigFromFile(self.temp_file_path)
+        config.set_root_album_id(new_album_id)
 
-        self.config.set_root_album_id(new_album_id)
-
-        self.config.flush()
         with open(self.temp_file_path, 'r') as f:
             content = f.read()
-
             self.assertIn("5f50c31e8a7d4b1c9c9b0b1e", content)
             self.assertIn("5f50c31e8a7d4b1c9c9b0b1f", content)

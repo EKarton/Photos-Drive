@@ -68,15 +68,69 @@ class ConfigFromFile(Config):
 
     @override
     def get_mongodb_configs(self) -> list[MongoDbConfig]:
-        raise NotImplementedError()
+        configs = []
+        for section_id in self._config.sections():
+            if self._config.get(section_id, "type") != "mongodb_config":
+                continue
+
+            config = MongoDbConfig(
+                id=ObjectId(section_id.strip()),
+                name=self._config.get(section_id, "name"),
+                read_write_connection_string=self._config.get(
+                    section_id, "read_write_connection_string"
+                ),
+                read_only_connection_string=self._config.get(
+                    section_id, "read_only_connection_string"
+                ),
+            )
+            configs.append(config)
+
+        return configs
 
     @override
     def add_mongodb_config(self, request: AddMongoDbConfigRequest) -> MongoDbConfig:
-        raise NotImplementedError()
+        id = self.__generate_unique_object_id()
+        id_str = str(id)
+        self._config.add_section(id_str)
+        self._config.set(id_str, "type", "mongodb_config")
+        self._config.set(id_str, "name", request.name)
+        self._config.set(
+            id_str, "read_write_connection_string", request.read_write_connection_string
+        )
+        self._config.set(
+            id_str, "read_only_connection_string", request.read_only_connection_string
+        )
+        self.flush()
+
+        return MongoDbConfig(
+            id=id,
+            name=request.name,
+            read_write_connection_string=request.read_write_connection_string,
+            read_only_connection_string=request.read_only_connection_string,
+        )
 
     @override
     def update_mongodb_config(self, request: UpdateMongoDbConfigRequest):
-        raise NotADirectoryError()
+        id_str = str(request.id)
+        if self._config.get(id_str, "type") != 'mongodb_config':
+            raise ValueError(f"Cannot find MongoDB config {request.id}")
+
+        if request.new_name:
+            self._config.set(id_str, "name", request.new_name)
+
+        if request.new_read_write_connection_string:
+            self._config.set(
+                id_str,
+                "read_write_connection_string",
+                request.new_read_write_connection_string,
+            )
+
+        if request.new_read_only_connection_string:
+            self._config.set(
+                id_str,
+                "read_only_connection_string",
+                request.new_read_only_connection_string,
+            )
 
     @override
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
