@@ -81,7 +81,6 @@ class ConfigFromMongoDb(Config):
         result = collection.insert_one(
             {
                 "name": request.name,
-                "connection_string": request.read_write_connection_string,
                 "read_write_connection_string": request.read_write_connection_string,
                 "read_only_connection_string": request.read_only_connection_string,
             }

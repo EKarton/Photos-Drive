@@ -110,9 +110,6 @@ class TestConfigFromMongoDb(unittest.TestCase):
         self.assertIsNotNone(inserted_doc)
         self.assertEqual(inserted_doc["name"], request.name)
         self.assertEqual(
-            inserted_doc["connection_string"], request.read_write_connection_string
-        )
-        self.assertEqual(
             inserted_doc["read_write_connection_string"],
             request.read_write_connection_string,
         )

@@ -132,6 +132,8 @@ class ConfigFromFile(Config):
                 request.new_read_only_connection_string,
             )
 
+        self.flush()
+
     @override
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
         results = []
@@ -186,7 +188,40 @@ class ConfigFromFile(Config):
 
     @override
     def get_gphotos_configs(self) -> list[GPhotosConfig]:
-        raise NotImplementedError()
+        configs = []
+        for section_id in self._config.sections():
+            if self._config.get(section_id, "type") != "gphotos_config":
+                continue
+
+            config = GPhotosConfig(
+                id=ObjectId(section_id.strip()),
+                name=self._config.get(section_id, "name"),
+                read_write_credentials=Credentials(
+                    token=self._config.get(section_id, "read_write_token"),
+                    refresh_token=self._config.get(
+                        section_id, "read_write_refresh_token"
+                    ),
+                    client_id=self._config.get(section_id, "read_write_client_id"),
+                    client_secret=self._config.get(
+                        section_id, "read_write_client_secret"
+                    ),
+                    token_uri=self._config.get(section_id, "read_write_token_uri"),
+                ),
+                read_only_credentials=Credentials(
+                    token=self._config.get(section_id, "read_only_token"),
+                    refresh_token=self._config.get(
+                        section_id, "read_only_refresh_token"
+                    ),
+                    client_id=self._config.get(section_id, "read_only_client_id"),
+                    client_secret=self._config.get(
+                        section_id, "read_only_client_secret"
+                    ),
+                    token_uri=self._config.get(section_id, "read_only_token_uri"),
+                ),
+            )
+            configs.append(config)
+
+        return configs
 
     @override
     def add_gphotos_config(self, request: AddGPhotosConfigRequest) -> GPhotosConfig:
