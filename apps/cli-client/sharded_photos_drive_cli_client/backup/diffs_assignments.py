@@ -1,13 +1,13 @@
 from typing import Dict
-
 from bson import ObjectId
-from sharded_photos_drive_cli_client.shared.config.config import Config
+
+from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 from .processed_diffs import ProcessedDiff
 
 
 class DiffsAssigner:
-    def __init__(self, config: Config):
-        self.__config = config
+    def __init__(self, repo: GPhotosClientsRepository):
+        self.__repo = repo
 
     def get_diffs_assignments(
         self, diffs: list[ProcessedDiff]
@@ -27,7 +27,7 @@ class DiffsAssigner:
                 client ID.
         """
         client_id_to_space_remaining = {}
-        for client_id, client in self.__config.get_gphotos_clients():
+        for client_id, client in self.__repo.get_all_clients():
             space = client.get_storage_quota()
             client_id_to_space_remaining[client_id] = space.limit - space.usage
 

@@ -42,13 +42,11 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Archives/Photos/2011/cat.jpg', contents='Cat')
 
         # Test setup: set up the cloud
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -116,13 +114,11 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Archives/Photos/2010/dog.jpg', contents='Dog')
 
         # Test setup: set up the cloud
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -213,13 +209,11 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Archives/Photos/2011/notes.txt', contents='My notes')
 
         # Test setup: set up the cloud
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -282,13 +276,11 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Laptop/Photos/2020/car.jpg', contents='Car')
 
         # Test setup: set up the cloud
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -349,13 +341,11 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Laptop/Photos/2020/car.jpg', contents='Car')
 
         # Test setup: set up the cloud
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -461,13 +451,11 @@ class FolderSyncDiffTests(TestCase):
         self.fs.create_file('/Archives/Photos/2010/dog.jpg', contents='Dog')
 
         # Test setup: set up the cloud
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
         config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 

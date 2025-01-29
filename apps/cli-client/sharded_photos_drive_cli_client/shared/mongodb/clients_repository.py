@@ -2,6 +2,7 @@ import logging
 from types import TracebackType
 from typing import Dict
 from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 from pymongo.client_session import ClientSession
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
@@ -33,8 +34,12 @@ class MongoDbClientsRepository:
         """
         mongodb_clients_repo = MongoDbClientsRepository()
 
-        for id, mongodb_client in config.get_mongo_db_clients():
-            mongodb_clients_repo.add_mongodb_client(id, mongodb_client)
+        for mongodb_config in config.get_mongodb_configs():
+            mongodb_client: MongoClient = MongoClient(
+                mongodb_config.read_write_connection_string, server_api=ServerApi("1")
+            )
+
+            mongodb_clients_repo.add_mongodb_client(mongodb_config.id, mongodb_client)
 
         return mongodb_clients_repo
 
@@ -70,7 +75,7 @@ class MongoDbClientsRepository:
         """
         str_id = str(id)
         if str_id not in self.__id_to_client:
-            raise ValueError(f"Cannot find MongoDB client with ID {id}")
+            raise ValueError(f"Cannot find MongoDB client {id}")
         return self.__id_to_client[str_id]
 
     def find_id_of_client_with_most_space(self) -> ObjectId:

@@ -1,7 +1,6 @@
 import unittest
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeItemsRepository,
     FakeGPhotosClient,
@@ -28,9 +27,8 @@ MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
 class AlbumsPrunerTests(unittest.TestCase):
     def test_prune_album__descendants_all_empty_albums(self):
         # Test setup: Build the objects
-        config = InMemoryConfig()
-        config.add_mongo_db_client(create_mock_mongo_client())
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: Set up the existing albums
@@ -38,7 +36,6 @@ class AlbumsPrunerTests(unittest.TestCase):
         archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
         photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
         album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
-        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
             UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
@@ -70,15 +67,13 @@ class AlbumsPrunerTests(unittest.TestCase):
         self.assertEqual(albums[0].parent_album_id, None)
 
     def test_prune_album__media_item_in_descendants(self):
-        # Test setup 1: Build the config
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
-        config = InMemoryConfig()
-        config.add_mongo_db_client(create_mock_mongo_client())
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
+        # Test setup 1: Build the GPhotos client
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
 
         # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -87,7 +82,6 @@ class AlbumsPrunerTests(unittest.TestCase):
         archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
         photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
         album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
-        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
             UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
@@ -155,16 +149,15 @@ class AlbumsPrunerTests(unittest.TestCase):
         self.assertEqual(albums[1].parent_album_id, root_album.id)
 
     def test_backup_pruning_3(self):
-        # Test setup 1: Build the config
-        mongodb_client = create_mock_mongo_client(1000)
-        gphotos_items_repo = FakeItemsRepository()
-        gphotos_client = FakeGPhotosClient(gphotos_items_repo, 'bob@gmail.com')
-        config = InMemoryConfig()
-        config.add_mongo_db_client(mongodb_client)
-        gphotos_client_id = config.add_gphotos_client(gphotos_client)
+        # Test setup 1: Build the GPhotos client
+        gphotos_client_id = ObjectId()
+        gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
 
         # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(
+            ObjectId(), create_mock_mongo_client(1000)
+        )
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
@@ -174,7 +167,6 @@ class AlbumsPrunerTests(unittest.TestCase):
         videos_album = albums_repo.create_album('Videos', archives_album.id, [], [])
         photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
         album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
-        config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
             UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
