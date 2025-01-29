@@ -1,11 +1,9 @@
 import configparser
-from typing import cast, override
+from typing import override
 from google.oauth2.credentials import Credentials
-from pymongo.mongo_client import MongoClient
-from google.auth.transport.requests import AuthorizedSession
-from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 
+from ..mongodb.albums import AlbumId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -15,8 +13,6 @@ from .config import (
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )
-from ..gphotos.client import GPhotosClientV2
-from ..mongodb.albums import AlbumId
 
 GPHOTOS_CONFIG_TYPE = "gphotos_config"
 MONGODB_CONFIG_TYPE = "mongodb_config"
@@ -36,39 +32,6 @@ class ConfigFromFile(Config):
         self._config_file_path = config_file_path
         self._config = configparser.ConfigParser()
         self._config.read(config_file_path)
-
-    @override
-    def get_mongo_db_clients(self) -> list[tuple[ObjectId, MongoClient]]:
-        results = []
-        for section_id in self._config.sections():
-            if self._config.get(section_id, "type") != "mongodb":
-                continue
-
-            mongodb_client: MongoClient = MongoClient(
-                self._config.get(section_id, "connection_string"),
-                server_api=ServerApi("1"),
-            )
-            results.append(
-                (
-                    ObjectId(section_id.strip()),
-                    mongodb_client,
-                )
-            )
-
-        return results
-
-    @override
-    def add_mongo_db_client(self, name: str, connection_string: str) -> str:
-        client_id = self.__generate_unique_object_id()
-        client_id_str = str(client_id)
-
-        self._config.add_section(client_id_str)
-        self._config.set(client_id_str, "type", "mongodb")
-        self._config.set(client_id_str, "name", name)
-        self._config.set(client_id_str, "connection_string", connection_string)
-        self.flush()
-
-        return name
 
     @override
     def get_mongodb_configs(self) -> list[MongoDbConfig]:
@@ -140,58 +103,6 @@ class ConfigFromFile(Config):
             )
 
         self.flush()
-
-    @override
-    def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
-        results = []
-        for section_id in self._config.sections():
-            if self._config.get(section_id, "type") != "gphotos":
-                continue
-
-            creds = Credentials(
-                token=self._config.get(section_id, "token"),
-                refresh_token=self._config.get(section_id, "refresh_token"),
-                client_id=self._config.get(section_id, "client_id"),
-                client_secret=self._config.get(section_id, "client_secret"),
-                token_uri=self._config.get(section_id, "token_uri"),
-            )
-            gphotos_client: GPhotosClientV2 = GPhotosClientV2(
-                name=self._config.get(section_id, "name"),
-                session=AuthorizedSession(creds),
-            )
-            results.append((ObjectId(section_id.strip()), gphotos_client))
-
-        return results
-
-    @override
-    def add_gphotos_client(self, gphotos_client: GPhotosClientV2) -> str:
-        client_id = self.__generate_unique_object_id()
-        client_id_str = str(client_id)
-        name = gphotos_client.name()
-
-        self._config.add_section(client_id_str)
-        self._config.set(client_id_str, "type", "gphotos")
-        self._config.set(client_id_str, "name", name)
-        credentials = cast(Credentials, gphotos_client.session().credentials)
-
-        if credentials.refresh_token:
-            self._config.set(client_id_str, "refresh_token", credentials.refresh_token)
-
-        if credentials.token:
-            self._config.set(client_id_str, "token", credentials.token)
-
-        if credentials.client_id:
-            self._config.set(client_id_str, "client_id", credentials.client_id)
-
-        if credentials.client_secret:
-            self._config.set(client_id_str, "client_secret", credentials.client_secret)
-
-        if credentials.token_uri:
-            self._config.set(client_id_str, "token_uri", credentials.token_uri)
-
-        self.flush()
-
-        return name
 
     @override
     def get_gphotos_configs(self) -> list[GPhotosConfig]:

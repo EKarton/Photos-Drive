@@ -1,7 +1,7 @@
 from typing import Dict, override
-from mongomock import MongoClient
 from bson.objectid import ObjectId
 
+from ..mongodb.albums import AlbumId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -11,35 +11,15 @@ from .config import (
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )
-from ..gphotos.client import GPhotosClientV2
-from ..mongodb.albums import AlbumId
 
 
 class InMemoryConfig(Config):
     """Represents the config repository stored in memory."""
 
     def __init__(self):
-        self.__id_to_mongodb_clients: Dict[str, MongoClient] = {}
-        self.__id_to_gphotos_clients: Dict[str, GPhotosClientV2] = {}
-
         self.__id_to_mongodb_config: Dict[ObjectId, MongoDbConfig] = {}
         self.__id_to_gphotos_config: Dict[ObjectId, GPhotosConfig] = {}
         self.__root_album_id = None
-
-    @override
-    def get_mongo_db_clients(self) -> list[tuple[ObjectId, MongoClient]]:
-        return [
-            (ObjectId(id), client)
-            for id, client in self.__id_to_mongodb_clients.items()
-        ]
-
-    @override
-    def add_mongo_db_client(self, mongodb_client: MongoClient) -> str:  # type: ignore
-        client_id = self.__generate_unique_object_id()
-        client_id_str = str(client_id)
-        self.__id_to_mongodb_clients[client_id_str] = mongodb_client
-
-        return client_id_str
 
     @override
     def get_mongodb_configs(self) -> list[MongoDbConfig]:
@@ -47,7 +27,7 @@ class InMemoryConfig(Config):
 
     @override
     def add_mongodb_config(self, request: AddMongoDbConfigRequest) -> MongoDbConfig:
-        new_id = self.__generate_unique_object_id_v2()
+        new_id = self.__generate_unique_object_id()
         config = MongoDbConfig(
             id=new_id,
             name=request.name,
@@ -81,28 +61,12 @@ class InMemoryConfig(Config):
         self.__id_to_mongodb_config[request.id] = new_config
 
     @override
-    def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
-        return [
-            (ObjectId(id), client)
-            for id, client in self.__id_to_gphotos_clients.items()
-        ]
-
-    @override
-    def add_gphotos_client(self, gphotos_client: GPhotosClientV2) -> str:
-        client_id = self.__generate_unique_object_id()
-        client_id_str = str(client_id)
-
-        self.__id_to_gphotos_clients[client_id_str] = gphotos_client
-
-        return client_id_str
-
-    @override
     def get_gphotos_configs(self) -> list[GPhotosConfig]:
         return [item for _, item in self.__id_to_gphotos_config.items()]
 
     @override
     def add_gphotos_config(self, request: AddGPhotosConfigRequest) -> GPhotosConfig:
-        new_id = self.__generate_unique_object_id_v2()
+        new_id = self.__generate_unique_object_id()
         config = GPhotosConfig(
             id=new_id,
             name=request.name,
@@ -147,18 +111,6 @@ class InMemoryConfig(Config):
         self.__root_album_id = album_id
 
     def __generate_unique_object_id(self) -> ObjectId:
-        id = ObjectId()
-        str_id = str(id)
-        while (
-            str_id in self.__id_to_gphotos_clients
-            or str_id in self.__id_to_mongodb_clients
-        ):
-            id = ObjectId()
-            str_id = str(id)
-
-        return id
-
-    def __generate_unique_object_id_v2(self) -> ObjectId:
         id = ObjectId()
         while id in self.__id_to_gphotos_config or id in self.__id_to_mongodb_config:
             id = ObjectId()

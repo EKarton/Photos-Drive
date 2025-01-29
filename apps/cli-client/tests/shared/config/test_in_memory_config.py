@@ -1,8 +1,6 @@
 import unittest
 from bson import ObjectId
-from mongomock import MongoClient
 from unittest.mock import MagicMock
-from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 
 from sharded_photos_drive_cli_client.shared.config.config import (
@@ -11,27 +9,13 @@ from sharded_photos_drive_cli_client.shared.config.config import (
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
-from sharded_photos_drive_cli_client.shared.mongodb.testing import (
-    create_mock_mongo_client,
-)
 
 
 class TestInMemoryConfig(unittest.TestCase):
     def setUp(self):
         self.config = InMemoryConfig()
-
-    def test_add_and_get_mongodb_client(self):
-        client = create_mock_mongo_client()
-        client_id = self.config.add_mongo_db_client(client)
-
-        clients = self.config.get_mongo_db_clients()
-
-        self.assertEqual(len(clients), 1)
-        self.assertEqual(str(clients[0][0]), client_id)
-        self.assertIsInstance(clients[0][1], MongoClient)
 
     def test_add_and_get_mongodb_config(self):
         request = AddMongoDbConfigRequest(
@@ -79,17 +63,6 @@ class TestInMemoryConfig(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "Mongo Config ID .* does not exist"):
             self.config.update_mongodb_config(update_request)
-
-    def test_add_and_get_gphotos_client(self):
-        mock_session = MagicMock(spec=AuthorizedSession)
-        client = GPhotosClientV2('bob@gmail.com', mock_session)
-        client_id = self.config.add_gphotos_client(client)
-
-        clients = self.config.get_gphotos_clients()
-
-        self.assertEqual(len(clients), 1)
-        self.assertEqual(str(clients[0][0]), client_id)
-        self.assertIsInstance(clients[0][1], GPhotosClientV2)
 
     def test_add_and_get_gphotos_config(self):
         mock_credentials = MagicMock(spec=Credentials)
