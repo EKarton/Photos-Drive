@@ -25,9 +25,6 @@ def prompt_user_for_mongodb_connection_string() -> str:
 
     mongodb_connection_string = None
     while True:
-        print(
-            "Enter your MongoDB connection string",
-        )
         mongodb_connection_string = getpass.getpass()
         try:
             mongodb_client: MongoClient = MongoClient(

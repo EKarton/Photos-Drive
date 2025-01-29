@@ -1,14 +1,22 @@
 from prettytable import PrettyTable
+
+from ..shared.gphotos.clients_repository import GPhotosClientsRepository
+from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.config.config import Config
 
 
 class UsageHandler:
     def run(self, config: Config):
-        print(self.__get_mongodb_accounts_table(config))
-        print("")
-        print(self.__get_gphoto_clients_table(config))
+        mongodb_repo = MongoDbClientsRepository.build_from_config(config)
+        gphotos_repo = GPhotosClientsRepository.build_from_config_repo(config)
 
-    def __get_mongodb_accounts_table(self, config: Config) -> PrettyTable:
+        print(self.__get_mongodb_accounts_table(mongodb_repo))
+        print("")
+        print(self.__get_gphoto_clients_table(gphotos_repo))
+
+    def __get_mongodb_accounts_table(
+        self, mongodb_repo: MongoDbClientsRepository
+    ) -> PrettyTable:
         table = PrettyTable(title="MongoDB accounts")
         table.field_names = [
             "ID",
@@ -17,7 +25,7 @@ class UsageHandler:
             "Usage",
             "Number of objects",
         ]
-        for client_id, client in config.get_mongo_db_clients():
+        for client_id, client in mongodb_repo.get_all_clients():
             db_stats = client["sharded_google_photos"].command("dbstats")
 
             free_space_remaining = db_stats['totalFreeStorageSize']
@@ -32,7 +40,9 @@ class UsageHandler:
 
         return table
 
-    def __get_gphoto_clients_table(self, config: Config) -> PrettyTable:
+    def __get_gphoto_clients_table(
+        self, gphotos_repo: GPhotosClientsRepository
+    ) -> PrettyTable:
         table = PrettyTable(title="Google Photos clients")
         table.field_names = [
             "ID",
@@ -42,7 +52,7 @@ class UsageHandler:
             "Usage",
         ]
 
-        for client_id, client in config.get_gphotos_clients():
+        for client_id, client in gphotos_repo.get_all_clients():
             storage_quota = client.get_storage_quota()
             table.add_row(
                 [

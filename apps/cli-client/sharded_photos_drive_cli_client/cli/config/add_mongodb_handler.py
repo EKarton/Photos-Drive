@@ -1,4 +1,4 @@
-from ...shared.config.config import Config
+from ...shared.config.config import AddMongoDbConfigRequest, Config
 from .utils import prompt_user_for_mongodb_connection_string
 
 
@@ -12,9 +12,21 @@ class AddMongoDbHandler:
         Args:
             config (Config): The config object.
         """
-        mongodb_client_name = self.__get_non_empty_name()
-        mongodb_connection_string = prompt_user_for_mongodb_connection_string()
-        config.add_mongo_db_client(mongodb_client_name, mongodb_connection_string)
+        name = self.__get_non_empty_name()
+
+        print("Now, enter your read+write connection string:")
+        read_write_connection_string = prompt_user_for_mongodb_connection_string()
+
+        print("Next, enter your read only connection string:")
+        read_only_connection_string = prompt_user_for_mongodb_connection_string()
+
+        config.add_mongodb_config(
+            AddMongoDbConfigRequest(
+                name=name,
+                read_write_connection_string=read_write_connection_string,
+                read_only_connection_string=read_only_connection_string,
+            )
+        )
 
         print("Successfully added your Mongo DB account!")
 
