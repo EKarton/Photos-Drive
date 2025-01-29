@@ -1,10 +1,51 @@
 from abc import ABC, abstractmethod
-
+from dataclasses import dataclass
 from pymongo.mongo_client import MongoClient
 from bson.objectid import ObjectId
+from google.oauth2.credentials import Credentials
 
 from ..gphotos.client import GPhotosClientV2
 from ..mongodb.albums import AlbumId
+
+
+@dataclass(frozen=True)
+class MongoDbConfig:
+    '''
+    A data class that encapsulates the MongoDB configurations.
+
+    Attributes:
+        id (ObjectId): The ID of this account.
+        name (str): The name of the account.
+        read_write_connection_string (str): The connection string to the MongoDB
+            instance with read-write permissions.
+        read_connection_string (str): The connection string to the MongoDB instance
+            with only read permissions.
+    '''
+
+    id: ObjectId
+    name: str
+    read_write_connection_string: str
+    read_only_connection_string: str
+
+
+@dataclass(frozen=True)
+class GPhotosConfig:
+    '''
+    A data class that encapsulates a Google Photos account.
+
+    Attributes:
+        id (ObjectId): The ID of this account.
+        name (str): The name of the account.
+        read_write_credentials (Credentials): The credentials to the account,
+            with read-write permissions
+        read_only_credentials (Credentials): The credentials to the account,
+            with read-only access.
+    '''
+
+    id: ObjectId
+    name: str
+    read_write_credentials: Credentials
+    read_only_credentials: Credentials
 
 
 class Config(ABC):

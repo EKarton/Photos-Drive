@@ -1,3 +1,4 @@
+import logging
 from typing import Mapping, cast, override
 
 from google.oauth2.credentials import Credentials
@@ -9,6 +10,8 @@ from bson.objectid import ObjectId
 from .config import Config
 from ..mongodb.albums import AlbumId
 from ..gphotos.client import GPhotosClientV2
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigFromMongoDb(Config):
@@ -74,6 +77,7 @@ class ConfigFromMongoDb(Config):
 
         clients = []
         for document in collection.find({}):
+            client_id = document["_id"]
             creds = Credentials(
                 token=document["token"],
                 refresh_token=document["refresh_token"],
@@ -85,7 +89,7 @@ class ConfigFromMongoDb(Config):
                 name=document["name"], session=AuthorizedSession(creds)
             )
 
-            clients.append((document["_id"], gphotos_client))
+            clients.append((client_id, gphotos_client))
 
         return clients
 
