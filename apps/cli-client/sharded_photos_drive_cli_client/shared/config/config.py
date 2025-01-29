@@ -62,9 +62,9 @@ class UpdateMongoDbConfigRequest:
     '''
 
     id: ObjectId
-    new_name: Optional[str]
-    new_read_write_connection_string: Optional[str]
-    new_read_only_connection_string: Optional[str]
+    new_name: Optional[str] = None
+    new_read_write_connection_string: Optional[str] = None
+    new_read_only_connection_string: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -120,9 +120,9 @@ class UpdateGPhotosConfigRequest:
     '''
 
     id: ObjectId
-    new_name: Optional[str]
-    new_read_write_credentials: Optional[Credentials]
-    new_read_only_credentials: Optional[Credentials]
+    new_name: Optional[str] = None
+    new_read_write_credentials: Optional[Credentials] = None
+    new_read_only_credentials: Optional[Credentials] = None
 
 
 class Config(ABC):
