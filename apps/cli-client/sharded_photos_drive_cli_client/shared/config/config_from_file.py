@@ -1,14 +1,20 @@
 import configparser
 from typing import cast, override
-
 from google.oauth2.credentials import Credentials
 from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 
-
-from .config import Config
+from .config import (
+    AddGPhotosConfigRequest,
+    AddMongoDbConfigRequest,
+    Config,
+    GPhotosConfig,
+    MongoDbConfig,
+    UpdateGPhotosConfigRequest,
+    UpdateMongoDbConfigRequest,
+)
 from ..gphotos.client import GPhotosClientV2
 from ..mongodb.albums import AlbumId
 
@@ -29,9 +35,6 @@ class ConfigFromFile(Config):
 
     @override
     def get_mongo_db_clients(self) -> list[tuple[ObjectId, MongoClient]]:
-        """
-        Returns a list of MongoDB clients with their IDs.
-        """
         results = []
         for section_id in self._config.sections():
             if self._config.get(section_id, "type") != "mongodb":
@@ -52,20 +55,6 @@ class ConfigFromFile(Config):
 
     @override
     def add_mongo_db_client(self, name: str, connection_string: str) -> str:
-        """
-        Adds the MongoDB client to the config by its connection string.
-        It will return the ID of the mongodb client.
-
-        Args:
-            name (str): The name of the MongoDB client.
-            connection_string (str): The MongoDB connection string.
-
-        Raises:
-            ValueError: If ID already exists.
-
-        Returns:
-            str: The ID of the new Mongo DB client.
-        """
         client_id = self.__generate_unique_object_id()
         client_id_str = str(client_id)
 
@@ -78,11 +67,19 @@ class ConfigFromFile(Config):
         return name
 
     @override
+    def get_mongodb_configs(self) -> list[MongoDbConfig]:
+        raise NotImplementedError()
+
+    @override
+    def add_mongodb_config(self, request: AddMongoDbConfigRequest) -> MongoDbConfig:
+        raise NotImplementedError()
+
+    @override
+    def update_mongodb_config(self, request: UpdateMongoDbConfigRequest):
+        raise NotADirectoryError()
+
+    @override
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
-        """
-        Returns a list of tuples, where each tuple is a Google Photo client ID and a
-        Google Photos client instance.
-        """
         results = []
         for section_id in self._config.sections():
             if self._config.get(section_id, "type") != "gphotos":
@@ -105,15 +102,6 @@ class ConfigFromFile(Config):
 
     @override
     def add_gphotos_client(self, gphotos_client: GPhotosClientV2) -> str:
-        """
-        Adds a Google Photos client to the config.
-
-        Args:
-            gphotos_client (GPhotosClientV2): The Google Photos client
-
-        Returns:
-            str: The ID of the Google Photos client.
-        """
         client_id = self.__generate_unique_object_id()
         client_id_str = str(client_id)
         name = gphotos_client.name()
@@ -143,16 +131,19 @@ class ConfigFromFile(Config):
         return name
 
     @override
+    def get_gphotos_configs(self) -> list[GPhotosConfig]:
+        raise NotImplementedError()
+
+    @override
+    def add_gphotos_config(self, request: AddGPhotosConfigRequest) -> GPhotosConfig:
+        raise NotImplementedError()
+
+    @override
+    def update_gphotos_config(self, request: UpdateGPhotosConfigRequest):
+        raise NotImplementedError()
+
+    @override
     def get_root_album_id(self) -> AlbumId:
-        """
-        Gets the ID of the root album.
-
-        Raises:
-            ValueError: If there is no root album ID.
-
-        Returns:
-            AlbumId: The album ID if it exists; else None.
-        """
         for section_id in self._config.sections():
             if self._config.get(section_id, "type") != "root_album":
                 continue
@@ -166,12 +157,6 @@ class ConfigFromFile(Config):
 
     @override
     def set_root_album_id(self, album_id: AlbumId):
-        """
-        Sets the ID of the root album.
-
-        Args:
-            album_id (AlbumId): The album ID of the root album.
-        """
         client_id = self.__generate_unique_object_id()
         client_id_str = str(client_id)
 

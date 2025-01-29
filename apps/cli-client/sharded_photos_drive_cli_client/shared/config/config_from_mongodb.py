@@ -1,13 +1,20 @@
 import logging
 from typing import Mapping, cast, override
-
 from google.oauth2.credentials import Credentials
 from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 
-from .config import Config
+from .config import (
+    AddGPhotosConfigRequest,
+    AddMongoDbConfigRequest,
+    Config,
+    GPhotosConfig,
+    MongoDbConfig,
+    UpdateGPhotosConfigRequest,
+    UpdateMongoDbConfigRequest,
+)
 from ..mongodb.albums import AlbumId
 from ..gphotos.client import GPhotosClientV2
 
@@ -30,9 +37,6 @@ class ConfigFromMongoDb(Config):
 
     @override
     def get_mongo_db_clients(self) -> list[tuple[ObjectId, MongoClient]]:
-        """
-        Returns a list of MongoDB clients with their IDs.
-        """
         collection = self.__mongodb_client["sharded_google_photos"]["mongodb_clients"]
 
         clients = []
@@ -47,17 +51,6 @@ class ConfigFromMongoDb(Config):
 
     @override
     def add_mongo_db_client(self, name: str, connection_string: str) -> str:
-        """
-        Adds the MongoDB client to the config by its connection string.
-        It will return the ID of the mongodb client.
-
-        Args:
-            name (str): The name of the MongoDB client.
-            connection_string (str): The MongoDB connection string.
-
-        Returns:
-            str: The ID of the new Mongo DB client.
-        """
         collection = self.__mongodb_client["sharded_google_photos"]["mongodb_clients"]
         result = collection.insert_one(
             {
@@ -68,11 +61,19 @@ class ConfigFromMongoDb(Config):
         return result.inserted_id
 
     @override
+    def get_mongodb_configs(self) -> list[MongoDbConfig]:
+        raise NotImplementedError()
+
+    @override
+    def add_mongodb_config(self, request: AddMongoDbConfigRequest) -> MongoDbConfig:
+        raise NotImplementedError()
+
+    @override
+    def update_mongodb_config(self, request: UpdateMongoDbConfigRequest):
+        raise NotADirectoryError()
+
+    @override
     def get_gphotos_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
-        """
-        Returns a list of tuples, where each tuple is a Google Photo client ID and a
-        Google Photos client instance.
-        """
         collection = self.__mongodb_client["sharded_google_photos"]["gphotos_clients"]
 
         clients = []
@@ -95,15 +96,6 @@ class ConfigFromMongoDb(Config):
 
     @override
     def add_gphotos_client(self, gphotos_client: GPhotosClientV2) -> str:
-        """
-        Adds a Google Photos client to the config.
-
-        Args:
-            gphotos_client (GPhotosClientV2): The Google Photos client
-
-        Returns:
-            str: The ID of the Google Photos client.
-        """
         credentials = cast(Credentials, gphotos_client.session().credentials)
 
         collection = self.__mongodb_client["sharded_google_photos"]["gphotos_clients"]
@@ -120,16 +112,19 @@ class ConfigFromMongoDb(Config):
         return result.inserted_id
 
     @override
+    def get_gphotos_configs(self) -> list[GPhotosConfig]:
+        raise NotImplementedError()
+
+    @override
+    def add_gphotos_config(self, request: AddGPhotosConfigRequest) -> GPhotosConfig:
+        raise NotImplementedError()
+
+    @override
+    def update_gphotos_config(self, request: UpdateGPhotosConfigRequest):
+        raise NotImplementedError()
+
+    @override
     def get_root_album_id(self) -> AlbumId:
-        """
-        Gets the ID of the root album.
-
-        Raises:
-            ValueError: If there is no root album ID.
-
-        Returns:
-            AlbumId: The album ID if it exists; else None.
-        """
         doc = self.__mongodb_client["sharded_google_photos"]["root_album"].find_one({})
 
         if doc is None:
@@ -139,12 +134,6 @@ class ConfigFromMongoDb(Config):
 
     @override
     def set_root_album_id(self, album_id: AlbumId):
-        """
-        Sets the ID of the root album.
-
-        Args:
-            album_id (AlbumId): The album ID of the root album.
-        """
         filter_query: Mapping = {}
         set_query: Mapping = {
             "$set": {
