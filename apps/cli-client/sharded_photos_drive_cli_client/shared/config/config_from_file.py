@@ -112,8 +112,11 @@ class ConfigFromFile(Config):
     @override
     def update_mongodb_config(self, request: UpdateMongoDbConfigRequest):
         id_str = str(request.id)
-        if self._config.get(id_str, "type") != 'mongodb_config':
+        if not self._config.has_section(id_str):
             raise ValueError(f"Cannot find MongoDB config {request.id}")
+
+        if self._config.get(id_str, "type") != 'mongodb_config':
+            raise ValueError(f"ID {request.id} is not a MongoDB config")
 
         if request.new_name:
             self._config.set(id_str, "name", request.new_name)
@@ -225,11 +228,58 @@ class ConfigFromFile(Config):
 
     @override
     def add_gphotos_config(self, request: AddGPhotosConfigRequest) -> GPhotosConfig:
-        raise NotImplementedError()
+        id = self.__generate_unique_object_id()
+        id_str = str(id)
+
+        self._config.add_section(id_str)
+        self._config.set(id_str, "type", "gphotos_config")
+        self._config.set(id_str, "name", str(request.name))
+        self.__set_read_write_credentials(id_str, request.read_write_credentials)
+        self.__set_read_only_credentials(id_str, request.read_only_credentials)
+        self.flush()
+
+        return GPhotosConfig(
+            id=id,
+            name=request.name,
+            read_write_credentials=request.read_write_credentials,
+            read_only_credentials=request.read_only_credentials,
+        )
 
     @override
     def update_gphotos_config(self, request: UpdateGPhotosConfigRequest):
-        raise NotImplementedError()
+        id_str = str(request.id)
+        if not self._config.has_section(id_str):
+            raise ValueError(f"Cannot find GPhotos config {id_str}")
+
+        if self._config.get(id_str, "type") != "gphotos_config":
+            raise ValueError(f"ID {id_str} is not a GPhotos config")
+
+        if request.new_name:
+            self._config.set(id_str, "name", str(request.new_name))
+
+        if request.new_read_write_credentials:
+            self.__set_read_write_credentials(
+                id_str, request.new_read_write_credentials
+            )
+
+        if request.new_read_only_credentials:
+            self.__set_read_only_credentials(id_str, request.new_read_only_credentials)
+
+        self.flush()
+
+    def __set_read_write_credentials(self, id_str: str, creds: Credentials):
+        self._config.set(id_str, "read_write_token", str(creds.token))
+        self._config.set(id_str, "read_write_refresh_token", str(creds.refresh_token))
+        self._config.set(id_str, "read_write_client_id", str(creds.client_id))
+        self._config.set(id_str, "read_write_client_secret", str(creds.client_secret))
+        self._config.set(id_str, "read_write_token_uri", str(creds.token_uri))
+
+    def __set_read_only_credentials(self, id_str: str, creds: Credentials):
+        self._config.set(id_str, "read_only_token", str(creds.token))
+        self._config.set(id_str, "read_only_refresh_token", str(creds.refresh_token))
+        self._config.set(id_str, "read_only_client_id", str(creds.client_id))
+        self._config.set(id_str, "read_only_client_secret", str(creds.client_secret))
+        self._config.set(id_str, "read_only_token_uri", str(creds.token_uri))
 
     @override
     def get_root_album_id(self) -> AlbumId:
