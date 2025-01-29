@@ -5,11 +5,22 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from pymongo.mongo_client import MongoClient
 
-DEFAULT_SCOPES = [
+'''
+Scopes for read+write access.
+Refer to https://developers.google.com/photos/overview/authorization#library-api-scopes
+'''
+READ_WRITE_SCOPES = [
     "https://www.googleapis.com/auth/photoslibrary.readonly",
     "https://www.googleapis.com/auth/photoslibrary.appendonly",
-    "https://www.googleapis.com/auth/photoslibrary.edit.appcreateddata",
-    "https://www.googleapis.com/auth/photoslibrary",
+    "https://www.googleapis.com/auth/drive.photos.readonly",
+]
+
+'''
+Scopes for read-only access.
+Refer to https://developers.google.com/photos/overview/authorization#library-api-scopes
+'''
+READ_ONLY_SCOPES = [
+    "https://www.googleapis.com/auth/photoslibrary.readonly",
     "https://www.googleapis.com/auth/drive.photos.readonly",
 ]
 
@@ -38,13 +49,13 @@ def prompt_user_for_mongodb_connection_string() -> str:
 
 
 def prompt_user_for_gphotos_credentials(
-    scopes: list[str] = DEFAULT_SCOPES,
+    scopes: list[str] = READ_WRITE_SCOPES,
 ) -> Credentials:
     """
     Prompts the user to enter Google Photos account.
 
     Args:
-        scopes (list[str]): A list of scopes, defaulted to DEFAULT_SCOPES.
+        scopes (list[str]): A list of scopes, defaulted to READ_WRITE_SCOPES.
 
     Returns:
         Credentials: A set of credentials obtained.

@@ -10,7 +10,7 @@ from ...shared.config.config_from_file import ConfigFromFile
 from ...shared.config.config_from_mongodb import ConfigFromMongoDb
 from ...shared.mongodb.clients_repository import MongoDbClientsRepository
 from ...shared.mongodb.albums_repository import AlbumsRepositoryImpl
-from .utils import prompt_user_for_mongodb_connection_string
+from .utils import READ_ONLY_SCOPES, prompt_user_for_mongodb_connection_string
 from .utils import prompt_user_for_gphotos_credentials
 
 
@@ -49,7 +49,7 @@ class InitHandler:
         gphotos_rw_credentials = prompt_user_for_gphotos_credentials()
 
         print("Now, time to log into your Google account for read-only access\n")
-        gphotos_r_credentials = prompt_user_for_gphotos_credentials()
+        gphotos_r_credentials = prompt_user_for_gphotos_credentials(READ_ONLY_SCOPES)
 
         config.add_gphotos_config(
             AddGPhotosConfigRequest(

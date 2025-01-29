@@ -1,5 +1,5 @@
 from ...shared.config.config import AddGPhotosConfigRequest, Config
-from .utils import prompt_user_for_gphotos_credentials
+from .utils import READ_ONLY_SCOPES, prompt_user_for_gphotos_credentials
 
 
 class AddGPhotosHandler:
@@ -18,7 +18,7 @@ class AddGPhotosHandler:
         read_write_credentials = prompt_user_for_gphotos_credentials()
 
         print("Now, time to log into your Google account for read only access\n")
-        read_only_credentials = prompt_user_for_gphotos_credentials()
+        read_only_credentials = prompt_user_for_gphotos_credentials(READ_ONLY_SCOPES)
 
         config.add_gphotos_config(
             AddGPhotosConfigRequest(
