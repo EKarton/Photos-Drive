@@ -36,7 +36,7 @@ def prompt_user_for_mongodb_connection_string(prompt_text: str) -> str:
 
     mongodb_connection_string = None
     while True:
-        mongodb_connection_string = get_non_empty_password_input_prompt(prompt_text)
+        mongodb_connection_string = prompt_user_for_non_empty_password(prompt_text)
         try:
             mongodb_client: MongoClient = MongoClient(
                 mongodb_connection_string,
@@ -63,10 +63,10 @@ def prompt_user_for_gphotos_credentials(
     credentials: Optional[Credentials] = None
     is_login_successful = False
     while not is_login_successful:
-        client_id = get_non_empty_password_input_prompt(
+        client_id = prompt_user_for_non_empty_password(
             "Enter Google Photos Client ID: "
         )
-        client_secret = get_non_empty_password_input_prompt(
+        client_secret = prompt_user_for_non_empty_password(
             "Enter Google Photos client secret: "
         )
 
@@ -116,7 +116,7 @@ def prompt_user_for_gphotos_credentials(
     return credentials
 
 
-def get_non_empty_password_input_prompt(prompt_text: str) -> str:
+def prompt_user_for_non_empty_password(prompt_text: str) -> str:
     """Prompts the user for a password and ensures it's not empty."""
     while True:
         value = getpass.getpass(prompt_text)
@@ -128,7 +128,7 @@ def get_non_empty_password_input_prompt(prompt_text: str) -> str:
             return value
 
 
-def get_non_empty_string_input_prompt(prompt_text: str) -> str:
+def prompt_user_for_non_empty_input_string(prompt_text: str) -> str:
     """Prompts the user for a string and ensures it's not empty."""
 
     while True:
@@ -142,7 +142,7 @@ def get_non_empty_string_input_prompt(prompt_text: str) -> str:
             return stripped_name
 
 
-def get_yes_no_input_prompt(prompt_text: str) -> bool:
+def prompt_user_for_yes_no_answer(prompt_text: str) -> bool:
     while True:
         raw_input = input(prompt_text)
         user_input = raw_input.strip().lower()

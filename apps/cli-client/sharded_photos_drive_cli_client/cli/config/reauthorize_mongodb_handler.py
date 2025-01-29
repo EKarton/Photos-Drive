@@ -5,9 +5,9 @@ from ...shared.config.config import (
     MongoDbConfig,
     UpdateMongoDbConfigRequest,
 )
-from .utils import (
-    get_non_empty_string_input_prompt,
-    get_yes_no_input_prompt,
+from .common_prompts import (
+    prompt_user_for_non_empty_input_string,
+    prompt_user_for_yes_no_answer,
     prompt_user_for_mongodb_connection_string,
 )
 
@@ -53,13 +53,13 @@ class ReauthorizeMongoDbHandler:
 
     def __get_new_name(self, cur_config: MongoDbConfig) -> str | None:
         print(f"The account name is {cur_config.name}")
-        if not get_yes_no_input_prompt("Do you want to change the name? (Y/N): "):
+        if not prompt_user_for_yes_no_answer("Do you want to change the name? (Y/N): "):
             return None
 
-        return get_non_empty_string_input_prompt("Enter new name: ")
+        return prompt_user_for_non_empty_input_string("Enter new name: ")
 
     def __get_new_read_write_connection_string(self) -> str | None:
-        if not get_yes_no_input_prompt(
+        if not prompt_user_for_yes_no_answer(
             "Do you want to change the read+write connection string? (Y/N): "
         ):
             return None
@@ -69,7 +69,7 @@ class ReauthorizeMongoDbHandler:
         )
 
     def __get_new_read_only_connection_string(self) -> str | None:
-        if not get_yes_no_input_prompt(
+        if not prompt_user_for_yes_no_answer(
             "Do you want to change the read+only connection string? (Y/N): "
         ):
             return None

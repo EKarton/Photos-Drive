@@ -2,11 +2,11 @@ from bson import ObjectId
 from google.oauth2.credentials import Credentials
 
 from ...shared.config.config import Config, GPhotosConfig, UpdateGPhotosConfigRequest
-from .utils import (
+from .common_prompts import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
-    get_non_empty_string_input_prompt,
-    get_yes_no_input_prompt,
+    prompt_user_for_non_empty_input_string,
+    prompt_user_for_yes_no_answer,
     prompt_user_for_gphotos_credentials,
 )
 
@@ -52,13 +52,13 @@ class ReauthorizeGPhotosHandler:
 
     def __get_new_name(self, cur_config: GPhotosConfig) -> str | None:
         print(f"The account name is {cur_config.name}")
-        if not get_yes_no_input_prompt("Do you want to change the name? (Y/N): "):
+        if not prompt_user_for_yes_no_answer("Do you want to change the name? (Y/N): "):
             return None
 
-        return get_non_empty_string_input_prompt("Enter new name: ")
+        return prompt_user_for_non_empty_input_string("Enter new name: ")
 
     def __get_new_read_write_credentials(self) -> Credentials | None:
-        if not get_yes_no_input_prompt(
+        if not prompt_user_for_yes_no_answer(
             "Do you want to change the read+write credentials? (Y/N): "
         ):
             return None
@@ -66,7 +66,7 @@ class ReauthorizeGPhotosHandler:
         return prompt_user_for_gphotos_credentials(READ_WRITE_SCOPES)
 
     def __get_new_read_only_credentials(self) -> Credentials | None:
-        if not get_yes_no_input_prompt(
+        if not prompt_user_for_yes_no_answer(
             "Do you want to change the read-only credentials? (Y/N): "
         ):
             return None

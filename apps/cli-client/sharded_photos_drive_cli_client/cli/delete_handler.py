@@ -1,7 +1,7 @@
 import logging
 
-
-from .utils import get_diffs_from_path, pretty_print_diffs, prompt_user_to_confirm
+from .config.common_prompts import prompt_user_for_yes_no_answer
+from .utils import get_diffs_from_path, pretty_print_diffs
 from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
@@ -38,7 +38,7 @@ class DeleteHandler:
 
         # Confirm if diffs are correct by the user
         pretty_print_diffs(diffs)
-        if not prompt_user_to_confirm():
+        if not prompt_user_for_yes_no_answer("Is this correct? (Y/N): "):
             print("Operation cancelled.")
             return
 

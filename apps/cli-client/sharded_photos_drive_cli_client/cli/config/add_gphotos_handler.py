@@ -1,5 +1,5 @@
 from ...shared.config.config import AddGPhotosConfigRequest, Config
-from .utils import READ_ONLY_SCOPES, prompt_user_for_gphotos_credentials
+from .common_prompts import READ_ONLY_SCOPES, prompt_user_for_gphotos_credentials
 
 
 class AddGPhotosHandler:
