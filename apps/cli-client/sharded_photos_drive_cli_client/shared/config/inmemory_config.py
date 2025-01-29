@@ -1,8 +1,6 @@
 from typing import Dict, override
-
 from mongomock import MongoClient
 from bson.objectid import ObjectId
-
 
 from .config import (
     AddGPhotosConfigRequest,

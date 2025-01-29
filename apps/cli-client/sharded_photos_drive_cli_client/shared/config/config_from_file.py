@@ -1,12 +1,10 @@
 import configparser
 from typing import cast, override
-
 from google.oauth2.credentials import Credentials
 from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
-
 
 from .config import (
     AddGPhotosConfigRequest,

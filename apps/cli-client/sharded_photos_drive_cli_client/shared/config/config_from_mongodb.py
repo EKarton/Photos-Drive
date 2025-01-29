@@ -1,6 +1,5 @@
 import logging
 from typing import Mapping, cast, override
-
 from google.oauth2.credentials import Credentials
 from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
