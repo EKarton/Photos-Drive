@@ -159,7 +159,9 @@ class InitHandler:
                 print("Invalid input. Please enter \'mongodb\' or \'file\'")
 
     def __prompt_mongodb_config(self) -> ConfigFromMongoDb:
-        connection_string = prompt_user_for_mongodb_connection_string()
+        connection_string = prompt_user_for_mongodb_connection_string(
+            "Enter your read+write connection string: "
+        )
         return ConfigFromMongoDb(MongoClient(connection_string))
 
     def __prompt_config_file(self) -> ConfigFromFile:

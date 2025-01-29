@@ -24,7 +24,9 @@ class UsageHandler:
             "Number of objects",
         ]
         for mongodb_config in config.get_mongodb_configs():
-            client = MongoClient(mongodb_config.read_write_connection_string)
+            client: MongoClient = MongoClient(
+                mongodb_config.read_write_connection_string
+            )
             db = client["sharded_google_photos"]
             db_stats = db.command({"dbStats": 1, 'freeStorage': 1})
             raw_total_free_storage = db_stats["totalFreeStorageSize"]
