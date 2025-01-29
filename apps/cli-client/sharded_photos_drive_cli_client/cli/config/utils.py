@@ -63,8 +63,8 @@ def prompt_user_for_gphotos_credentials(
     credentials: Optional[Credentials] = None
     is_login_successful = False
     while not is_login_successful:
-        client_id = get_non_empty_client_id()
-        client_secret = get_non_empty_client_secret()
+        client_id = get_client_id_input_prompt()
+        client_secret = get_client_secret_input_prompt()
 
         try:
             iaflow: InstalledAppFlow = InstalledAppFlow.from_client_config(
@@ -112,25 +112,48 @@ def prompt_user_for_gphotos_credentials(
     return credentials
 
 
-def get_non_empty_client_id() -> str:
-    """Prompts the user for a name and ensures it's not empty."""
+def get_client_id_input_prompt() -> str:
+    return get_non_empty_password_input_prompt("Enter Google Photos Client ID: ")
 
+
+def get_client_secret_input_prompt() -> str:
+    return get_non_empty_password_input_prompt("Enter Google Photos client secret: ")
+
+
+def get_non_empty_password_input_prompt(prompt_text: str) -> str:
+    """Prompts the user for a password and ensures it's not empty."""
     while True:
-        value = getpass.getpass("Enter Google Photos Client ID: ")
+        value = getpass.getpass(prompt_text)
         value = value.strip()
 
         if not value:
-            print("Client ID cannot be empty. Please try again.")
+            print("Input cannot be empty. Please try again.")
         else:
             return value
 
 
-def get_non_empty_client_secret() -> str:
-    while True:
-        value = getpass.getpass("Enter Google Photos client secret: ")
-        value = value.strip()
+def get_non_empty_string_input_prompt(prompt_text: str) -> str:
+    """Prompts the user for a string and ensures it's not empty."""
 
-        if not value:
-            print("Client secret cannot be empty. Please try again.")
+    while True:
+        name = input(prompt_text)
+        stripped_name = name.strip()
+
+        if not stripped_name:
+            print("Input cannot be empty. Please try again.")
+
         else:
-            return value
+            return stripped_name
+
+
+def get_yes_no_input_prompt(prompt_text: str) -> bool:
+    while True:
+        raw_input = input(prompt_text)
+        user_input = raw_input.strip().lower()
+
+        if user_input in ["yes", "y"]:
+            return True
+        elif user_input in ["no", "n"]:
+            return False
+        else:
+            print("Invalid input. Please enter \'y\' or \'n\'")
