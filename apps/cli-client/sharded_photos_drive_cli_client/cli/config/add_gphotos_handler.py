@@ -1,8 +1,5 @@
-from google.auth.transport.requests import AuthorizedSession
-
-from ...shared.config.config import Config
-from ...shared.gphotos.client import GPhotosClientV2
-from .utils import prompt_user_for_gphotos_credentials
+from ...shared.config.config import AddGPhotosConfigRequest, Config
+from .utils import READ_ONLY_SCOPES, prompt_user_for_gphotos_credentials
 
 
 class AddGPhotosHandler:
@@ -16,11 +13,20 @@ class AddGPhotosHandler:
             config (Config): The config object.
         """
         gphotos_account_name = self.__get_non_empty_name()
-        gphotos_credentials = prompt_user_for_gphotos_credentials()
-        gphotos_session = AuthorizedSession(gphotos_credentials)
-        gphotos_client = GPhotosClientV2(gphotos_account_name, gphotos_session)
 
-        config.add_gphotos_client(gphotos_client)
+        print("Now, time to log into your Google account for read+write access\n")
+        read_write_credentials = prompt_user_for_gphotos_credentials()
+
+        print("Now, time to log into your Google account for read only access\n")
+        read_only_credentials = prompt_user_for_gphotos_credentials(READ_ONLY_SCOPES)
+
+        config.add_gphotos_config(
+            AddGPhotosConfigRequest(
+                name=gphotos_account_name,
+                read_write_credentials=read_write_credentials,
+                read_only_credentials=read_only_credentials,
+            )
+        )
 
         print("Successfully added your Google Photos account!")
 

@@ -1,14 +1,16 @@
 import os
 from pymongo.mongo_client import MongoClient
-from google.auth.transport.requests import AuthorizedSession
 
-from ...shared.config.config import Config
+from ...shared.config.config import (
+    AddGPhotosConfigRequest,
+    AddMongoDbConfigRequest,
+    Config,
+)
 from ...shared.config.config_from_file import ConfigFromFile
 from ...shared.config.config_from_mongodb import ConfigFromMongoDb
 from ...shared.mongodb.clients_repository import MongoDbClientsRepository
 from ...shared.mongodb.albums_repository import AlbumsRepositoryImpl
-from ...shared.gphotos.client import GPhotosClientV2
-from .utils import prompt_user_for_mongodb_connection_string
+from .utils import READ_ONLY_SCOPES, prompt_user_for_mongodb_connection_string
 from .utils import prompt_user_for_gphotos_credentials
 
 
@@ -24,16 +26,38 @@ class InitHandler:
         # Step 1: Ask for Mongo DB account
         print("First, let's log into your first Mongo DB account.")
         mongodb_name = self.__get_non_empty_name_for_mongodb()
-        mongodb_connection_string = prompt_user_for_mongodb_connection_string()
-        config.add_mongo_db_client(mongodb_name, mongodb_connection_string)
+
+        print("Now, enter your read+write MongoDB connection string.\n")
+        mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string()
+
+        print("Now, enter your read-only MongoDB connection string.\n")
+        mongodb_r_connection_string = prompt_user_for_mongodb_connection_string()
+
+        config.add_mongodb_config(
+            AddMongoDbConfigRequest(
+                name=mongodb_name,
+                read_write_connection_string=mongodb_rw_connection_string,
+                read_only_connection_string=mongodb_r_connection_string,
+            )
+        )
 
         # Step 2: Ask for Google Photo account
         print("Now it's time to log in to your first Google Photos account.")
         gphotos_name = self.__get_non_empty_name_for_gphotos()
-        gphotos_credentials = prompt_user_for_gphotos_credentials()
-        gphotos_session = AuthorizedSession(gphotos_credentials)
-        gphotos_client = GPhotosClientV2(gphotos_name, gphotos_session)
-        config.add_gphotos_client(gphotos_client)
+
+        print("Now, time to log into your Google account for read+write access\n")
+        gphotos_rw_credentials = prompt_user_for_gphotos_credentials()
+
+        print("Now, time to log into your Google account for read-only access\n")
+        gphotos_r_credentials = prompt_user_for_gphotos_credentials(READ_ONLY_SCOPES)
+
+        config.add_gphotos_config(
+            AddGPhotosConfigRequest(
+                name=gphotos_name,
+                read_write_credentials=gphotos_rw_credentials,
+                read_only_credentials=gphotos_r_credentials,
+            )
+        )
 
         # Step 3: Create root album in Mongo DB account
         print("Perfect! Setting up your accounts...")
