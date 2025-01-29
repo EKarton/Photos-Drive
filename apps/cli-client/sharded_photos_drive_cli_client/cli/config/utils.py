@@ -25,7 +25,7 @@ READ_ONLY_SCOPES = [
 ]
 
 
-def prompt_user_for_mongodb_connection_string() -> str:
+def prompt_user_for_mongodb_connection_string(prompt_text: str) -> str:
     """
     Prompts the user multiple times for the MongoDB connection string.
     It will test the connection out, and will ask again if it fails.
@@ -36,7 +36,7 @@ def prompt_user_for_mongodb_connection_string() -> str:
 
     mongodb_connection_string = None
     while True:
-        mongodb_connection_string = getpass.getpass()
+        mongodb_connection_string = get_non_empty_password_input_prompt(prompt_text)
         try:
             mongodb_client: MongoClient = MongoClient(
                 mongodb_connection_string,
@@ -63,8 +63,12 @@ def prompt_user_for_gphotos_credentials(
     credentials: Optional[Credentials] = None
     is_login_successful = False
     while not is_login_successful:
-        client_id = get_client_id_input_prompt()
-        client_secret = get_client_secret_input_prompt()
+        client_id = get_non_empty_password_input_prompt(
+            "Enter Google Photos Client ID: "
+        )
+        client_secret = get_non_empty_password_input_prompt(
+            "Enter Google Photos client secret: "
+        )
 
         try:
             iaflow: InstalledAppFlow = InstalledAppFlow.from_client_config(
@@ -110,14 +114,6 @@ def prompt_user_for_gphotos_credentials(
         raise ValueError("Credentials is empty!")
 
     return credentials
-
-
-def get_client_id_input_prompt() -> str:
-    return get_non_empty_password_input_prompt("Enter Google Photos Client ID: ")
-
-
-def get_client_secret_input_prompt() -> str:
-    return get_non_empty_password_input_prompt("Enter Google Photos client secret: ")
 
 
 def get_non_empty_password_input_prompt(prompt_text: str) -> str:

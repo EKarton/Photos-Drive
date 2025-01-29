@@ -27,11 +27,13 @@ class InitHandler:
         print("First, let's log into your first Mongo DB account.")
         mongodb_name = self.__get_non_empty_name_for_mongodb()
 
-        print("Now, enter your read+write MongoDB connection string.\n")
-        mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string()
+        mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
+            "Enter your read+write connection string: "
+        )
 
-        print("Now, enter your read-only MongoDB connection string.\n")
-        mongodb_r_connection_string = prompt_user_for_mongodb_connection_string()
+        mongodb_r_connection_string = prompt_user_for_mongodb_connection_string(
+            "Enter your read-only connection string: "
+        )
 
         config.add_mongodb_config(
             AddMongoDbConfigRequest(
