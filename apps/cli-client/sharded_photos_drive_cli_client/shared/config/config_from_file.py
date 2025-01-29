@@ -5,7 +5,6 @@ from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
-from enum import Enum
 
 from .config import (
     AddGPhotosConfigRequest,
