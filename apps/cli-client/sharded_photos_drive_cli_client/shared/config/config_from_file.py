@@ -5,6 +5,7 @@ from pymongo.mongo_client import MongoClient
 from google.auth.transport.requests import AuthorizedSession
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
+from enum import Enum
 
 from .config import (
     AddGPhotosConfigRequest,
@@ -17,6 +18,10 @@ from .config import (
 )
 from ..gphotos.client import GPhotosClientV2
 from ..mongodb.albums import AlbumId
+
+GPHOTOS_CONFIG_TYPE = "gphotos_config"
+MONGODB_CONFIG_TYPE = "mongodb_config"
+ROOT_ALBUM_TYPE = "root_album"
 
 
 class ConfigFromFile(Config):
@@ -70,7 +75,7 @@ class ConfigFromFile(Config):
     def get_mongodb_configs(self) -> list[MongoDbConfig]:
         configs = []
         for section_id in self._config.sections():
-            if self._config.get(section_id, "type") != "mongodb_config":
+            if self._config.get(section_id, "type") != MONGODB_CONFIG_TYPE:
                 continue
 
             config = MongoDbConfig(
@@ -92,7 +97,7 @@ class ConfigFromFile(Config):
         id = self.__generate_unique_object_id()
         id_str = str(id)
         self._config.add_section(id_str)
-        self._config.set(id_str, "type", "mongodb_config")
+        self._config.set(id_str, "type", MONGODB_CONFIG_TYPE)
         self._config.set(id_str, "name", request.name)
         self._config.set(
             id_str, "read_write_connection_string", request.read_write_connection_string
@@ -115,7 +120,7 @@ class ConfigFromFile(Config):
         if not self._config.has_section(id_str):
             raise ValueError(f"Cannot find MongoDB config {request.id}")
 
-        if self._config.get(id_str, "type") != 'mongodb_config':
+        if self._config.get(id_str, "type") != MONGODB_CONFIG_TYPE:
             raise ValueError(f"ID {request.id} is not a MongoDB config")
 
         if request.new_name:
@@ -193,7 +198,7 @@ class ConfigFromFile(Config):
     def get_gphotos_configs(self) -> list[GPhotosConfig]:
         configs = []
         for section_id in self._config.sections():
-            if self._config.get(section_id, "type") != "gphotos_config":
+            if self._config.get(section_id, "type") != GPHOTOS_CONFIG_TYPE:
                 continue
 
             config = GPhotosConfig(
@@ -232,7 +237,7 @@ class ConfigFromFile(Config):
         id_str = str(id)
 
         self._config.add_section(id_str)
-        self._config.set(id_str, "type", "gphotos_config")
+        self._config.set(id_str, "type", GPHOTOS_CONFIG_TYPE)
         self._config.set(id_str, "name", str(request.name))
         self.__set_read_write_credentials(id_str, request.read_write_credentials)
         self.__set_read_only_credentials(id_str, request.read_only_credentials)
@@ -251,7 +256,7 @@ class ConfigFromFile(Config):
         if not self._config.has_section(id_str):
             raise ValueError(f"Cannot find GPhotos config {id_str}")
 
-        if self._config.get(id_str, "type") != "gphotos_config":
+        if self._config.get(id_str, "type") != GPHOTOS_CONFIG_TYPE:
             raise ValueError(f"ID {id_str} is not a GPhotos config")
 
         if request.new_name:
@@ -284,7 +289,7 @@ class ConfigFromFile(Config):
     @override
     def get_root_album_id(self) -> AlbumId:
         for section_id in self._config.sections():
-            if self._config.get(section_id, "type") != "root_album":
+            if self._config.get(section_id, "type") != ROOT_ALBUM_TYPE:
                 continue
 
             return AlbumId(
@@ -300,7 +305,7 @@ class ConfigFromFile(Config):
         client_id_str = str(client_id)
 
         self._config.add_section(client_id_str)
-        self._config.set(client_id_str, "type", "root_album")
+        self._config.set(client_id_str, "type", ROOT_ALBUM_TYPE)
         self._config.set(client_id_str, "client_id", str(album_id.client_id))
         self._config.set(client_id_str, "object_id", str(album_id.object_id))
         self.flush()
