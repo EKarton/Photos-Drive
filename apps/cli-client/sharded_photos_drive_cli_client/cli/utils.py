@@ -28,7 +28,7 @@ def get_diffs_from_path(path: str) -> list[str]:
         list(str): A list of file paths of media items it found.
     """
     if os.path.isdir(path):
-        return get_diffs_from_dir_path(path)
+        return __get_diffs_from_dir_path(path)
 
     if os.path.isfile(path):
         if not path.lower().endswith(MEDIA_ITEM_FILE_EXTENSIONS):
@@ -39,7 +39,7 @@ def get_diffs_from_path(path: str) -> list[str]:
     raise ValueError(f"File {path} does not exist")
 
 
-def get_diffs_from_dir_path(dir_path: str) -> list[str]:
+def __get_diffs_from_dir_path(dir_path: str) -> list[str]:
     """
     Returns a list of file paths of media items that are under a directory.
 

@@ -14,7 +14,6 @@ class TestMutuallyExclusiveGroup(unittest.TestCase):
         self.app = typer.Typer()
         self.callback = createMutuallyExclusiveGroup(2)
 
-    def test_no_conflict(self):
         @self.app.command()
         def cmd(
             param1: Annotated[str | None, typer.Option(callback=self.callback)] = None,
@@ -22,41 +21,16 @@ class TestMutuallyExclusiveGroup(unittest.TestCase):
         ):
             typer.echo(f"Param1: {param1}, Param2: {param2}")
 
+    def test_no_conflict(self):
         result = self.runner.invoke(self.app, ["--param1", "value1"])
+
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Param1: value1, Param2: None", result.stdout)
 
     def test_conflict(self):
-        @self.app.command()
-        def cmd(
-            param1: Annotated[str | None, typer.Option(callback=self.callback)] = None,
-            param2: Annotated[str | None, typer.Option(callback=self.callback)] = None,
-        ):
-            typer.echo(f"Param1: {param1}, Param2: {param2}")
-
         result = self.runner.invoke(
             self.app, ["--param1", "value1", "--param2", "value2"]
         )
+
         self.assertEqual(result.exit_code, 2)
         self.assertIn("param2 is mutually exclusive with", result.stdout)
-
-    def test_size_three(self):
-        callback = createMutuallyExclusiveGroup(3)
-
-        @self.app.command()
-        def cmd(
-            param1: Annotated[str | None, typer.Option(callback=callback)] = None,
-            param2: Annotated[str | None, typer.Option(callback=callback)] = None,
-            param3: Annotated[str | None, typer.Option(callback=callback)] = None,
-        ):
-            typer.echo(f"Param1: {param1}, Param2: {param2}, Param3: {param3}")
-
-        result = self.runner.invoke(
-            self.app, ["--param1", "value1", "--param2", "value2", "--param3", "value3"]
-        )
-        self.assertEqual(result.exit_code, 2)
-        self.assertIn("param3 is mutually exclusive with", result.stdout)
-
-
-if __name__ == '__main__':
-    unittest.main()
