@@ -11,10 +11,12 @@ from sharded_photos_drive_cli_client.backup.processed_diffs import (
     DiffsProcessor,
     ProcessedDiff,
 )
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli.utils import pretty_print_processed_diffs
+from sharded_photos_drive_cli_client.cli2.utils.utils import (
+    pretty_print_processed_diffs,
+)
 from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
 from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
 from sharded_photos_drive_cli_client.cli2.utils.typer import (

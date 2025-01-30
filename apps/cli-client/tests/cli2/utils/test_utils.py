@@ -5,7 +5,7 @@ from io import StringIO
 
 from sharded_photos_drive_cli_client.backup.diffs import Diff
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
-from sharded_photos_drive_cli_client.cli.utils import (
+from sharded_photos_drive_cli_client.cli2.utils.utils import (
     get_diffs_from_path,
     pretty_print_diffs,
     pretty_print_processed_diffs,

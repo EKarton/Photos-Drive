@@ -5,10 +5,10 @@ import typer
 from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
 from sharded_photos_drive_cli_client.backup.diffs import Diff
 from sharded_photos_drive_cli_client.backup.processed_diffs import DiffsProcessor
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli.utils import (
+from sharded_photos_drive_cli_client.cli2.utils.utils import (
     get_diffs_from_path,
     pretty_print_diffs,
 )

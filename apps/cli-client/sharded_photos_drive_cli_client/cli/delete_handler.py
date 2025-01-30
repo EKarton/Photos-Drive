@@ -1,7 +1,7 @@
 import logging
 
-from .config.common_prompts import prompt_user_for_yes_no_answer
-from .utils import get_diffs_from_path, pretty_print_diffs
+from ..cli2.utils.common_prompts import prompt_user_for_yes_no_answer
+from ..cli2.utils.utils import get_diffs_from_path, pretty_print_diffs
 from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl

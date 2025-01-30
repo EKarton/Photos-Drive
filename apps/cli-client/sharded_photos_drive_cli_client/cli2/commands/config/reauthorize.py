@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 import typer
 from google.oauth2.credentials import Credentials
 
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
     prompt_user_for_gphotos_credentials,

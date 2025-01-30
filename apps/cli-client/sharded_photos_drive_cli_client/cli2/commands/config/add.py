@@ -2,7 +2,7 @@ import logging
 from typing_extensions import Annotated
 import typer
 
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
     READ_ONLY_SCOPES,
     prompt_user_for_gphotos_credentials,
     prompt_user_for_mongodb_connection_string,

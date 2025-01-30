@@ -5,8 +5,8 @@ from termcolor import colored
 
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
 
-from ..backup.diffs import Diff
-from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
+from ...backup.diffs import Diff
+from ...shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 
 
 def get_diffs_from_path(path: str) -> list[str]:

@@ -2,7 +2,7 @@ import logging
 from typing_extensions import Annotated
 import typer
 
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
     prompt_user_for_yes_no_answer,
 )
 from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options

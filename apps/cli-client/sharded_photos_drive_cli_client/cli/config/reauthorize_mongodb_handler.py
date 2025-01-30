@@ -5,7 +5,7 @@ from ...shared.config.config import (
     MongoDbConfig,
     UpdateMongoDbConfigRequest,
 )
-from .common_prompts import (
+from ...cli2.utils.common_prompts import (
     prompt_user_for_non_empty_input_string,
     prompt_user_for_yes_no_answer,
     prompt_user_for_mongodb_connection_string,

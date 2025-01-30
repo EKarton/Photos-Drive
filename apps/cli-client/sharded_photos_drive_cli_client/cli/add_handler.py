@@ -1,9 +1,9 @@
 import logging
 
-from .config.common_prompts import (
+from ..cli2.utils.common_prompts import (
     prompt_user_for_yes_no_answer,
 )
-from .utils import (
+from ..cli2.utils.utils import (
     get_diffs_from_path,
     pretty_print_processed_diffs,
 )

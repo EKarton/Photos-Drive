@@ -1,4 +1,4 @@
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
     prompt_user_for_yes_no_answer,
 )
 from ..shared.config.config import Config

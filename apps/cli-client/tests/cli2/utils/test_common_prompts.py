@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import Mock, patch
 from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
     prompt_user_for_mongodb_connection_string,
     prompt_user_for_non_empty_input_string,
     prompt_user_for_non_empty_password,
