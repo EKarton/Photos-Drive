@@ -36,8 +36,8 @@ class TestPromptUserForMongodbConnectionString(unittest.TestCase):
 
     def test_invalid_connection_string(self):
         # Test setup: mock MongoClient
-        incorrect_mongodb_client = create_mock_mongo_client()
-        incorrect_mongodb_client.admin = Mock().command.side_effect = ValueError(
+        incorrect_mongodb_client = Mock()
+        incorrect_mongodb_client.admin.command.side_effect = ValueError(
             "Custom error message"
         )
         correct_mongodb_client = create_mock_mongo_client()
