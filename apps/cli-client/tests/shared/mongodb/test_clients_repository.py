@@ -1,7 +1,9 @@
 from typing import cast
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from bson.objectid import ObjectId
+import mongomock
+from pymongo import MongoClient
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
@@ -18,7 +20,12 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
 
 
 class TestMongoDbClientsRepository(unittest.TestCase):
-    def test_build_from_config__fetches_and_adds_mongodb_client_to_repo(self):
+
+    @patch.object(MongoClient, '__init__', return_value=None)
+    @patch.object(MongoClient, '__new__', return_value=mongomock.MongoClient())
+    def test_build_from_config__fetches_and_adds_mongodb_client_to_repo(
+        self, mongodb_new_mock, _mongodb_init_mock
+    ):
         mock_config = InMemoryConfig()
         mongodb_config_1 = mock_config.add_mongodb_config(
             AddMongoDbConfigRequest(
@@ -41,6 +48,8 @@ class TestMongoDbClientsRepository(unittest.TestCase):
         self.assertEqual(len(clients), 2)
         self.assertEqual(clients[0][0], mongodb_config_1.id)
         self.assertEqual(clients[1][0], mongodb_config_2.id)
+        mongodb_new_mock.assert_any_call(MongoClient, "localhost:5572")
+        mongodb_new_mock.assert_any_call(MongoClient, "localhost:5574")
 
     def test_add_mongodb_client__adds_mongodb_client_to_repo(self):
         client_id = ObjectId()

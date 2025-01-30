@@ -2,7 +2,7 @@ from bson import ObjectId
 from google.oauth2.credentials import Credentials
 
 from ...shared.config.config import Config, GPhotosConfig, UpdateGPhotosConfigRequest
-from .common_prompts import (
+from ...cli2.shared.inputs import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
     prompt_user_for_non_empty_input_string,

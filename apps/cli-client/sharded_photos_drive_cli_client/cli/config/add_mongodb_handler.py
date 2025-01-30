@@ -1,5 +1,5 @@
 from ...shared.config.config import AddMongoDbConfigRequest, Config
-from .common_prompts import prompt_user_for_mongodb_connection_string
+from ...cli2.shared.inputs import prompt_user_for_mongodb_connection_string
 
 
 class AddMongoDbHandler:

@@ -35,6 +35,9 @@ class FakeGPhotosClient(GPhotosClientV2):
             usage=len(self.media_items().search_for_media_items()),
         )
 
+    def name(self) -> str:
+        return self.id
+
     def albums(self) -> GPhotosAlbumsClient:
         return self._albums_client
 

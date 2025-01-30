@@ -1,11 +1,12 @@
 import logging
 
-from .config.common_prompts import (
+from ..cli2.shared.printer import pretty_print_processed_diffs
+
+from ..cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from .utils import (
-    get_diffs_from_path,
-    pretty_print_processed_diffs,
+from ..cli2.shared.files import (
+    get_media_file_paths_from_path,
 )
 from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
@@ -39,7 +40,8 @@ class AddHandler:
 
         # Get the diffs
         diffs = [
-            Diff(modifier="+", file_path=path) for path in get_diffs_from_path(path)
+            Diff(modifier="+", file_path=path)
+            for path in get_media_file_paths_from_path(path)
         ]
 
         # Process the diffs with metadata

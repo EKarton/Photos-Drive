@@ -1,6 +1,6 @@
 import logging
 
-from .config.common_prompts import (
+from ..cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
 from ..backup.backup_photos import PhotosBackup, BackupResults
@@ -12,7 +12,7 @@ from ..backup.diffs import Diff
 from ..backup.processed_diffs import DiffsProcessor, ProcessedDiff
 from ..diff.get_diffs import FolderSyncDiff, DiffResults
 from ..shared.config.config import Config
-from .utils import pretty_print_processed_diffs
+from ..cli2.shared.printer import pretty_print_processed_diffs
 
 logger = logging.getLogger(__name__)
 

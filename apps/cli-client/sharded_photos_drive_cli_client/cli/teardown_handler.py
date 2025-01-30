@@ -1,4 +1,4 @@
-from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
 from ..shared.config.config import Config
@@ -71,19 +71,6 @@ class TeardownHandler:
                 self.__add_media_items_to_album_safely(
                     gphotos_client, trash_album_id, media_item_ids
                 )
-
-    def __confirm_deletion_of_everything(self):
-        print("Do you want to delete everything this tool has ever created?")
-        while True:
-            raw_input = input("[Yes/Y] or [No/N]: ")
-            user_input = raw_input.strip().lower()
-
-            if user_input in ["yes", "y"]:
-                return True
-            elif user_input in ["no", "n"]:
-                raise ValueError("Terminated teardown.")
-            else:
-                print("Invalid input. Please enter Yes/Y or No/N.")
 
     def __add_media_items_to_album_safely(
         self, client: GPhotosClientV2, album_id: str, media_item_ids: list[str]
