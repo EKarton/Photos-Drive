@@ -44,7 +44,7 @@ def init(
 ):
     setup_logging(verbose)
 
-    logger.debug("Called config init handler with args:\n verbose={verbose}")
+    logger.debug(f"Called config init handler with args:\n verbose={verbose}")
 
     # Step 0: Ask where to save config
     __prompt_welcome()
@@ -103,52 +103,42 @@ def init(
         print("Saved your config")
 
     # Step 5: Tell user how to add more MongoDB accounts / Google Photo accounts
-    print("Congratulations! You have set up a basic version of sharded_google_photos!")
-    print()
-    print("Whenever you are running out of MongoDB space, you can always:")
-    print("  1. Create a new MongoDB account from go/mongodb")
-    print("  2. Run:")
-    if type(config) is ConfigFromFile:
-        print(
-            "      sharded_google_photos config add mongodb ",
-            "--config_file_path <file-path>",
-        )
-    else:
-        print(
-            "      sharded_google_photos config add mongodb ",
-            "--config_mongodb <connection string>",
-        )
-    print("     and follow the prompts from there.")
-    print()
     print(
-        "Similarly, whenever you are running out of Google Photos space, ",
-        "you can always:",
+        "Congratulations! You have set up a basic version of sharded_google_photos!\n"
+        + "\n"
+        + "You can always add more MongoDB accounts by:\n"
+        + " 1. Create a new MongoDB account\n"
+        + " 2. Run:\n"
     )
-    print("  1. Create a new Google Photos account from go/gphotos")
-    print("  2. Run:")
+
     if type(config) is ConfigFromFile:
-        print(
-            "      sharded_google_photos config add gphotos ",
-            "--config_file_path <file-path>",
-        )
+        print(f"      {get_config_add_mongodb_config_file_cli()}")
     else:
-        print(
-            "      sharded_google_photos config add gphotos ",
-            "--config_mongodb <connection string>",
-        )
-    print("     and follow the prompts from there.")
-    print()
-    print("That's it! Have fun uploading photos!")
+        print(f"      {get_config_add_mongodb_config_file_cli()}")
+
+    print(
+        +"\nSimilarly, you can add more Google Photos storage by: \n"
+        + "  1. Create a new Google Photos account\n"
+        + "  2. Run:\n"
+    )
+    if type(config) is ConfigFromFile:
+        print(f"      {get_config_add_gphotos_config_file_cli()}")
+    else:
+        print(f"      {get_config_add_gphotos_config_file_cli()}")
+
+    print("\nThat's it! Have fun uploading photos!")
 
 
 def __prompt_welcome():
-    print("Welcome!")
-    print("Before you get started with sharded_google_photos, you need the following:")
-    print("\n  1. A place to store your config files (MongoDB or in a config file).")
-    print("\n  2. A place to store your photo metadata (MongoDB).")
-    print("\n  3. A place to store your photos (Google Photos account).")
-    print("")
-    input("Press [enter] to continue")
+    print(
+        "Welcome!\n"
+        + "Before you get started with sharded_google_photos, you need the following:\n"
+        + "\n  1. A place to store your config files (MongoDB or in a config file).\n"
+        + "\n  2. A place to store your photo metadata (MongoDB).\n"
+        + "\n  3. A place to store your photos (Google Photos account).\n"
+        + "\n"
+        + "Press [enter] to continue\n"
+    )
 
 
 def __prompt_config() -> Config:
@@ -231,3 +221,19 @@ def __get_non_empty_name_for_gphotos() -> str:
 
         else:
             return stripped_name
+
+
+def get_config_add_gphotos_config_file_cli():
+    return "sharded_google_photos config add gphotos --config-file <file-path>"
+
+
+def get_config_add_mongodb_config_file_cli():
+    return "sharded_google_photos config add mongodb --config-file <file-path>"
+
+
+def get_config_add_gphotos_config_mongodb_cli():
+    return "sharded_google_photos config add gphotos --config-mongodb <file-path>"
+
+
+def get_config_add_mongodb_config_mongodb_cli():
+    return "sharded_google_photos config add mongodb --config-mongodb <file-path>"
