@@ -6,6 +6,7 @@ from sharded_photos_drive_cli_client.cli.config.common_prompts import (
     READ_ONLY_SCOPES,
     prompt_user_for_gphotos_credentials,
     prompt_user_for_mongodb_connection_string,
+    prompt_user_for_non_empty_input_string,
 )
 from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
 from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
@@ -51,7 +52,6 @@ def gphotos(
     ] = False,
 ):
     setup_logging(verbose)
-
     logger.debug(
         "Called config add gphotos handler with args:\n"
         + f" config_file: {config_file}\n"
@@ -61,7 +61,9 @@ def gphotos(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    gphotos_account_name = __get_non_empty_gphotos_name()
+    gphotos_account_name = prompt_user_for_non_empty_input_string(
+        "Enter name of your Google Photos account: "
+    )
 
     print("Now, time to log into your Google account for read+write access\n")
     read_write_credentials = prompt_user_for_gphotos_credentials()
@@ -78,20 +80,6 @@ def gphotos(
     )
 
     print("Successfully added your Google Photos account!")
-
-
-def __get_non_empty_gphotos_name() -> str:
-    """Prompts the user for a name and ensures it's not empty."""
-
-    while True:
-        name = input("Enter name of your Google Photos account: ")
-        stripped_name = name.strip()
-
-        if not stripped_name:
-            print("Name cannot be empty. Please try again.")
-
-        else:
-            return stripped_name
 
 
 @app.command()
@@ -122,7 +110,6 @@ def mongodb(
     ] = False,
 ):
     setup_logging(verbose)
-
     logger.debug(
         "Called config add mongodb handler with args:\n"
         + f" config_file: {config_file}\n"
@@ -132,7 +119,9 @@ def mongodb(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    name = __get_non_empty_mongodb_name()
+    name = prompt_user_for_non_empty_input_string(
+        "Enter name of your Mongo DB account: "
+    )
 
     read_write_connection_string = prompt_user_for_mongodb_connection_string(
         "Enter your read+write connection string: "
@@ -151,17 +140,3 @@ def mongodb(
     )
 
     print("Successfully added your Mongo DB account!")
-
-
-def __get_non_empty_mongodb_name() -> str:
-    """Prompts the user for a name and ensures it's not empty."""
-
-    while True:
-        name = input("Enter name of your Mongo DB account: ")
-        stripped_name = name.strip()
-
-        if not stripped_name:
-            print("Name cannot be empty. Please try again.")
-
-        else:
-            return stripped_name
