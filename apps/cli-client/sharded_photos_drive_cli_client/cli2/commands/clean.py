@@ -80,10 +80,12 @@ def clean(
     )
     cleanup_results = cleaner.clean()
 
-    print("Cleanup success!")
-    print(f"Number of media items deleted: {cleanup_results.num_media_items_deleted}")
-    print(f"Number of albums deleted: {cleanup_results.num_albums_deleted}")
-    print(
+    typer.echo("Cleanup success!")
+    typer.echo(
+        f"Number of media items deleted: {cleanup_results.num_media_items_deleted}"
+    )
+    typer.echo(f"Number of albums deleted: {cleanup_results.num_albums_deleted}")
+    typer.echo(
         "Number of Google Photos items trashed: "
         + str(cleanup_results.num_gmedia_items_moved_to_trash)
     )

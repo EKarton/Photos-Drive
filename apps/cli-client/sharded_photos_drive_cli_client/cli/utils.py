@@ -1,6 +1,6 @@
 import os
 from typing import Literal
-from prettytable import PrettyTable, NONE
+from prettytable import PrettyTable, HRuleStyle, VRuleStyle
 from termcolor import colored
 
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
@@ -82,8 +82,8 @@ def pretty_print_diffs(backup_diffs: list[Diff]):
 
     # Remove the borders
     table.border = False
-    table.hrules = NONE
-    table.vrules = NONE
+    table.hrules = HRuleStyle.NONE
+    table.vrules = VRuleStyle.NONE
 
     print("============================================================")
     print("Changes")
@@ -129,8 +129,8 @@ def pretty_print_processed_diffs(processed_diffs: list[ProcessedDiff]):
 
     # Remove the borders
     table.border = False
-    table.hrules = NONE
-    table.vrules = NONE
+    table.hrules = HRuleStyle.NONE
+    table.vrules = VRuleStyle.NONE
 
     print("============================================================")
     print("Changes")

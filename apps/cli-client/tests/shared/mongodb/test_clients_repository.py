@@ -1,7 +1,8 @@
 from typing import cast
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from bson.objectid import ObjectId
+from pymongo import MongoClient
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
@@ -18,7 +19,9 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
 
 
 class TestMongoDbClientsRepository(unittest.TestCase):
-    def test_build_from_config__fetches_and_adds_mongodb_client_to_repo(self):
+
+    @patch.object(MongoClient, '__init__', return_value=None)
+    def test_build_from_config__fetches_and_adds_mongodb_client_to_repo(self, _):
         mock_config = InMemoryConfig()
         mongodb_config_1 = mock_config.add_mongodb_config(
             AddMongoDbConfigRequest(

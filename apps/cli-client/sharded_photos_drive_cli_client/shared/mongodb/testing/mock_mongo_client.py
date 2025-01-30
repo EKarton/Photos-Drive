@@ -5,6 +5,7 @@ from unittest.mock import Mock
 def create_mock_mongo_client(
     total_free_storage_size: int = 1000,
     storage_size: int = 0,
+    objects: int = 0,
 ) -> mongomock.MongoClient:
     '''
     Creates a fake MongoDB Client with fake 'totalFreeStorageSize' stats
@@ -21,6 +22,7 @@ def create_mock_mongo_client(
         return_value={
             "totalFreeStorageSize": total_free_storage_size,
             "storageSize": storage_size,
+            'objects': objects,
         }
     )
 

@@ -9,20 +9,23 @@ from sharded_photos_drive_cli_client.cli2.commands import teardown
 from sharded_photos_drive_cli_client.cli2.commands import usage
 
 
-app = typer.Typer()
+def build_app() -> typer.Typer:
+    app = typer.Typer()
 
-app.add_typer(config.app, name="config")
-app.add_typer(add.app)
-app.add_typer(delete.app)
-app.add_typer(sync.app)
-app.add_typer(clean.app)
-app.add_typer(teardown.app)
-app.add_typer(usage.app)
+    app.add_typer(config.app, name="config")
+    app.add_typer(add.app)
+    app.add_typer(delete.app)
+    app.add_typer(sync.app)
+    app.add_typer(clean.app)
+    app.add_typer(teardown.app)
+    app.add_typer(usage.app)
+
+    return app
 
 
 def main():
-    app()
+    build_app()()
 
 
 if __name__ == '__main__':
-    app()
+    build_app()()

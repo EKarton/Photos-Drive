@@ -25,6 +25,7 @@ def build_config_from_options(
     if config_file:
         return ConfigFromFile(config_file)
     elif config_mongodb:
-        return ConfigFromMongoDb(MongoClient(config_mongodb))
+        client = MongoClient(config_mongodb)
+        return ConfigFromMongoDb(client)
     else:
         raise ValueError('Unknown arg type')

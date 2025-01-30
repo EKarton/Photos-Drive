@@ -1,8 +1,7 @@
 import logging
 from types import TracebackType
-from typing import Dict
+from typing import Callable, Dict
 from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 from pymongo.client_session import ClientSession
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
@@ -38,7 +37,7 @@ class MongoDbClientsRepository:
 
         for mongodb_config in config.get_mongodb_configs():
             mongodb_client: MongoClient = MongoClient(
-                mongodb_config.read_write_connection_string, server_api=ServerApi("1")
+                mongodb_config.read_write_connection_string
             )
 
             mongodb_clients_repo.add_mongodb_client(mongodb_config.id, mongodb_client)
