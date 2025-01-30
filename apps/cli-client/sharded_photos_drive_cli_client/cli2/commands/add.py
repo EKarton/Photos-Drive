@@ -1,28 +1,50 @@
-from typing import cast
+import logging
 from typing_extensions import Annotated
 import typer
-from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.shared.config.config import Config
-from sharded_photos_drive_cli_client.shared.config.config_from_file import (
-    ConfigFromFile,
+from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
+from sharded_photos_drive_cli_client.backup.diffs import Diff
+from sharded_photos_drive_cli_client.backup.processed_diffs import DiffsProcessor
+from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+    prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.shared.config.config_from_mongodb import (
-    ConfigFromMongoDb,
+from sharded_photos_drive_cli_client.cli.utils import (
+    get_diffs_from_path,
+    pretty_print_processed_diffs,
 )
+from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
+from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
+from sharded_photos_drive_cli_client.cli2.utils.typer import (
+    createMutuallyExclusiveGroup,
+)
+from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
+    AlbumsRepositoryImpl,
+)
+from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+    MongoDbClientsRepository,
+)
+from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
+    MediaItemsRepositoryImpl,
+)
+
+logger = logging.getLogger(__name__)
 
 app = typer.Typer()
+config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 
 
-@app.callback()
-def config_callback(
-    ctx: typer.Context,
+@app.command()
+def add(
+    path: str,
     config_file: Annotated[
         str | None,
         typer.Option(
             "--config-file",
             help="Path to config file",
-            is_eager=False,
+            callback=config_exclusivity_callback,
         ),
     ] = None,
     config_mongodb: Annotated[
@@ -31,19 +53,71 @@ def config_callback(
             "--config-mongodb",
             help="Connection string to a MongoDB account that has the configs",
             is_eager=False,
+            callback=config_exclusivity_callback,
         ),
     ] = None,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            help="Whether to show all logging debug statements or not",
+        ),
+    ] = False,
+    parallelize_uploads: Annotated[
+        bool,
+        typer.Option(
+            "--parallelize-uploads",
+            help="Whether to parallelize uploads or not",
+        ),
+    ] = False,
 ):
-    print(config_file, config_mongodb)
-    if config_file:
-        ctx.obj['config'] = cast(Config, ConfigFromFile(config_file))
-    elif config_mongodb:
-        ctx.obj['config'] = cast(Config, ConfigFromMongoDb(MongoClient(config_mongodb)))
-    else:
-        raise ValueError('Need to specify either --config-mongodb or --config-file')
+    setup_logging(verbose)
 
+    logger.debug(
+        "Called add handler with args:\n"
+        + f" path: {path}\n"
+        + f" config_file: {config_file}\n"
+        + f" config_mongodb={config_mongodb}\n"
+        + f" verbose={verbose}\n"
+        + f" parallelize_uploads={parallelize_uploads}"
+    )
 
-@app.command()
-def add(ctx: typer.Context):
-    print("add files handler")
-    print(ctx)
+    # Set up the repos
+    config = build_config_from_options(config_file, config_mongodb)
+    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
+    albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+    media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+    # Get the diffs
+    diffs = [Diff(modifier="+", file_path=path) for path in get_diffs_from_path(path)]
+
+    # Process the diffs with metadata
+    diff_processor = DiffsProcessor()
+    processed_diffs = diff_processor.process_raw_diffs(diffs)
+    for processed_diff in processed_diffs:
+        logger.debug(f"Processed diff: {processed_diff}")
+
+    # Confirm if diffs are correct by the user
+    pretty_print_processed_diffs(processed_diffs)
+    if not prompt_user_for_yes_no_answer("Is this correct? (Y/N): "):
+        print("Operation cancelled.")
+        return
+
+    # Process the diffs
+    backup_service = PhotosBackup(
+        config,
+        albums_repo,
+        media_items_repo,
+        gphoto_clients_repo,
+        mongodb_clients_repo,
+        parallelize_uploads,
+    )
+    backup_results = backup_service.backup(processed_diffs)
+    logger.debug(f"Backup results: {backup_results}")
+
+    print(f"Added {len(diffs)} items.")
+    print(f"Items added: {backup_results.num_media_items_added}")
+    print(f"Items deleted: {backup_results.num_media_items_deleted}")
+    print(f"Albums created: {backup_results.num_albums_created}")
+    print(f"Albums deleted: {backup_results.num_albums_deleted}")
