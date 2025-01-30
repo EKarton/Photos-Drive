@@ -117,7 +117,7 @@ def init(
         print(f"      {get_config_add_mongodb_config_file_cli()}")
 
     print(
-        +"\nSimilarly, you can add more Google Photos storage by: \n"
+        "\nSimilarly, you can add more Google Photos storage by: \n"
         + "  1. Create a new Google Photos account\n"
         + "  2. Run:\n"
     )

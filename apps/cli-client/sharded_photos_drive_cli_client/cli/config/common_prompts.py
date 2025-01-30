@@ -71,7 +71,6 @@ def prompt_user_for_gphotos_credentials(
         )
 
         try:
-            print('hehe', InstalledAppFlow)
             iaflow: InstalledAppFlow = InstalledAppFlow.from_client_config(
                 client_config={
                     "web": {
