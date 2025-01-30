@@ -1,6 +1,6 @@
 import logging
 from types import TracebackType
-from typing import Callable, Dict
+from typing import Dict
 from pymongo.mongo_client import MongoClient
 from pymongo.client_session import ClientSession
 from pymongo.read_concern import ReadConcern
