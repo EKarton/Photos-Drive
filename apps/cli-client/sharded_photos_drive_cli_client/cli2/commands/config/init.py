@@ -1,4 +1,6 @@
+import logging
 import os
+from typing_extensions import Annotated
 import typer
 from pymongo import MongoClient
 
@@ -7,6 +9,7 @@ from sharded_photos_drive_cli_client.cli.config.common_prompts import (
     prompt_user_for_gphotos_credentials,
     prompt_user_for_mongodb_connection_string,
 )
+from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
 from sharded_photos_drive_cli_client.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -25,12 +28,24 @@ from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
 
-
+logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 
 @app.command()
-def init():
+def init(
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            help="Whether to show all logging debug statements or not",
+        ),
+    ] = False,
+):
+    setup_logging(verbose)
+
+    logger.debug("Called config init handler with args:\n verbose={verbose}")
+
     # Step 0: Ask where to save config
     __prompt_welcome()
     config = __prompt_config()

@@ -1,15 +1,167 @@
+import logging
+from typing_extensions import Annotated
 import typer
 
+from sharded_photos_drive_cli_client.cli.config.common_prompts import (
+    READ_ONLY_SCOPES,
+    prompt_user_for_gphotos_credentials,
+    prompt_user_for_mongodb_connection_string,
+)
+from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
+from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
+from sharded_photos_drive_cli_client.cli2.utils.typer import (
+    createMutuallyExclusiveGroup,
+)
+from sharded_photos_drive_cli_client.shared.config.config import (
+    AddGPhotosConfigRequest,
+    AddMongoDbConfigRequest,
+)
+
+logger = logging.getLogger(__name__)
+
 app = typer.Typer()
+config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 
 
 @app.command()
-def gphotos(ctx: typer.Context):
-    print('config add gphotos')
-    print(ctx)
+def gphotos(
+    config_file: Annotated[
+        str | None,
+        typer.Option(
+            "--config-file",
+            help="Path to config file",
+            callback=config_exclusivity_callback,
+        ),
+    ] = None,
+    config_mongodb: Annotated[
+        str | None,
+        typer.Option(
+            "--config-mongodb",
+            help="Connection string to a MongoDB account that has the configs",
+            is_eager=False,
+            callback=config_exclusivity_callback,
+        ),
+    ] = None,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            help="Whether to show all logging debug statements or not",
+        ),
+    ] = False,
+):
+    setup_logging(verbose)
+
+    logger.debug(
+        "Called config add gphotos handler with args:\n"
+        + f" config_file: {config_file}\n"
+        + f" config_mongodb={config_mongodb}\n"
+        + f" verbose={verbose}"
+    )
+
+    # Set up the repos
+    config = build_config_from_options(config_file, config_mongodb)
+    gphotos_account_name = __get_non_empty_gphotos_name()
+
+    print("Now, time to log into your Google account for read+write access\n")
+    read_write_credentials = prompt_user_for_gphotos_credentials()
+
+    print("Now, time to log into your Google account for read only access\n")
+    read_only_credentials = prompt_user_for_gphotos_credentials(READ_ONLY_SCOPES)
+
+    config.add_gphotos_config(
+        AddGPhotosConfigRequest(
+            name=gphotos_account_name,
+            read_write_credentials=read_write_credentials,
+            read_only_credentials=read_only_credentials,
+        )
+    )
+
+    print("Successfully added your Google Photos account!")
+
+
+def __get_non_empty_gphotos_name() -> str:
+    """Prompts the user for a name and ensures it's not empty."""
+
+    while True:
+        name = input("Enter name of your Google Photos account: ")
+        stripped_name = name.strip()
+
+        if not stripped_name:
+            print("Name cannot be empty. Please try again.")
+
+        else:
+            return stripped_name
 
 
 @app.command()
-def mongodb(ctx: typer.Context):
-    print("config add mongodb")
-    print(ctx)
+def mongodb(
+    config_file: Annotated[
+        str | None,
+        typer.Option(
+            "--config-file",
+            help="Path to config file",
+            callback=config_exclusivity_callback,
+        ),
+    ] = None,
+    config_mongodb: Annotated[
+        str | None,
+        typer.Option(
+            "--config-mongodb",
+            help="Connection string to a MongoDB account that has the configs",
+            is_eager=False,
+            callback=config_exclusivity_callback,
+        ),
+    ] = None,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            help="Whether to show all logging debug statements or not",
+        ),
+    ] = False,
+):
+    setup_logging(verbose)
+
+    logger.debug(
+        "Called config add mongodb handler with args:\n"
+        + f" config_file: {config_file}\n"
+        + f" config_mongodb={config_mongodb}\n"
+        + f" verbose={verbose}"
+    )
+
+    # Set up the repos
+    config = build_config_from_options(config_file, config_mongodb)
+    name = __get_non_empty_mongodb_name()
+
+    read_write_connection_string = prompt_user_for_mongodb_connection_string(
+        "Enter your read+write connection string: "
+    )
+
+    read_only_connection_string = prompt_user_for_mongodb_connection_string(
+        "Enter your read only connection string: "
+    )
+
+    config.add_mongodb_config(
+        AddMongoDbConfigRequest(
+            name=name,
+            read_write_connection_string=read_write_connection_string,
+            read_only_connection_string=read_only_connection_string,
+        )
+    )
+
+    print("Successfully added your Mongo DB account!")
+
+
+def __get_non_empty_mongodb_name() -> str:
+    """Prompts the user for a name and ensures it's not empty."""
+
+    while True:
+        name = input("Enter name of your Mongo DB account: ")
+        stripped_name = name.strip()
+
+        if not stripped_name:
+            print("Name cannot be empty. Please try again.")
+
+        else:
+            return stripped_name
