@@ -8,6 +8,7 @@ from sharded_photos_drive_cli_client.cli2.shared.printer import (
     pretty_print_diffs,
     pretty_print_processed_diffs,
 )
+from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocation
 
 
 class TestPrettyPrintProcessedDiffs(unittest.TestCase):
@@ -30,7 +31,7 @@ class TestPrettyPrintProcessedDiffs(unittest.TestCase):
                 album_name='Test',
                 file_name="file2.png",
                 file_hash=b'hash2',
-                location=None,
+                location=GpsLocation(latitude=40, longitude=100),
                 file_size=2000,
             ),
         ]
@@ -40,6 +41,7 @@ class TestPrettyPrintProcessedDiffs(unittest.TestCase):
         output = mock_stdout.getvalue()
         self.assertIn('file1.jpg', output)
         self.assertIn('file2.png', output)
+        self.assertIn('40, 100', output)
         self.assertIn('Number of media items to add: 1', output)
         self.assertIn('Number of media items to delete: 1', output)
 
