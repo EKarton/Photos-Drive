@@ -14,7 +14,7 @@ from sharded_photos_drive_cli_client.backup.processed_diffs import (
 from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli2.shared.utils import (
+from sharded_photos_drive_cli_client.cli2.shared.printer import (
     pretty_print_processed_diffs,
 )
 from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options

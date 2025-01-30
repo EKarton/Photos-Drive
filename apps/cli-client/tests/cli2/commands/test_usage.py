@@ -6,7 +6,7 @@ from bson import ObjectId
 from pymongo import MongoClient
 from typer.testing import CliRunner
 
-from sharded_photos_drive_cli_client.cli2.main import build_app
+from sharded_photos_drive_cli_client.cli2.app import build_app
 from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )

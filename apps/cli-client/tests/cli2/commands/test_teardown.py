@@ -5,7 +5,7 @@ from unittest.mock import patch
 from typer.testing import CliRunner
 from bson import ObjectId
 
-from sharded_photos_drive_cli_client.cli2.main import build_app
+from sharded_photos_drive_cli_client.cli2.app import build_app
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
 from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
     GPhotosClientsRepository,

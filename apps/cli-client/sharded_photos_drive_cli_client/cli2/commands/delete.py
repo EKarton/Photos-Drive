@@ -8,9 +8,9 @@ from sharded_photos_drive_cli_client.backup.processed_diffs import DiffsProcesso
 from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli2.shared.utils import (
+from sharded_photos_drive_cli_client.cli2.shared.printer import pretty_print_diffs
+from sharded_photos_drive_cli_client.cli2.shared.files import (
     get_media_file_paths_from_path,
-    pretty_print_diffs,
 )
 from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
 from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
