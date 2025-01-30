@@ -1,4 +1,5 @@
-from typing import cast
+import functools
+from typing import Callable, cast
 from typing_extensions import Annotated
 import typer
 from pymongo import MongoClient
@@ -10,6 +11,30 @@ from sharded_photos_drive_cli_client.shared.config.config_from_file import (
 from sharded_photos_drive_cli_client.shared.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
+
+
+def add_config_options(func: Callable):
+    @typer.option(
+        "--config-file",
+        help="Path to config file",
+        is_eager=False,
+    )
+    @typer.option(
+        "--config-mongodb",
+        help="MongoDB connection string",
+        is_eager=False,
+    )
+    @functools.wraps(func)  # Preserve metadata
+    def wrapper(
+        ctx: typer.Context,
+        config_file: str | None = None,  # These arguments are now added
+        config_mongodb: str | None = None,
+        *args,
+        **kwargs,
+    ):
+        return func(ctx, config_file, config_mongodb, *args, **kwargs)
+
+    return wrapper
 
 
 def config_callback(
