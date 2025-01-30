@@ -3,7 +3,7 @@ from unittest.mock import patch
 import mongomock
 from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
+from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
 from sharded_photos_drive_cli_client.shared.config.config_from_file import (
     ConfigFromFile,
 )

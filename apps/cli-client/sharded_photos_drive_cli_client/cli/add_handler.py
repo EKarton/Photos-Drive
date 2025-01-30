@@ -1,10 +1,10 @@
 import logging
 
-from ..cli2.utils.common_prompts import (
+from ..cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from ..cli2.utils.utils import (
-    get_diffs_from_path,
+from ..cli2.shared.utils import (
+    get_media_file_paths_from_path,
     pretty_print_processed_diffs,
 )
 from ..shared.config.config import Config
@@ -39,7 +39,8 @@ class AddHandler:
 
         # Get the diffs
         diffs = [
-            Diff(modifier="+", file_path=path) for path in get_diffs_from_path(path)
+            Diff(modifier="+", file_path=path)
+            for path in get_media_file_paths_from_path(path)
         ]
 
         # Process the diffs with metadata

@@ -3,7 +3,7 @@ import unittest
 import typer
 from typer.testing import CliRunner
 
-from sharded_photos_drive_cli_client.cli2.utils.typer import (
+from sharded_photos_drive_cli_client.cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 

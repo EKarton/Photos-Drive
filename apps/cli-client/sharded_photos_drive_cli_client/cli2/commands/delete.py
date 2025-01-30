@@ -5,16 +5,16 @@ import typer
 from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
 from sharded_photos_drive_cli_client.backup.diffs import Diff
 from sharded_photos_drive_cli_client.backup.processed_diffs import DiffsProcessor
-from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli2.utils.utils import (
-    get_diffs_from_path,
+from sharded_photos_drive_cli_client.cli2.shared.utils import (
+    get_media_file_paths_from_path,
     pretty_print_diffs,
 )
-from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
-from sharded_photos_drive_cli_client.cli2.utils.typer import (
+from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
+from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
+from sharded_photos_drive_cli_client.cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
@@ -82,7 +82,10 @@ def delete(
     media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
     # Get the diffs
-    diffs = [Diff(modifier="-", file_path=path) for path in get_diffs_from_path(path)]
+    diffs = [
+        Diff(modifier="-", file_path=path)
+        for path in get_media_file_paths_from_path(path)
+    ]
 
     # Confirm if diffs are correct by the user
     pretty_print_diffs(diffs)

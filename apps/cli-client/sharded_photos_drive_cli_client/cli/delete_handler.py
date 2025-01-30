@@ -1,7 +1,7 @@
 import logging
 
-from ..cli2.utils.common_prompts import prompt_user_for_yes_no_answer
-from ..cli2.utils.utils import get_diffs_from_path, pretty_print_diffs
+from ..cli2.shared.inputs import prompt_user_for_yes_no_answer
+from ..cli2.shared.utils import get_media_file_paths_from_path, pretty_print_diffs
 from ..shared.config.config import Config
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
@@ -33,7 +33,8 @@ class DeleteHandler:
 
         # Get the diffs
         diffs = [
-            Diff(modifier="-", file_path=path) for path in get_diffs_from_path(path)
+            Diff(modifier="-", file_path=path)
+            for path in get_media_file_paths_from_path(path)
         ]
 
         # Confirm if diffs are correct by the user

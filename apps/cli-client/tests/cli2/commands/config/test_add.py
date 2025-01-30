@@ -8,7 +8,7 @@ from bson import ObjectId
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
 )

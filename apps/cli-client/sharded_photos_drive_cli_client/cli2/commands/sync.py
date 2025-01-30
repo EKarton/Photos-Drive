@@ -11,15 +11,15 @@ from sharded_photos_drive_cli_client.backup.processed_diffs import (
     DiffsProcessor,
     ProcessedDiff,
 )
-from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli2.utils.utils import (
+from sharded_photos_drive_cli_client.cli2.shared.utils import (
     pretty_print_processed_diffs,
 )
-from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
-from sharded_photos_drive_cli_client.cli2.utils.typer import (
+from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
+from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
+from sharded_photos_drive_cli_client.cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from sharded_photos_drive_cli_client.diff.get_diffs import DiffResults, FolderSyncDiff

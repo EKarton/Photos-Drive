@@ -4,7 +4,7 @@ import sys
 from io import StringIO
 from contextlib import contextmanager
 
-from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
+from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
 
 
 class TestSetupLogging(unittest.TestCase):

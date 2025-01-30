@@ -1,5 +1,5 @@
 from ...shared.config.config import AddGPhotosConfigRequest, Config
-from ...cli2.utils.common_prompts import (
+from ...cli2.shared.inputs import (
     READ_ONLY_SCOPES,
     prompt_user_for_gphotos_credentials,
 )

@@ -9,7 +9,7 @@ from ...backup.diffs import Diff
 from ...shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 
 
-def get_diffs_from_path(path: str) -> list[str]:
+def get_media_file_paths_from_path(path: str) -> list[str]:
     """
     Returns a list of file paths that are under a path.
 
@@ -28,7 +28,7 @@ def get_diffs_from_path(path: str) -> list[str]:
         list(str): A list of file paths of media items it found.
     """
     if os.path.isdir(path):
-        return __get_diffs_from_dir_path(path)
+        return __get_media_file_paths_from_dir_path(path)
 
     if os.path.isfile(path):
         if not path.lower().endswith(MEDIA_ITEM_FILE_EXTENSIONS):
@@ -39,7 +39,7 @@ def get_diffs_from_path(path: str) -> list[str]:
     raise ValueError(f"File {path} does not exist")
 
 
-def __get_diffs_from_dir_path(dir_path: str) -> list[str]:
+def __get_media_file_paths_from_dir_path(dir_path: str) -> list[str]:
     """
     Returns a list of file paths of media items that are under a directory.
 

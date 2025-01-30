@@ -4,12 +4,12 @@ from typing_extensions import Annotated
 import typer
 from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.cli2.utils.common_prompts import (
+from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     READ_ONLY_SCOPES,
     prompt_user_for_gphotos_credentials,
     prompt_user_for_mongodb_connection_string,
 )
-from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
+from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
 from sharded_photos_drive_cli_client.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,

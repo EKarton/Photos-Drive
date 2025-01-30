@@ -3,9 +3,9 @@ from typing_extensions import Annotated
 import typer
 
 from sharded_photos_drive_cli_client.clean.clean_system import SystemCleaner
-from sharded_photos_drive_cli_client.cli2.utils.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli2.utils.logging import setup_logging
-from sharded_photos_drive_cli_client.cli2.utils.typer import (
+from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
+from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
+from sharded_photos_drive_cli_client.cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (

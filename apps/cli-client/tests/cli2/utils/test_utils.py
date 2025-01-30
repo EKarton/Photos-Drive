@@ -5,8 +5,8 @@ from io import StringIO
 
 from sharded_photos_drive_cli_client.backup.diffs import Diff
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
-from sharded_photos_drive_cli_client.cli2.utils.utils import (
-    get_diffs_from_path,
+from sharded_photos_drive_cli_client.cli2.shared.utils import (
+    get_media_file_paths_from_path,
     pretty_print_diffs,
     pretty_print_processed_diffs,
 )
@@ -19,7 +19,7 @@ class TestGetDiffsFromPath(TestCase):
     def test_get_diffs_from_path_file(self):
         self.fs.create_file('/test/image.jpg')
 
-        result = get_diffs_from_path('/test/image.jpg')
+        result = get_media_file_paths_from_path('/test/image.jpg')
 
         self.assertEqual(result, ['/test/image.jpg'])
 
@@ -27,11 +27,11 @@ class TestGetDiffsFromPath(TestCase):
         self.fs.create_file('/test/document.txt')
 
         with self.assertRaises(ValueError):
-            get_diffs_from_path('/test/document.txt')
+            get_media_file_paths_from_path('/test/document.txt')
 
     def test_get_diffs_from_path_nonexistent(self):
         with self.assertRaises(ValueError):
-            get_diffs_from_path('/test/nonexistent.jpg')
+            get_media_file_paths_from_path('/test/nonexistent.jpg')
 
     def test_get_diffs_from_dir_path(self):
         self.fs.create_file('/test/image1.jpg')
@@ -39,7 +39,7 @@ class TestGetDiffsFromPath(TestCase):
         self.fs.create_file('/test/subdir/image3.gif')
         self.fs.create_file('/test/document.txt')
 
-        result = get_diffs_from_path('/test')
+        result = get_media_file_paths_from_path('/test')
 
         expected = [
             './test/image1.jpg',

@@ -10,11 +10,11 @@ from ...shared.config.config_from_file import ConfigFromFile
 from ...shared.config.config_from_mongodb import ConfigFromMongoDb
 from ...shared.mongodb.clients_repository import MongoDbClientsRepository
 from ...shared.mongodb.albums_repository import AlbumsRepositoryImpl
-from ...cli2.utils.common_prompts import (
+from ...cli2.shared.inputs import (
     READ_ONLY_SCOPES,
     prompt_user_for_mongodb_connection_string,
 )
-from ...cli2.utils.common_prompts import prompt_user_for_gphotos_credentials
+from ...cli2.shared.inputs import prompt_user_for_gphotos_credentials
 
 
 class InitHandler:
