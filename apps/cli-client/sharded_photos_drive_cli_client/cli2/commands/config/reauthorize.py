@@ -88,7 +88,7 @@ def gphotos(
                 new_read_only_credentials=new_read_only_credentials,
             )
         )
-        print("Successfully updated gphotos config {id_str}")
+        print(f"Successfully updated gphotos config {id}")
     else:
         print("No change")
 
@@ -152,7 +152,7 @@ def mongodb(
                 new_read_only_connection_string=new_read_only_connection_string,
             )
         )
-        print("Successfully updated mongodb config {id_str}")
+        print(f"Successfully updated mongodb config {id}")
     else:
         print("No change")
 

@@ -19,7 +19,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client im
 )
 
 
-class TestAddCli(unittest.TestCase):
+class TestReauthorizeCli(unittest.TestCase):
     def setUp(self):
         self.mongodb_client_id = ObjectId()
         self.gphotos_client_id = ObjectId()
@@ -61,7 +61,7 @@ class TestAddCli(unittest.TestCase):
         patch.stopall()
         os.unlink(self.temp_file_path)
 
-    def test_add_gphotos(self):
+    def test_reauthorize_gphotos(self):
         # Test setup: mock getpass
         mock_get_pass = patch('getpass.getpass').start()
         mock_get_pass.side_effect = [
@@ -100,19 +100,26 @@ class TestAddCli(unittest.TestCase):
         app = build_app()
         result = runner.invoke(
             app,
-            ["config", "add", "gphotos", "--config-file", self.temp_file_path],
-            input="bob@gmail.com\n",
+            [
+                "config",
+                "reauthorize",
+                "gphotos",
+                str(self.gphotos_client_id),
+                "--config-file",
+                self.temp_file_path,
+            ],
+            input="yes\nbob@gmail.com\nyes\nyes\n",
         )
 
         # Test assert: check on output
         self.assertEqual(
             result.output,
-            'Enter name of your Google Photos account: '
-            + 'Now, time to log into your Google account for read+write access\n'
-            + '\n'
-            + 'Now, time to log into your Google account for read only access\n'
-            + '\n'
-            + 'Successfully added your Google Photos account!\n',
+            'The account name is TestGPhotos\n'
+            + 'Do you want to change the name? (Y/N): '
+            + 'Enter new name: '
+            + 'Do you want to change the read+write credentials? (Y/N): '
+            + 'Do you want to change the read-only credentials? (Y/N): '
+            + f'Successfully updated gphotos config {self.gphotos_client_id}\n',
         )
         self.assertEqual(result.exit_code, 0)
 
@@ -132,7 +139,7 @@ class TestAddCli(unittest.TestCase):
             self.assertIn('read_only_client_secret = clientSecret2', content)
             self.assertIn('read_only_token_uri = python.com', content)
 
-    def test_add_mongodb(self):
+    def test_reauthorize_mongodb(self):
         # Test setup: mock MongoClient
         mongodb_client = create_mock_mongo_client()
         patch.object(MongoClient, '__init__', return_value=None).start()
@@ -150,15 +157,26 @@ class TestAddCli(unittest.TestCase):
         app = build_app()
         result = runner.invoke(
             app,
-            ["config", "add", "mongodb", "--config-file", self.temp_file_path],
-            input="bob@gmail.com\n",
+            [
+                "config",
+                "reauthorize",
+                "mongodb",
+                str(self.mongodb_client_id),
+                "--config-file",
+                self.temp_file_path,
+            ],
+            input="yes\nbob@gmail.com\nyes\nyes\n",
         )
 
         # Test assert: check on output
         self.assertEqual(
             result.output,
-            'Enter name of your Mongo DB account: '
-            + 'Successfully added your Mongo DB account!\n',
+            'The account name is TestMongoDB\n'
+            + 'Do you want to change the name? (Y/N): '
+            + 'Enter new name: '
+            + 'Do you want to change the read+write connection string? (Y/N): '
+            + 'Do you want to change the read+only connection string? (Y/N): '
+            + f'Successfully updated mongodb config {self.mongodb_client_id}\n',
         )
         self.assertEqual(result.exit_code, 0)
 
