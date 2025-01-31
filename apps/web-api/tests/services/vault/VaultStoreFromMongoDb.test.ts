@@ -1,125 +1,248 @@
-import { MongoClient, ObjectId } from 'mongodb'
-import { MongoMemoryServer } from 'mongodb-memory-server'
-import { GPhotosClient } from '../../../src/services/blob_store/GPhotosClient'
-import { VaultStoreFromMongoDb } from '../../../src/services/vault/VaultStoreFromMongoDb'
+/* eslint-disable security/detect-object-injection */
+
+import { MongoClient, ObjectId } from 'mongodb';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { UpdateGPhotosConfigRequest } from '../../../src/services/vault/VaultStore';
+import {
+  DatabaseCollections,
+  DatabaseName,
+  VaultStoreFromMongoDb
+} from '../../../src/services/vault/VaultStoreFromMongoDb';
 
 describe('VaultStoreFromMongoDb', () => {
-  let mongoServer: MongoMemoryServer
-  let mongoClient: MongoClient
-  let vaultStore: VaultStoreFromMongoDb
+  let mongoServer: MongoMemoryServer;
+  let mongoClient: MongoClient;
+  let vaultStore: VaultStoreFromMongoDb;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create()
-    const mongoUri = mongoServer.getUri()
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
 
-    mongoClient = await MongoClient.connect(mongoUri)
-    vaultStore = new VaultStoreFromMongoDb(mongoClient)
-  })
+    mongoClient = await MongoClient.connect(mongoUri);
+    vaultStore = new VaultStoreFromMongoDb(mongoClient);
+  });
 
   afterAll(async () => {
-    await mongoClient.close()
-    await mongoServer.stop()
-  })
+    await mongoClient.close();
+    await mongoServer.stop();
+  });
 
   beforeEach(async () => {
-    const db = mongoClient.db('sharded_google_photos')
-    await db.collection('mongodb_clients').deleteMany({})
-    await db.collection('gphotos_clients').deleteMany({})
-    await db.collection('root_album').deleteMany({})
-  })
+    const db = mongoClient.db(DatabaseName);
+    await db.collection(DatabaseCollections.MONGODB_CONFIGS).deleteMany({});
+    await db.collection(DatabaseCollections.GPHOTOS_CONFIGS).deleteMany({});
+    await db.collection(DatabaseCollections.ROOT_ALBUM).deleteMany({});
+  });
 
-  describe('getMongoDbClients', () => {
+  describe('getMongoDbConfigs', () => {
     it('should return MongoDB clients', async () => {
       const testClients = [
-        { _id: new ObjectId(), connection_string: 'mongodb://localhost:27017' },
-        { _id: new ObjectId(), connection_string: 'mongodb://localhost:27018' }
-      ]
-
+        {
+          _id: new ObjectId(),
+          name: 'bob@gmail.com',
+          read_only_connection_string: 'mongodb://localhost:27017'
+        },
+        {
+          _id: new ObjectId(),
+          name: 'sam@gmail.com',
+          read_only_connection_string: 'mongodb://localhost:27018'
+        }
+      ];
       await mongoClient
-        .db('sharded_google_photos')
-        .collection('mongodb_clients')
-        .insertMany(testClients)
+        .db(DatabaseName)
+        .collection(DatabaseCollections.MONGODB_CONFIGS)
+        .insertMany(testClients);
 
-      const result = await vaultStore.getMongoDbClients()
+      const result = await vaultStore.getMongoDbConfigs();
 
-      expect(result).toHaveLength(2)
-      expect(result[0][0]).toBe(testClients[0]._id.toString())
-      expect(result[0][1]).toBeInstanceOf(MongoClient)
-      expect(result[1][0]).toBe(testClients[1]._id.toString())
-      expect(result[1][1]).toBeInstanceOf(MongoClient)
-    })
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        id: testClients[0]._id.toString(),
+        name: 'bob@gmail.com',
+        connectionString: 'mongodb://localhost:27017'
+      });
+      expect(result[1]).toEqual({
+        id: testClients[1]._id.toString(),
+        name: 'sam@gmail.com',
+        connectionString: 'mongodb://localhost:27018'
+      });
+    });
+  });
 
-    it('should return an empty array when no clients are found', async () => {
-      const result = await vaultStore.getMongoDbClients()
-      expect(result).toHaveLength(0)
-    })
-  })
-
-  describe('getGPhotosClients', () => {
+  describe('getGPhotosConfigs', () => {
     it('should return GPhotos clients', async () => {
       const testClients = [
         {
           _id: new ObjectId(),
-          name: 'Client1',
-          token: 'token1',
-          refresh_token: 'refresh1',
-          client_id: 'id1',
-          client_secret: 'secret1'
+          name: 'bob@gmail.com',
+          read_write_credentials: {
+            token: 'token1',
+            token_uri: 'google.com',
+            refresh_token: 'refresh1',
+            client_id: 'id1',
+            client_secret: 'secret1'
+          }
         },
         {
           _id: new ObjectId(),
-          name: 'Client2',
-          token: 'token2',
-          refresh_token: 'refresh2',
-          client_id: 'id2',
-          client_secret: 'secret2'
+          name: 'sam@gmail.com',
+          read_write_credentials: {
+            token: 'token2',
+            token_uri: 'google.com',
+            refresh_token: 'refresh2',
+            client_id: 'id2',
+            client_secret: 'secret2'
+          }
         }
-      ]
-
+      ];
       await mongoClient
-        .db('sharded_google_photos')
-        .collection('gphotos_clients')
-        .insertMany(testClients)
+        .db(DatabaseName)
+        .collection(DatabaseCollections.GPHOTOS_CONFIGS)
+        .insertMany(testClients);
 
-      const result = await vaultStore.getGPhotosClients()
+      const configs = await vaultStore.getGPhotosConfigs();
 
-      expect(result).toHaveLength(2)
-      expect(result[0][0]).toBe(testClients[0]._id.toString())
-      expect(result[0][1]).toBeInstanceOf(GPhotosClient)
-      expect(result[1][0]).toBe(testClients[1]._id.toString())
-      expect(result[1][1]).toBeInstanceOf(GPhotosClient)
-    })
+      expect(configs).toHaveLength(2);
+      configs.forEach((config, i) => {
+        expect(config.id).toEqual(testClients[i]._id.toString());
+        expect(config.name).toEqual(testClients[i].name);
+        expect(config.credentials.token).toEqual(
+          testClients[i].read_write_credentials.token
+        );
+        expect(config.credentials.tokenUri).toEqual(
+          testClients[i].read_write_credentials.token_uri
+        );
+        expect(config.credentials.refreshToken).toEqual(
+          testClients[i].read_write_credentials.refresh_token
+        );
+        expect(config.credentials.clientId).toEqual(
+          testClients[i].read_write_credentials.client_id
+        );
+        expect(config.credentials.clientSecret).toEqual(
+          testClients[i].read_write_credentials.client_secret
+        );
+      });
+    });
+  });
 
-    it('should return an empty array when no clients are found', async () => {
-      const result = await vaultStore.getGPhotosClients()
-      expect(result).toHaveLength(0)
-    })
-  })
+  describe('updateGPhotosConfig', () => {
+    it('should update GPhotos config with new credentials', async () => {
+      const testConfig = {
+        _id: new ObjectId(),
+        name: 'test@gmail.com',
+        read_write_credentials: {
+          token: 'old_token',
+          token_uri: 'old_uri',
+          refresh_token: 'old_refresh',
+          client_id: 'old_id',
+          client_secret: 'old_secret'
+        }
+      };
+      await mongoClient
+        .db(DatabaseName)
+        .collection(DatabaseCollections.GPHOTOS_CONFIGS)
+        .insertOne(testConfig);
+
+      const request: UpdateGPhotosConfigRequest = {
+        id: testConfig._id.toString(),
+        newCredentials: {
+          token: 'new_token',
+          tokenUri: 'new_uri',
+          refreshToken: 'new_refresh',
+          clientId: 'new_id',
+          clientSecret: 'new_secret'
+        }
+      };
+      await vaultStore.updateGPhotosConfig(request);
+
+      const updatedConfig = await mongoClient
+        .db(DatabaseName)
+        .collection(DatabaseCollections.GPHOTOS_CONFIGS)
+        .findOne({ _id: testConfig._id });
+      expect(updatedConfig).toBeDefined();
+      expect(updatedConfig?.read_write_credentials).toEqual({
+        token: 'new_token',
+        token_uri: 'new_uri',
+        refresh_token: 'new_refresh',
+        client_id: 'new_id',
+        client_secret: 'new_secret'
+      });
+    });
+
+    it('should throw an error when config is not found', async () => {
+      const nonExistentId = new ObjectId();
+      const request: UpdateGPhotosConfigRequest = {
+        id: nonExistentId.toString(),
+        newCredentials: {
+          token: 'new_token',
+          tokenUri: 'new_uri',
+          refreshToken: 'new_refresh',
+          clientId: 'new_id',
+          clientSecret: 'new_secret'
+        }
+      };
+
+      await expect(vaultStore.updateGPhotosConfig(request)).rejects.toThrow(
+        `Could not find ${nonExistentId.toString()} in config`
+      );
+    });
+
+    it('should not update if newCredentials is not provided', async () => {
+      const testConfig = {
+        _id: new ObjectId(),
+        name: 'test@gmail.com',
+        read_write_credentials: {
+          token: 'old_token',
+          token_uri: 'old_uri',
+          refresh_token: 'old_refresh',
+          client_id: 'old_id',
+          client_secret: 'old_secret'
+        }
+      };
+      await mongoClient
+        .db(DatabaseName)
+        .collection(DatabaseCollections.GPHOTOS_CONFIGS)
+        .insertOne(testConfig);
+
+      const request: UpdateGPhotosConfigRequest = {
+        id: testConfig._id.toString()
+      };
+      await vaultStore.updateGPhotosConfig(request);
+
+      const updatedConfig = await mongoClient
+        .db(DatabaseName)
+        .collection(DatabaseCollections.GPHOTOS_CONFIGS)
+        .findOne({ _id: testConfig._id });
+      expect(updatedConfig).toBeDefined();
+      expect(updatedConfig?.read_write_credentials).toEqual(
+        testConfig.read_write_credentials
+      );
+    });
+  });
 
   describe('getRootAlbumId', () => {
     it('should return the root album ID', async () => {
       const rootAlbum = {
         client_id: new ObjectId(),
         object_id: new ObjectId()
-      }
-
+      };
       await mongoClient
-        .db('sharded_google_photos')
-        .collection('root_album')
-        .insertOne(rootAlbum)
+        .db(DatabaseName)
+        .collection(DatabaseCollections.ROOT_ALBUM)
+        .insertOne(rootAlbum);
 
-      const result = await vaultStore.getRootAlbumId()
+      const result = await vaultStore.getRootAlbumId();
 
       expect(result).toEqual({
         clientId: rootAlbum.client_id.toString(),
         objectId: rootAlbum.object_id.toString()
-      })
-    })
+      });
+    });
 
     it('should throw an error when no root album is found', async () => {
       await expect(vaultStore.getRootAlbumId()).rejects.toThrow(
         'No root album found!'
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

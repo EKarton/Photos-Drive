@@ -1,9 +1,9 @@
-import { Vault } from '../vault/VaultStore'
-import { GPhotosClient } from './GPhotosClient'
+import { Vault } from '../vault/VaultStore';
+import { GPhotosClient } from './GPhotosClient';
 
 /** Stores all of the GPhotoClients in the repository. */
 export class GPhotosClientsRepository {
-  private idToClient = new Map<string, GPhotosClient>()
+  private idToClient = new Map<string, GPhotosClient>();
 
   /**
    * Builds the {@code GPhotosClientsRepository} from a config file.
@@ -11,12 +11,15 @@ export class GPhotosClientsRepository {
    * @returns An instance of {@code GPhotosClientsRepository}.
    */
   static async buildFromVault(vault: Vault): Promise<GPhotosClientsRepository> {
-    const repo = new GPhotosClientsRepository()
+    const repo = new GPhotosClientsRepository();
 
-    const clients = await vault.getGPhotosClients()
-    clients.forEach(([id, client]) => repo.idToClient.set(id, client))
+    const configs = await vault.getGPhotosConfigs();
+    configs.forEach((config) => {
+      const gPhotosClient = new GPhotosClient(config.name, config.credentials);
+      repo.idToClient.set(config.id, gPhotosClient);
+    });
 
-    return repo
+    return repo;
   }
 
   /**
@@ -27,10 +30,10 @@ export class GPhotosClientsRepository {
    */
   getGPhotosClientById(id: string): GPhotosClient {
     if (!this.idToClient.has(id)) {
-      throw new NoGPhotosClientFoundError(id)
+      throw new NoGPhotosClientFoundError(id);
     }
 
-    return this.idToClient.get(id)!
+    return this.idToClient.get(id)!;
   }
 
   /**
@@ -38,19 +41,19 @@ export class GPhotosClientsRepository {
    * @returns a list of all GPhotoClients with their IDs.
    */
   getGPhotosClients(): [string, GPhotosClient][] {
-    const results: [string, GPhotosClient][] = []
+    const results: [string, GPhotosClient][] = [];
 
     for (const [id, client] of this.idToClient) {
-      results.push([id, client])
+      results.push([id, client]);
     }
 
-    return results
+    return results;
   }
 }
 
 /** Represents an error for when no GPhotosClient is found. */
 export class NoGPhotosClientFoundError extends Error {
   constructor(id: string) {
-    super(`No google photos client found with id ${id}`)
+    super(`No google photos client found with id ${id}`);
   }
 }

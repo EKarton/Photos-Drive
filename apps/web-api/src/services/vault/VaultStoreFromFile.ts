@@ -1,97 +1,135 @@
 /* eslint-disable security/detect-non-literal-fs-filename */
 /* eslint-disable security/detect-object-injection */
 
-import * as fs from 'fs'
-import * as ini from 'ini'
-import { MongoClient, ServerApiVersion } from 'mongodb'
-import { GPhotosClient, GPhotosCredentials } from '../blob_store/GPhotosClient'
-import { AlbumId } from '../metadata_store/Albums'
-import { Vault } from './VaultStore'
+import * as fs from 'fs';
+import * as ini from 'ini';
+import { GPhotosCredentials } from '../blob_store/GPhotosClient';
+import { AlbumId } from '../metadata_store/Albums';
+import {
+  GPhotosConfig,
+  MongoDbConfig,
+  UpdateGPhotosConfigRequest,
+  Vault
+} from './VaultStore';
 
-/** What the config file should look like */
-interface Config {
-  [key: string]: ConfigSection
+/** The valid section types in the config */
+export enum SectionTypes {
+  MONGODB_CONFIG = 'mongodb_config',
+  GPHOTOS_CONFIG = 'gphotos_config',
+  ROOT_ALBUM = 'root_album'
 }
 
-/** A section in the config */
-interface ConfigSection {
-  type: string
-  connection_string?: string
-  token?: string
-  refresh_token?: string
-  client_id?: string
-  client_secret?: string
-  name?: string
-  object_id?: string
-}
+/** The config type */
+type INIParseResult = Record<string, Record<string, string | number | boolean>>;
 
 /** Implementation of {@code Vault} read from a file. */
 export class VaultStoreFromFile implements Vault {
-  private _config: Config
+  private _configFilePath: string;
+  private _config: INIParseResult;
 
   constructor(configFilePath: string) {
-    this._config = ini.parse(fs.readFileSync(configFilePath, 'utf-8'))
+    this._configFilePath = configFilePath;
+    this._config = ini.parse(fs.readFileSync(configFilePath, 'utf-8'));
   }
 
-  getMongoDbClients(): Promise<[string, MongoClient][]> {
-    const results: [string, MongoClient][] = []
+  getMongoDbConfigs(): Promise<MongoDbConfig[]> {
+    const configs: MongoDbConfig[] = [];
 
     for (const sectionId in this._config) {
-      if (this._config[sectionId].type !== 'mongodb') {
-        continue
+      if (this._config[sectionId]['type'] !== SectionTypes.MONGODB_CONFIG) {
+        continue;
       }
 
-      const mongodbClient = new MongoClient(
-        this._config[sectionId].connection_string!,
-        { serverApi: ServerApiVersion.v1 }
-      )
+      const rawConfigs = this._config[sectionId];
 
-      results.push([sectionId.trim(), mongodbClient])
+      const config: MongoDbConfig = {
+        id: sectionId,
+        name: rawConfigs['name'] as string,
+        connectionString: rawConfigs['read_only_connection_string'] as string
+      };
+
+      configs.push(config);
     }
 
-    return new Promise((resolve, _) => resolve(results))
+    return new Promise((resolve, _) => resolve(configs));
   }
 
-  getGPhotosClients(): Promise<[string, GPhotosClient][]> {
-    const results: [string, GPhotosClient][] = []
+  getGPhotosConfigs(): Promise<GPhotosConfig[]> {
+    const configs: GPhotosConfig[] = [];
+
     for (const sectionId in this._config) {
-      if (this._config[sectionId].type !== 'gphotos') {
-        continue
+      if (this._config[sectionId].type !== SectionTypes.GPHOTOS_CONFIG) {
+        continue;
       }
+
+      const section = this._config[sectionId];
 
       const creds: GPhotosCredentials = {
-        accessToken: this._config[sectionId].token!,
-        refreshToken: this._config[sectionId].refresh_token!,
-        clientId: this._config[sectionId].client_id!,
-        clientSecret: this._config[sectionId].client_secret!
-      }
+        token: section['read_write_credentials_token'] as string,
+        refreshToken: section['read_write_credentials_refresh_token'] as string,
+        tokenUri: section['read_write_credentials_token_uri'] as string,
+        clientId: section['read_write_credentials_client_id'] as string,
+        clientSecret: section['read_write_credentials_client_secret'] as string
+      };
+      const config: GPhotosConfig = {
+        id: sectionId,
+        name: section['name'] as string,
+        credentials: creds
+      };
 
-      const gphotosClient = new GPhotosClient(
-        this._config[sectionId].name!,
-        creds
-      )
-      results.push([sectionId.trim(), gphotosClient])
+      configs.push(config);
     }
 
-    return new Promise((resolve, _) => resolve(results))
+    return new Promise((resolve, _) => resolve(configs));
+  }
+
+  async updateGPhotosConfig(request: UpdateGPhotosConfigRequest) {
+    if (!(request.id in this._config)) {
+      throw new Error(`Cannot find config ${request.id}`);
+    }
+
+    const section = this._config[request.id];
+    const sectionType = section['type'] as string;
+    if (sectionType !== SectionTypes.GPHOTOS_CONFIG) {
+      throw new Error(`${request.id} is not a GPhotos config`);
+    }
+
+    if (request.newCredentials) {
+      section['read_write_credentials_token'] = request.newCredentials.token;
+      section['read_write_credentials_refresh_token'] =
+        request.newCredentials.refreshToken;
+      section['read_write_credentials_token_uri'] =
+        request.newCredentials.tokenUri;
+      section['read_write_credentials_client_id'] =
+        request.newCredentials.clientId;
+      section['read_write_credentials_client_secret'] =
+        request.newCredentials.clientSecret;
+
+      await this.flush();
+    }
   }
 
   async getRootAlbumId(): Promise<AlbumId> {
     for (const sectionId in this._config) {
-      if (this._config[sectionId].type !== 'root_album') {
-        continue
+      if (this._config[sectionId].type !== SectionTypes.ROOT_ALBUM) {
+        continue;
       }
 
       const data: AlbumId = {
-        clientId: this._config[sectionId].client_id!.trim(),
-        objectId: this._config[sectionId].object_id!.trim()
-      }
+        clientId: (this._config[sectionId]['client_id'] as string).trim(),
+        objectId: (this._config[sectionId]['object_id'] as string).trim()
+      };
 
-      return new Promise((resolve, _) => resolve(data))
+      return new Promise((resolve, _) => resolve(data));
     }
 
     return new Promise((_, reject) =>
       reject(new Error('Cannot find root album'))
-    )
+    );
+  }
+
+  private async flush() {
+    const updatedIniString = ini.stringify(this._config);
+    return fs.promises.writeFile(this._configFilePath, updatedIniString);
   }
 }
