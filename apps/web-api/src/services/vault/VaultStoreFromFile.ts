@@ -6,31 +6,75 @@ import * as ini from 'ini'
 import { MongoClient, ServerApiVersion } from 'mongodb'
 import { GPhotosClient, GPhotosCredentials } from '../blob_store/GPhotosClient'
 import { AlbumId } from '../metadata_store/Albums'
-import { Vault } from './VaultStore'
+import {
+  GPhotosConfig,
+  MongoDbConfig,
+  UpdateGPhotosConfigRequest,
+  Vault
+} from './VaultStore'
 
-/** What the config file should look like */
-interface Config {
-  [key: string]: ConfigSection
-}
-
-/** A section in the config */
-interface ConfigSection {
-  type: string
-  connection_string?: string
-  token?: string
-  refresh_token?: string
-  client_id?: string
-  client_secret?: string
-  name?: string
-  object_id?: string
-}
+/** The config type */
+type INIParseResult = Record<string, Record<string, string | number | boolean>>
 
 /** Implementation of {@code Vault} read from a file. */
 export class VaultStoreFromFile implements Vault {
-  private _config: Config
+  private _config: INIParseResult
 
   constructor(configFilePath: string) {
     this._config = ini.parse(fs.readFileSync(configFilePath, 'utf-8'))
+  }
+
+  getMongoDbConfigs(): Promise<MongoDbConfig[]> {
+    const configs: MongoDbConfig[] = []
+
+    for (const sectionId in this._config) {
+      if (this._config[sectionId]['type'] !== 'mongodb_config') {
+        continue
+      }
+
+      const rawConfigs = this._config[sectionId]
+
+      const config: MongoDbConfig = {
+        id: rawConfigs['id'] as string,
+        connectionString: rawConfigs['read_only_connection_string'] as string
+      }
+
+      configs.push(config)
+    }
+
+    return new Promise((resolve, _) => resolve(configs))
+  }
+
+  getGPhotosConfigs(): Promise<GPhotosConfig[]> {
+    const configs: GPhotosConfig[] = []
+
+    for (const sectionId in this._config) {
+      if (this._config[sectionId].type !== 'gphotos_config') {
+        continue
+      }
+
+      const section = this._config[sectionId]
+
+      const creds: GPhotosCredentials = {
+        token: section['read_write_credentials_token'] as string,
+        refreshToken: section['read_write_credentials_refresh_token'] as string,
+        tokenUri: section['read_write_credentials_token_uri'] as string,
+        clientId: section['read_write_credentials_client_id'] as string,
+        clientSecret: section['read_write_credentials_client_secret'] as string
+      }
+      const config: GPhotosConfig = {
+        id: sectionId,
+        credentials: creds
+      }
+
+      configs.push(config)
+    }
+
+    return new Promise((resolve, _) => resolve(configs))
+  }
+
+  updateGPhotosConfig(request: UpdateGPhotosConfigRequest): Promise<void> {
+    throw new Error('Method not implemented.')
   }
 
   getMongoDbClients(): Promise<[string, MongoClient][]> {
@@ -42,7 +86,7 @@ export class VaultStoreFromFile implements Vault {
       }
 
       const mongodbClient = new MongoClient(
-        this._config[sectionId].connection_string!,
+        this._config[sectionId]['connection_string'] as string,
         { serverApi: ServerApiVersion.v1 }
       )
 
@@ -60,14 +104,15 @@ export class VaultStoreFromFile implements Vault {
       }
 
       const creds: GPhotosCredentials = {
-        accessToken: this._config[sectionId].token!,
-        refreshToken: this._config[sectionId].refresh_token!,
-        clientId: this._config[sectionId].client_id!,
-        clientSecret: this._config[sectionId].client_secret!
+        token: this._config[sectionId]['token'] as string,
+        refreshToken: this._config[sectionId]['refresh_token'] as string,
+        tokenUri: '',
+        clientId: this._config[sectionId]['client_id'] as string,
+        clientSecret: this._config[sectionId]['client_secret'] as string
       }
 
       const gphotosClient = new GPhotosClient(
-        this._config[sectionId].name!,
+        this._config[sectionId]['name'] as string,
         creds
       )
       results.push([sectionId.trim(), gphotosClient])
@@ -83,8 +128,8 @@ export class VaultStoreFromFile implements Vault {
       }
 
       const data: AlbumId = {
-        clientId: this._config[sectionId].client_id!.trim(),
-        objectId: this._config[sectionId].object_id!.trim()
+        clientId: (this._config[sectionId]['client_id'] as string).trim(),
+        objectId: (this._config[sectionId]['object_id'] as string).trim()
       }
 
       return new Promise((resolve, _) => resolve(data))

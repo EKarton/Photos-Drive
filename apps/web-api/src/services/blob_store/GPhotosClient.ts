@@ -6,10 +6,13 @@ import logger from '../../utils/logger'
 /** Represents the credentials of a Google Photos client. */
 export type GPhotosCredentials = {
   /** The access token. */
-  accessToken: string
+  token: string
 
   /** The refresh token. */
   refreshToken: string
+
+  /** The token uri to fetch new tokens. */
+  tokenUri: string
 
   /** The client ID. */
   clientId: string
@@ -66,7 +69,7 @@ export class GPhotosClient {
 
     this.credentials = {
       ...this.credentials,
-      accessToken: checkNotNull(response.data['access_token'])
+      token: checkNotNull(response.data['access_token'])
     }
   }
 }

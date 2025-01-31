@@ -19,7 +19,7 @@ export default async function (gphotoClientRepo: GPhotosClientsRepository) {
       const response = {
         gphotoClients: results.map(([id, client]) => ({
           id: id,
-          token: client.getCredentials().accessToken
+          token: client.getCredentials().token
         }))
       }
 
@@ -38,7 +38,7 @@ export default async function (gphotoClientRepo: GPhotosClientsRepository) {
         const client = gphotoClientRepo.getGPhotosClientById(gphotosClientId)
         await client.refreshAccessToken()
         return res.status(200).json({
-          newToken: client.getCredentials().accessToken
+          newToken: client.getCredentials().token
         })
       } catch (error) {
         if (error instanceof NoGPhotosClientFoundError) {

@@ -36,7 +36,7 @@ export class VaultStoreFromMongoDb implements Vault {
 
     return docs.map((doc) => {
       const creds: GPhotosCredentials = {
-        accessToken: doc['token'],
+        token: doc['token'],
         refreshToken: doc['refresh_token'],
         clientId: doc['client_id'],
         clientSecret: doc['client_secret']
