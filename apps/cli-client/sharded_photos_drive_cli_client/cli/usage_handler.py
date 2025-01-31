@@ -11,7 +11,7 @@ class UsageHandler:
         print(self.__get_mongodb_accounts_table(config))
         print("")
 
-        gphotos_repo = GPhotosClientsRepository.build_from_config_repo(config)
+        gphotos_repo = GPhotosClientsRepository.build_from_config(config)
         print(self.__get_gphoto_clients_table(gphotos_repo))
 
     def __get_mongodb_accounts_table(self, config: Config) -> PrettyTable:

@@ -71,7 +71,7 @@ def teardown(
 
     config = build_config_from_options(config_file, config_mongodb)
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
+    gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
     root_album_id = config.get_root_album_id()
 
     # Delete all albums from DB except for the root album

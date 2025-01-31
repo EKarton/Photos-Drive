@@ -77,7 +77,7 @@ def delete(
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
+    gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
     albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
     media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 

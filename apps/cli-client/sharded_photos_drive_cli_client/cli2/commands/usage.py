@@ -63,7 +63,7 @@ def usage(
     print(__get_mongodb_accounts_table(config))
     print("")
 
-    gphotos_repo = GPhotosClientsRepository.build_from_config_repo(config)
+    gphotos_repo = GPhotosClientsRepository.build_from_config(config)
     print(__get_gphoto_clients_table(gphotos_repo))
 
 
@@ -104,9 +104,8 @@ def __get_gphoto_clients_table(gphotos_repo: GPhotosClientsRepository) -> Pretty
     table.field_names = [
         "ID",
         "Name",
-        "Free space remaining",
-        "Amount in trash",
-        "Usage",
+        "Used / Limit (in bytes)",
+        "Amount in trash (in bytes)",
     ]
 
     for client_id, client in gphotos_repo.get_all_clients():
@@ -115,14 +114,16 @@ def __get_gphoto_clients_table(gphotos_repo: GPhotosClientsRepository) -> Pretty
             [
                 client_id,
                 client.name(),
-                storage_quota.usage,
+                f'{storage_quota.usage} / {storage_quota.limit}',
                 storage_quota.usage_in_drive_trash,
-                storage_quota.limit,
             ]
         )
 
-    # Left align the columns
+    # Left align the columns except for usage and trash usage
     for col in table.align:
         table.align[col] = "l"
+
+    table.align["Used / Limit (in bytes)"] = "r"
+    table.align["Amount in trash (in bytes)"] = 'r'
 
     return table

@@ -147,7 +147,7 @@ def __backup_diffs_to_system(
     parallelize_uploads: bool,
 ) -> BackupResults:
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    gphoto_clients_repo = GPhotosClientsRepository.build_from_config_repo(config)
+    gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
     albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
     media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 

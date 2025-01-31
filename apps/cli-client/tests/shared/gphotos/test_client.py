@@ -1,10 +1,15 @@
 import unittest
+from unittest.mock import Mock, patch
 import requests_mock
 from freezegun import freeze_time
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
+from google.auth.transport import Request
 
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
+from sharded_photos_drive_cli_client.shared.gphotos.client import (
+    GPhotosClientV2,
+    ListenableCredentials,
+)
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosStorageQuota
 from sharded_photos_drive_cli_client.shared.gphotos.albums_client import (
     GPhotosAlbumsClient,
@@ -107,3 +112,55 @@ class GPhotosClientTests(unittest.TestCase):
         client = GPhotosClientV2("bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS))
 
         self.assertIsInstance(client.media_items(), GPhotosMediaItemsClient)
+
+
+class TestListenableCredentials(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_credentials = {
+            'token': 'fake_token',
+            'refresh_token': 'fake_refresh_token',
+            'token_uri': 'https://oauth2.googleapis.com/token',
+            'client_id': 'fake_client_id',
+            'client_secret': 'fake_client_secret',
+            'scopes': ['https://www.googleapis.com/auth/photoslibrary.readonly'],
+        }
+        self.listenable_credentials = ListenableCredentials(**self.mock_credentials)
+
+    def test_initialization(self):
+        self.assertIsInstance(self.listenable_credentials, Credentials)
+
+    @patch.object(Credentials, 'refresh')
+    def test_refresh_without_callback(self, mock_refresh):
+        mock_request = Mock(spec=Request)
+        self.listenable_credentials.refresh(mock_request)
+
+        mock_refresh.assert_called_once_with(mock_request)
+
+    @patch.object(Credentials, 'refresh')
+    def test_refresh_with_callback(self, mock_refresh):
+        mock_request = Mock(spec=Request)
+        mock_callback = Mock()
+        self.listenable_credentials.set_token_refresh_callback(mock_callback)
+
+        self.listenable_credentials.refresh(mock_request)
+
+        mock_refresh.assert_called_once_with(mock_request)
+        mock_callback.assert_called_once()
+
+        # Check that the callback was called with a copy of the credentials
+        called_credentials = mock_callback.call_args[0][0]
+        self.assertIsInstance(called_credentials, Credentials)
+        self.assertIsNot(called_credentials, self.listenable_credentials)
+
+    def test_make_copy(self):
+        copied_credentials = self.listenable_credentials._make_copy()
+        self.assertIsInstance(copied_credentials, Credentials)
+        self.assertIsNot(copied_credentials, self.listenable_credentials)
+
+        # Check that all attributes are the same
+        for attr in self.mock_credentials.keys():
+            self.assertEqual(
+                getattr(copied_credentials, attr),
+                getattr(self.listenable_credentials, attr),
+            )
