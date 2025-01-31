@@ -1,14 +1,13 @@
-import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
-import { GPhotosClient, GPhotosCredentials } from '../blob_store/GPhotosClient';
-import { AlbumId } from '../metadata_store/Albums';
+import { MongoClient, ObjectId } from 'mongodb'
+import { AlbumId } from '../metadata_store/Albums'
 import {
   GPhotosConfig,
   MongoDbConfig,
   UpdateGPhotosConfigRequest,
   Vault
-} from './VaultStore';
+} from './VaultStore'
 
-export const DatabaseName = 'sharded_google_photos';
+export const DatabaseName = 'sharded_google_photos'
 
 export enum DatabaseCollections {
   MONGODB_CONFIGS = 'mongodb_configs',
@@ -20,23 +19,23 @@ export enum DatabaseCollections {
 
 /** Implementation of {@code Vault} read from Mongo Db. */
 export class VaultStoreFromMongoDb implements Vault {
-  private _client: MongoClient;
+  private _client: MongoClient
 
   constructor(client: MongoClient) {
-    this._client = client;
+    this._client = client
   }
   async getMongoDbConfigs(): Promise<MongoDbConfig[]> {
     const docs = await this._client
       .db(DatabaseName)
       .collection(DatabaseCollections.MONGODB_CONFIGS)
       .find()
-      .toArray();
+      .toArray()
 
     return docs.map((doc) => ({
       id: doc['_id'].toString(),
       name: doc['name'],
       connectionString: doc['read_only_connection_string']
-    }));
+    }))
   }
 
   async getGPhotosConfigs(): Promise<GPhotosConfig[]> {
@@ -44,7 +43,7 @@ export class VaultStoreFromMongoDb implements Vault {
       .db(DatabaseName)
       .collection(DatabaseCollections.GPHOTOS_CONFIGS)
       .find()
-      .toArray();
+      .toArray()
 
     return docs.map((doc) => ({
       id: doc['_id'].toString(),
@@ -56,14 +55,14 @@ export class VaultStoreFromMongoDb implements Vault {
         clientId: doc['read_write_credentials']['client_id'],
         clientSecret: doc['read_write_credentials']['client_secret']
       }
-    }));
+    }))
   }
 
   async updateGPhotosConfig(
     request: UpdateGPhotosConfigRequest
   ): Promise<void> {
-    const filter = { _id: new ObjectId(request.id) };
-    const update: { $set: { [key: string]: object } } = { $set: {} };
+    const filter = { _id: new ObjectId(request.id) }
+    const update: { $set: { [key: string]: object } } = { $set: {} }
 
     if (request.newCredentials) {
       update['$set']['read_write_credentials'] = {
@@ -72,69 +71,32 @@ export class VaultStoreFromMongoDb implements Vault {
         refresh_token: request.newCredentials.refreshToken,
         client_id: request.newCredentials.clientId,
         client_secret: request.newCredentials.clientSecret
-      };
+      }
     }
 
     const result = await this._client
       .db(DatabaseName)
       .collection(DatabaseCollections.GPHOTOS_CONFIGS)
-      .updateOne(filter, update);
+      .updateOne(filter, update)
 
     if (result.modifiedCount !== 1) {
-      throw new Error(`Could not find ${request.id} in config`);
+      throw new Error(`Could not find ${request.id} in config`)
     }
-  }
-
-  async getMongoDbClients(): Promise<[string, MongoClient][]> {
-    const docs = await this._client
-      .db(DatabaseName)
-      .collection(DatabaseCollections.MONGODB_CLIENTS)
-      .find()
-      .toArray();
-
-    return docs.map((doc) => {
-      const mongodbClient = new MongoClient(doc['connection_string'], {
-        serverApi: ServerApiVersion.v1
-      });
-
-      return [doc['_id'].toString(), mongodbClient];
-    });
-  }
-
-  async getGPhotosClients(): Promise<[string, GPhotosClient][]> {
-    const docs = await this._client
-      .db(DatabaseName)
-      .collection(DatabaseCollections.GPHOTOS_CLIENTS)
-      .find()
-      .toArray();
-
-    return docs.map((doc) => {
-      const creds: GPhotosCredentials = {
-        token: doc['token'],
-        tokenUri: 'https://oauth2.googleapis.com/token',
-        refreshToken: doc['refresh_token'],
-        clientId: doc['client_id'],
-        clientSecret: doc['client_secret']
-      };
-
-      const gphotosClient = new GPhotosClient(doc['name'], creds);
-      return [doc['_id'].toString(), gphotosClient];
-    });
   }
 
   async getRootAlbumId(): Promise<AlbumId> {
     const doc = await this._client
       .db(DatabaseName)
       .collection(DatabaseCollections.ROOT_ALBUM)
-      .findOne();
+      .findOne()
 
     if (doc === null) {
-      throw new Error('No root album found!');
+      throw new Error('No root album found!')
     }
 
     return {
       clientId: (doc['client_id'] as ObjectId).toString(),
       objectId: (doc['object_id'] as ObjectId).toString()
-    };
+    }
   }
 }
