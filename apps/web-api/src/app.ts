@@ -4,7 +4,7 @@ import express, { Application, NextFunction, Request, Response } from 'express'
 import helmet from 'helmet'
 import { MongoClient } from 'mongodb'
 import expressLogger from 'pino-http'
-import { Config, getConfig } from './config'
+import { AppConfig, getAppConfig } from './app_config'
 import albumsRouter from './routes/albums'
 import authRouter from './routes/authentication'
 import gphotoClientsRouter from './routes/gphoto_clients'
@@ -30,7 +30,7 @@ import logger from './utils/logger'
 
 export class App {
   private app: Application
-  private appConfig: Config
+  private appConfig: AppConfig
 
   private config?: Vault
   private mongoDbClientsRepository?: MongoDbClientsRepository
@@ -40,7 +40,7 @@ export class App {
 
   constructor() {
     this.app = express()
-    this.appConfig = getConfig()
+    this.appConfig = getAppConfig()
   }
 
   async run() {

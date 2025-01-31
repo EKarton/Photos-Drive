@@ -2,7 +2,7 @@ import { wrap } from 'async-middleware'
 import axios from 'axios'
 import { json, Request, Response, Router } from 'express'
 import { importPKCS8, SignJWT } from 'jose'
-import { getConfig } from '../config'
+import { getAppConfig } from '../app_config'
 import logger from '../utils/logger'
 
 export const GOOGLE_LOGIN_PAGE_URL =
@@ -14,7 +14,7 @@ export const GOOGLE_USER_INFO_URL =
   'https://www.googleapis.com/oauth2/v2/userinfo'
 
 export default async function () {
-  const config = getConfig()
+  const config = getAppConfig()
 
   const secretKey = await importPKCS8(config.accessTokenJwtPrivateKey, 'EdDSA')
   const expiryMillis = Number(process.env.JWT_EXPIRY_IN_MILLISECONDS) || 3600000

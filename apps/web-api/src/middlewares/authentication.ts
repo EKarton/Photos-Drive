@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { importSPKI, jwtVerify } from 'jose'
-import { getConfig } from '../config'
+import { getAppConfig } from '../app_config'
 import logger from '../utils/logger'
 
 export type DecodedAccessToken = {
@@ -13,7 +13,7 @@ export type DecodedAccessToken = {
  */
 export async function verifyAuthentication() {
   const publicKey = await importSPKI(
-    getConfig().accessTokenJwtPublicKey,
+    getAppConfig().accessTokenJwtPublicKey,
     'EdDSA'
   )
 

@@ -1,7 +1,7 @@
 /**
  * A set of config variables
  */
-export type Config = {
+export type AppConfig = {
   /** The client id of the Google OAuth2 login flow. */
   googleLoginClientId: string
 
@@ -37,7 +37,7 @@ export type Config = {
  * Returns a set of config variables from environment variables.
  * @returns a set of config variables
  */
-export function getConfig(): Config {
+export function getAppConfig(): AppConfig {
   return {
     googleLoginClientId: process.env.GOOGLE_CLIENT_ID || '',
     googleLoginClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',

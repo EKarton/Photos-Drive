@@ -13,14 +13,25 @@ import {
   Vault
 } from './VaultStore'
 
+/** The valid section types in the config */
+export enum SectionTypes {
+  MONGODB_CONFIG = 'mongodb_config',
+  GPHOTOS_CONFIG = 'gphotos_config',
+  ROOT_ALBUM = 'root_album',
+  MONGODB_CLIENT = 'mongodb',
+  GPHOTOS_CLIENT = 'gphotos'
+}
+
 /** The config type */
 type INIParseResult = Record<string, Record<string, string | number | boolean>>
 
 /** Implementation of {@code Vault} read from a file. */
 export class VaultStoreFromFile implements Vault {
+  private _configFilePath: string
   private _config: INIParseResult
 
   constructor(configFilePath: string) {
+    this._configFilePath = configFilePath
     this._config = ini.parse(fs.readFileSync(configFilePath, 'utf-8'))
   }
 
@@ -28,7 +39,7 @@ export class VaultStoreFromFile implements Vault {
     const configs: MongoDbConfig[] = []
 
     for (const sectionId in this._config) {
-      if (this._config[sectionId]['type'] !== 'mongodb_config') {
+      if (this._config[sectionId]['type'] !== SectionTypes.MONGODB_CLIENT) {
         continue
       }
 
@@ -49,7 +60,7 @@ export class VaultStoreFromFile implements Vault {
     const configs: GPhotosConfig[] = []
 
     for (const sectionId in this._config) {
-      if (this._config[sectionId].type !== 'gphotos_config') {
+      if (this._config[sectionId].type !== SectionTypes.GPHOTOS_CONFIG) {
         continue
       }
 
@@ -73,15 +84,37 @@ export class VaultStoreFromFile implements Vault {
     return new Promise((resolve, _) => resolve(configs))
   }
 
-  updateGPhotosConfig(request: UpdateGPhotosConfigRequest): Promise<void> {
-    throw new Error('Method not implemented.')
+  async updateGPhotosConfig(request: UpdateGPhotosConfigRequest) {
+    if (!(request.id in this._config)) {
+      throw new Error(`Cannot find config ${request.id}`)
+    }
+
+    const section = this._config[request.id]
+    const sectionType = section['type'] as string
+    if (sectionType !== SectionTypes.GPHOTOS_CONFIG) {
+      throw new Error(`${request.id} is not a GPhotos config`)
+    }
+
+    if (request.newCredentials) {
+      section['read_write_credentials_token'] = request.newCredentials.token
+      section['read_write_credentials_refresh_token'] =
+        request.newCredentials.refreshToken
+      section['read_write_credentials_token_uri'] =
+        request.newCredentials.tokenUri
+      section['read_write_credentials_client_id'] =
+        request.newCredentials.clientId
+      section['read_write_credentials_client_secret'] =
+        request.newCredentials.clientSecret
+
+      this.flush()
+    }
   }
 
   getMongoDbClients(): Promise<[string, MongoClient][]> {
     const results: [string, MongoClient][] = []
 
     for (const sectionId in this._config) {
-      if (this._config[sectionId].type !== 'mongodb') {
+      if (this._config[sectionId].type !== SectionTypes.MONGODB_CLIENT) {
         continue
       }
 
@@ -99,7 +132,7 @@ export class VaultStoreFromFile implements Vault {
   getGPhotosClients(): Promise<[string, GPhotosClient][]> {
     const results: [string, GPhotosClient][] = []
     for (const sectionId in this._config) {
-      if (this._config[sectionId].type !== 'gphotos') {
+      if (this._config[sectionId].type !== SectionTypes.GPHOTOS_CLIENT) {
         continue
       }
 
@@ -123,7 +156,7 @@ export class VaultStoreFromFile implements Vault {
 
   async getRootAlbumId(): Promise<AlbumId> {
     for (const sectionId in this._config) {
-      if (this._config[sectionId].type !== 'root_album') {
+      if (this._config[sectionId].type !== SectionTypes.ROOT_ALBUM) {
         continue
       }
 
@@ -137,6 +170,15 @@ export class VaultStoreFromFile implements Vault {
 
     return new Promise((_, reject) =>
       reject(new Error('Cannot find root album'))
+    )
+  }
+
+  private async flush() {
+    const updatedIniString = ini.stringify(this._config)
+    return fs.promises.writeFile(
+      this._configFilePath,
+      updatedIniString,
+      'utf-8'
     )
   }
 }

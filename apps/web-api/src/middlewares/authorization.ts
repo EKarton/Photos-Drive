@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { getConfig } from '../config'
+import { getAppConfig } from '../app_config'
 import logger from '../utils/logger'
 
 /**
@@ -7,7 +7,7 @@ import logger from '../utils/logger'
  * @returns an Express middleware
  */
 export async function verifyAuthorization() {
-  const validSubject = getConfig().accessTokenAllowedSubject
+  const validSubject = getAppConfig().accessTokenAllowedSubject
 
   return async (req: Request, res: Response, next: NextFunction) => {
     if (req.decodedAccessToken.id === validSubject) {
