@@ -108,7 +108,7 @@ class ListenableCredentials(Credentials):
     def refresh(self, request):
         super().refresh(request)
         if self.token_refresh_callback:
-            self.token_refresh_callback(self)
+            self.token_refresh_callback(self._make_copy())
 
     def set_token_refresh_callback(
         self, callback: Optional[Callable[[Credentials], None]]

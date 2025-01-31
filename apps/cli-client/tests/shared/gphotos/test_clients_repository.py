@@ -32,7 +32,7 @@ class TestGPhotosClientsRepository(unittest.TestCase):
         )
 
     def test_build_from_config_repo__adds_gphotos_clients_from_config(self):
-        repo = GPhotosClientsRepository.build_from_config_repo(self.config)
+        repo = GPhotosClientsRepository.build_from_config(self.config)
 
         self.assertEqual(len(repo.get_all_clients()), 2)
 
@@ -47,7 +47,7 @@ class TestGPhotosClientsRepository(unittest.TestCase):
 
     def test_add_gphotos_client__add_duplicate_gphotos_client__throws_error(self):
         client_id = self.config.get_gphotos_configs()[0].id
-        repo = GPhotosClientsRepository.build_from_config_repo(self.config)
+        repo = GPhotosClientsRepository.build_from_config(self.config)
 
         with self.assertRaisesRegex(
             ValueError, f"GPhotos Client ID {client_id} already exists"
@@ -58,7 +58,7 @@ class TestGPhotosClientsRepository(unittest.TestCase):
     def test_get_client_by_id(self):
         client_config = self.config.get_gphotos_configs()[0]
 
-        repo = GPhotosClientsRepository.build_from_config_repo(self.config)
+        repo = GPhotosClientsRepository.build_from_config(self.config)
         client = repo.get_client_by_id(client_config.id)
 
         self.assertIsInstance(client, GPhotosClientV2)
