@@ -34,6 +34,7 @@ export class VaultStoreFromMongoDb implements Vault {
 
     return docs.map((doc) => ({
       id: doc['_id'].toString(),
+      name: doc['name'],
       connectionString: doc['read_only_connection_string']
     }))
   }
@@ -47,6 +48,7 @@ export class VaultStoreFromMongoDb implements Vault {
 
     return docs.map((doc) => ({
       id: doc['_id'].toString(),
+      name: doc['name'],
       credentials: {
         token: doc['read_write_credentials']['token'],
         refreshToken: doc['read_write_credentials']['refresh_token'],

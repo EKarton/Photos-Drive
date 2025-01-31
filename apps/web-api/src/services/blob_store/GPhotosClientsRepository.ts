@@ -13,8 +13,11 @@ export class GPhotosClientsRepository {
   static async buildFromVault(vault: Vault): Promise<GPhotosClientsRepository> {
     const repo = new GPhotosClientsRepository()
 
-    const clients = await vault.getGPhotosClients()
-    clients.forEach(([id, client]) => repo.idToClient.set(id, client))
+    const configs = await vault.getGPhotosConfigs()
+    configs.forEach((config) => {
+      const gPhotosClient = new GPhotosClient(config.name, config.credentials)
+      repo.idToClient.set(config.id, gPhotosClient)
+    })
 
     return repo
   }

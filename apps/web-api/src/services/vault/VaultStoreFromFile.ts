@@ -47,6 +47,7 @@ export class VaultStoreFromFile implements Vault {
 
       const config: MongoDbConfig = {
         id: rawConfigs['id'] as string,
+        name: rawConfigs['name'] as string,
         connectionString: rawConfigs['read_only_connection_string'] as string
       }
 
@@ -75,6 +76,7 @@ export class VaultStoreFromFile implements Vault {
       }
       const config: GPhotosConfig = {
         id: sectionId,
+        name: section['name'] as string,
         credentials: creds
       }
 

@@ -7,6 +7,9 @@ export interface GPhotosConfig {
   /** Unique ID for this Google Photos config. */
   id: string
 
+  /** The name for this GPhotos config */
+  name: string
+
   /** Its credentials. */
   credentials: GPhotosCredentials
 }
@@ -15,6 +18,9 @@ export interface GPhotosConfig {
 export interface MongoDbConfig {
   /** Unique ID for this MongoDB configuration. */
   id: string
+
+  /** The name for this MongoDB config */
+  name: string
 
   /** The connection string to this MongoDB config. */
   connectionString: string
