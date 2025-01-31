@@ -75,8 +75,8 @@ def gphotos(
 
     has_change = (
         new_name is not None
-        and new_read_write_credentials is not None
-        and new_read_only_credentials is not None
+        or new_read_write_credentials is not None
+        or new_read_only_credentials is not None
     )
 
     if has_change:
@@ -139,8 +139,8 @@ def mongodb(
 
     has_change = (
         new_name is not None
-        and new_read_write_connection_string is not None
-        and new_read_only_connection_string is not None
+        or new_read_write_connection_string is not None
+        or new_read_only_connection_string is not None
     )
 
     if has_change:
