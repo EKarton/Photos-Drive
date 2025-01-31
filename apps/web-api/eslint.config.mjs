@@ -1,8 +1,8 @@
-import pluginJs from '@eslint/js'
-import eslintConfigPrettier from 'eslint-config-prettier'
-import pluginSecurity from 'eslint-plugin-security'
-import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import pluginJs from '@eslint/js';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import pluginSecurity from 'eslint-plugin-security';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default [
   {
@@ -27,4 +27,4 @@ export default [
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   pluginSecurity.configs.recommended
-]
+];

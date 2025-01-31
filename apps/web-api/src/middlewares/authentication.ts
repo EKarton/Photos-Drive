@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from 'express'
-import { importSPKI, jwtVerify } from 'jose'
-import { getAppConfig } from '../app_config'
-import logger from '../utils/logger'
+import { NextFunction, Request, Response } from 'express';
+import { importSPKI, jwtVerify } from 'jose';
+import { getAppConfig } from '../app_config';
+import logger from '../utils/logger';
 
 export type DecodedAccessToken = {
-  id: string
-}
+  id: string;
+};
 
 /**
  * Middleware that checks if the access token is valid
@@ -15,23 +15,23 @@ export async function verifyAuthentication() {
   const publicKey = await importSPKI(
     getAppConfig().accessTokenJwtPublicKey,
     'EdDSA'
-  )
+  );
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    const accessToken = req.headers.authorization?.split(' ')[1]
+    const accessToken = req.headers.authorization?.split(' ')[1];
     if (!accessToken) {
-      logger.debug('No access token')
-      return res.status(401).json({ error: 'Missing access token' })
+      logger.debug('No access token');
+      return res.status(401).json({ error: 'Missing access token' });
     }
 
     try {
-      const decodedToken = await jwtVerify(accessToken, publicKey)
-      req.decodedAccessToken = { id: decodedToken.payload.sub ?? '' }
-      next()
+      const decodedToken = await jwtVerify(accessToken, publicKey);
+      req.decodedAccessToken = { id: decodedToken.payload.sub ?? '' };
+      next();
     } catch (e) {
-      logger.debug(`Error verifying token: ${e}`)
+      logger.debug(`Error verifying token: ${e}`);
 
-      return res.status(401).json({ error: 'Invalid access token' })
+      return res.status(401).json({ error: 'Invalid access token' });
     }
-  }
+  };
 }

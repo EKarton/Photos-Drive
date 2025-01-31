@@ -1,10 +1,10 @@
-import { Router } from 'express'
+import { Router } from 'express';
 
 export default function () {
-  const router: Router = Router()
+  const router: Router = Router();
   router.get('/api/v1/health', (_, res) => {
-    res.sendStatus(200)
-  })
+    res.sendStatus(200);
+  });
 
-  return router
+  return router;
 }

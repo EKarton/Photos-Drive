@@ -3,35 +3,35 @@
  */
 export type AppConfig = {
   /** The client id of the Google OAuth2 login flow. */
-  googleLoginClientId: string
+  googleLoginClientId: string;
 
   /** The client secret of the Google OAuth2 login flow. */
-  googleLoginClientSecret: string
+  googleLoginClientSecret: string;
 
   /** The callback uri of the Google OAuth2 login flow (should match whats in GCP).  */
-  googleLoginCallbackUri: string
+  googleLoginCallbackUri: string;
 
   /** The JWT public key used to generate the access token. */
-  accessTokenJwtPublicKey: string
+  accessTokenJwtPublicKey: string;
 
   /** The JWT private key used to generate the access token. */
-  accessTokenJwtPrivateKey: string
+  accessTokenJwtPrivateKey: string;
 
   /** The allowed subject for the access token. */
-  accessTokenAllowedSubject: string
+  accessTokenAllowedSubject: string;
 
   /** The server port. */
-  serverPort: number
+  serverPort: number;
 
   /** The file path to the vault. */
-  vaultFilePath: string
+  vaultFilePath: string;
 
   /** The MongoDB connection string to the vault */
-  vaultMongoDb: string
+  vaultMongoDb: string;
 
   /** The frontend endpoint for CORS. */
-  corsFrontendEndpoint: string
-}
+  corsFrontendEndpoint: string;
+};
 
 /**
  * Returns a set of config variables from environment variables.
@@ -49,5 +49,5 @@ export function getAppConfig(): AppConfig {
     vaultFilePath: process.env.VAULT_FILE_PATH || '',
     vaultMongoDb: process.env.VAULT_MONGODB || '',
     corsFrontendEndpoint: process.env.CORS_FRONTEND_ENDPOINT || ''
-  }
+  };
 }
