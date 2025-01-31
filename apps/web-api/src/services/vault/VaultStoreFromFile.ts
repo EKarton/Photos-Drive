@@ -16,9 +16,7 @@ import {
 export enum SectionTypes {
   MONGODB_CONFIG = 'mongodb_config',
   GPHOTOS_CONFIG = 'gphotos_config',
-  ROOT_ALBUM = 'root_album',
-  MONGODB_CLIENT = 'mongodb',
-  GPHOTOS_CLIENT = 'gphotos'
+  ROOT_ALBUM = 'root_album'
 }
 
 /** The config type */
@@ -38,14 +36,14 @@ export class VaultStoreFromFile implements Vault {
     const configs: MongoDbConfig[] = []
 
     for (const sectionId in this._config) {
-      if (this._config[sectionId]['type'] !== SectionTypes.MONGODB_CLIENT) {
+      if (this._config[sectionId]['type'] !== SectionTypes.MONGODB_CONFIG) {
         continue
       }
 
       const rawConfigs = this._config[sectionId]
 
       const config: MongoDbConfig = {
-        id: rawConfigs['id'] as string,
+        id: sectionId,
         name: rawConfigs['name'] as string,
         connectionString: rawConfigs['read_only_connection_string'] as string
       }

@@ -9,12 +9,11 @@ import {
 
 export const DatabaseName = 'sharded_google_photos'
 
+/** Possible collections in the database */
 export enum DatabaseCollections {
   MONGODB_CONFIGS = 'mongodb_configs',
   GPHOTOS_CONFIGS = 'gphotos_configs',
-  ROOT_ALBUM = 'root_album',
-  MONGODB_CLIENTS = 'mongodb_clients',
-  GPHOTOS_CLIENTS = 'gphotos_clients'
+  ROOT_ALBUM = 'root_album'
 }
 
 /** Implementation of {@code Vault} read from Mongo Db. */

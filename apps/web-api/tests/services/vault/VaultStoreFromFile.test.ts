@@ -3,7 +3,10 @@
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import { VaultStoreFromFile } from '../../../src/services/vault/VaultStoreFromFile'
+import {
+  SectionTypes,
+  VaultStoreFromFile
+} from '../../../src/services/vault/VaultStoreFromFile'
 
 describe('VaultStoreFromFile', () => {
   let tempConfigPath: string
@@ -17,12 +20,12 @@ describe('VaultStoreFromFile', () => {
     // Write test configuration to the temporary file
     const testConfig =
       '[1]\n' +
-      'type = mongodb_config\n' +
+      `type = ${SectionTypes.MONGODB_CONFIG}\n` +
       'name = bob@gmail.com\n' +
       `read_only_connection_string = localhost:8080\n` +
       '\n' +
       '[2]\n' +
-      'type = gphotos_config\n' +
+      `type = ${SectionTypes.GPHOTOS_CONFIG}\n` +
       'name = sam@gmail.com\n' +
       'read_write_credentials_token = test_access_token\n' +
       'read_write_credentials_token_uri = https://oauth2.googleapis.com/token\n' +
@@ -31,12 +34,12 @@ describe('VaultStoreFromFile', () => {
       'read_write_credentials_client_secret = test_client_secret\n' +
       '\n' +
       '[3]\n' +
-      'type = root_album\n' +
+      `type = ${SectionTypes.ROOT_ALBUM}\n` +
       'client_id = 1\n' +
       'object_id = 123\n' +
       '\n' +
       '[4]\n' +
-      'type = invalid'
+      'type = invalid-section'
     fs.writeFileSync(tempConfigPath, testConfig)
 
     // Create VaultStoreFromFile instance
