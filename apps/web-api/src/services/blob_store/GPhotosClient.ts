@@ -28,6 +28,7 @@ export type GPhotosCredentials = {
 export class GPhotosClient {
   private name: string;
   private credentials: GPhotosCredentials;
+  private refreshListener?: RefreshCredentialsListener;
 
   /**
    * Constructs the {@code GPhotosClient} class.
@@ -49,8 +50,15 @@ export class GPhotosClient {
     return { ...this.credentials };
   }
 
+  /** Sets the refresh listener. */
+  public setRefreshCredentialsListener(listener: RefreshCredentialsListener) {
+    this.refreshListener = listener;
+  }
+
   /** Refreshes the access token. */
-  async refreshAccessToken() {
+  async refreshCredentials() {
+    await this.refreshListener?.beforeRefresh();
+
     const uri = this.credentials.tokenUri;
     const requestBody = {
       client_id: this.credentials.clientId,
@@ -71,5 +79,22 @@ export class GPhotosClient {
       ...this.credentials,
       token: checkNotNull(response.data['access_token'])
     };
+
+    await this.refreshListener?.afterRefresh();
   }
+}
+
+/** An event listener for whenever the GPhotosClient refreshes the access token. */
+export interface RefreshCredentialsListener {
+  /**
+   * Called right before refreshing the access token.
+   * It will wait until the return value resolves before refreshing the access token.
+   */
+  beforeRefresh: () => Promise<void>;
+
+  /**
+   * Called right after refreshing the access token.
+   * It will wait until the return value resolves before completing refreshing the access token.
+   */
+  afterRefresh: () => Promise<void>;
 }

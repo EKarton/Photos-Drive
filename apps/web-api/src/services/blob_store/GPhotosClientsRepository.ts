@@ -16,6 +16,21 @@ export class GPhotosClientsRepository {
     const configs = await vault.getGPhotosConfigs();
     configs.forEach((config) => {
       const gPhotosClient = new GPhotosClient(config.name, config.credentials);
+
+      gPhotosClient.setRefreshCredentialsListener({
+        beforeRefresh: () => {
+          return Promise.resolve();
+        },
+
+        afterRefresh: () => {
+          vault.updateGPhotosConfig({
+            id: config.id,
+            newCredentials: gPhotosClient.getCredentials()
+          });
+          return Promise.resolve();
+        }
+      });
+
       repo.idToClient.set(config.id, gPhotosClient);
     });
 
