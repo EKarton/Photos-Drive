@@ -130,7 +130,7 @@ class TestCleanCli(unittest.TestCase):
 
         patch.object(
             GPhotosClientsRepository,
-            'build_from_config_repo',
+            'build_from_config',
             return_value=gphotos_clients_repo,
         ).start()
 
