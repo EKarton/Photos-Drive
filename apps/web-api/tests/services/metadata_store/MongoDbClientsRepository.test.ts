@@ -1,17 +1,17 @@
-import { mock } from 'jest-mock-extended'
+import { mock } from 'jest-mock-extended';
 import {
   MongoDbClientNotFoundError,
   MongoDbClientsRepositoryImpl
-} from '../../../src/services/metadata_store/MongoDbClientsRepository'
-import { Vault } from '../../../src/services/vault/VaultStore'
+} from '../../../src/services/metadata_store/MongoDbClientsRepository';
+import { Vault } from '../../../src/services/vault/VaultStore';
 
 describe('MongoDbClientsRepositoryImpl', () => {
-  let mockVault: jest.Mocked<Vault>
-  let mongoDbClientsRepo: MongoDbClientsRepositoryImpl
+  let mockVault: jest.Mocked<Vault>;
+  let mongoDbClientsRepo: MongoDbClientsRepositoryImpl;
 
   beforeEach(async () => {
     // Create a mocked implementation of Vault
-    mockVault = mock<Vault>()
+    mockVault = mock<Vault>();
     mockVault.getMongoDbConfigs.mockResolvedValue([
       {
         id: '1',
@@ -23,36 +23,38 @@ describe('MongoDbClientsRepositoryImpl', () => {
         name: 'sam@gmail.com',
         connectionString: 'mongodb://localhost:27017/testdb'
       }
-    ])
+    ]);
 
     // Build the repository from the mocked vault
     mongoDbClientsRepo =
-      await MongoDbClientsRepositoryImpl.buildFromVault(mockVault)
-  })
+      await MongoDbClientsRepositoryImpl.buildFromVault(mockVault);
+  });
 
   afterEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   describe('getClientFromId', () => {
     it('should return the MongoDB client when it exists', () => {
-      const client = mongoDbClientsRepo.getClientFromId('1')
+      const client = mongoDbClientsRepo.getClientFromId('1');
 
-      expect(client).toBeTruthy()
-    })
+      expect(client).toBeTruthy();
+    });
 
     it('should throw an error when the client does not exist', () => {
-      const fnToTest = () => mongoDbClientsRepo.getClientFromId('nonexistent')
+      const fnToTest = () => mongoDbClientsRepo.getClientFromId('nonexistent');
 
-      expect(fnToTest).toThrow(MongoDbClientNotFoundError)
-      expect(fnToTest).toThrow('Cannot find MongoDB client with id nonexistent')
-    })
-  })
+      expect(fnToTest).toThrow(MongoDbClientNotFoundError);
+      expect(fnToTest).toThrow(
+        'Cannot find MongoDB client with id nonexistent'
+      );
+    });
+  });
 
   describe('listClients', () => {
     it('should return a list of all clients', () => {
-      const clients = mongoDbClientsRepo.listClients()
-      expect(clients.length).toEqual(2)
-    })
-  })
-})
+      const clients = mongoDbClientsRepo.listClients();
+      expect(clients.length).toEqual(2);
+    });
+  });
+});
