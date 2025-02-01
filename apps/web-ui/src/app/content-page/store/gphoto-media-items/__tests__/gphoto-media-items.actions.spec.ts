@@ -1,5 +1,5 @@
 import { Result, toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../../services/webapi.service';
+import { GPhotosMediaItem } from '../../../services/webapi.service';
 import {
   loadGPhotosMediaItemDetails,
   loadGPhotosMediaItemDetailsResult,
@@ -19,7 +19,7 @@ describe('GPhotos Media Items Actions', () => {
 
   it('should create an action to save media item details result', () => {
     const gPhotosMediaItemId = 'client123:mediaItem123';
-    const result: Result<GPhotosMediaItemDetailsApiResponse> = toSuccess({
+    const result: Result<GPhotosMediaItem> = toSuccess({
       id: 'mediaItem123',
       baseUrl: '',
       mimeType: '',

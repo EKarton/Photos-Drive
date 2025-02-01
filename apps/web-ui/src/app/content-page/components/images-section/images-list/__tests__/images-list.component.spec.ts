@@ -6,8 +6,10 @@ import { Map as ImmutableMap } from 'immutable';
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { MockResizeObserverFactory } from '../../../../../shared/resize-observer-factory/__mocks__/MockResizeObserverFactory';
 import { toSuccess } from '../../../../../shared/results/results';
-import { GPhotosMediaItemDetails } from '../../../../services/gphotos-api.service';
-import { MediaItem } from '../../../../services/webapi.service';
+import {
+  GPhotosMediaItem,
+  MediaItem,
+} from '../../../../services/webapi.service';
 import { gPhotosMediaItemsState } from '../../../../store/gphoto-media-items';
 import { mediaItemsState } from '../../../../store/media-items';
 import { mediaViewerState } from '../../../../store/media-viewer';
@@ -21,22 +23,14 @@ const MEDIA_ITEM_DETAILS_PHOTOS_1: MediaItem = {
   gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
 };
 
-const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItemDetails = {
-  id: 'gPhotosMediaItem1',
-  description: '',
-  productUrl: '',
+const GMEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
   baseUrl: 'https://www.google.com/photos/1',
   mimeType: 'image/jpeg',
   mediaMetadata: {
     creationTime: '',
-    width: 4032,
-    height: 3024,
+    width: '4032',
+    height: '3024',
   },
-  contributorInfo: {
-    profilePictureBaseUrl: '',
-    displayName: '',
-  },
-  filename: '',
 };
 
 describe('ImagesListComponent', () => {
@@ -59,7 +53,7 @@ describe('ImagesListComponent', () => {
             [gPhotosMediaItemsState.FEATURE_KEY]: {
               idToDetails: ImmutableMap().set(
                 'gPhotosClient1:gPhotosMediaItem1',
-                toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+                toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_1),
               ),
             },
           },

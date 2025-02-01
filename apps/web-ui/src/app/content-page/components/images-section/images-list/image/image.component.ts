@@ -29,7 +29,7 @@ import { filterOnlySuccess } from '../../../../../shared/results/rxjs/filterOnly
 import { switchMapResultToResultRxJs } from '../../../../../shared/results/rxjs/switchMapResultToResultRxJs';
 import { combineResults2 } from '../../../../../shared/results/utils/combineResults2';
 import {
-  GPhotosMediaItemDetailsApiResponse,
+  GPhotosMediaItem,
   MediaItem,
 } from '../../../../services/webapi.service';
 import {
@@ -138,7 +138,7 @@ export class ImageComponent implements OnInit, OnDestroy {
     },
   );
 
-  private openImageInNewTab(detail: GPhotosMediaItemDetailsApiResponse) {
+  private openImageInNewTab(detail: GPhotosMediaItem) {
     const width = detail.mediaMetadata.width;
     const height = detail.mediaMetadata.height;
     const fullPageUrl = `${detail.baseUrl}=w${width}-h${height}`;

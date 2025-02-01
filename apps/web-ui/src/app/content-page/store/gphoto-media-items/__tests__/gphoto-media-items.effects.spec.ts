@@ -6,7 +6,7 @@ import { of, throwError } from 'rxjs';
 
 import { toFailure, toSuccess } from '../../../../shared/results/results';
 import {
-  GPhotosMediaItemDetailsApiResponse,
+  GPhotosMediaItem,
   WebApiService,
 } from '../../../services/webapi.service';
 import * as gPhotosMediaItemsActions from '../gphoto-media-items.actions';
@@ -49,7 +49,7 @@ describe('GPhotosMediaItemsEffects', () => {
 
   it('should dispatch loadGPhotosMediaItemDetailsResult on successful fetch', (done) => {
     const gPhotosMediaItemId = 'clientId:mediaItemId';
-    const mockResponse: GPhotosMediaItemDetailsApiResponse = {
+    const mockResponse: GPhotosMediaItem = {
       baseUrl: '',
       mimeType: '',
       mediaMetadata: {
