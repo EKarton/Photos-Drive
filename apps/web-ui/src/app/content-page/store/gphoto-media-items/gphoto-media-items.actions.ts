@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
 import { Result } from '../../../shared/results/results';
-import { GPhotosMediaItemApiResponse } from '../../services/gphotos-api.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../services/webapi.service';
 
 /** An action that fetches the details of a media item. */
 export const loadGPhotosMediaItemDetails = createAction(
@@ -14,6 +14,6 @@ export const loadGPhotosMediaItemDetailsResult = createAction(
   '[GPhotos Media Items] Saves results of getting details of a media item from GPhotos',
   props<{
     gPhotosMediaItemId: string;
-    result: Result<GPhotosMediaItemApiResponse>;
+    result: Result<GPhotosMediaItemDetailsApiResponse>;
   }>(),
 );

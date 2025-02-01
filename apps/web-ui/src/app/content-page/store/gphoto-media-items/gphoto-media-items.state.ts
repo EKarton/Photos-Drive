@@ -2,11 +2,11 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { Map as ImmutableMap } from 'immutable';
 
 import { Result, toPending } from '../../../shared/results/results';
-import { GPhotosMediaItemApiResponse } from '../../services/gphotos-api.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../services/webapi.service';
 
 /** The type defs of this NgRx store. */
 export interface GPhotosMediaItemsState {
-  idToDetails: ImmutableMap<string, Result<GPhotosMediaItemApiResponse>>;
+  idToDetails: ImmutableMap<string, Result<GPhotosMediaItemDetailsApiResponse>>;
 }
 
 /** The initial state of the NgRx store. */
@@ -24,5 +24,5 @@ export const selectGPhotosMediaItemsState =
 /** Returns the GPhotos media item details by id. */
 export const selectGPhotosMediaItemById = (id: string) =>
   createSelector(selectGPhotosMediaItemsState, (state) =>
-    state.idToDetails.get(id, toPending<GPhotosMediaItemApiResponse>()),
+    state.idToDetails.get(id, toPending<GPhotosMediaItemDetailsApiResponse>()),
   );
