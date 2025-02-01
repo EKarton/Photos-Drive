@@ -2,6 +2,7 @@ import axios from 'axios';
 import qs from 'qs';
 import checkNotNull from '../../utils/checkNotNull';
 import logger from '../../utils/logger';
+import { MediaItem } from './GMediaItems';
 
 /** Represents the credentials of a Google Photos client. */
 export type GPhotosCredentials = {
@@ -89,6 +90,45 @@ export class GPhotosClient {
       await this.refreshListener?.afterRefresh();
     } catch (error) {
       await this.refreshListener?.afterRefresh(error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Gets the media item details for a given media item id.
+   * If the access token has expired, it will refresh the token and retry the request.
+   *
+   * @param mediaItemId the id of the media item.
+   * @returns the details of the media item.
+   */
+  public async getMediaItem(mediaItemId: string): Promise<MediaItem> {
+    const url = `https://photoslibrary.googleapis.com/v1/mediaItems/${mediaItemId}`;
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${this.credentials.token}`
+        }
+      });
+      return response.data as MediaItem;
+    } catch (error) {
+      // If the error is an AxiosError and the status is 401, try refreshing the credentials
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        logger.info(
+          `Access token expired for ${this.name}. Refreshing token and retrying...`
+        );
+        await this.refreshCredentials();
+
+        // Retry the request with the new token
+        const retryResponse = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${this.credentials.token}`
+          }
+        });
+        return retryResponse.data as MediaItem;
+      }
+
+      // If the error was not a 401, rethrow it
       throw error;
     }
   }
