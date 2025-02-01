@@ -28,8 +28,10 @@ import { Result, toPending } from '../../../../../shared/results/results';
 import { filterOnlySuccess } from '../../../../../shared/results/rxjs/filterOnlySuccess';
 import { switchMapResultToResultRxJs } from '../../../../../shared/results/rxjs/switchMapResultToResultRxJs';
 import { combineResults2 } from '../../../../../shared/results/utils/combineResults2';
-import { GPhotosMediaItemDetails } from '../../../../services/gphotos-api.service';
-import { MediaItem } from '../../../../services/webapi.service';
+import {
+  GPhotosMediaItemDetailsApiResponse,
+  MediaItem,
+} from '../../../../services/webapi.service';
 import {
   gPhotosMediaItemsActions,
   gPhotosMediaItemsState,
@@ -98,12 +100,12 @@ export class ImageComponent implements OnInit, OnDestroy {
           mediaItemResult,
           gMediaItemResult,
           (mediaItem, gMediaItem) => {
-            const originalWidth = gMediaItem.mediaMetadata.width;
-            const originalHeight = gMediaItem.mediaMetadata.height;
+            const originalWidth = Number(gMediaItem.mediaMetadata.width);
+            const originalHeight = Number(gMediaItem.mediaMetadata.height);
 
             return {
               id: mediaItem.id,
-              baseUrl: gMediaItem.baseUrl,
+              baseUrl: gMediaItem.baseUrl!,
               width: width,
               height: (originalHeight / originalWidth) * width,
               fileName: mediaItem.fileName,
@@ -136,7 +138,7 @@ export class ImageComponent implements OnInit, OnDestroy {
     },
   );
 
-  private openImageInNewTab(detail: GPhotosMediaItemDetails) {
+  private openImageInNewTab(detail: GPhotosMediaItemDetailsApiResponse) {
     const width = detail.mediaMetadata.width;
     const height = detail.mediaMetadata.height;
     const fullPageUrl = `${detail.baseUrl}=w${width}-h${height}`;
