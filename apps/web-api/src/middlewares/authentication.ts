@@ -3,13 +3,14 @@ import { importSPKI, jwtVerify } from 'jose';
 import { getAppConfig } from '../app_config';
 import logger from '../utils/logger';
 
+/** The contents of an access token. */
 export type DecodedAccessToken = {
   id: string;
 };
 
 /**
- * Middleware that checks if the access token is valid
- * @returns an Express middleware
+ * Middleware that checks if the access token is valid.
+ * @returns an Express middleware.
  */
 export async function verifyAuthentication() {
   const publicKey = await importSPKI(

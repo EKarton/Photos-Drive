@@ -4,7 +4,7 @@ import logger from '../utils/logger';
 
 /**
  * Middleware that checks if the user has the authorization to view the resource.
- * @returns an Express middleware
+ * @returns an Express middleware.
  */
 export async function verifyAuthorization() {
   const validSubject = getAppConfig().accessTokenAllowedSubject;

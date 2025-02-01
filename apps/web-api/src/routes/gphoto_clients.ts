@@ -36,7 +36,7 @@ export default async function (gphotoClientRepo: GPhotosClientsRepository) {
 
       try {
         const client = gphotoClientRepo.getGPhotosClientById(gphotosClientId);
-        await client.refreshAccessToken();
+        await client.refreshCredentials();
         return res.status(200).json({
           newToken: client.getCredentials().token
         });

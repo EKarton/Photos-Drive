@@ -111,7 +111,7 @@ describe('GPhoto Clients Router', () => {
   describe('POST /api/v1/gphotos-clients/:id/token-refresh', () => {
     it('should return 200 response when token refresh is successful', async () => {
       const client1 = mock<GPhotosClient>();
-      client1.refreshAccessToken.mockResolvedValue();
+      client1.refreshCredentials.mockResolvedValue();
       client1.getCredentials.mockReturnValue({
         token: 'client1AccessToken',
         tokenUri: 'google.com',
