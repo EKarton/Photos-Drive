@@ -7,7 +7,7 @@
   @if (album | isPending) {
     <span>Loading...</span>
   } @else if (album | hasFailed) {
-    <span>Error</span>
+    <span>Error: {{ album.error!.message }}</span>
   } @else {
     @if (album.data!.childAlbumIds.length > 0) {
       <h1 class="text-2xl font-bold mb-4">Albums</h1>

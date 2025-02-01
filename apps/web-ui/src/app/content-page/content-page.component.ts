@@ -3,7 +3,7 @@ import { Component, inject, OnDestroy, OnInit, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map, Subscription, switchMap } from 'rxjs';
+import { map, Observable, Subscription, switchMap } from 'rxjs';
 
 import { HasFailedPipe } from '../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../shared/results/pipes/is-pending.pipe';
@@ -44,7 +44,7 @@ export class ContentPageComponent implements OnInit, OnDestroy {
     initialValue: 'root',
   });
 
-  readonly albumResult$ = this.albumId$.pipe(
+  readonly albumResult$: Observable<Result<Album>> = this.albumId$.pipe(
     switchMap((albumId) =>
       this.store.select(albumsState.selectAlbumDetailsById(albumId)),
     ),

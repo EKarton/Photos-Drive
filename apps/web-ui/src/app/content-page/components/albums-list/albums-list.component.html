@@ -3,7 +3,7 @@
   @if (album | isPending) {
     <span data-testid="albums-list-spinner">Loading...</span>
   } @else if (album | hasFailed) {
-    <span>Error: {{ album.error | json }}</span>
+    <span>Error: {{ album.error!.message }}</span>
   } @else {
     @for (childAlbumId of album.data!.childAlbumIds; track childAlbumId) {
       <app-content-album-card

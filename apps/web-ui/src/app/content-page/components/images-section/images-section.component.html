@@ -2,7 +2,7 @@
 @if (result | isPending) {
   <span data-testid="images-section-spinner">Loading...</span>
 } @else if (result | hasFailed) {
-  <span>Error: {{ result.error | json }}</span>
+  <span>Error: {{ result.error!.message }}</span>
 } @else {
   <app-content-images-list [mediaItemIds]="result.data!" />
 }
