@@ -176,7 +176,7 @@ describe('ImageComponent', () => {
 
     expect(store.dispatch).toHaveBeenCalledWith(
       gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+        gMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
       }),
     );
   });

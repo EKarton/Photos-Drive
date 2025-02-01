@@ -48,7 +48,7 @@ describe('GPhotosMediaItemsEffects', () => {
   });
 
   it('should dispatch loadGPhotosMediaItemDetailsResult on successful fetch', (done) => {
-    const gPhotosMediaItemId = 'clientId:mediaItemId';
+    const gMediaItemId = 'clientId:mediaItemId';
     const mockResponse: GPhotosMediaItem = {
       baseUrl: '',
       mimeType: '',
@@ -65,7 +65,7 @@ describe('GPhotosMediaItemsEffects', () => {
     actions$ = new Actions(
       of(
         gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-          gPhotosMediaItemId,
+          gMediaItemId,
         }),
       ),
     );
@@ -73,7 +73,7 @@ describe('GPhotosMediaItemsEffects', () => {
     effects.loadGPhotosMediaItemDetails$.subscribe((action) => {
       expect(action).toEqual(
         gPhotosMediaItemsActions.loadGPhotosMediaItemDetailsResult({
-          gPhotosMediaItemId,
+          gMediaItemId,
           result: toSuccess(mockResponse),
         }),
       );
@@ -82,7 +82,7 @@ describe('GPhotosMediaItemsEffects', () => {
   });
 
   it('should handle error when fetching media item details', (done) => {
-    const gPhotosMediaItemId = 'clientId:mediaItemId';
+    const gMediaItemId = 'clientId:mediaItemId';
     store.select.and.returnValue(of(toSuccess('mockToken')));
     const error = new Error('Error fetching details');
     gPhotosApiService.fetchGPhotosMediaItemDetails.and.returnValue(
@@ -91,7 +91,7 @@ describe('GPhotosMediaItemsEffects', () => {
     actions$ = new Actions(
       of(
         gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-          gPhotosMediaItemId,
+          gMediaItemId,
         }),
       ),
     );
@@ -99,7 +99,7 @@ describe('GPhotosMediaItemsEffects', () => {
     effects.loadGPhotosMediaItemDetails$.subscribe((action) => {
       expect(action).toEqual(
         gPhotosMediaItemsActions.loadGPhotosMediaItemDetailsResult({
-          gPhotosMediaItemId,
+          gMediaItemId,
           result: toFailure(error),
         }),
       );
