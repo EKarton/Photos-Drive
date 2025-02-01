@@ -9,6 +9,7 @@ import { environment } from '../../../../environments/environment';
 import {
   AlbumDetailsApiResponse,
   GPhotosClientsListApiResponse,
+  GPhotosMediaItemDetailsApiResponse,
   MediaItemDetailsApiResponse,
   RefreshTokenApiResponse,
   WebApiService,
@@ -118,6 +119,47 @@ describe('WebApiService', () => {
 
     const req = httpMock.expectOne(
       `${environment.webApiEndpoint}/api/v1/media-items/${mediaItemId}`,
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toEqual(
+      'Bearer authToken123',
+    );
+    req.flush(mockResponse);
+  });
+
+  it('should fetch GPhotos media item details', () => {
+    const gPhotosClientId = 'client1';
+    const gPhotosMediaItemId = 'gphoto123';
+    const mockResponse: GPhotosMediaItemDetailsApiResponse = {
+      baseUrl: 'https://example.com/media-item.jpg',
+      mimeType: 'image/jpeg',
+      mediaMetadata: {
+        creationTime: '2025-01-01T00:00:00Z',
+        width: '1920',
+        height: '1080',
+        photo: {
+          cameraMake: 'Canon',
+          cameraModel: 'EOS 5D Mark IV',
+          focalLength: 50,
+          apertureFNumber: 1.4,
+          isoEquivalent: 800,
+          exposureTime: '1/500s',
+        },
+      },
+    };
+
+    service
+      .fetchGPhotosMediaItemDetails(
+        'authToken123',
+        gPhotosClientId,
+        gPhotosMediaItemId,
+      )
+      .subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+    const req = httpMock.expectOne(
+      `${environment.webApiEndpoint}/api/v1/gphotos/${gPhotosClientId}/media-items/${gPhotosMediaItemId}`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.get('Authorization')).toEqual(

@@ -1,5 +1,5 @@
 import { Result, toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItemApiResponse } from '../../../services/gphotos-api.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../services/webapi.service';
 import {
   loadGPhotosMediaItemDetails,
   loadGPhotosMediaItemDetailsResult,
@@ -19,22 +19,15 @@ describe('GPhotos Media Items Actions', () => {
 
   it('should create an action to save media item details result', () => {
     const gPhotosMediaItemId = 'client123:mediaItem123';
-    const result: Result<GPhotosMediaItemApiResponse> = toSuccess({
+    const result: Result<GPhotosMediaItemDetailsApiResponse> = toSuccess({
       id: 'mediaItem123',
-      description: '',
-      productUrl: '',
       baseUrl: '',
       mimeType: '',
       mediaMetadata: {
         creationTime: '',
-        width: 0,
-        height: 0,
+        width: '0',
+        height: '0',
       },
-      contributorInfo: {
-        profilePictureBaseUrl: '',
-        displayName: '',
-      },
-      filename: '',
     });
 
     const action = loadGPhotosMediaItemDetailsResult({

@@ -5,7 +5,7 @@ import {
   toPending,
   toSuccess,
 } from '../../../../shared/results/results';
-import { GPhotosMediaItemApiResponse } from '../../../services/gphotos-api.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../services/webapi.service';
 import {
   GPhotosMediaItemsState,
   selectGPhotosMediaItemById,
@@ -24,27 +24,20 @@ describe('GPhoto Media Items Selectors', () => {
 
   it('should select a media item by ID', () => {
     const gPhotosMediaItemId = 'clientId:mediaItemId';
-    const mediaItemResult: Result<GPhotosMediaItemApiResponse> = toSuccess({
-      id: 'mediaItemId',
-      description: '',
-      productUrl: '',
-      baseUrl: '',
-      mimeType: '',
-      mediaMetadata: {
-        creationTime: '',
-        width: 0,
-        height: 0,
-      },
-      contributorInfo: {
-        profilePictureBaseUrl: '',
-        displayName: '',
-      },
-      filename: '',
-    });
+    const mediaItemResult: Result<GPhotosMediaItemDetailsApiResponse> =
+      toSuccess({
+        baseUrl: '',
+        mimeType: '',
+        mediaMetadata: {
+          creationTime: '',
+          width: '0',
+          height: '0',
+        },
+      });
     const initialState: GPhotosMediaItemsState = {
       idToDetails: ImmutableMap<
         string,
-        Result<GPhotosMediaItemApiResponse>
+        Result<GPhotosMediaItemDetailsApiResponse>
       >().set(gPhotosMediaItemId, mediaItemResult),
     };
 
@@ -62,6 +55,6 @@ describe('GPhoto Media Items Selectors', () => {
       GPhotosMediaItems: buildInitialState(),
     });
 
-    expect(result).toEqual(toPending<GPhotosMediaItemApiResponse>());
+    expect(result).toEqual(toPending<GPhotosMediaItemDetailsApiResponse>());
   });
 });
