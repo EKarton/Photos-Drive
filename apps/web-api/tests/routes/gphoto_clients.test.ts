@@ -173,7 +173,8 @@ describe('GPhoto Clients Router', () => {
       const mediaItem = {
         id: 'mediaItem1',
         description: 'Test media item',
-        productUrl: 'https://example.com/mediaItem1',
+        productUrl: 'https://example.com/mediaItem1/raw',
+        baseUrl: 'https://example.com/mediaItem1',
         mimeType: 'image/jpeg',
         mediaMetadata: {
           creationTime: '2022-01-01T00:00:00Z',
@@ -205,7 +206,23 @@ describe('GPhoto Clients Router', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(mediaItem);
+      expect(res.body).toEqual({
+        baseUrl: 'https://example.com/mediaItem1',
+        mimeType: 'image/jpeg',
+        mediaMetadata: {
+          creationTime: '2022-01-01T00:00:00Z',
+          width: '1920',
+          height: '1080',
+          photo: {
+            cameraMake: 'Canon',
+            cameraModel: 'EOS 5D',
+            focalLength: 50,
+            apertureFNumber: 1.8,
+            isoEquivalent: 400,
+            exposureTime: '1/250s'
+          }
+        }
+      });
     });
 
     it('should return 404 when the client is not found', async () => {

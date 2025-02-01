@@ -65,7 +65,11 @@ export default async function (gPhotoClientRepo: GPhotosClientsRepository) {
         const client = gPhotoClientRepo.getGPhotosClientById(gPhotosClientId);
         const mediaItem = await client.getMediaItem(gPhotosMediaItemId);
 
-        return res.status(200).json(mediaItem);
+        return res.status(200).json({
+          baseUrl: mediaItem.baseUrl,
+          mimeType: mediaItem.mimeType,
+          mediaMetadata: mediaItem.mediaMetadata
+        });
       } catch (err) {
         if (err instanceof NoGPhotosClientFoundError) {
           return res.status(404).json({
