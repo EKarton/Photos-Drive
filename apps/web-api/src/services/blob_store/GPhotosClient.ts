@@ -59,28 +59,33 @@ export class GPhotosClient {
   async refreshCredentials() {
     await this.refreshListener?.beforeRefresh();
 
-    const uri = this.credentials.tokenUri;
-    const requestBody = {
-      client_id: this.credentials.clientId,
-      client_secret: this.credentials.clientSecret,
-      refresh_token: this.credentials.refreshToken,
-      grant_type: 'refresh_token'
-    };
-    const headers = {
-      'content-type': 'application/x-www-form-urlencoded'
-    };
+    try {
+      const uri = this.credentials.tokenUri;
+      const requestBody = {
+        client_id: this.credentials.clientId,
+        client_secret: this.credentials.clientSecret,
+        refresh_token: this.credentials.refreshToken,
+        grant_type: 'refresh_token'
+      };
+      const headers = {
+        'content-type': 'application/x-www-form-urlencoded'
+      };
 
-    logger.info(`Fetching new token for account ${this.name}`);
-    const response = await axios.post(uri, qs.stringify(requestBody), {
-      headers
-    });
+      logger.info(`Fetching new token for account ${this.name}`);
+      const response = await axios.post(uri, qs.stringify(requestBody), {
+        headers
+      });
 
-    this.credentials = {
-      ...this.credentials,
-      token: checkNotNull(response.data['access_token'])
-    };
+      this.credentials = {
+        ...this.credentials,
+        token: checkNotNull(response.data['access_token'])
+      };
 
-    await this.refreshListener?.afterRefresh();
+      await this.refreshListener?.afterRefresh();
+    } catch (error) {
+      await this.refreshListener?.afterRefresh(error as Error);
+      throw error;
+    }
   }
 }
 
@@ -95,6 +100,8 @@ export interface RefreshCredentialsListener {
   /**
    * Called right after refreshing the access token.
    * It will wait until the return value resolves before completing refreshing the access token.
+   *
+   * @param err If there was an error, it would pass the error here.
    */
-  afterRefresh: () => Promise<void>;
+  afterRefresh: (err?: Error) => Promise<void>;
 }
