@@ -1,6 +1,5 @@
 import express from 'express';
 import { mock } from 'jest-mock-extended';
-import { importPKCS8, SignJWT } from 'jose';
 import request from 'supertest';
 import mediaItemsRouter from '../../src/routes/media_items';
 import {
@@ -12,39 +11,23 @@ import {
   MediaItemsRepository
 } from '../../src/services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/MongoDbClientsRepository';
+import { fakeAuthEnv, generateTestToken } from './utils/auth';
+import { setupTestEnv } from './utils/env';
 
 describe('Media Items Router', () => {
-  const originalEnv = process.env;
-  const fakePublicKey =
-    '-----BEGIN PUBLIC KEY-----MCowBQYDK2VwAyEADPItlNZv8oKHe/TVm4b04lfw1tvY8dde52zmWzk8hg4=-----END PUBLIC KEY-----%';
-  const fakePrivateKey =
-    '-----BEGIN PRIVATE KEY-----MC4CAQAwBQYDK2VwBCIEIG2LxwXdQJFmm2E3jNdvVoDzFp1EUisEuzteaAd3Wpw7-----END PRIVATE KEY-----%';
+  let cleanupTestEnvFn = () => {};
   let token = '';
 
   beforeEach(async () => {
     jest.resetModules();
-    process.env = {
-      ...originalEnv,
-      ACCESS_TOKEN_JWT_PUBLIC_KEY: fakePublicKey,
-      ACCESS_TOKEN_JWT_PRIVATE_KEY: fakePrivateKey
-    };
-
-    const secretKey = await importPKCS8(
-      process.env.ACCESS_TOKEN_JWT_PRIVATE_KEY || '',
-      'EdDSA'
-    );
-    const tokenExpiryTime = new Date(Date.now() + 360000);
-    token = await new SignJWT({ id: '1' })
-      .setProtectedHeader({ alg: 'EdDSA' })
-      .setIssuedAt()
-      .setIssuer('Photos-Map-Web-Api')
-      .setAudience('http://localhost:3000')
-      .setExpirationTime(tokenExpiryTime)
-      .sign(secretKey);
+    cleanupTestEnvFn = setupTestEnv({
+      ...fakeAuthEnv
+    });
+    token = await generateTestToken();
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    cleanupTestEnvFn();
   });
 
   describe('GET /api/v1/media-items/:id', () => {

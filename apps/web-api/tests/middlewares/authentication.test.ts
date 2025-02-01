@@ -1,38 +1,22 @@
 import express from 'express';
-import { importPKCS8, SignJWT } from 'jose';
 import request from 'supertest';
 import { verifyAuthentication } from '../../src/middlewares/authentication';
+import { fakeAuthEnv, generateTestToken } from '../routes/utils/auth';
+import { setupTestEnv } from '../routes/utils/env';
 
 describe('verifyAuthentication()', () => {
-  const originalEnv = process.env;
-  const fakePublicKey =
-    '-----BEGIN PUBLIC KEY-----MCowBQYDK2VwAyEADPItlNZv8oKHe/TVm4b04lfw1tvY8dde52zmWzk8hg4=-----END PUBLIC KEY-----%';
-  const fakePrivateKey =
-    '-----BEGIN PRIVATE KEY-----MC4CAQAwBQYDK2VwBCIEIG2LxwXdQJFmm2E3jNdvVoDzFp1EUisEuzteaAd3Wpw7-----END PRIVATE KEY-----%';
+  let cleanupTestEnvFn = () => {};
 
   beforeEach(() => {
-    jest.resetModules();
-    process.env = {
-      ...originalEnv,
-      ACCESS_TOKEN_JWT_PUBLIC_KEY: fakePublicKey,
-      ACCESS_TOKEN_JWT_PRIVATE_KEY: fakePrivateKey
-    };
+    cleanupTestEnvFn = setupTestEnv({ ...fakeAuthEnv });
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    cleanupTestEnvFn();
   });
 
   it('should return 200, given correct access token', async () => {
-    const secretKey = await importPKCS8(fakePrivateKey, 'EdDSA');
-    const tokenExpiryTime = new Date(Date.now() + 360000);
-    const token = await new SignJWT({ id: '1' })
-      .setProtectedHeader({ alg: 'EdDSA' })
-      .setIssuedAt()
-      .setIssuer('Photos-Map-Web-Api')
-      .setAudience('http://localhost:3000')
-      .setExpirationTime(tokenExpiryTime)
-      .sign(secretKey);
+    const token = await generateTestToken();
 
     const app = express();
     app.get(
