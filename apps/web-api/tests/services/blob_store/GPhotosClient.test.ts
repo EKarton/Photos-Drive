@@ -28,10 +28,27 @@ describe('GPhotosClient', () => {
   });
 
   describe('getCredentials', () => {
-    it('should return the credentials of the Google Photos client', () => {
+    it('should return the credentials', () => {
       const gphotosClient = new GPhotosClient('Test Account', credentials);
 
       expect(gphotosClient.getCredentials()).toEqual(credentials);
+    });
+  });
+
+  describe('setCredentials', () => {
+    it('should set new credentials', () => {
+      const gphotosClient = new GPhotosClient('Test Account', credentials);
+
+      const newCredentials: GPhotosCredentials = {
+        token: 'token2',
+        tokenUri: 'https://oauth2.googleapis.com/token',
+        refreshToken: 'refresh2',
+        clientId: 'client_id_2',
+        clientSecret: 'client_secret_2'
+      };
+      gphotosClient.setCredentials(newCredentials);
+
+      expect(gphotosClient.getCredentials()).toEqual(newCredentials);
     });
   });
 

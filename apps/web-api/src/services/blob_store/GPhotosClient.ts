@@ -50,6 +50,11 @@ export class GPhotosClient {
     return { ...this.credentials };
   }
 
+  /** Sets the credentials. */
+  public setCredentials(newCredentials: GPhotosCredentials) {
+    this.credentials = newCredentials;
+  }
+
   /** Sets the refresh listener. */
   public setRefreshCredentialsListener(listener: RefreshCredentialsListener) {
     this.refreshListener = listener;
