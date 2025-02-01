@@ -20,25 +20,17 @@ export class GPhotosMediaItemsEffects {
   loadGPhotosMediaItemDetails$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(gPhotosMediaItemsActions.loadGPhotosMediaItemDetails),
-      distinct((prop) => prop.gPhotosMediaItemId),
-      mergeMap(({ gPhotosMediaItemId }) => {
-        const parts = gPhotosMediaItemId.split(':');
-        const gClientId = parts[0];
-        const gMediaItemId = parts[1];
-
+      distinct((prop) => prop.gMediaItemId),
+      mergeMap(({ gMediaItemId }) => {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
             return this.webApiService
-              .fetchGPhotosMediaItemDetails(
-                accessToken,
-                gClientId,
-                gMediaItemId,
-              )
+              .fetchGPhotosMediaItemDetails(accessToken, gMediaItemId)
               .pipe(
                 toResult<GPhotosMediaItemDetailsApiResponse>(),
                 map((result) =>
                   gPhotosMediaItemsActions.loadGPhotosMediaItemDetailsResult({
-                    gPhotosMediaItemId,
+                    gMediaItemId,
                     result,
                   }),
                 ),

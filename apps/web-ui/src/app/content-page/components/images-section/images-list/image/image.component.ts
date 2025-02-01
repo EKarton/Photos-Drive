@@ -182,7 +182,7 @@ export class ImageComponent implements OnInit, OnDestroy {
         .subscribe((mediaItem) => {
           this.store.dispatch(
             gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-              gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
+              gMediaItemId: mediaItem.gPhotosMediaItemId,
             }),
           );
         }),

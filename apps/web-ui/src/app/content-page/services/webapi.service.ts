@@ -205,10 +205,9 @@ export class WebApiService {
   /** Fetches the details of a gphotos media item. */
   fetchGPhotosMediaItemDetails(
     accessToken: string,
-    gPhotosClientId: string,
-    gPhotosMediaItemId: string,
+    gMediaItemId: string,
   ): Observable<GPhotosMediaItemDetailsApiResponse> {
-    const url = `${environment.webApiEndpoint}/api/v1/gphotos/${gPhotosClientId}/media-items/${gPhotosMediaItemId}`;
+    const url = `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${gMediaItemId}`;
     return this.httpClient.get<GPhotosMediaItemDetailsApiResponse>(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
