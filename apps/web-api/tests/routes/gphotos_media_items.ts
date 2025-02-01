@@ -27,7 +27,7 @@ describe('GPhotos Media Items Router', () => {
     cleanupTestEnvFn();
   });
 
-  describe('GET /api/v1/gphotos/:clientId/media-items/:mediaItemId', () => {
+  describe('GET /api/v1/gphotos/media-items/:gMediaItemId', () => {
     it('should return 200 response when media item is successfully fetched', async () => {
       const mediaItem = {
         id: 'mediaItem1',
@@ -61,7 +61,7 @@ describe('GPhotos Media Items Router', () => {
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')
+        .get('/api/v1/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(200);
@@ -87,14 +87,14 @@ describe('GPhotos Media Items Router', () => {
     it('should return 404 when the client is not found', async () => {
       const repo = mock<GPhotosClientsRepository>();
       repo.getGPhotosClientById.mockImplementation(() => {
-        throw new NoGPhotosClientFoundError('gPhotosClient1');
+        throw new NoGPhotosClientFoundError('123');
       });
 
       const app = express();
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')
+        .get('/api/v1/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(404);
@@ -114,7 +114,7 @@ describe('GPhotos Media Items Router', () => {
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')
+        .get('/api/v1/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(500);
@@ -133,7 +133,7 @@ describe('GPhotos Media Items Router', () => {
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')
+        .get('/api/v1/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(500);

@@ -12,12 +12,13 @@ export default async function (gPhotoClientRepo: GPhotosClientsRepository) {
   const router: Router = Router();
 
   router.get(
-    '/api/v1/gphotos/:clientId/media-items/:mediaItemId',
+    '/api/v1/gphotos/media-items/:gMediaItemId',
     await verifyAuthentication(),
     await verifyAuthorization(),
     wrap(async (req, res) => {
-      const gPhotosClientId = req.params.clientId;
-      const gPhotosMediaItemId = req.params.mediaItemId;
+      const rawGMediaItemIdParts = req.params.gMediaItemId.split(':');
+      const gPhotosClientId = rawGMediaItemIdParts[0];
+      const gPhotosMediaItemId = rawGMediaItemIdParts[1];
 
       try {
         const client = gPhotoClientRepo.getGPhotosClientById(gPhotosClientId);
