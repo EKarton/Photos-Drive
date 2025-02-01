@@ -16,7 +16,7 @@ describe('GPhotos Media Items Reducer', () => {
 
   it('should handle loadGPhotosMediaItemDetailsResult action', () => {
     const initialState = buildInitialState();
-    const gPhotosMediaItemId = 'clientId:mediaItemId';
+    const gMediaItemId = 'clientId:mediaItemId';
     const result: Result<GPhotosMediaItem> = toSuccess({
       baseUrl: '',
       mimeType: '',
@@ -28,11 +28,11 @@ describe('GPhotos Media Items Reducer', () => {
     });
 
     const action = gPhotosMediaItemsActions.loadGPhotosMediaItemDetailsResult({
-      gPhotosMediaItemId,
+      gMediaItemId,
       result,
     });
     const state = gPhotosMediaItemsReducer(initialState, action);
 
-    expect(state.idToDetails.get(gPhotosMediaItemId)).toEqual(result);
+    expect(state.idToDetails.get(gMediaItemId)).toEqual(result);
   });
 });

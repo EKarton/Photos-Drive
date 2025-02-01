@@ -6,15 +6,12 @@ import { buildInitialState, FEATURE_KEY } from './gphoto-media-items.state';
 export const gPhotosMediaItemsReducer = createReducer(
   buildInitialState(),
 
-  on(
-    loadGPhotosMediaItemDetailsResult,
-    (state, { gPhotosMediaItemId, result }) => {
-      return {
-        ...state,
-        idToDetails: state.idToDetails.set(gPhotosMediaItemId, result),
-      };
-    },
-  ),
+  on(loadGPhotosMediaItemDetailsResult, (state, { gMediaItemId, result }) => {
+    return {
+      ...state,
+      idToDetails: state.idToDetails.set(gMediaItemId, result),
+    };
+  }),
 );
 
 export const gPhotosMediaItemsFeature = createFeature({

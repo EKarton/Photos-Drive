@@ -128,8 +128,7 @@ describe('WebApiService', () => {
   });
 
   it('should fetch GPhotos media item details', () => {
-    const gPhotosClientId = 'client1';
-    const gPhotosMediaItemId = 'gphoto123';
+    const gMediaItemId = 'client1:gphoto123';
     const mockResponse: GPhotosMediaItemDetailsApiResponse = {
       baseUrl: 'https://example.com/media-item.jpg',
       mimeType: 'image/jpeg',
@@ -149,17 +148,13 @@ describe('WebApiService', () => {
     };
 
     service
-      .fetchGPhotosMediaItemDetails(
-        'authToken123',
-        gPhotosClientId,
-        gPhotosMediaItemId,
-      )
+      .fetchGPhotosMediaItemDetails('authToken123', gMediaItemId)
       .subscribe((response) => {
         expect(response).toEqual(mockResponse);
       });
 
     const req = httpMock.expectOne(
-      `${environment.webApiEndpoint}/api/v1/gphotos/${gPhotosClientId}/media-items/${gPhotosMediaItemId}`,
+      `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${gMediaItemId}`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.get('Authorization')).toEqual(
