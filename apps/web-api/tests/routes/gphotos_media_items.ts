@@ -2,7 +2,7 @@ import { AxiosError } from 'axios';
 import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
-import gPhotosClientsRouter from '../../src/routes/gphoto_clients';
+import gPhotosMediaItemsRouter from '../../src/routes/gphotos_media_items';
 import { GPhotosClient } from '../../src/services/blob_store/GPhotosClient';
 import {
   GPhotosClientsRepository,
@@ -11,7 +11,7 @@ import {
 import { fakeAuthEnv, generateTestToken } from './utils/auth';
 import { setupTestEnv } from './utils/env';
 
-describe('GPhoto Clients Router', () => {
+describe('GPhotos Media Items Router', () => {
   let cleanupTestEnvFn = () => {};
   let token = '';
 
@@ -58,7 +58,7 @@ describe('GPhoto Clients Router', () => {
       repo.getGPhotosClientById.mockReturnValue(client);
 
       const app = express();
-      app.use(await gPhotosClientsRouter(repo));
+      app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
         .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')
@@ -91,7 +91,7 @@ describe('GPhoto Clients Router', () => {
       });
 
       const app = express();
-      app.use(await gPhotosClientsRouter(repo));
+      app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
         .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')
@@ -111,7 +111,7 @@ describe('GPhoto Clients Router', () => {
       repo.getGPhotosClientById.mockReturnValue(client);
 
       const app = express();
-      app.use(await gPhotosClientsRouter(repo));
+      app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
         .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')
@@ -130,7 +130,7 @@ describe('GPhoto Clients Router', () => {
       repo.getGPhotosClientById.mockReturnValue(client);
 
       const app = express();
-      app.use(await gPhotosClientsRouter(repo));
+      app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
         .get('/api/v1/gphotos/gPhotosClient1/media-items/mediaItem1')

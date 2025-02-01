@@ -7,7 +7,7 @@ import expressLogger from 'pino-http';
 import { AppConfig, getAppConfig } from './app_config';
 import albumsRouter from './routes/albums';
 import authRouter from './routes/authentication';
-import gphotoClientsRouter from './routes/gphoto_clients';
+import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
 import mediaItemsRouter from './routes/media_items';
 import { GPhotosClientsRepository } from './services/blob_store/GPhotosClientsRepository';
@@ -86,7 +86,7 @@ export class App {
       )
     );
     this.app.use(await mediaItemsRouter(this.mediaItemsRepository));
-    this.app.use(await gphotoClientsRouter(this.gPhotosClientsRepository));
+    this.app.use(await gPhotosMediaItemsRouter(this.gPhotosClientsRepository));
 
     this.app.use(
       (err: Error, _req: Request, res: Response, _next: NextFunction) => {
