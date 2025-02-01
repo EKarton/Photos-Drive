@@ -44,8 +44,6 @@ export class GPhotosClientsRepository {
    * @returns {@code GPhotosClient} the client.
    */
   getGPhotosClientById(id: string): GPhotosClient {
-    console.log(id);
-    console.log(this.idToClient);
     if (!this.idToClient.has(id)) {
       throw new NoGPhotosClientFoundError(id);
     }
