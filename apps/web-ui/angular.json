@@ -80,10 +80,10 @@
         },
         "test": {
           "builder": "@ngx-env/builder:karma",
-          "karmaConfig": "karma.conf.js",
           "options": {
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
+            "karmaConfig": "karma.conf.js",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
