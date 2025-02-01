@@ -6,7 +6,7 @@ import { Map as ImmutableMap } from 'immutable';
 import { WINDOW } from '../../../../../../app.tokens';
 import { toFailure, toSuccess } from '../../../../../../shared/results/results';
 import {
-  GPhotosMediaItemDetailsApiResponse,
+  GPhotosMediaItem,
   MediaItem,
 } from '../../../../../services/webapi.service';
 import {
@@ -31,7 +31,7 @@ const MEDIA_ITEM_DETAILS_PHOTOS_1: MediaItem = {
   gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
 };
 
-const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItemDetailsApiResponse = {
+const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
   baseUrl: 'http://www.google.com/photos/1',
   mimeType: 'image/jpeg',
   mediaMetadata: {

@@ -18,10 +18,7 @@ import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
 import { Result, toPending } from '../../../shared/results/results';
 import { switchMapResultToResultRxJs } from '../../../shared/results/rxjs/switchMapResultToResultRxJs';
 import { combineResults2 } from '../../../shared/results/utils/combineResults2';
-import {
-  GPhotosMediaItemDetailsApiResponse,
-  MediaItem,
-} from '../../services/webapi.service';
+import { GPhotosMediaItem, MediaItem } from '../../services/webapi.service';
 import { gPhotosMediaItemsState } from '../../store/gphoto-media-items';
 import { mediaItemsState } from '../../store/media-items';
 import { mediaViewerActions, mediaViewerState } from '../../store/media-viewer';
@@ -66,17 +63,16 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
       }),
     );
 
-    const gPhotosMediaItemResult$: Observable<
-      Result<GPhotosMediaItemDetailsApiResponse>
-    > = mediaItemResult$.pipe(
-      switchMapResultToResultRxJs((mediaItem) =>
-        this.store.select(
-          gPhotosMediaItemsState.selectGPhotosMediaItemById(
-            mediaItem.gPhotosMediaItemId,
+    const gPhotosMediaItemResult$: Observable<Result<GPhotosMediaItem>> =
+      mediaItemResult$.pipe(
+        switchMapResultToResultRxJs((mediaItem) =>
+          this.store.select(
+            gPhotosMediaItemsState.selectGPhotosMediaItemById(
+              mediaItem.gPhotosMediaItemId,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
     const mediaDetailsResult$: Observable<Result<MediaDetails>> = combineLatest(
       [mediaItemResult$, gPhotosMediaItemResult$],

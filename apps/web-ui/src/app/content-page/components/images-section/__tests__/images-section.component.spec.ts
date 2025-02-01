@@ -6,8 +6,11 @@ import { Map as ImmutableMap } from 'immutable';
 import { WINDOW } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItemDetails } from '../../../services/gphotos-api.service';
-import { Album, MediaItem } from '../../../services/webapi.service';
+import {
+  Album,
+  GPhotosMediaItem,
+  MediaItem,
+} from '../../../services/webapi.service';
 import { albumsActions, albumsState } from '../../../store/albums';
 import { gPhotosMediaItemsState } from '../../../store/gphoto-media-items';
 import { mediaItemsState } from '../../../store/media-items';
@@ -38,40 +41,24 @@ const MEDIA_ITEM_DETAILS_PHOTOS_2: MediaItem = {
   gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
 };
 
-const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItemDetails = {
-  id: 'gPhotosMediaItem1',
-  description: '',
-  productUrl: '',
+const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
   baseUrl: 'http://www.google.com/photos/1',
   mimeType: 'image/jpeg',
   mediaMetadata: {
     creationTime: '',
-    width: 200,
-    height: 200,
+    width: '200',
+    height: '200',
   },
-  contributorInfo: {
-    profilePictureBaseUrl: '',
-    displayName: '',
-  },
-  filename: '',
 };
 
-const G_MEDIA_ITEM_DETAILS_PHOTO_2: GPhotosMediaItemDetails = {
-  id: 'gPhotosMediaItem2',
-  description: '',
-  productUrl: '',
+const G_MEDIA_ITEM_DETAILS_PHOTO_2: GPhotosMediaItem = {
   baseUrl: 'http://www.google.com/photos/2',
   mimeType: 'image/jpeg',
   mediaMetadata: {
     creationTime: '',
-    width: 300,
-    height: 300,
+    width: '300',
+    height: '300',
   },
-  contributorInfo: {
-    profilePictureBaseUrl: '',
-    displayName: '',
-  },
-  filename: '',
 };
 
 describe('ImagesSectionComponent', () => {

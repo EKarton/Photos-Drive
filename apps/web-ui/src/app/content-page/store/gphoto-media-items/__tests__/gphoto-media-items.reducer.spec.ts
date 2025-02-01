@@ -1,5 +1,5 @@
 import { Result, toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../../services/webapi.service';
+import { GPhotosMediaItem } from '../../../services/webapi.service';
 import * as gPhotosMediaItemsActions from '../gphoto-media-items.actions';
 import { gPhotosMediaItemsReducer } from '../gphoto-media-items.reducer';
 import { buildInitialState } from '../gphoto-media-items.state';
@@ -17,7 +17,7 @@ describe('GPhotos Media Items Reducer', () => {
   it('should handle loadGPhotosMediaItemDetailsResult action', () => {
     const initialState = buildInitialState();
     const gPhotosMediaItemId = 'clientId:mediaItemId';
-    const result: Result<GPhotosMediaItemDetailsApiResponse> = toSuccess({
+    const result: Result<GPhotosMediaItem> = toSuccess({
       baseUrl: '',
       mimeType: '',
       mediaMetadata: {

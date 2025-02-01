@@ -5,8 +5,7 @@ import { Map as ImmutableMap } from 'immutable';
 import { NAVIGATOR } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItemDetails } from '../../../services/gphotos-api.service';
-import { MediaItem } from '../../../services/webapi.service';
+import { GPhotosMediaItem, MediaItem } from '../../../services/webapi.service';
 import { gPhotosMediaItemsState } from '../../../store/gphoto-media-items';
 import { mediaItemsState } from '../../../store/media-items';
 import {
@@ -27,22 +26,14 @@ const MEDIA_ITEM_DETAILS: MediaItem = {
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem1',
 };
 
-const GPHOTOS_MEDIA_ITEM_DETAILS: GPhotosMediaItemDetails = {
-  id: 'gPhotosMediaItem1',
-  description: '',
-  productUrl: '',
+const GPHOTOS_MEDIA_ITEM_DETAILS: GPhotosMediaItem = {
   baseUrl: 'http://www.google.com/photos/1',
   mimeType: '',
   mediaMetadata: {
     creationTime: '',
-    width: 200,
-    height: 300,
+    width: '200',
+    height: '300',
   },
-  contributorInfo: {
-    profilePictureBaseUrl: '',
-    displayName: '',
-  },
-  filename: '',
 };
 
 describe('MediaViewerComponent', () => {
