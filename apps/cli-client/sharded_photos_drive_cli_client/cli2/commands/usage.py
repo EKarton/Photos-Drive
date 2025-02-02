@@ -4,6 +4,7 @@ from typing_extensions import Annotated
 import typer
 from pymongo import MongoClient
 
+from sharded_photos_drive_cli_client.clean.clean_system import TRASH_ALBUM_TITLE
 from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
 from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
 from sharded_photos_drive_cli_client.cli2.shared.typer import (
@@ -104,18 +105,43 @@ def __get_gphoto_clients_table(gphotos_repo: GPhotosClientsRepository) -> Pretty
     table.field_names = [
         "ID",
         "Name",
-        "Used / Limit (in bytes)",
-        "Amount in trash (in bytes)",
+        "Used / limit (bytes)",
+        "Trash album size (photo count)",
     ]
 
     for client_id, client in gphotos_repo.get_all_clients():
-        storage_quota = client.get_storage_quota()
+        usage, limit = '', ''
+
+        try:
+            storage_quota = client.get_storage_quota()
+            usage = str(storage_quota.usage)
+            limit = str(storage_quota.limit)
+
+            trash_album = next(
+                filter(
+                    lambda x: x.title == TRASH_ALBUM_TITLE,
+                    client.albums().list_albums(),
+                ),
+                None,
+            )
+            num_photos_in_trash_album = (
+                str(trash_album.mediaItemsCount)
+                if trash_album is not None and trash_album.mediaItemsCount is not None
+                else '0'
+            )
+        except Exception as error:
+            logger.error(f'Error occurred to get details of gphotos client {client_id}')
+            logger.error(error)
+            usage = 'ERROR'
+            limit = 'ERROR'
+            num_photos_in_trash_album = 'ERROR'
+
         table.add_row(
             [
                 client_id,
                 client.name(),
-                f'{storage_quota.usage} / {storage_quota.limit}',
-                storage_quota.usage_in_drive_trash,
+                f'{usage} / {limit}',
+                num_photos_in_trash_album,
             ]
         )
 
