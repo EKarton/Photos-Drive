@@ -11,7 +11,7 @@
       <div class="skeleton h-2 w-full"></div>
     </div>
   } @else if (album | hasFailed) {
-    <span>Error: {{ album.error.message }}</span>
+    <span>Error: {{ album.error!.message }}</span>
   } @else {
     @let name = album.data!.albumName;
     @let mediaItemsCount = album.data!.mediaItemIds.length;
