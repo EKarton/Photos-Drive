@@ -37,7 +37,7 @@ const GPHOTOS_MEDIA_ITEM_IMAGE: GPhotosMediaItem = {
 };
 
 const MEDIA_ITEM_VIDEO: MediaItem = {
-  id: 'mediaItem1',
+  id: 'mediaItem2',
   fileName: 'dog.mp4',
   hashCode: '1234',
   location: {
@@ -49,12 +49,28 @@ const MEDIA_ITEM_VIDEO: MediaItem = {
 };
 
 const GPHOTOS_MEDIA_ITEM_VIDEO: GPhotosMediaItem = {
-  baseUrl: 'http://www.google.com/photos/1',
+  baseUrl: 'http://www.google.com/videos/1',
   mimeType: 'video/mp4',
   mediaMetadata: {
     creationTime: '',
     width: '200',
     height: '300',
+  },
+};
+
+const MEDIA_ITEM_AUDIO: MediaItem = {
+  id: 'mediaItem3',
+  fileName: 'dog.mp3',
+  hashCode: '1234',
+  gPhotosClientId: 'gPhotosClientId1',
+  gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem3',
+};
+
+const GPHOTOS_MEDIA_ITEM_AUDIO: GPhotosMediaItem = {
+  baseUrl: 'http://www.google.com/audio/1',
+  mimeType: 'audio/mp3',
+  mediaMetadata: {
+    creationTime: '',
   },
 };
 
@@ -126,6 +142,41 @@ describe('MediaViewerComponent', () => {
     expect(spinner).toBeTruthy();
   });
 
+  it('should render error message given unhandled mime type', () => {
+    store.setState({
+      [mediaViewerState.FEATURE_KEY]: {
+        request: {
+          mediaItemId: 'mediaItem3',
+        },
+        isOpen: true,
+      },
+      [mediaItemsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap().set(
+          'mediaItem3',
+          toSuccess(MEDIA_ITEM_AUDIO),
+        ),
+      },
+      [gPhotosMediaItemsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap().set(
+          'gPhotosClientId1:gPhotosMediaItem3',
+          toSuccess(GPHOTOS_MEDIA_ITEM_AUDIO),
+        ),
+      },
+    });
+    store.refreshState();
+    fixture.autoDetectChanges();
+
+    // Assert dialog is open
+    const dialog = fixture.nativeElement.querySelector('dialog');
+    expect(dialog.open).toBeTrue();
+
+    // Assert error message on content viewer is present
+    const errorMessage = fixture.nativeElement.querySelector(
+      '[data-testid="media-viewer-unknown"]',
+    );
+    expect(errorMessage.textContent).toEqual('Unhandled media type: audio/mp3');
+  });
+
   it('should render items correctly given loaded image data', () => {
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
@@ -167,7 +218,9 @@ describe('MediaViewerComponent', () => {
       '[data-testid="media-viewer-new-window-button"]',
     );
     expect(newWindowButton).toBeTruthy();
-    expect(newWindowButton.getAttribute('href')).toEqual('');
+    expect(newWindowButton.getAttribute('href')).toEqual(
+      'http://www.google.com/photos/1=w200-h300',
+    );
 
     // Assert the share button is present
     const shareButton = fixture.nativeElement.querySelector(
@@ -248,7 +301,7 @@ describe('MediaViewerComponent', () => {
     );
     expect(newWindowButton).toBeTruthy();
     expect(newWindowButton.getAttribute('href')).toEqual(
-      'http://www.google.com/photos/1=dv',
+      'http://www.google.com/videos/1=dv',
     );
 
     // Assert the share button is present
@@ -263,7 +316,7 @@ describe('MediaViewerComponent', () => {
     );
     expect(downloadButton).toBeTruthy();
     expect(downloadButton.getAttribute('href')).toEqual(
-      'http://www.google.com/photos/1=dv',
+      'http://www.google.com/videos/1=dv',
     );
     expect(downloadButton.getAttribute('download')).toEqual('dog.mp4');
 
@@ -273,13 +326,11 @@ describe('MediaViewerComponent', () => {
     );
     expect(closeDialogButton).toBeTruthy();
 
-    // Assert the image is present
-    const image = fixture.nativeElement.querySelector(
+    // Assert the video is present
+    const video = fixture.nativeElement.querySelector(
       '[data-testid="media-viewer-video"]',
     );
-    expect(image.getAttribute('src')).toEqual(
-      'http://www.google.com/photos/1=dv',
-    );
+    expect(video).toBeTruthy();
 
     // Assert the location text is present
     const locationText = fixture.nativeElement.querySelector(
@@ -372,7 +423,7 @@ describe('MediaViewerComponent', () => {
       },
       [mediaItemsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap().set(
-          'mediaItem1',
+          'mediaItem2',
           toSuccess(MEDIA_ITEM_VIDEO),
         ),
       },
@@ -394,7 +445,7 @@ describe('MediaViewerComponent', () => {
     expect(mockNavigator.share).toHaveBeenCalledWith({
       title: 'dog.mp4',
       text: 'Photo from Sharded Photos Drive',
-      url: 'http://www.google.com/photos/1=dv',
+      url: 'http://www.google.com/videos/1=dv',
     });
   });
 

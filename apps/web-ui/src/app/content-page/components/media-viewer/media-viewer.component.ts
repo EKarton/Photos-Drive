@@ -145,11 +145,7 @@ function getUrl(gMediaItem: GPhotosMediaItem): string {
     return `${gMediaItem.baseUrl}=w${gMediaItem.mediaMetadata.width}-h${gMediaItem.mediaMetadata.height}`;
   }
 
-  if (gMediaItem.mimeType.startsWith('video')) {
-    return `${gMediaItem.baseUrl}=dv`;
-  }
-
-  throw Error(`Unknown mime type ${gMediaItem.mimeType}`);
+  return `${gMediaItem.baseUrl}=dv`;
 }
 
 function getDownloadUrl(gMediaItem: GPhotosMediaItem): string {
@@ -157,9 +153,5 @@ function getDownloadUrl(gMediaItem: GPhotosMediaItem): string {
     return `${gMediaItem.baseUrl}=d`;
   }
 
-  if (gMediaItem.mimeType.startsWith('video')) {
-    return `${gMediaItem.baseUrl}=dv`;
-  }
-
-  throw Error(`Unknown mime type ${gMediaItem.mimeType}`);
+  return `${gMediaItem.baseUrl}=dv`;
 }

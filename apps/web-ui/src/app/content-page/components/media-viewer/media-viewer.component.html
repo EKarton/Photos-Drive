@@ -116,7 +116,9 @@
     <span class="modal-box loading loading-spinner loading-lg"></span>
   } @else if (mediaDetails | hasFailed) {
     <div class="modal-box p-0 m-0">
-      <span>Error: {{ mediaDetails.error!.message }}</span>
+      <span data-testid="media-viewer-error"
+        >Error: {{ mediaDetails.error!.message }}</span
+      >
     </div>
   } @else {
     @if (mediaDetails.data!.mimeType.startsWith('video')) {
@@ -140,7 +142,9 @@
       />
     } @else {
       <div class="modal-box p-0 m-0">
-        <span>Unhandled media type: {{ mediaDetails.data!.mimeType }}</span>
+        <span data-testid="media-viewer-unknown">
+          Unhandled media type: {{ mediaDetails.data!.mimeType }}
+        </span>
       </div>
     }
   }
