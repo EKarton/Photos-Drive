@@ -18,7 +18,7 @@
       <a
         data-testid="media-viewer-new-window-button"
         class="btn btn-circle btn-outline border-none btn-sm"
-        [href]="mediaDetails.data!.imageUrl"
+        [href]="mediaDetails.data!.url"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -44,9 +44,7 @@
       <button
         data-testid="media-viewer-share-button"
         class="btn btn-circle btn-outline border-none btn-sm"
-        (click)="
-          share(mediaDetails.data!.imageUrl, mediaDetails.data!.fileName)
-        "
+        (click)="share(mediaDetails.data!.url, mediaDetails.data!.fileName)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -70,10 +68,8 @@
       <a
         data-testid="media-viewer-download-button"
         class="btn btn-circle btn-outline border-none btn-sm"
-        [href]="mediaDetails.data!.imageUrl"
+        [href]="mediaDetails.data!.downloadUrl"
         [download]="mediaDetails.data!.fileName"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -123,12 +119,30 @@
       <span>Error: {{ mediaDetails.error!.message }}</span>
     </div>
   } @else {
-    <img
-      data-testid="media-viewer-image"
-      class="modal-box rounded-sm p-0 m-0 max-h-[calc(100vh-150px)] max-w-[100vw] w-auto h-auto"
-      [src]="mediaDetails.data!.imageUrl"
-      [alt]="mediaDetails.data!.imageAlt"
-    />
+    @if (mediaDetails.data!.mimeType.startsWith('video')) {
+      <video
+        data-testid="media-viewer-video"
+        class="modal-box rounded-sm p-0 m-0 max-h-[calc(100vh-150px)] max-w-[100vw] w-auto h-auto"
+        controls
+      >
+        <source
+          [src]="mediaDetails.data!.url"
+          [type]="mediaDetails.data!.mimeType"
+        />
+        Your browser does not support the video tag.
+      </video>
+    } @else if (mediaDetails.data!.mimeType.startsWith('video')) {
+      <img
+        data-testid="media-viewer-image"
+        class="modal-box rounded-sm p-0 m-0 max-h-[calc(100vh-150px)] max-w-[100vw] w-auto h-auto"
+        [src]="mediaDetails.data!.url"
+        [alt]="mediaDetails.data!.imageAlt"
+      />
+    } @else {
+      <div class="modal-box p-0 m-0">
+        <span>Unhandled media type: {{ mediaDetails.data!.mimeType }}</span>
+      </div>
+    }
   }
   <form
     method="dialog"

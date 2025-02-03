@@ -25,7 +25,9 @@ import { mediaViewerActions, mediaViewerState } from '../../store/media-viewer';
 
 /** The details to display to the UI. */
 interface MediaDetails {
-  imageUrl: string;
+  url: string;
+  downloadUrl: string;
+  mimeType: string;
   imageAlt: string;
   fileName: string;
   formattedDate: string;
@@ -81,7 +83,9 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
           mediaItemResult,
           gPhotosMediaItemResult,
           (mediaItem, gPhotosMediaItem) => ({
-            imageUrl: `${gPhotosMediaItem.baseUrl}=w${gPhotosMediaItem.mediaMetadata.width}-h${gPhotosMediaItem.mediaMetadata.height}`,
+            url: getUrl(gPhotosMediaItem),
+            downloadUrl: getDownloadUrl(gPhotosMediaItem),
+            mimeType: gPhotosMediaItem.mimeType,
             imageAlt: `Image of ${mediaItem.fileName}`,
             fileName: mediaItem.fileName,
             formattedDate: 'Sunday, November 20, 2016 at 12:35 PM',
@@ -134,4 +138,28 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
+}
+
+function getUrl(gMediaItem: GPhotosMediaItem): string {
+  if (gMediaItem.mimeType.startsWith('image')) {
+    return `${gMediaItem.baseUrl}=w${gMediaItem.mediaMetadata.width}-h${gMediaItem.mediaMetadata.height}`;
+  }
+
+  if (gMediaItem.mimeType.startsWith('video')) {
+    return `${gMediaItem.baseUrl}=dv`;
+  }
+
+  throw Error(`Unknown mime type ${gMediaItem.mimeType}`);
+}
+
+function getDownloadUrl(gMediaItem: GPhotosMediaItem): string {
+  if (gMediaItem.mimeType.startsWith('image')) {
+    return `${gMediaItem.baseUrl}=d`;
+  }
+
+  if (gMediaItem.mimeType.startsWith('video')) {
+    return `${gMediaItem.baseUrl}=dv`;
+  }
+
+  throw Error(`Unknown mime type ${gMediaItem.mimeType}`);
 }
