@@ -174,7 +174,9 @@ describe('MediaViewerComponent', () => {
     const errorMessage = fixture.nativeElement.querySelector(
       '[data-testid="media-viewer-unknown"]',
     );
-    expect(errorMessage.textContent).toEqual('Unhandled media type: audio/mp3');
+    expect(errorMessage.textContent!.trim()).toEqual(
+      'Unhandled media type: audio/mp3',
+    );
   });
 
   it('should render items correctly given loaded image data', () => {
