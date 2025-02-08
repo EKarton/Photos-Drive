@@ -3,6 +3,7 @@ from typing import Dict
 from collections import deque
 from bson.objectid import ObjectId
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
@@ -108,19 +109,37 @@ class SystemCleaner:
         )
 
     def __prune_albums(self) -> int:
+        def process_album(album_id):
+            album = self.__albums_repo.get_album_by_id(album_id)
+            child_album_ids = album.child_album_ids
+            prune_album_id = (
+                album_id
+                if len(child_album_ids) == 0 and len(album.media_item_ids) == 0
+                else None
+            )
+
+            return child_album_ids, prune_album_id
+
+        logger.info("Pruning albums")
         empty_leaf_album_ids = []
         root_album_id = self.__config.get_root_album_id()
-        albums_queue = deque([root_album_id])
-        while len(albums_queue) > 0:
-            cur_album_id = albums_queue.popleft()
-            cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
 
-            for child_album_id in cur_album.child_album_ids:
-                albums_queue.append(child_album_id)
+        with ThreadPoolExecutor() as executor:
+            current_level = [root_album_id]
+            while current_level:
+                future_to_album = {
+                    executor.submit(process_album, album_id): album_id
+                    for album_id in current_level
+                }
+                next_level = []
+                for future in as_completed(future_to_album):
+                    children, prune_id = future.result()
+                    next_level += children
 
-            if len(cur_album.child_album_ids) == 0:
-                if len(cur_album.media_item_ids) == 0:
-                    empty_leaf_album_ids.append(cur_album_id)
+                    if prune_id is not None:
+                        empty_leaf_album_ids.append(prune_id)
+
+                current_level = next_level
 
         total_albums_pruned = 0
         pruner = AlbumsPruner(root_album_id, self.__albums_repo)
@@ -128,11 +147,13 @@ class SystemCleaner:
             with MongoDbTransactionsContext(self.__mongodb_clients_repo):
                 total_albums_pruned += pruner.prune_album(album_id)
 
+        logger.info("Finished pruning albums")
         return total_albums_pruned
 
     def __find_all_content(
         self,
     ) -> tuple[set[MediaItemId], set[AlbumId], set[GPhotosMediaItemKey]]:
+        logger.info("Finding content to keep")
         media_item_ids = set()
         album_ids = set()
         gmedia_item_keys = set()
@@ -157,26 +178,32 @@ class SystemCleaner:
                     )
                 )
 
+        logger.info("Finished finding content to keep")
         return media_item_ids, album_ids, gmedia_item_keys
 
     def __find_album_ids_to_delete(self, album_ids_to_keep: set[AlbumId]):
+        logger.info("Finding albums to keep")
         all_album_ids = set([item.id for item in self.__albums_repo.get_all_albums()])
 
+        logger.info("Finished finding albums to keep")
         return all_album_ids - album_ids_to_keep
 
     def __find_media_item_ids_to_delete(
         self,
         media_item_ids_to_keep: set[MediaItemId],
     ) -> set[MediaItemId]:
+        logger.info("Finding media items in DB to keep")
         all_media_item_ids = set(
             [item.id for item in self.__media_items_repo.get_all_media_items()]
         )
 
+        logger.info("Finished finding media items in DB to keep")
         return all_media_item_ids - media_item_ids_to_keep
 
     def __find_gmedia_item_keys_to_trash(
         self, gmedia_item_keys_to_keep: set[GPhotosMediaItemKey]
     ) -> set[GPhotosMediaItemKey]:
+        logger.info("Finding GPhoto media items to delete")
         all_gmedia_item_ids = set([])
         gphotos_clients = self.__gphotos_clients_repo.get_all_clients()
         for gphotos_client_id, gphotos_client in gphotos_clients:
@@ -187,9 +214,12 @@ class SystemCleaner:
                     )
                 )
 
+        logger.info("Finished finding GPhoto media items to delete")
         return all_gmedia_item_ids - gmedia_item_keys_to_keep
 
     def __move_gmedia_items_to_trash(self, gmedia_item_keys: list[GPhotosMediaItemKey]):
+        logger.info("Moving deleted GPhoto media items to trash album")
+
         client_id_to_gmedia_item_ids: Dict[ObjectId, list[str]] = {}
         for key in gmedia_item_keys:
             if key.client_id not in client_id_to_gmedia_item_ids:
@@ -204,6 +234,8 @@ class SystemCleaner:
             self.__move_gmedia_item_ids_to_album_safely(
                 client, trash_album.id, client_id_to_gmedia_item_ids[client_id]
             )
+
+        logger.info("Finished moving deleted GPhoto media items to trash album")
 
     def __find_or_create_trash_album(self, client: GPhotosClientV2) -> GAlbum:
         trash_album: GAlbum | None = None
