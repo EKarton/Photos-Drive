@@ -1,15 +1,13 @@
 from dataclasses import dataclass
 from typing import Dict
-from collections import deque
 from bson.objectid import ObjectId
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from ..shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
     MongoDbTransactionsContext,
 )
-
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.gphotos.client import GPhotosClientV2
 from ..shared.gphotos.albums import Album as GAlbum
@@ -153,33 +151,64 @@ class SystemCleaner:
     def __find_all_content(
         self,
     ) -> tuple[set[MediaItemId], set[AlbumId], set[GPhotosMediaItemKey]]:
-        logger.info("Finding content to keep")
-        media_item_ids = set()
-        album_ids = set()
-        gmedia_item_keys = set()
+        def process_album(album_id):
+            """
+            Fetch the album, extract its child album IDs and media items,
+            and build a local set of gmedia_item_keys.
 
-        root_album_id = self.__config.get_root_album_id()
-        albums_queue = deque([root_album_id])
-        while len(albums_queue) > 0:
-            cur_album_id = albums_queue.popleft()
-            cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
-            album_ids.add(cur_album_id)
+            Returns a tuple:
+                (current album_id, list of child_album_ids,
+                list of media_item_ids, list of gmedia_item_keys)
+            """
+            cur_album = self.__albums_repo.get_album_by_id(album_id)
+            child_ids = list(cur_album.child_album_ids)
+            local_media_item_ids = list(cur_album.media_item_ids)
 
-            for child_album_id in cur_album.child_album_ids:
-                albums_queue.append(child_album_id)
-
-            for media_item_id in cur_album.media_item_ids:
-                media_item_ids.add(media_item_id)
-
+            local_media_keys = []
+            for media_item_id in local_media_item_ids:
                 media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
-                gmedia_item_keys.add(
+                local_media_keys.append(
                     GPhotosMediaItemKey(
                         media_item.gphotos_client_id, media_item.gphotos_media_item_id
                     )
                 )
 
+            return album_id, child_ids, local_media_item_ids, local_media_keys
+
+        logger.info("Finding content to keep")
+
+        album_ids = []
+        media_item_ids = []
+        gmedia_item_keys = []
+
+        with ThreadPoolExecutor() as executor:
+            current_level = [self.__config.get_root_album_id()]
+
+            while current_level:
+                # Submit the current level's albums for processing in parallel.
+                futures = {
+                    executor.submit(process_album, album_id): album_id
+                    for album_id in current_level
+                }
+
+                next_level = []
+                for future in as_completed(futures):
+                    album_id, child_ids, local_media_ids, local_media_keys = (
+                        future.result()
+                    )
+
+                    album_ids.append(album_id)
+                    media_item_ids += local_media_ids
+                    gmedia_item_keys += local_media_keys
+
+                    # Enqueue the children for the next level.
+                    next_level += child_ids
+
+                # Move to the next level.
+                current_level = next_level
+
         logger.info("Finished finding content to keep")
-        return media_item_ids, album_ids, gmedia_item_keys
+        return set(media_item_ids), set(album_ids), set(gmedia_item_keys)
 
     def __find_album_ids_to_delete(self, album_ids_to_keep: set[AlbumId]):
         logger.info("Finding albums to keep")
