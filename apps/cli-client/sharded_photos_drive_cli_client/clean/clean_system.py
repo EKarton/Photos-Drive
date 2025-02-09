@@ -169,7 +169,7 @@ class SystemCleaner:
             album_id: AlbumId,
         ) -> tuple[list[MediaItemId], list[GPhotosMediaItemKey], list[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
-            print(f'Processing {album.id}')
+            logger.debug(f'Processing {album.id}')
 
             # Process media items
             media_ids_to_keep: list[MediaItemId] = []
@@ -205,6 +205,10 @@ class SystemCleaner:
 
             # Update the album if any changes were detected.
             if media_ids_to_keep_changed or child_album_ids_to_keep_changed:
+                logger.debug(f'Modifying {album.id}')
+                logger.debug(media_ids_to_keep)
+                logger.debug(child_album_ids_to_keep)
+
                 self.__albums_repo.update_album(
                     album_id,
                     UpdatedAlbumFields(
