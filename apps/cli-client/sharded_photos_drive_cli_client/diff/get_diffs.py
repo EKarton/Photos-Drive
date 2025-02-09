@@ -1,12 +1,14 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from collections import deque
 import logging
 import os
+from typing import cast
 
 from ..shared.hashes.xxhash import compute_file_hash
 from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 from ..shared.config.config import Config
-from ..shared.mongodb.albums import Album
+from ..shared.mongodb.albums import Album, AlbumId
 from ..shared.mongodb.albums_repository import AlbumsRepository
 from ..shared.mongodb.media_items_repository import MediaItemsRepository
 
@@ -93,12 +95,20 @@ class FolderSyncDiff:
             )
 
         base_album_id = base_album.id
-        queue: deque = deque([(base_album_id, [])])
 
-        while len(queue) > 0:
-            album_id, prev_path = queue.popleft()
+        def process_album(
+            album_id: AlbumId, prev_path: list[str]
+        ) -> tuple[list[RemoteFile], list[tuple[AlbumId, list[str]]]]:
+            '''
+            This helper processes one album and returns:
+            - the RemoteFile objects for its media items,
+            - a list of child album tuples (child_album_id, new_prev_path)
+            '''
+
             album = self.__albums_repo.get_album_by_id(album_id)
+            local_found_files: list[RemoteFile] = []
 
+            # Process media items for this album.
             for media_item_id in album.media_item_ids:
                 media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
                 file_hash_str = (
@@ -107,29 +117,55 @@ class FolderSyncDiff:
 
                 if album_id == base_album_id:
                     remote_file_path = f'{remote_dir_path}/{media_item.file_name}'
-                    found_files.append(
+                    local_found_files.append(
                         RemoteFile(
                             key=f'{media_item.file_name}:{file_hash_str}',
                             remote_relative_file_path=remote_file_path,
                         )
                     )
                 else:
-                    remote_file_path = str.join(
-                        '/', prev_path + [album.name, media_item.file_name]
+                    # Build the relative path
+                    remote_file_path = '/'.join(
+                        prev_path + [cast(str, album.name), media_item.file_name]
                     )
                     remote_relative_file_path = f'{remote_dir_path}/{remote_file_path}'
-                    found_files.append(
+                    local_found_files.append(
                         RemoteFile(
                             key=f'{remote_file_path}:{file_hash_str}',
                             remote_relative_file_path=remote_relative_file_path,
                         )
                     )
 
+            # Build new tuples for child albums.
+            child_album_tuples = []
             for child_album_id in album.child_album_ids:
                 if album_id == base_album_id:
-                    queue.append((child_album_id, prev_path.copy()))
+                    child_album_tuples.append((child_album_id, prev_path.copy()))
                 else:
-                    queue.append((child_album_id, prev_path + [album.name]))
+                    child_album_tuples.append(
+                        (child_album_id, prev_path + [cast(str, album.name)])
+                    )
+
+            return local_found_files, child_album_tuples
+
+        # Perform parallel BFS
+        with ThreadPoolExecutor() as executor:
+            cur_level: list[tuple[AlbumId, list[str]]] = [(base_album_id, [])]
+
+            while len(cur_level) > 0:
+                futures = [
+                    executor.submit(process_album, cur_album_id, prev_path)
+                    for cur_album_id, prev_path in cur_level
+                ]
+
+                next_level: list[tuple[AlbumId, list[str]]] = []
+                for future in as_completed(futures):
+                    local_found_files, child_album_tuples = future.result()
+
+                    found_files += local_found_files
+                    next_level += child_album_tuples
+
+                cur_level = next_level
 
         return found_files
 
