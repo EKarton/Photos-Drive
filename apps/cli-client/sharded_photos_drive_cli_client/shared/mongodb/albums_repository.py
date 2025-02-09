@@ -207,10 +207,10 @@ class AlbumsRepositoryImpl(AlbumsRepository):
                     else None
                 ),
                 "child_album_ids": [
-                    f"{c_id.client_id}/{c_id.object_id}" for c_id in child_album_ids
+                    f"{c_id.client_id}:{c_id.object_id}" for c_id in child_album_ids
                 ],
                 "media_item_ids": [
-                    f"{m_id.client_id}/{m_id.object_id}" for m_id in media_item_ids
+                    f"{m_id.client_id}:{m_id.object_id}" for m_id in media_item_ids
                 ],
             },
             session=session,

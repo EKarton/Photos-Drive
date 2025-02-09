@@ -69,14 +69,14 @@ class FakeItemsRepository:
         self, client_id: str, album_id: str, media_item_ids: list[str]
     ):
         if client_id not in self.__album_id_to_accessible_client_ids[album_id]:
-            raise Exception("Cannot add photos to album it did not join")
+            raise ValueError("Cannot add photos to album it did not join")
 
         for media_id in media_item_ids:
             if (
                 client_id
                 not in self.__media_item_ids_to_accessible_client_ids[media_id]
             ):
-                raise Exception("Cannot put someone's media item into album")
+                raise ValueError("Cannot put someone's media item into album")
 
             self.__album_id_to_media_item_ids[album_id].add(media_id)
 
@@ -85,14 +85,14 @@ class FakeItemsRepository:
         self, client_id: str, album_id: str, media_item_ids: list[str]
     ):
         if client_id not in self.__album_id_to_accessible_client_ids[album_id]:
-            raise Exception("Cannot remove photos from album it did not join")
+            raise ValueError("Cannot remove photos from album it did not join")
 
         for media_id in media_item_ids:
             is_accessible = (
                 client_id in self.__media_item_ids_to_accessible_client_ids[media_id]
             )
             if not is_accessible:
-                raise Exception("Cannot remove someone else's photos from album")
+                raise ValueError("Cannot remove someone else's photos from album")
 
             self.__album_id_to_media_item_ids[album_id].remove(media_id)
 
@@ -106,7 +106,7 @@ class FakeItemsRepository:
 
             if album_id is not None:
                 if client_id not in self.__album_id_to_accessible_client_ids[album_id]:
-                    raise Exception("Cannot add uploaded photos to inaccessible album")
+                    raise ValueError("Cannot add uploaded photos to inaccessible album")
                 self.__album_id_to_media_item_ids[album_id].add(new_media_item_id)
 
             new_media_item = {
@@ -169,7 +169,7 @@ class FakeItemsRepository:
     ) -> list[MediaItem]:
         if album_id is not None:
             if client_id not in self.__album_id_to_accessible_client_ids[album_id]:
-                raise Exception("Cannot search in inaccessible album")
+                raise ValueError("Cannot search in inaccessible album")
 
             return [
                 from_dict(MediaItem, self.__media_item_id_to_media_item[media_item_id])
@@ -196,7 +196,7 @@ class FakeItemsRepository:
         new_cover_media_item_id: Optional[str] = None,
     ) -> Album:
         if client_id != self.__album_id_to_owned_client_id[album_id]:
-            raise Exception("Cannot update album it does not own")
+            raise ValueError("Cannot update album it does not own")
 
         album_info = self.__album_id_to_album[album_id]
         if new_title is not None:
@@ -219,6 +219,16 @@ class FakeItemsRepository:
                 "coverPhotoMediaItemId": album_info["coverPhotoMediaItemId"],
             },
         )
+
+    @synchronized(_lock)
+    def delete_album(self, client_id: str, album_id: str):
+        if client_id != self.__album_id_to_owned_client_id[album_id]:
+            raise ValueError("Cannot update album it does not own")
+
+        del self.__album_id_to_album[album_id]
+        del self.__album_id_to_owned_client_id[album_id]
+        del self.__album_id_to_media_item_ids[album_id]
+        del self.__album_id_to_accessible_client_ids[album_id]
 
     def __get_unique_media_item_id(self):
         media_item_id = str(uuid.uuid4())

@@ -13,7 +13,7 @@ class FakeGPhotosMediaItemsClient(GPhotosMediaItemsClient):
         self, upload_tokens: list[str], album_id: Optional[str] = None
     ) -> UploadedPhotosToGPhotosResult:
         if len(upload_tokens) >= 50:
-            raise Exception("Must have less than 50 upload tokens")
+            raise ValueError("Must have less than 50 upload tokens")
 
         return self.repository.add_uploaded_photos_to_gphotos(
             self.id, upload_tokens, album_id

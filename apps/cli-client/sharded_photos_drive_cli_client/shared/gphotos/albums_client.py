@@ -117,6 +117,18 @@ class GPhotosAlbumsClient:
         return from_dict(Album, res.json())
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
+    def delete_album(self, album_id: str):
+        """
+        Deletes an existing album.
+
+        Args:
+            album_id (str): The ID of the album to update.
+        """
+        uri = f"https://photoslibrary.googleapis.com/v1/albums/{album_id}"
+        res = self._session.delete(uri)
+        res.raise_for_status()
+
+    @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
     def add_photos_to_album(self, album_id: str, media_item_ids: list[str]):
         """
         Adds a list of media items from the album.

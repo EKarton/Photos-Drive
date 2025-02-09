@@ -84,6 +84,31 @@ class FakeGPhotosClientTests(unittest.TestCase):
         albums_list = client_1.albums().list_albums()
         self.assertEqual(len(albums_list), 0)
 
+    def test_delete_album(self):
+        repo = FakeItemsRepository()
+        client_1 = FakeGPhotosClient(repo)
+        client_2 = FakeGPhotosClient(repo)
+        album_1 = client_1.albums().create_album("Photos/2011")
+        album_2 = client_2.albums().create_album("Photos/2012")
+
+        client_1.albums().delete_album(album_1.id)
+        client_2.albums().delete_album(album_2.id)
+
+        albums_list_1 = client_1.albums().list_albums()
+        albums_list_2 = client_2.albums().list_albums()
+        self.assertEqual(len(albums_list_1), 0)
+        self.assertEqual(len(albums_list_2), 0)
+
+    def test_delete_album__in_different_client__throws_exception(self):
+        repo = FakeItemsRepository()
+        client_1 = FakeGPhotosClient(repo)
+        client_2 = FakeGPhotosClient(repo)
+        client_1.albums().create_album("Photos/2011")
+        album_2 = client_2.albums().create_album("Photos/2012")
+
+        with self.assertRaisesRegex(ValueError, 'Cannot update album it does not own'):
+            client_1.albums().delete_album(album_2.id)
+
     def test_add_photos_to_album__existing_album__adds_media_items_to_albums(self):
         repo = FakeItemsRepository()
         client_1 = FakeGPhotosClient(repo)
@@ -162,7 +187,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         new_media_item_id = results.newMediaItemResults[0].mediaItem.id
 
         with self.assertRaisesRegex(
-            Exception, "Cannot add photos to album it did not join"
+            ValueError, "Cannot add photos to album it did not join"
         ):
             client_1.albums().add_photos_to_album(album_1.id, [new_media_item_id])
 
@@ -181,7 +206,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         new_media_item_id = results.newMediaItemResults[0].mediaItem.id
 
         with self.assertRaisesRegex(
-            Exception, "Cannot put someone's media item into album"
+            ValueError, "Cannot put someone's media item into album"
         ):
             client_2.albums().add_photos_to_album(album_1.id, [new_media_item_id])
 
@@ -202,7 +227,9 @@ class FakeGPhotosClientTests(unittest.TestCase):
             )
             new_media_item_ids.append(results.newMediaItemResults[0].mediaItem.id)
 
-        with self.assertRaisesRegex(Exception, "Must have less than 50 media item ids"):
+        with self.assertRaisesRegex(
+            ValueError, "Must have less than 50 media item ids"
+        ):
             client_2.albums().add_photos_to_album(album_1.id, new_media_item_ids)
 
     def test_remove_photos_from_album__on_photo_in_album__removes_photo_from_album(
@@ -242,7 +269,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         new_media_item_id = results.newMediaItemResults[0].mediaItem.id
 
         with self.assertRaisesRegex(
-            Exception, "Cannot remove photos from album it did not join"
+            ValueError, "Cannot remove photos from album it did not join"
         ):
             client_2.albums().remove_photos_from_album(album_1.id, [new_media_item_id])
 
@@ -260,7 +287,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         new_media_item_id = results.newMediaItemResults[0].mediaItem.id
 
         with self.assertRaisesRegex(
-            Exception, "Cannot remove someone else's photos from album"
+            ValueError, "Cannot remove someone else's photos from album"
         ):
             client_2.albums().remove_photos_from_album(album_1.id, [new_media_item_id])
 
@@ -326,7 +353,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
             for i in range(50)
         ]
 
-        with self.assertRaisesRegex(Exception, "Must have less than 50 upload tokens"):
+        with self.assertRaisesRegex(ValueError, "Must have less than 50 upload tokens"):
             client_1.media_items().add_uploaded_photos_to_gphotos(upload_tokens)
 
     def test_add_uploaded_photos_to_gphotos__regular_album__adds_to_album(self):
@@ -356,7 +383,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         )
 
         with self.assertRaisesRegex(
-            Exception, 'Cannot add uploaded photos to inaccessible album'
+            ValueError, 'Cannot add uploaded photos to inaccessible album'
         ):
             client_1.media_items().add_uploaded_photos_to_gphotos(
                 [upload_token], album_1.id
@@ -436,7 +463,7 @@ class FakeGPhotosClientTests(unittest.TestCase):
         client_2 = FakeGPhotosClient(repo)
         album_1 = client_1.albums().create_album("Photos/2011")
 
-        with self.assertRaisesRegex(Exception, "Cannot search in inaccessible album"):
+        with self.assertRaisesRegex(ValueError, "Cannot search in inaccessible album"):
             client_2.media_items().search_for_media_items(album_1.id)
 
     def test_update_album__returns_info_and_updates_album(self):
@@ -476,5 +503,5 @@ class FakeGPhotosClientTests(unittest.TestCase):
         client_2 = FakeGPhotosClient(repo)
         album_1 = client_1.albums().create_album("Photos/2011")
 
-        with self.assertRaisesRegex(Exception, "Cannot update album it does not own"):
+        with self.assertRaisesRegex(ValueError, "Cannot update album it does not own"):
             client_2.albums().update_album(album_1.id, "Photos/2020")
