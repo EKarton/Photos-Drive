@@ -228,14 +228,28 @@ class FolderSyncDiff:
     def __get_diffs(
         self, remote_files: list[RemoteFile], local_files: list[LocalFile]
     ) -> DiffResults:
-        remote_file_keys = set([f.key for f in remote_files])
-        local_file_keys = set([f.key for f in local_files])
+        # Build the key sets concurrently.
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            # Submit both map creations concurrently.
+            future_remote_keys = executor.submit(lambda: {f.key for f in remote_files})
+            future_local_keys = executor.submit(lambda: {f.key for f in local_files})
+            remote_file_keys = future_remote_keys.result()
+            local_file_keys = future_local_keys.result()
+
+            # Define functions for the filtering tasks.
+            def filter_missing_remote():
+                return [obj for obj in remote_files if obj.key not in local_file_keys]
+
+            def filter_missing_local():
+                return [obj for obj in local_files if obj.key not in remote_file_keys]
+
+            # Submit both filtering tasks concurrently.
+            future_missing_remote = executor.submit(filter_missing_remote)
+            future_missing_local = executor.submit(filter_missing_local)
+            missing_remote_files_in_local = future_missing_remote.result()
+            missing_local_files_in_remote = future_missing_local.result()
 
         return DiffResults(
-            missing_remote_files_in_local=[
-                obj for obj in remote_files if obj.key not in local_file_keys
-            ],
-            missing_local_files_in_remote=[
-                obj for obj in local_files if obj.key not in remote_file_keys
-            ],
+            missing_remote_files_in_local=missing_remote_files_in_local,
+            missing_local_files_in_remote=missing_local_files_in_remote,
         )
