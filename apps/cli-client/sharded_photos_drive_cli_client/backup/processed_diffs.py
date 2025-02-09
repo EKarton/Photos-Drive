@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, replace
 import os
-from typing import cast
+from typing import Optional, cast
 from exiftool import ExifToolHelper  # type: ignore
 
 from ..shared.hashes.xxhash import compute_file_hash
@@ -38,34 +39,42 @@ class DiffsProcessor:
     def process_raw_diffs(self, diffs: list[Diff]) -> list[ProcessedDiff]:
         """Processes raw diffs into processed diffs, parsing their metadata."""
 
-        processed_diffs = []
-
-        # Verify diffs
-        for diff in diffs:
-            if diff.modifier != "+" and diff.modifier != "-":
+        def process_diff(diff):
+            if diff.modifier not in ("+", "-"):
                 raise ValueError(f"Modifier {diff.modifier} in {diff} not allowed.")
 
             if diff.modifier == "+" and not os.path.exists(diff.file_path):
                 raise ValueError(f"File {diff.file_path} does not exist.")
 
+            return ProcessedDiff(
+                modifier=diff.modifier,
+                file_path=diff.file_path,
+                file_hash=compute_file_hash(diff.file_path),
+                album_name=self.__get_album_name(diff),
+                file_name=self.__get_file_name(diff),
+                file_size=self.__get_file_size_in_bytes(diff),
+                location=None,  # Placeholder; will be updated later
+            )
+
+        processed_diffs: list[Optional[ProcessedDiff]] = [None] * len(diffs)
+        with ThreadPoolExecutor() as executor:
+            future_to_idx = {
+                executor.submit(process_diff, diff): i for i, diff in enumerate(diffs)
+            }
+            for future in as_completed(future_to_idx):
+                idx = future_to_idx[future]
+                processed_diffs[idx] = future.result()
+
         # Get locations from all diffs
         locations = self.__get_locations(diffs)
 
-        # Process diffs
-        for i, diff in enumerate(diffs):
-            processed_diffs.append(
-                ProcessedDiff(
-                    modifier=diff.modifier,
-                    file_path=diff.file_path,
-                    file_hash=compute_file_hash(diff.file_path),
-                    album_name=self.__get_album_name(diff),
-                    file_name=self.__get_file_name(diff),
-                    file_size=self.__get_file_size_in_bytes(diff),
-                    location=locations[i],
-                )
+        # Update locations in processed diffs
+        for i, processed_diff in enumerate(processed_diffs):
+            processed_diffs[i] = replace(
+                cast(ProcessedDiff, processed_diff), location=locations[i]
             )
 
-        return processed_diffs
+        return cast(list[ProcessedDiff], processed_diffs)
 
     def __get_locations(self, diffs: list[Diff]) -> list[GpsLocation | None]:
         locations: list[GpsLocation | None] = [None] * len(diffs)
