@@ -151,35 +151,10 @@ class SystemCleaner:
     def __find_all_content(
         self,
     ) -> tuple[set[MediaItemId], set[AlbumId], set[GPhotosMediaItemKey]]:
-        def process_album(album_id):
-            """
-            Fetch the album, extract its child album IDs and media items,
-            and build a local set of gmedia_item_keys.
+        logger.info("Finding album ids and media item ids to keep")
 
-            Returns a tuple:
-                (current album_id, list of child_album_ids,
-                list of media_item_ids, list of gmedia_item_keys)
-            """
-            cur_album = self.__albums_repo.get_album_by_id(album_id)
-            child_ids = list(cur_album.child_album_ids)
-            local_media_item_ids = list(cur_album.media_item_ids)
-
-            local_media_keys = []
-            for media_item_id in local_media_item_ids:
-                media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
-                local_media_keys.append(
-                    GPhotosMediaItemKey(
-                        media_item.gphotos_client_id, media_item.gphotos_media_item_id
-                    )
-                )
-
-            return album_id, child_ids, local_media_item_ids, local_media_keys
-
-        logger.info("Finding content to keep")
-
-        album_ids = []
-        media_item_ids = []
-        gmedia_item_keys = []
+        album_ids: list[AlbumId] = []
+        media_item_ids: list[MediaItemId] = []
 
         with ThreadPoolExecutor() as executor:
             current_level = [self.__config.get_root_album_id()]
@@ -187,27 +162,49 @@ class SystemCleaner:
             while current_level:
                 # Submit the current level's albums for processing in parallel.
                 futures = {
-                    executor.submit(process_album, album_id): album_id
+                    executor.submit(
+                        self.__albums_repo.get_album_by_id, album_id
+                    ): album_id
                     for album_id in current_level
                 }
 
                 next_level = []
                 for future in as_completed(futures):
-                    album_id, child_ids, local_media_ids, local_media_keys = (
-                        future.result()
-                    )
+                    cur_album = future.result()
 
-                    album_ids.append(album_id)
-                    media_item_ids += local_media_ids
-                    gmedia_item_keys += local_media_keys
+                    album_ids.append(cur_album.id)
+                    media_item_ids += cur_album.media_item_ids
 
                     # Enqueue the children for the next level.
-                    next_level += child_ids
+                    next_level += cur_album.child_album_ids
 
                 # Move to the next level.
                 current_level = next_level
 
-        logger.info("Finished finding content to keep")
+        logger.info("Finished finding album ids and media item ids to keep")
+
+        logger.info("Finding gphoto media item ids to keep")
+
+        gmedia_item_keys: list[GPhotosMediaItemKey] = []
+
+        with ThreadPoolExecutor() as executor:
+            futures = {
+                executor.submit(
+                    self.__media_items_repo.get_media_item_by_id, media_item_id
+                ): media_item_id
+                for media_item_id in media_item_ids
+            }
+
+            for future in as_completed(futures):
+                media_item = future.result()
+                gmedia_item_keys.append(
+                    GPhotosMediaItemKey(
+                        media_item.gphotos_client_id, media_item.gphotos_media_item_id
+                    )
+                )
+
+        logger.info("Finished finding gphoto media item ids to keep")
+
         return set(media_item_ids), set(album_ids), set(gmedia_item_keys)
 
     def __find_album_ids_to_delete(self, album_ids_to_keep: set[AlbumId]):
@@ -233,18 +230,30 @@ class SystemCleaner:
         self, gmedia_item_keys_to_keep: set[GPhotosMediaItemKey]
     ) -> set[GPhotosMediaItemKey]:
         logger.info("Finding GPhoto media items to delete")
-        all_gmedia_item_ids = set([])
-        gphotos_clients = self.__gphotos_clients_repo.get_all_clients()
-        for gphotos_client_id, gphotos_client in gphotos_clients:
-            for gmedia_item in gphotos_client.media_items().search_for_media_items():
-                all_gmedia_item_ids.add(
-                    GPhotosMediaItemKey(
-                        client_id=gphotos_client_id, object_id=gmedia_item.id
-                    )
+
+        def process_job(
+            args: tuple[ObjectId, GPhotosClientV2],
+        ):
+            gphotos_client_id, gphotos_client = args
+            return [
+                GPhotosMediaItemKey(
+                    client_id=gphotos_client_id, object_id=gmedia_item.id
                 )
+                for gmedia_item in gphotos_client.media_items().search_for_media_items()
+            ]
+
+        all_gmedia_item_ids = []
+
+        with ThreadPoolExecutor() as executor:
+            gphotos_clients = self.__gphotos_clients_repo.get_all_clients()
+            futures = [
+                executor.submit(process_job, client) for client in gphotos_clients
+            ]
+            for future in as_completed(futures):
+                all_gmedia_item_ids += future.result()
 
         logger.info("Finished finding GPhoto media items to delete")
-        return all_gmedia_item_ids - gmedia_item_keys_to_keep
+        return set(all_gmedia_item_ids) - gmedia_item_keys_to_keep
 
     def __move_gmedia_items_to_trash(self, gmedia_item_keys: list[GPhotosMediaItemKey]):
         logger.info("Moving deleted GPhoto media items to trash album")
