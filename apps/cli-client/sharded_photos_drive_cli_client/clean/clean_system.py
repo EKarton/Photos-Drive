@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from bson.objectid import ObjectId
 import logging
 from ..shared.gphotos.albums import Album as GAlbum
-from concurrent.futures import Future, ThreadPoolExecutor, as_completed, wait
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 from ..shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
