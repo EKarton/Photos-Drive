@@ -177,6 +177,9 @@ class SystemCleaner:
             media_ids_to_keep_changed = False
             for media_item_id in album.media_item_ids:
                 if media_item_id not in all_media_item_ids:
+                    logger.debug(
+                        f'Removing gemdia item {media_item_id} from {album.id}'
+                    )
                     media_ids_to_keep_changed = True
                     continue
 
@@ -187,6 +190,9 @@ class SystemCleaner:
                 )
 
                 if gphotos_media_item_id not in all_gphoto_media_item_ids:
+                    logger.debug(
+                        f'Removing gemdia item {gphotos_media_item_id} from {album.id}'
+                    )
                     media_ids_to_keep_changed = True
                     continue
 
@@ -198,6 +204,9 @@ class SystemCleaner:
             child_album_ids_to_keep_changed = False
             for child_album_id in album.child_album_ids:
                 if child_album_id not in all_album_ids:
+                    logger.debug(
+                        f'Removing child album id {child_album_id} from {album.id}'
+                    )
                     child_album_ids_to_keep_changed = True
                     continue
 
