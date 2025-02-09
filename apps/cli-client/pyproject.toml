@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sharded_photos_drive_cli_client"
-version = "1.2.2"
+version = "1.2.3"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
