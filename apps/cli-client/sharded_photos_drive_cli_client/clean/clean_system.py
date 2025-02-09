@@ -77,8 +77,11 @@ class SystemCleaner:
         # Step 1: Prune all the leaf albums in the tree
         num_albums_pruned = self.__prune_albums()
 
-        # Step 2: Find all content in the tree that we want to keep
-        media_item_ids, album_ids, gmedia_item_keys = self.__find_all_content()
+        # Step 2a: Find all album ids and media item ids that we want to keep
+        album_ids, media_item_ids = self.__find_all_album_ids_and_media_item_ids()
+
+        # # Step 2b: Find all gphoto media item ids that we want to keep
+        gmedia_item_keys = self.__find_all_gmedia_item_ids(media_item_ids)
 
         # Step 3: Find all the media item ids to delete
         media_item_ids_to_delete = self.__find_media_item_ids_to_delete(media_item_ids)
@@ -148,9 +151,9 @@ class SystemCleaner:
         logger.info("Finished pruning albums")
         return total_albums_pruned
 
-    def __find_all_content(
+    def __find_all_album_ids_and_media_item_ids(
         self,
-    ) -> tuple[set[MediaItemId], set[AlbumId], set[GPhotosMediaItemKey]]:
+    ) -> tuple[set[AlbumId], set[MediaItemId]]:
         logger.info("Finding album ids and media item ids to keep")
 
         album_ids: list[AlbumId] = []
@@ -182,9 +185,13 @@ class SystemCleaner:
                 current_level = next_level
 
         logger.info("Finished finding album ids and media item ids to keep")
+        return set(album_ids), set(media_item_ids)
 
+    def __find_all_gmedia_item_ids(
+        self,
+        media_item_ids: set[MediaItemId],
+    ) -> set[GPhotosMediaItemKey]:
         logger.info("Finding gphoto media item ids to keep")
-
         gmedia_item_keys: list[GPhotosMediaItemKey] = []
 
         with ThreadPoolExecutor() as executor:
@@ -204,8 +211,7 @@ class SystemCleaner:
                 )
 
         logger.info("Finished finding gphoto media item ids to keep")
-
-        return set(media_item_ids), set(album_ids), set(gmedia_item_keys)
+        return set(gmedia_item_keys)
 
     def __find_album_ids_to_delete(self, album_ids_to_keep: set[AlbumId]):
         logger.info("Finding albums to keep")
