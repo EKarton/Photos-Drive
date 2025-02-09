@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 from bson.objectid import ObjectId
 import logging
-from collections import deque
-from concurrent.futures import Future, ThreadPoolExecutor, as_completed, wait
+from ..shared.gphotos.albums import Album as GAlbum
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 from ..shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
@@ -74,40 +74,37 @@ class SystemCleaner:
         self.__mongodb_clients_repo = mongodb_clients_repo
 
     def clean(self) -> CleanupResults:
-        # Step 1: Delete all albums in GPhotos
-        self.__delete_all_albums()
-
-        # Step 2: Find all albums
+        # Step 1: Find all albums
         all_album_ids = self.__find_all_albums()
 
-        # Step 3: Find all media items
+        # Step 2: Find all media items
         all_media_item_ids = self.__find_all_media_items()
 
-        # Step 4: Find all gphoto media items
+        # Step 3: Find all gphoto media items
         all_gphoto_media_item_ids = self.__find_all_gmedia_items()
 
-        # Step 5: Find all the content that we want to keep
+        # Step 4: Find all the content that we want to keep
         album_ids_to_keep, media_item_ids_to_keep, gmedia_item_ids_to_keep = (
             self.__find_content_to_keep(
                 all_album_ids, all_media_item_ids, all_gphoto_media_item_ids
             )
         )
 
-        # Step 6: Delete all unlinked albums
+        # Step 5: Delete all unlinked albums
         album_ids_to_delete = all_album_ids - album_ids_to_keep
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
 
-        # Step 7: Delete all unlinked media items
+        # Step 6: Delete all unlinked media items
         media_item_ids_to_delete = all_media_item_ids - media_item_ids_to_keep
         self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
 
-        # Step 8: Delete all unlinked gphoto media items
+        # Step 7: Delete all unlinked gphoto media items
         gphoto_media_item_ids_to_delete = (
             all_gphoto_media_item_ids - gmedia_item_ids_to_keep
         )
         self.__move_gmedia_items_to_trash(list(gphoto_media_item_ids_to_delete))
 
-        # Step 9: Prune all the leaf albums in the tree
+        # Step 8: Prune all the leaf albums in the tree
         num_albums_pruned = self.__prune_albums()
 
         return CleanupResults(
@@ -115,34 +112,6 @@ class SystemCleaner:
             num_albums_deleted=len(album_ids_to_delete) + num_albums_pruned,
             num_gmedia_items_moved_to_trash=len(gphoto_media_item_ids_to_delete),
         )
-
-    def __delete_all_albums(self):
-        logger.info("Deleting all albums in Google Photos")
-        albums_to_delete: list[tuple[ObjectId, str]] = []
-
-        with ThreadPoolExecutor() as executor:
-            list_albums_futures = {
-                executor.submit(client.albums().list_albums, True): client_id
-                for client_id, client in self.__gphotos_clients_repo.get_all_clients()
-            }
-
-            for future in as_completed(list_albums_futures):
-                albums = future.result()
-                client_id = list_albums_futures[future]
-                albums_to_delete += [(client_id, album.id) for album in albums]
-
-        with ThreadPoolExecutor() as executor:
-            delete_albums_futures: list[Future] = []
-
-            for client_id, album_id in albums_to_delete:
-                client = self.__gphotos_clients_repo.get_client_by_id(client_id)
-                delete_albums_futures.append(
-                    executor.submit(client.albums().delete_album, album_id)
-                )
-
-            wait(delete_albums_futures)
-
-        logger.info("Deleted all albums in Google Photos")
 
     def __find_all_albums(self) -> set[AlbumId]:
         logger.info("Finding all albums")
@@ -187,21 +156,26 @@ class SystemCleaner:
         all_media_item_ids: set[MediaItemId],
         all_gphoto_media_item_ids: set[GPhotosMediaItemKey],
     ) -> tuple[set[AlbumId], set[MediaItemId], set[GPhotosMediaItemKey]]:
-        album_ids_to_keep: list[AlbumId] = []
-        media_item_ids_to_keep: list[MediaItemId] = []
-        gmedia_item_ids_to_keep: list[GPhotosMediaItemKey] = []
+        logger.info(
+            "Finding all album ids, media item ids, and gphoto media item ids to keep"
+        )
 
-        queue = deque([self.__config.get_root_album_id()])
-        while len(queue) > 0:
-            album_id = queue.popleft()
+        all_album_ids_to_keep: list[AlbumId] = []
+        all_media_ids_to_keep: list[MediaItemId] = []
+        all_gmedia_ids_to_keep: list[GPhotosMediaItemKey] = []
+
+        def process_album(
+            album_id: AlbumId,
+        ) -> tuple[list[MediaItemId], list[GPhotosMediaItemKey], list[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
-            album_ids_to_keep.append(album_id)
 
-            sub_media_item_ids_to_keep = []
-            sub_media_item_ids_to_keep_changed = False
+            # Process media items
+            media_ids_to_keep: list[MediaItemId] = []
+            gmedia_ids_to_keep: list[GPhotosMediaItemKey] = []
+            media_ids_to_keep_changed = False
             for media_item_id in album.media_item_ids:
                 if media_item_id not in all_media_item_ids:
-                    sub_media_item_ids_to_keep_changed = True
+                    media_ids_to_keep_changed = True
                     continue
 
                 media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
@@ -211,49 +185,73 @@ class SystemCleaner:
                 )
 
                 if gphotos_media_item_id not in all_gphoto_media_item_ids:
-                    sub_media_item_ids_to_keep_changed = True
+                    media_ids_to_keep_changed = True
                     continue
 
-                sub_media_item_ids_to_keep.append(media_item_id)
-                media_item_ids_to_keep.append(media_item_id)
-                gmedia_item_ids_to_keep.append(gphotos_media_item_id)
+                media_ids_to_keep.append(media_item_id)
+                gmedia_ids_to_keep.append(gphotos_media_item_id)
 
-            sub_child_album_ids_to_keep = []
-            sub_child_album_ids_to_keep_changed = False
+            # Process child albums
+            child_album_ids_to_keep: list[AlbumId] = []
+            child_album_ids_to_keep_changed = False
             for child_album_id in album.child_album_ids:
                 if child_album_id not in all_album_ids:
-                    sub_child_album_ids_to_keep_changed = True
+                    child_album_ids_to_keep_changed = True
                     continue
 
-                sub_child_album_ids_to_keep.append(child_album_id)
+                child_album_ids_to_keep.append(child_album_id)
 
-            if (
-                sub_media_item_ids_to_keep_changed
-                or sub_child_album_ids_to_keep_changed
-            ):
+            # Update the album if any changes were detected.
+            if media_ids_to_keep_changed or child_album_ids_to_keep_changed:
                 self.__albums_repo.update_album(
                     album_id,
                     UpdatedAlbumFields(
                         new_media_item_ids=(
-                            sub_media_item_ids_to_keep
-                            if sub_media_item_ids_to_keep_changed
-                            else None
+                            media_ids_to_keep if media_ids_to_keep_changed else None
                         ),
                         new_child_album_ids=(
-                            sub_child_album_ids_to_keep
-                            if sub_child_album_ids_to_keep_changed
+                            child_album_ids_to_keep
+                            if child_album_ids_to_keep_changed
                             else None
                         ),
                     ),
                 )
+            # Return data for merging and the next BFS frontier.
+            return (
+                media_ids_to_keep,
+                gmedia_ids_to_keep,
+                child_album_ids_to_keep,
+            )
 
-            for child_album_id in sub_child_album_ids_to_keep:
-                queue.append(child_album_id)
+        with ThreadPoolExecutor() as executor:
+            cur_level = [self.__config.get_root_album_id()]
+            while len(cur_level) > 0:
+                # Submit all albums at the current level.
+                futures = {
+                    executor.submit(process_album, album_id): album_id
+                    for album_id in cur_level
+                }
 
+                new_level = []
+                for future in as_completed(futures):
+                    local_media_ids, local_gmedia_ids, child_album_ids = future.result()
+                    album_id = futures[future]
+
+                    all_album_ids_to_keep.append(album_id)
+                    all_media_ids_to_keep += local_media_ids
+                    all_gmedia_ids_to_keep += local_gmedia_ids
+                    new_level += child_album_ids
+
+                cur_level = new_level
+
+        logger.info(
+            "Finished finding all album ids, media item ids, and gphoto media item ids "
+            + "to keep"
+        )
         return (
-            set(album_ids_to_keep),
-            set(media_item_ids_to_keep),
-            set(gmedia_item_ids_to_keep),
+            set(all_album_ids_to_keep),
+            set(all_media_ids_to_keep),
+            set(all_gmedia_ids_to_keep),
         )
 
     def __move_gmedia_items_to_trash(self, gmedia_item_keys: list[GPhotosMediaItemKey]):
@@ -271,7 +269,7 @@ class SystemCleaner:
             gmedia_item_ids: list[GPhotosMediaItemKey],
         ):
             client = self.__gphotos_clients_repo.get_client_by_id(client_id)
-            trash_album = client.albums().create_album(TRASH_ALBUM_TITLE)
+            trash_album = self.__find_or_create_trash_album(client)
 
             self.__move_gmedia_item_ids_to_album_safely(
                 client,
@@ -289,6 +287,18 @@ class SystemCleaner:
             wait(futures)
 
         logger.info("Finished moving deleted GPhoto media items to trash album")
+
+    def __find_or_create_trash_album(self, client: GPhotosClientV2) -> GAlbum:
+        trash_album: GAlbum | None = None
+        for album in client.albums().list_albums(exclude_non_app_created_data=True):
+            if album.title == TRASH_ALBUM_TITLE:
+                trash_album = album
+                break
+
+        if not trash_album:
+            trash_album = client.albums().create_album(TRASH_ALBUM_TITLE)
+
+        return trash_album
 
     def __move_gmedia_item_ids_to_album_safely(
         self, client: GPhotosClientV2, galbum_id: str, gmedia_item_ids: list[str]
