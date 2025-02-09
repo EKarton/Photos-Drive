@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 from bson.objectid import ObjectId
 import logging
-from ..shared.gphotos.albums import Album as GAlbum
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 from ..shared.mongodb.clients_repository import (
@@ -10,6 +9,8 @@ from ..shared.mongodb.clients_repository import (
     MongoDbTransactionsContext,
 )
 from ..shared.mongodb.albums_pruner import AlbumsPruner
+from ..shared.gphotos.albums import Album as GAlbum
+from ..shared.gphotos.media_items import MediaItem as GMediaItem
 from ..shared.gphotos.client import GPhotosClientV2
 from ..shared.mongodb.albums import AlbumId
 from ..shared.mongodb.media_items import MediaItemId
@@ -140,7 +141,7 @@ class SystemCleaner:
                 futures[future] = client_id
 
             for future in as_completed(futures):
-                raw_gmedia_items = future.result()
+                raw_gmedia_items: list[GMediaItem] = future.result()
                 client_id = futures[future]
                 gmedia_item_ids += [
                     GPhotosMediaItemKey(client_id, raw_gmedia_item.id)
@@ -168,6 +169,7 @@ class SystemCleaner:
             album_id: AlbumId,
         ) -> tuple[list[MediaItemId], list[GPhotosMediaItemKey], list[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
+            logger.debug(f'Processing {album.id}')
 
             # Process media items
             media_ids_to_keep: list[MediaItemId] = []
@@ -203,6 +205,10 @@ class SystemCleaner:
 
             # Update the album if any changes were detected.
             if media_ids_to_keep_changed or child_album_ids_to_keep_changed:
+                logger.debug(f'Modifying {album.id}')
+                logger.debug(media_ids_to_keep)
+                logger.debug(child_album_ids_to_keep)
+
                 self.__albums_repo.update_album(
                     album_id,
                     UpdatedAlbumFields(

@@ -3,8 +3,7 @@ from collections import deque
 import logging
 import os
 
-from sharded_photos_drive_cli_client.shared.hashes.xxhash import compute_file_hash
-
+from ..shared.hashes.xxhash import compute_file_hash
 from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
