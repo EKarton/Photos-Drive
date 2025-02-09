@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from bson.objectid import ObjectId
 import logging
 from collections import deque
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed, wait
 
 from ..shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
@@ -118,27 +118,29 @@ class SystemCleaner:
 
     def __delete_all_albums(self):
         logger.info("Deleting all albums in Google Photos")
-        albums_to_delete: list[tuple[str, str]] = []
+        albums_to_delete: list[tuple[ObjectId, str]] = []
 
         with ThreadPoolExecutor() as executor:
-            futures = {
+            list_albums_futures = {
                 executor.submit(client.albums().list_albums, True): client_id
                 for client_id, client in self.__gphotos_clients_repo.get_all_clients()
             }
 
-            for future in as_completed(futures):
+            for future in as_completed(list_albums_futures):
                 albums = future.result()
-                client_id = futures[future]
+                client_id = list_albums_futures[future]
                 albums_to_delete += [(client_id, album.id) for album in albums]
 
         with ThreadPoolExecutor() as executor:
-            futures = []
+            delete_albums_futures: list[Future] = []
 
             for client_id, album_id in albums_to_delete:
                 client = self.__gphotos_clients_repo.get_client_by_id(client_id)
-                futures.append(executor.submit(client.albums().delete_album, album_id))
+                delete_albums_futures.append(
+                    executor.submit(client.albums().delete_album, album_id)
+                )
 
-            wait(futures)
+            wait(delete_albums_futures)
 
         logger.info("Deleted all albums in Google Photos")
 
