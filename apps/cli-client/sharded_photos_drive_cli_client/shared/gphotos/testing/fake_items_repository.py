@@ -220,6 +220,16 @@ class FakeItemsRepository:
             },
         )
 
+    @synchronized(_lock)
+    def delete_album(self, client_id: str, album_id: str):
+        if client_id != self.__album_id_to_owned_client_id[album_id]:
+            raise Exception("Cannot update album it does not own")
+
+        del self.__album_id_to_album[album_id]
+        del self.__album_id_to_owned_client_id[album_id]
+        del self.__album_id_to_media_item_ids[album_id]
+        del self.__album_id_to_accessible_client_ids[album_id]
+
     def __get_unique_media_item_id(self):
         media_item_id = str(uuid.uuid4())
         while media_item_id in self.__media_item_id_to_media_item:

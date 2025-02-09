@@ -25,6 +25,9 @@ class FakeGPhotosAlbumsClient(GPhotosAlbumsClient):
             self.id, album_id, new_title, new_cover_media_item_id
         )
 
+    def delete_album(self, album_id: str):
+        return self.repository.delete_album(self.id, album_id)
+
     def add_photos_to_album(self, album_id: str, media_item_ids: list[str]):
         if len(media_item_ids) > 50:
             raise Exception("Must have less than 50 media item ids")

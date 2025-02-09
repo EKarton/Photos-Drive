@@ -181,6 +181,50 @@ class GPhotosAlbumClientTests(unittest.TestCase):
             with self.assertRaisesRegex(Exception, expectedException):
                 client.albums().create_album("Photos/2011")
 
+    def test_delete_album__2xx__no_exception(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            request_mocker.delete("https://photoslibrary.googleapis.com/v1/albums/123")
+
+            client.albums().delete_album("123")
+
+    @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
+    def test_delete_album__first_call_5xx_second_call_2xx(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            request_mocker.register_uri(
+                "DELETE",
+                "https://photoslibrary.googleapis.com/v1/albums/123",
+                [
+                    {"text": "", "status_code": 500},
+                    {"text": "", "status_code": 200},
+                ],
+            )
+
+            client.albums().delete_album("123")
+
+    @freeze_time("Jan 14th, 2020", auto_tick_seconds=100000)
+    def test_delete_album__only_5xx__throws_exception(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            request_mocker.delete(
+                "https://photoslibrary.googleapis.com/v1/albums/123",
+                status_code=500,
+            )
+
+            expectedException = (
+                "500 Server Error: None for url: "
+                + "https://photoslibrary.googleapis.com/v1/albums/123"
+            )
+            with self.assertRaisesRegex(Exception, expectedException):
+                client.albums().delete_album("123")
+
     def test_add_photos_to_album__2xx__returns_nothing(self):
         with requests_mock.Mocker() as request_mocker:
             client = GPhotosClientV2(
