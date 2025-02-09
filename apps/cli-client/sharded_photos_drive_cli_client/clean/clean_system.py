@@ -182,55 +182,50 @@ class SystemCleaner:
 
         def process_album(
             album_id: AlbumId, executor: ThreadPoolExecutor
-        ) -> tuple[list[AlbumId], list[MediaItemId], list[GPhotosMediaItemKey]]:
+        ) -> tuple[list[MediaItemId], list[GPhotosMediaItemKey], list[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
-            local_album_ids = [album_id]
 
             # Process media items in parallel using the same executor.
             media_futures = [
                 executor.submit(process_media_item, m_id)
                 for m_id in album.media_item_ids
             ]
-            sub_media_item_ids_to_keep = []
-            local_media_ids: list[MediaItemId] = []
-            local_gmedia_ids: list[GPhotosMediaItemKey] = []
 
-            sub_media_item_ids_to_keep_changed = False
+            media_ids_to_keep_changed = False
+            media_ids_to_keep: list[MediaItemId] = []
+            gmedia_ids_to_keep: list[GPhotosMediaItemKey] = []
+
             for future in as_completed(media_futures):
                 result, changed = future.result()
                 if changed:
-                    sub_media_item_ids_to_keep_changed = True
+                    media_ids_to_keep_changed = True
+
                 if result is not None:
                     m_id, gmedia_id = result
-                    sub_media_item_ids_to_keep.append(m_id)
-                    local_media_ids.append(m_id)
-                    local_gmedia_ids.append(gmedia_id)
+                    media_ids_to_keep.append(m_id)
+                    gmedia_ids_to_keep.append(gmedia_id)
 
             # Process child albums (sequentially or similarly in parallel if needed).
-            sub_child_album_ids_to_keep = []
-            sub_child_album_ids_to_keep_changed = False
+            child_album_ids_to_keep = []
+            child_album_ids_to_keep_changed = False
             for child_album_id in album.child_album_ids:
                 if child_album_id not in all_album_ids:
-                    sub_child_album_ids_to_keep_changed = True
+                    child_album_ids_to_keep_changed = True
                     continue
-                sub_child_album_ids_to_keep.append(child_album_id)
+
+                child_album_ids_to_keep.append(child_album_id)
 
             # Update the album if changes were detected.
-            if (
-                sub_media_item_ids_to_keep_changed
-                or sub_child_album_ids_to_keep_changed
-            ):
+            if media_ids_to_keep_changed or child_album_ids_to_keep_changed:
                 self.__albums_repo.update_album(
                     album_id,
                     UpdatedAlbumFields(
                         new_media_item_ids=(
-                            sub_media_item_ids_to_keep
-                            if sub_media_item_ids_to_keep_changed
-                            else None
+                            media_ids_to_keep if media_ids_to_keep_changed else None
                         ),
                         new_child_album_ids=(
-                            sub_child_album_ids_to_keep
-                            if sub_child_album_ids_to_keep_changed
+                            child_album_ids_to_keep
+                            if child_album_ids_to_keep_changed
                             else None
                         ),
                     ),
@@ -238,10 +233,9 @@ class SystemCleaner:
 
             # Return the album ids, media ids, and the gmedia item ids we want to keep.
             return (
-                local_album_ids,
-                local_media_ids,
-                local_gmedia_ids,
-                sub_child_album_ids_to_keep,
+                media_ids_to_keep,
+                gmedia_ids_to_keep,
+                child_album_ids_to_keep,
             )
 
         # Use one thread pool for the entire BFS traversal.
@@ -249,23 +243,19 @@ class SystemCleaner:
             cur_level = [self.__config.get_root_album_id()]
             while len(cur_level) > 0:
                 # Submit all albums at the current level.
-                futures = [
-                    executor.submit(process_album, album_id, executor)
+                futures = {
+                    executor.submit(process_album, album_id, executor): album_id
                     for album_id in cur_level
-                ]
+                }
 
                 new_level = []
                 for future in as_completed(futures):
-                    (
-                        local_album_ids,
-                        local_media_ids,
-                        local_gmedia_ids,
-                        child_album_ids,
-                    ) = future.result()
+                    local_media_ids, local_gmedia_ids, child_album_ids = future.result()
+                    album_id = futures[future]
 
-                    all_album_ids_to_keep.extend(local_album_ids)
-                    all_media_ids_to_keep.extend(local_media_ids)
-                    all_gmedia_ids_to_keep.extend(local_gmedia_ids)
+                    all_album_ids_to_keep.append(album_id)
+                    all_media_ids_to_keep += local_media_ids
+                    all_gmedia_ids_to_keep += local_gmedia_ids
                     new_level += child_album_ids
 
                 cur_level = new_level
