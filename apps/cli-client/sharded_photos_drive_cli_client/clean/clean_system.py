@@ -164,49 +164,35 @@ class SystemCleaner:
         all_media_ids_to_keep: list[MediaItemId] = []
         all_gmedia_ids_to_keep: list[GPhotosMediaItemKey] = []
 
-        def process_media_item(
-            media_item_id: MediaItemId,
-        ) -> tuple[Optional[tuple[MediaItemId, GPhotosMediaItemKey]], bool]:
-            if media_item_id not in all_media_item_ids:
-                return None, True
-
-            media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
-            gphotos_media_item_id = GPhotosMediaItemKey(
-                media_item.gphotos_client_id,
-                media_item.gphotos_media_item_id,
-            )
-            if gphotos_media_item_id not in all_gphoto_media_item_ids:
-                return None, True
-
-            return (media_item_id, gphotos_media_item_id), False
-
         def process_album(
-            album_id: AlbumId, executor: ThreadPoolExecutor
+            album_id: AlbumId,
         ) -> tuple[list[MediaItemId], list[GPhotosMediaItemKey], list[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
 
-            # Process media items in parallel using the same executor.
-            media_futures = [
-                executor.submit(process_media_item, m_id)
-                for m_id in album.media_item_ids
-            ]
-
-            media_ids_to_keep_changed = False
+            # Process media items
             media_ids_to_keep: list[MediaItemId] = []
             gmedia_ids_to_keep: list[GPhotosMediaItemKey] = []
-
-            for future in as_completed(media_futures):
-                result, changed = future.result()
-                if changed:
+            media_ids_to_keep_changed = False
+            for media_item_id in album.media_item_ids:
+                if media_item_id not in all_media_item_ids:
                     media_ids_to_keep_changed = True
+                    continue
 
-                if result is not None:
-                    m_id, gmedia_id = result
-                    media_ids_to_keep.append(m_id)
-                    gmedia_ids_to_keep.append(gmedia_id)
+                media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
+                gphotos_media_item_id = GPhotosMediaItemKey(
+                    media_item.gphotos_client_id,
+                    media_item.gphotos_media_item_id,
+                )
 
-            # Process child albums (sequentially or similarly in parallel if needed).
-            child_album_ids_to_keep = []
+                if gphotos_media_item_id not in all_gphoto_media_item_ids:
+                    media_ids_to_keep_changed = True
+                    continue
+
+                media_ids_to_keep.append(media_item_id)
+                gmedia_ids_to_keep.append(gphotos_media_item_id)
+
+            # Process child albums
+            child_album_ids_to_keep: list[AlbumId] = []
             child_album_ids_to_keep_changed = False
             for child_album_id in album.child_album_ids:
                 if child_album_id not in all_album_ids:
@@ -215,7 +201,7 @@ class SystemCleaner:
 
                 child_album_ids_to_keep.append(child_album_id)
 
-            # Update the album if changes were detected.
+            # Update the album if any changes were detected.
             if media_ids_to_keep_changed or child_album_ids_to_keep_changed:
                 self.__albums_repo.update_album(
                     album_id,
@@ -230,8 +216,7 @@ class SystemCleaner:
                         ),
                     ),
                 )
-
-            # Return the album ids, media ids, and the gmedia item ids we want to keep.
+            # Return data for merging and the next BFS frontier.
             return (
                 media_ids_to_keep,
                 gmedia_ids_to_keep,
@@ -244,7 +229,7 @@ class SystemCleaner:
             while len(cur_level) > 0:
                 # Submit all albums at the current level.
                 futures = {
-                    executor.submit(process_album, album_id, executor): album_id
+                    executor.submit(process_album, album_id): album_id
                     for album_id in cur_level
                 }
 
