@@ -223,7 +223,6 @@ class SystemCleaner:
                 child_album_ids_to_keep,
             )
 
-        # Use one thread pool for the entire BFS traversal.
         with ThreadPoolExecutor() as executor:
             cur_level = [self.__config.get_root_album_id()]
             while len(cur_level) > 0:
