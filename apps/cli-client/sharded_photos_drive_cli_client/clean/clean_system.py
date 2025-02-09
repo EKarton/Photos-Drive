@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 from bson.objectid import ObjectId
 import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 from ..shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
@@ -110,7 +110,7 @@ class SystemCleaner:
         )
 
     def __prune_albums(self) -> int:
-        def process_album(album_id):
+        def process_album(album_id: AlbumId) -> tuple[list[AlbumId], Optional[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
             child_album_ids = album.child_album_ids
             prune_album_id = (
@@ -128,12 +128,12 @@ class SystemCleaner:
         with ThreadPoolExecutor() as executor:
             current_level = [root_album_id]
             while current_level:
-                future_to_album = {
-                    executor.submit(process_album, album_id): album_id
+                futures = [
+                    executor.submit(process_album, album_id)
                     for album_id in current_level
-                }
+                ]
                 next_level = []
-                for future in as_completed(future_to_album):
+                for future in as_completed(futures):
                     children, prune_id = future.result()
                     next_level += children
 
@@ -163,13 +163,10 @@ class SystemCleaner:
             current_level = [self.__config.get_root_album_id()]
 
             while current_level:
-                # Submit the current level's albums for processing in parallel.
-                futures = {
-                    executor.submit(
-                        self.__albums_repo.get_album_by_id, album_id
-                    ): album_id
+                futures = [
+                    executor.submit(self.__albums_repo.get_album_by_id, album_id)
                     for album_id in current_level
-                }
+                ]
 
                 next_level = []
                 for future in as_completed(futures):
@@ -195,12 +192,12 @@ class SystemCleaner:
         gmedia_item_keys: list[GPhotosMediaItemKey] = []
 
         with ThreadPoolExecutor() as executor:
-            futures = {
+            futures = [
                 executor.submit(
                     self.__media_items_repo.get_media_item_by_id, media_item_id
-                ): media_item_id
+                )
                 for media_item_id in media_item_ids
-            }
+            ]
 
             for future in as_completed(futures):
                 media_item = future.result()
@@ -264,20 +261,34 @@ class SystemCleaner:
     def __move_gmedia_items_to_trash(self, gmedia_item_keys: list[GPhotosMediaItemKey]):
         logger.info("Moving deleted GPhoto media items to trash album")
 
-        client_id_to_gmedia_item_ids: Dict[ObjectId, list[str]] = {}
+        client_id_to_gmedia_item_ids: Dict[ObjectId, list[GPhotosMediaItemKey]] = {}
         for key in gmedia_item_keys:
             if key.client_id not in client_id_to_gmedia_item_ids:
                 client_id_to_gmedia_item_ids[key.client_id] = []
 
-            client_id_to_gmedia_item_ids[key.client_id].append(key.object_id)
+            client_id_to_gmedia_item_ids[key.client_id].append(key)
 
-        for client_id in client_id_to_gmedia_item_ids:
+        def process_client(
+            client_id: ObjectId,
+            gmedia_item_ids: list[GPhotosMediaItemKey],
+        ):
             client = self.__gphotos_clients_repo.get_client_by_id(client_id)
             trash_album = self.__find_or_create_trash_album(client)
 
             self.__move_gmedia_item_ids_to_album_safely(
-                client, trash_album.id, client_id_to_gmedia_item_ids[client_id]
+                client,
+                trash_album.id,
+                [media_item_id.object_id for media_item_id in gmedia_item_ids],
             )
+
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(
+                    process_client, client_id, client_id_to_gmedia_item_ids[client_id]
+                )
+                for client_id in client_id_to_gmedia_item_ids
+            ]
+            wait(futures)
 
         logger.info("Finished moving deleted GPhoto media items to trash album")
 
