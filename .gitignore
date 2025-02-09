@@ -33,8 +33,7 @@
 /**/connect.lock
 /**/coverage
 /**/.coverage
-/**/libpeerconnection.log
-/**/testem.log
+/**/*.log
 /**/typings
 
 # System files
