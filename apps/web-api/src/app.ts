@@ -26,6 +26,7 @@ import {
 import { Vault } from './services/vault/VaultStore';
 import { VaultStoreFromFile } from './services/vault/VaultStoreFromFile';
 import { VaultStoreFromMongoDb } from './services/vault/VaultStoreFromMongoDb';
+import { setupTracer } from './utils/tracer';
 import logger from './utils/logger';
 
 export class App {
@@ -44,6 +45,13 @@ export class App {
   }
 
   async run() {
+    if (this.appConfig.tracerEnabled) {
+      setupTracer(
+        this.appConfig.tracerOltpEndpoint,
+        this.appConfig.tracerOltpApiKey
+      );
+    }
+
     if (this.appConfig.vaultFilePath) {
       this.config = new VaultStoreFromFile(this.appConfig.vaultFilePath);
     } else if (this.appConfig.vaultMongoDb) {
@@ -69,7 +77,7 @@ export class App {
 
     this.app.use(helmet());
     this.app.use(compression());
-    this.app.use(expressLogger());
+    // this.app.use(expressLogger());
     this.app.use(
       cors({
         origin: this.appConfig.corsFrontendEndpoint,

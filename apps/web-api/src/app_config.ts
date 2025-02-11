@@ -31,6 +31,15 @@ export type AppConfig = {
 
   /** The frontend endpoint for CORS. */
   corsFrontendEndpoint: string;
+
+  /** Whether tracer is enabled or not. */
+  tracerEnabled: boolean;
+
+  /** The oltp endpoint for tracer. */
+  tracerOltpEndpoint: string;
+
+  /** The oltp api token for graphana cloud. */
+  tracerOltpApiKey: string;
 };
 
 /**
@@ -48,6 +57,9 @@ export function getAppConfig(): AppConfig {
     serverPort: parseInt(process.env.PORT || '3000'),
     vaultFilePath: process.env.VAULT_FILE_PATH || '',
     vaultMongoDb: process.env.VAULT_MONGODB || '',
-    corsFrontendEndpoint: process.env.CORS_FRONTEND_ENDPOINT || ''
+    corsFrontendEndpoint: process.env.CORS_FRONTEND_ENDPOINT || '',
+    tracerEnabled: process.env.TRACER_ENABLED === 'true',
+    tracerOltpEndpoint: process.env.TRACER_OTLP_ENDPOINT || '',
+    tracerOltpApiKey: process.env.TRACER_OLTP_GRAPHANA_API_TOKEN || ''
   };
 }
