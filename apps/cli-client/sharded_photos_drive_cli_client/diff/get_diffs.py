@@ -73,11 +73,10 @@ class FolderSyncDiff:
     def get_diffs(self, local_dir_path: str, remote_dir_path: str) -> DiffResults:
         # Step 1: Go through the database and get all of its files
         remote_files = self.__get_remote_files(remote_dir_path)
+        logger.debug(f'Remote items: {remote_files}')
 
         # Step 2: Go through the entire folder directory and build a tree
         local_files = self.__get_local_files(local_dir_path)
-
-        logger.debug(f'Remote items: {remote_files}')
         logger.debug(f'Local items: {local_files}')
 
         # Step 3: Compare the trees
