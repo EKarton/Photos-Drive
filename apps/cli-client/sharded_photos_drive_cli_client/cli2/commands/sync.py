@@ -1,4 +1,6 @@
 import logging
+import math
+from typing import Generator
 from typing_extensions import Annotated
 import typer
 
@@ -78,6 +80,13 @@ def sync(
             help="Whether to parallelize uploads or not",
         ),
     ] = False,
+    batch_size: Annotated[
+        int,
+        typer.Option(
+            "--batch-size",
+            help="The amount to batch the syncs",
+        ),
+    ] = 50,
 ):
     setup_logging(verbose)
 
@@ -115,7 +124,7 @@ def sync(
         return
 
     backup_results = __backup_diffs_to_system(
-        config, processed_diffs, parallelize_uploads
+        config, processed_diffs, parallelize_uploads, batch_size
     )
     print("Sync complete.")
     print(f"Albums created: {backup_results.num_albums_created}")
@@ -145,6 +154,7 @@ def __backup_diffs_to_system(
     config: Config,
     processed_diffs: list[ProcessedDiff],
     parallelize_uploads: bool,
+    batch_size: int,
 ) -> BackupResults:
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
     gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
@@ -161,10 +171,39 @@ def __backup_diffs_to_system(
         parallelize_uploads,
     )
     try:
-        backup_results = backup_service.backup(processed_diffs)
-        logger.debug(f"Backup results: {backup_results}")
-        return backup_results
+        overall_results = BackupResults(0, 0, 0, 0, 0)
+        num_total_chunks = math.ceil(len(processed_diffs) / batch_size)
+        num_chunks_completed = 0
+
+        for batch in __chunked(processed_diffs, batch_size):
+            logger.info(f'Backing up chunk {num_chunks_completed} / {num_total_chunks}')
+            batch_results = backup_service.backup(batch)
+
+            logger.info(f'Backed up {num_chunks_completed} / {num_total_chunks} chunks')
+            logger.debug(f"Batch results: {batch_results}")
+
+            overall_results = __merge_results(overall_results, batch_results)
+
+        logger.debug(f"Backup results: {overall_results}")
+        return overall_results
     except BaseException as e:
         logger.error(f'Backup failed: {e}')
         print("Run sharded_photos_drive clean to fix errors")
         raise e
+
+
+def __merge_results(result1: BackupResults, result2: BackupResults) -> BackupResults:
+    return BackupResults(
+        num_media_items_added=result1.num_media_items_added
+        + result2.num_media_items_added,
+        num_media_items_deleted=result1.num_media_items_deleted
+        + result2.num_media_items_deleted,
+        num_albums_created=result1.num_albums_created + result2.num_albums_created,
+        num_albums_deleted=result1.num_albums_deleted + result2.num_albums_deleted,
+        total_elapsed_time=result1.total_elapsed_time + result2.total_elapsed_time,
+    )
+
+
+def __chunked(lst: list, size: int) -> Generator[list, None, None]:
+    for i in range(0, len(lst), size):
+        yield lst[i : i + size]
