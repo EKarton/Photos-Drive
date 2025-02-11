@@ -204,6 +204,6 @@ def __merge_results(result1: BackupResults, result2: BackupResults) -> BackupRes
     )
 
 
-def __chunked(lst: list, size: int) -> Generator[list]:
+def __chunked(lst: list, size: int) -> Generator[list, None, None]:
     for i in range(0, len(lst), size):
         yield lst[i : i + size]
