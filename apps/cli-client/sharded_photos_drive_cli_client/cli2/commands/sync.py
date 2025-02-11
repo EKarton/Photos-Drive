@@ -170,12 +170,13 @@ def __backup_diffs_to_system(
         mongodb_clients_repo,
         parallelize_uploads,
     )
-    try:
-        overall_results = BackupResults(0, 0, 0, 0, 0)
-        num_total_chunks = math.ceil(len(processed_diffs) / batch_size)
-        num_chunks_completed = 0
 
-        for batch in __chunked(processed_diffs, batch_size):
+    overall_results = BackupResults(0, 0, 0, 0, 0)
+    num_total_chunks = math.ceil(len(processed_diffs) / batch_size)
+    num_chunks_completed = 0
+
+    for batch in __chunked(processed_diffs, batch_size):
+        try:
             logger.info(f'Backing up chunk {num_chunks_completed} / {num_total_chunks}')
             batch_results = backup_service.backup(batch)
 
@@ -184,12 +185,25 @@ def __backup_diffs_to_system(
 
             overall_results = __merge_results(overall_results, batch_results)
 
-        logger.debug(f"Backup results: {overall_results}")
-        return overall_results
-    except BaseException as e:
-        logger.error(f'Backup failed: {e}')
-        print("Run sharded_photos_drive clean to fix errors")
-        raise e
+        except BaseException as e:
+            logger.error(f'Chunk failed: {num_chunks_completed} / {num_total_chunks}')
+            logger.error(e)
+
+            logger.info(f"Albums created: {overall_results.num_albums_created}")
+            logger.info(f"Albums deleted: {overall_results.num_albums_deleted}")
+            logger.info(f"Media items created: {overall_results.num_media_items_added}")
+            logger.info(
+                f"Media items deleted: {overall_results.num_media_items_deleted}"
+            )
+            logger.info(
+                f"Elapsed time: {overall_results.total_elapsed_time:.6f} seconds"
+            )
+
+            print("Run sharded_photos_drive clean to fix errors")
+            raise e
+
+    logger.debug(f"Backup results: {overall_results}")
+    return overall_results
 
 
 def __merge_results(result1: BackupResults, result2: BackupResults) -> BackupResults:
