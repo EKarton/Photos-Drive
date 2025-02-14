@@ -156,21 +156,6 @@ def __backup_diffs_to_system(
     parallelize_uploads: bool,
     batch_size: int,
 ) -> BackupResults:
-    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
-    albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-    media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
-
-    # Process the diffs
-    backup_service = PhotosBackup(
-        config,
-        albums_repo,
-        media_items_repo,
-        gphoto_clients_repo,
-        mongodb_clients_repo,
-        parallelize_uploads,
-    )
-
     overall_results = BackupResults(0, 0, 0, 0, 0)
     num_total_chunks = math.ceil(len(processed_diffs) / batch_size)
     num_chunks_completed = 0
@@ -178,6 +163,21 @@ def __backup_diffs_to_system(
     for batch in __chunked(processed_diffs, batch_size):
         try:
             logger.info(f'Backing up chunk {num_chunks_completed} / {num_total_chunks}')
+            mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+            gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
+            albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+            media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+            # Process the diffs
+            backup_service = PhotosBackup(
+                config,
+                albums_repo,
+                media_items_repo,
+                gphoto_clients_repo,
+                mongodb_clients_repo,
+                parallelize_uploads,
+            )
+
             batch_results = backup_service.backup(batch)
 
             logger.info(f'Backed up {num_chunks_completed} / {num_total_chunks} chunks')
