@@ -195,32 +195,53 @@ class FolderSyncDiff:
         return cur_album
 
     def __get_local_files(self, dir_path: str) -> list[LocalFile]:
+        def process_file(base_album_path: str, root: str, file: str) -> LocalFile:
+            """
+            Processes a single file: computes its relative path, computes the file hash,
+            and returns a LocalFile instance.
+            """
+            # Determine the relative remote album path.
+            remote_album_path = os.path.relpath(root)
+            if remote_album_path.startswith(base_album_path):
+                remote_album_path = remote_album_path[len(base_album_path) + 1 :]
+
+            # Build the remote file path.
+            remote_file_path = os.path.join(remote_album_path, file).replace(
+                os.sep, "/"
+            )
+
+            # Build the local file path.
+            local_file_path = os.path.join(
+                ".", os.path.relpath(os.path.join(root, file))
+            )
+
+            # Compute the file hash.
+            file_hash = compute_file_hash(local_file_path).hex()
+
+            # Return the LocalFile instance.
+            return LocalFile(
+                key=f'{remote_file_path}:{file_hash}',
+                local_relative_file_path=local_file_path,
+            )
+
         found_files: list[LocalFile] = []
         base_album_path = os.path.relpath(dir_path)
+        tasks = []
 
         for root, _, files in os.walk(dir_path):
             for file in files:
                 if not file.lower().endswith(MEDIA_ITEM_FILE_EXTENSIONS):
                     continue
 
-                remote_album_path = os.path.relpath(root)
-                if remote_album_path.startswith(base_album_path):
-                    remote_album_path = remote_album_path[len(base_album_path) + 1 :]
+                tasks.append((root, file))
 
-                remote_file_path = os.path.join(remote_album_path, file).replace(
-                    os.sep, "/"
-                )
-                local_file_path = os.path.join(
-                    ".", os.path.relpath(os.path.join(root, file))
-                )
-                file_hash = compute_file_hash(local_file_path).hex()
-
-                found_files.append(
-                    LocalFile(
-                        key=f'{remote_file_path}:{file_hash}',
-                        local_relative_file_path=local_file_path,
-                    )
-                )
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(process_file, base_album_path, root, file)
+                for root, file in tasks
+            ]
+            for future in as_completed(futures):
+                found_files.append(future.result())
 
         return found_files
 
