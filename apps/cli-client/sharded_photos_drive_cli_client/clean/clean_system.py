@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
 from bson.objectid import ObjectId
+import json
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
@@ -78,11 +79,17 @@ class SystemCleaner:
         # Step 1: Find all albums
         all_album_ids = self.__find_all_albums()
 
+        print(len(all_album_ids))
+
         # Step 2: Find all media items
         all_media_item_ids = self.__find_all_media_items()
 
+        print(len(all_media_item_ids))
+
         # Step 3: Find all gphoto media items
         all_gphoto_media_item_ids = self.__find_all_gmedia_items()
+
+        print(len(all_gphoto_media_item_ids))
 
         # Step 4: Find all the content that we want to keep
         album_ids_to_keep, media_item_ids_to_keep, gmedia_item_ids_to_keep = (
@@ -93,10 +100,12 @@ class SystemCleaner:
 
         # Step 5: Delete all unlinked albums
         album_ids_to_delete = all_album_ids - album_ids_to_keep
+        print('album_ids_to_delete:', len(album_ids_to_delete))
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
 
         # Step 6: Delete all unlinked media items
         media_item_ids_to_delete = all_media_item_ids - media_item_ids_to_keep
+        print('media_item_ids_to_delete:', len(media_item_ids_to_delete))
         self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
 
         # Step 7: Delete all unlinked gphoto media items
@@ -132,24 +141,43 @@ class SystemCleaner:
 
     def __find_all_gmedia_items(self) -> set[GPhotosMediaItemKey]:
         logger.info("Finding all gmedia items")
-        gmedia_item_ids = []
-        with ThreadPoolExecutor() as executor:
-            futures = {}
 
-            for client_id, client in self.__gphotos_clients_repo.get_all_clients():
-                future = executor.submit(client.media_items().search_for_media_items)
-                futures[future] = client_id
+        gmedia_item_ids: list[GPhotosMediaItemKey] = []
 
-            for future in as_completed(futures):
-                raw_gmedia_items: list[GMediaItem] = future.result()
-                client_id = futures[future]
-                gmedia_item_ids += [
-                    GPhotosMediaItemKey(client_id, raw_gmedia_item.id)
-                    for raw_gmedia_item in raw_gmedia_items
-                ]
+        for client_id, client in self.__gphotos_clients_repo.get_all_clients():
+            raw_gmedia_items = client.media_items().get_all_media_items()
+            gmedia_item_ids.extend(
+                GPhotosMediaItemKey(client_id, raw_gmedia_item.id)
+                for raw_gmedia_item in raw_gmedia_items
+            )
+
+        gmedia_item_ids_serializable = [
+            {"client_id": str(item.client_id), "object_id": item.object_id}
+            for item in gmedia_item_ids
+        ]
+
+        # Save to a JSON file
+        with open("gmedia_items.json", "w") as f:
+            json.dump(gmedia_item_ids_serializable, f, indent=4)
+
+        hehe = GPhotosMediaItemKey(
+            client_id=ObjectId('678f5ba3ba65619d15e7f7cf'),
+            object_id='AHwy9Fqt_jXGcFnSa76HKxW-SNy1mwFuIH2ad6olF6kxtAIVkPJ7IVfKuVU9qKjNqWx8YKabLNa8UBkNP9-R0ZW_zyctGjqfRQ',
+        )
+
+        if hehe not in gmedia_item_ids:
+            raise ValueError("Help 4")
 
         logger.info("Finished finding all gmedia items")
-        return set(gmedia_item_ids)
+
+        my_set = set(gmedia_item_ids)
+        if hehe not in my_set:
+            raise ValueError("Help 5")
+
+        if len(gmedia_item_ids) != len(my_set):
+            raise ValueError(f"Help 6 {len(gmedia_item_ids)} vs {len(my_set)}")
+
+        return my_set
 
     def __find_content_to_keep(
         self,
@@ -180,6 +208,9 @@ class SystemCleaner:
                     logger.debug(
                         f'Removing gemdia item {media_item_id} from {album.id}'
                     )
+                    input(
+                        f'Removing gemdia item {media_item_id} from {album.id}. Continue?'
+                    )
                     media_ids_to_keep_changed = True
                     continue
 
@@ -189,9 +220,15 @@ class SystemCleaner:
                     media_item.gphotos_media_item_id,
                 )
 
+                if ':' in media_item.gphotos_media_item_id:
+                    raise ValueError("Help 3!")
+
                 if gphotos_media_item_id not in all_gphoto_media_item_ids:
                     logger.debug(
                         f'Removing gemdia item {gphotos_media_item_id} from {album.id}'
+                    )
+                    input(
+                        f'Removing gemdia item {gphotos_media_item_id} from {album.id}. Continue?'
                     )
                     media_ids_to_keep_changed = True
                     continue
@@ -207,6 +244,9 @@ class SystemCleaner:
                     logger.debug(
                         f'Removing child album id {child_album_id} from {album.id}'
                     )
+                    input(
+                        f'Removing child album id {child_album_id} from {album.id}. Continue?'
+                    )
                     child_album_ids_to_keep_changed = True
                     continue
 
@@ -217,6 +257,15 @@ class SystemCleaner:
                 logger.debug(f'Modifying {album.id}')
                 logger.debug(media_ids_to_keep)
                 logger.debug(child_album_ids_to_keep)
+
+                print('Before:')
+                print(album.media_item_ids)
+                print(album.child_album_ids)
+                print('After:')
+                print(media_ids_to_keep)
+                print(child_album_ids_to_keep)
+
+                input("Is this correct?")
 
                 self.__albums_repo.update_album(
                     album_id,
