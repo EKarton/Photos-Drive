@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
 from bson.objectid import ObjectId
-import json
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
@@ -11,7 +10,6 @@ from ..shared.mongodb.clients_repository import (
 )
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.gphotos.albums import Album as GAlbum
-from ..shared.gphotos.media_items import MediaItem as GMediaItem
 from ..shared.gphotos.client import GPhotosClientV2
 from ..shared.mongodb.albums import AlbumId
 from ..shared.mongodb.media_items import MediaItemId
@@ -102,19 +100,19 @@ class SystemCleaner:
 
         # Step 5: Delete all unlinked albums
         album_ids_to_delete = all_album_ids - album_ids_to_keep
-        input(f'Deleting {len(album_ids_to_delete)} albums. Continue?')
+        logger.info(f'Deleting {len(album_ids_to_delete)} albums.')
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
 
         # Step 6: Delete all unlinked media items
         media_item_ids_to_delete = all_media_item_ids - media_item_ids_to_keep
-        input(f'Deleting {len(media_item_ids_to_delete)} media items. Continue?')
+        logger.info(f'Deleting {len(media_item_ids_to_delete)} media items.')
         self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
 
         # Step 7: Delete all unlinked gphoto media items
         gphoto_media_item_ids_to_delete = (
             all_gphoto_media_item_ids - gmedia_item_ids_to_keep
         )
-        input(f'Trashing {len(gphoto_media_item_ids_to_delete)} photos. Continue?')
+        logger.info(f'Trashing {len(gphoto_media_item_ids_to_delete)} photos')
         self.__move_gmedia_items_to_trash(list(gphoto_media_item_ids_to_delete))
 
         # Step 8: Prune all the leaf albums in the tree
@@ -169,26 +167,9 @@ class SystemCleaner:
             # Flatten the results (safe since `results` is local)
             gmedia_item_ids = [item for sublist in results for item in sublist]
 
-        # Convert to JSON-serializable format
-        gmedia_item_ids_serializable = [
-            {"client_id": str(item.client_id), "object_id": item.object_id}
-            for item in gmedia_item_ids
-        ]
-
-        # Save to a JSON file
-        with open("gmedia_items.json", "w") as f:
-            json.dump(gmedia_item_ids_serializable, f, indent=4)
-
         logger.info("Finished finding all gmedia items")
 
-        gmedia_item_ids_set = set(gmedia_item_ids)
-
-        if len(gmedia_item_ids) != len(gmedia_item_ids_set):
-            raise ValueError(
-                f"Help 6 {len(gmedia_item_ids)} vs {len(gmedia_item_ids_set)}"
-            )
-
-        return gmedia_item_ids_set
+        return set(gmedia_item_ids)
 
     def __find_content_to_keep(
         self,
@@ -219,9 +200,6 @@ class SystemCleaner:
                     logger.debug(
                         f'Removing gemdia item {media_item_id} from {album.id}'
                     )
-                    input(
-                        f'Removing gemdia item {media_item_id} from {album.id}. Continue?'
-                    )
                     media_ids_to_keep_changed = True
                     continue
 
@@ -231,15 +209,9 @@ class SystemCleaner:
                     media_item.gphotos_media_item_id,
                 )
 
-                if ':' in media_item.gphotos_media_item_id:
-                    raise ValueError("Help 3!")
-
                 if gphotos_media_item_id not in all_gphoto_media_item_ids:
                     logger.debug(
                         f'Removing gemdia item {gphotos_media_item_id} from {album.id}'
-                    )
-                    input(
-                        f'Removing gemdia item {gphotos_media_item_id} from {album.id}. Continue?'
                     )
                     media_ids_to_keep_changed = True
                     continue
@@ -268,15 +240,6 @@ class SystemCleaner:
                 logger.debug(f'Modifying {album.id}')
                 logger.debug(media_ids_to_keep)
                 logger.debug(child_album_ids_to_keep)
-
-                print('Before:')
-                print(album.media_item_ids)
-                print(album.child_album_ids)
-                print('After:')
-                print(media_ids_to_keep)
-                print(child_album_ids_to_keep)
-
-                input("Is this correct?")
 
                 self.__albums_repo.update_album(
                     album_id,
