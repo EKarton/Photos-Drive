@@ -160,24 +160,16 @@ class SystemCleaner:
         with open("gmedia_items.json", "w") as f:
             json.dump(gmedia_item_ids_serializable, f, indent=4)
 
-        hehe = GPhotosMediaItemKey(
-            client_id=ObjectId('678f5ba3ba65619d15e7f7cf'),
-            object_id='AHwy9Fqt_jXGcFnSa76HKxW-SNy1mwFuIH2ad6olF6kxtAIVkPJ7IVfKuVU9qKjNqWx8YKabLNa8UBkNP9-R0ZW_zyctGjqfRQ',
-        )
-
-        if hehe not in gmedia_item_ids:
-            raise ValueError("Help 4")
-
         logger.info("Finished finding all gmedia items")
 
-        my_set = set(gmedia_item_ids)
-        if hehe not in my_set:
-            raise ValueError("Help 5")
+        gmedia_item_ids_set = set(gmedia_item_ids)
 
-        if len(gmedia_item_ids) != len(my_set):
-            raise ValueError(f"Help 6 {len(gmedia_item_ids)} vs {len(my_set)}")
+        if len(gmedia_item_ids) != len(gmedia_item_ids_set):
+            raise ValueError(
+                f"Help 6 {len(gmedia_item_ids)} vs {len(gmedia_item_ids_set)}"
+            )
 
-        return my_set
+        return gmedia_item_ids_set
 
     def __find_content_to_keep(
         self,
