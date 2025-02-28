@@ -200,25 +200,18 @@ class FolderSyncDiff:
             Processes a single file: computes its relative path, computes the file hash,
             and returns a LocalFile instance.
             """
-            # Determine the relative remote album path.
             remote_album_path = os.path.relpath(root)
             if remote_album_path.startswith(base_album_path):
                 remote_album_path = remote_album_path[len(base_album_path) + 1 :]
 
-            # Build the remote file path.
             remote_file_path = os.path.join(remote_album_path, file).replace(
                 os.sep, "/"
             )
-
-            # Build the local file path.
             local_file_path = os.path.join(
                 ".", os.path.relpath(os.path.join(root, file))
             )
-
-            # Compute the file hash.
             file_hash = compute_file_hash(local_file_path).hex()
 
-            # Return the LocalFile instance.
             return LocalFile(
                 key=f'{remote_file_path}:{file_hash}',
                 local_relative_file_path=local_file_path,
