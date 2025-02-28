@@ -259,8 +259,12 @@ class FolderSyncDiff:
             # Submit both filtering tasks concurrently.
             future_missing_remote = executor.submit(filter_missing_remote)
             future_missing_local = executor.submit(filter_missing_local)
+
             missing_remote_files_in_local = future_missing_remote.result()
+            logger.debug('Obtained missing items in remote')
+
             missing_local_files_in_remote = future_missing_local.result()
+            logger.debug('Obtained missing items in local')
 
         return DiffResults(
             missing_remote_files_in_local=missing_remote_files_in_local,
