@@ -160,6 +160,16 @@ class FakeItemsRepository:
         self.__upload_tokens_to_file_name[upload_token] = file_name
         return upload_token
 
+    def get_all_media_items(self, client_id: str) -> list[MediaItem]:
+        def is_valid(media_item):
+            is_owned = (
+                client_id == self.__media_item_ids_to_owned_client_id[media_item["id"]]
+            )
+            return is_owned
+
+        all_media_items = list(self.__media_item_id_to_media_item.values())
+        return [from_dict(MediaItem, a) for a in filter(is_valid, all_media_items)]
+
     def search_for_media_items(
         self,
         client_id: str,

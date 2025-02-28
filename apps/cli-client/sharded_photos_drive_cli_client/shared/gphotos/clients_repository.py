@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class GPhotosClientsRepository:
     def __init__(self):
-        self.__id_to_client: Dict[str, GPhotosClientV2] = {}
+        self.__id_to_client: Dict[ObjectId, GPhotosClientV2] = {}
 
     @staticmethod
     def build_from_config(
@@ -77,11 +77,10 @@ class GPhotosClientsRepository:
         Raises:
             ValueError: If ID already exists.
         """
-        str_id = str(id)
-        if str_id in self.__id_to_client:
-            raise ValueError(f"GPhotos Client ID {id} already exists")
+        if id in self.__id_to_client:
+            raise ValueError(f"GPhotos Client ID {str(id)} already exists")
 
-        self.__id_to_client[str_id] = client
+        self.__id_to_client[id] = client
 
     def get_client_by_id(self, id: ObjectId) -> GPhotosClientV2:
         """
@@ -93,10 +92,9 @@ class GPhotosClientsRepository:
         Raises:
             ValueError: If ID does not exist.
         """
-        str_id = str(id)
-        if str_id not in self.__id_to_client:
-            raise ValueError(f"Cannot find Google Photos client {id}")
-        return self.__id_to_client[str_id]
+        if id not in self.__id_to_client:
+            raise ValueError(f"Cannot find Google Photos client {str(id)}")
+        return self.__id_to_client[id]
 
     def get_all_clients(self) -> list[tuple[ObjectId, GPhotosClientV2]]:
         """
@@ -105,4 +103,4 @@ class GPhotosClientsRepository:
         Returns:
             ist[(ObjectId, GPhotosClientV2)]: A list of clients with their ids
         """
-        return [(ObjectId(id), client) for id, client in self.__id_to_client.items()]
+        return [(id, client) for id, client in self.__id_to_client.items()]

@@ -409,6 +409,25 @@ class FakeGPhotosClientTests(unittest.TestCase):
 
         self.assertNotEqual(upload_token, None)
 
+    def test_get_all_media_items__photos_on_other_account__returns_correct_values(
+        self,
+    ):
+        repo = FakeItemsRepository()
+        client_1 = FakeGPhotosClient(repo)
+        client_2 = FakeGPhotosClient(repo)
+        upload_token = client_1.media_items().upload_photo(
+            "Photos/2011/dog.jpg", "dog.jpg"
+        )
+        results = client_1.media_items().add_uploaded_photos_to_gphotos([upload_token])
+        new_media_item_id = results.newMediaItemResults[0].mediaItem.id
+
+        search_results_1 = client_1.media_items().get_all_media_items()
+        search_results_2 = client_2.media_items().get_all_media_items()
+
+        self.assertEqual(len(search_results_1), 1)
+        self.assertEqual(search_results_1[0].id, new_media_item_id)
+        self.assertEqual(len(search_results_2), 0)
+
     def test_search_for_media_items__no_photos__returns_nothing(self):
         repo = FakeItemsRepository()
         client = FakeGPhotosClient(repo)

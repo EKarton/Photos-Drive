@@ -19,6 +19,9 @@ class FakeGPhotosMediaItemsClient(GPhotosMediaItemsClient):
             self.id, upload_tokens, album_id
         )
 
+    def get_all_media_items(self) -> list[MediaItem]:
+        return self.repository.get_all_media_items(self.id)
+
     def search_for_media_items(
         self,
         album_id: Optional[str] = None,

@@ -10,7 +10,6 @@ from ..shared.mongodb.clients_repository import (
 )
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.gphotos.albums import Album as GAlbum
-from ..shared.gphotos.media_items import MediaItem as GMediaItem
 from ..shared.gphotos.client import GPhotosClientV2
 from ..shared.mongodb.albums import AlbumId
 from ..shared.mongodb.media_items import MediaItemId
@@ -77,12 +76,15 @@ class SystemCleaner:
     def clean(self) -> CleanupResults:
         # Step 1: Find all albums
         all_album_ids = self.__find_all_albums()
+        logger.info(f'Found {len(all_album_ids)} albums')
 
         # Step 2: Find all media items
         all_media_item_ids = self.__find_all_media_items()
+        logger.info(f'Found {len(all_media_item_ids)} media items')
 
         # Step 3: Find all gphoto media items
         all_gphoto_media_item_ids = self.__find_all_gmedia_items()
+        logger.info(f'Found {len(all_gphoto_media_item_ids)} gmedia items')
 
         # Step 4: Find all the content that we want to keep
         album_ids_to_keep, media_item_ids_to_keep, gmedia_item_ids_to_keep = (
@@ -90,19 +92,27 @@ class SystemCleaner:
                 all_album_ids, all_media_item_ids, all_gphoto_media_item_ids
             )
         )
+        logger.info(
+            f'Keeping {len(album_ids_to_keep)} albums, '
+            + f'{len(media_item_ids_to_keep)} media items, and '
+            + f'{len(gmedia_item_ids_to_keep)} gmedia items'
+        )
 
         # Step 5: Delete all unlinked albums
         album_ids_to_delete = all_album_ids - album_ids_to_keep
+        logger.info(f'Deleting {len(album_ids_to_delete)} albums.')
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
 
         # Step 6: Delete all unlinked media items
         media_item_ids_to_delete = all_media_item_ids - media_item_ids_to_keep
+        logger.info(f'Deleting {len(media_item_ids_to_delete)} media items.')
         self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
 
         # Step 7: Delete all unlinked gphoto media items
         gphoto_media_item_ids_to_delete = (
             all_gphoto_media_item_ids - gmedia_item_ids_to_keep
         )
+        logger.info(f'Trashing {len(gphoto_media_item_ids_to_delete)} photos')
         self.__move_gmedia_items_to_trash(list(gphoto_media_item_ids_to_delete))
 
         # Step 8: Prune all the leaf albums in the tree
@@ -132,23 +142,33 @@ class SystemCleaner:
 
     def __find_all_gmedia_items(self) -> set[GPhotosMediaItemKey]:
         logger.info("Finding all gmedia items")
+
+        def fetch_media_items(client_id, client):
+            """Fetch media items for a given client."""
+            raw_gmedia_items = client.media_items().get_all_media_items()
+            return [
+                GPhotosMediaItemKey(client_id, raw_gmedia_item.id)
+                for raw_gmedia_item in raw_gmedia_items
+            ]
+
+        clients = list(self.__gphotos_clients_repo.get_all_clients())
+
+        # Use ThreadPoolExecutor to parallelize media item fetching
         gmedia_item_ids = []
         with ThreadPoolExecutor() as executor:
-            futures = {}
+            futures = [
+                executor.submit(fetch_media_items, client_id, client)
+                for client_id, client in clients
+            ]
 
-            for client_id, client in self.__gphotos_clients_repo.get_all_clients():
-                future = executor.submit(client.media_items().search_for_media_items)
-                futures[future] = client_id
+            # Collect results in a thread-safe manner
+            results = [future.result() for future in as_completed(futures)]
 
-            for future in as_completed(futures):
-                raw_gmedia_items: list[GMediaItem] = future.result()
-                client_id = futures[future]
-                gmedia_item_ids += [
-                    GPhotosMediaItemKey(client_id, raw_gmedia_item.id)
-                    for raw_gmedia_item in raw_gmedia_items
-                ]
+            # Flatten the results (safe since `results` is local)
+            gmedia_item_ids = [item for sublist in results for item in sublist]
 
         logger.info("Finished finding all gmedia items")
+
         return set(gmedia_item_ids)
 
     def __find_content_to_keep(

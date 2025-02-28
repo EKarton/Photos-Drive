@@ -119,6 +119,47 @@ class GPhotosMediaItemsClient:
             config=dacite.Config(cast=[VideoProcessingStatus]),
         )
 
+    def get_all_media_items(self) -> list[MediaItem]:
+        '''
+        Lists all media items.
+
+        Returns:
+            list[MediaItem]: A list of all media items.
+        '''
+        logger.debug("Getting all media items")
+
+        page_token = None
+        media_items = []
+        while True:
+            res = self._get_all_media_items_in_pages(page_token)
+            res_body = res.json()
+
+            media_items += res_body.get("mediaItems", [])
+
+            if "nextPageToken" in res_body:
+                page_token = res_body["nextPageToken"]
+            else:
+                break
+
+        return [
+            from_dict(MediaItem, m, config=dacite.Config(cast=[VideoProcessingStatus]))
+            for m in media_items
+        ]
+
+    @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
+    def _get_all_media_items_in_pages(
+        self, page_token: Optional[str] | None
+    ) -> Response:
+        params = {
+            'pageSize': 100,
+            'pageToken': page_token,
+        }
+        res = self._session.get(
+            "https://photoslibrary.googleapis.com/v1/mediaItems", params=params
+        )
+        res.raise_for_status()
+        return res
+
     def search_for_media_items(
         self,
         album_id: Optional[str] = None,
@@ -149,10 +190,7 @@ class GPhotosMediaItemsClient:
             )
             res_body = res.json()
 
-            if "mediaItems" not in res_body:
-                break
-
-            media_items += res_body["mediaItems"]
+            media_items += res_body.get("mediaItems", [])
 
             if "nextPageToken" in res_body:
                 page_token = res_body["nextPageToken"]

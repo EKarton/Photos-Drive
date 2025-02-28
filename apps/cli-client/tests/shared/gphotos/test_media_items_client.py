@@ -614,6 +614,146 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
                 ],
             )
 
+    def test_get_all_media_items__2xx__returns_media_items(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            request_mocker.get(
+                "https://photoslibrary.googleapis.com/v1/mediaItems",
+                json=MOCK_GET_MEDIA_ITEMS_RESPONSE,
+            )
+
+            response = client.media_items().get_all_media_items()
+
+            self.assertEqual(
+                response[0],
+                from_dict(
+                    MediaItem,
+                    MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][0],
+                    config=dacite.Config(cast=[VideoProcessingStatus]),
+                ),
+            )
+            self.assertEqual(
+                response[1],
+                from_dict(
+                    MediaItem,
+                    MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][1],
+                    config=dacite.Config(cast=[VideoProcessingStatus]),
+                ),
+            )
+            self.assertEqual(
+                response[2],
+                from_dict(
+                    MediaItem,
+                    MOCK_GET_MEDIA_ITEMS_RESPONSE["mediaItems"][2],
+                    config=dacite.Config(cast=[VideoProcessingStatus]),
+                ),
+            )
+
+    def test_get_all_media_items__response_in_two_pages__returns_media_items(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            url = 'https://photoslibrary.googleapis.com/v1/mediaItems'
+            request_mocker.get(
+                f"{url}?pageSize=100",
+                json={
+                    "mediaItems": [
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][0],
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][1],
+                    ],
+                    "nextPageToken": "a",
+                },
+            )
+            request_mocker.get(
+                f"{url}?pageSize=100&pageToken=a",
+                json={
+                    "mediaItems": [
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][2],
+                    ],
+                },
+            )
+
+            response = client.media_items().get_all_media_items()
+
+            self.assertEqual(
+                response,
+                [
+                    from_dict(
+                        MediaItem,
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][i],
+                        config=dacite.Config(cast=[VideoProcessingStatus]),
+                    )
+                    for i in range(len(MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems']))
+                ],
+            )
+
+    def test_get_all_media_items__second_page_no_mediaItems_field(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            url = 'https://photoslibrary.googleapis.com/v1/mediaItems'
+            request_mocker.get(
+                f"{url}?pageSize=100",
+                json={
+                    "mediaItems": MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'],
+                    "nextPageToken": "a",
+                },
+            )
+            request_mocker.get(
+                f"{url}?pageSize=100&pageToken=a",
+                json={},
+            )
+
+            response = client.media_items().get_all_media_items()
+
+            self.assertEqual(
+                response,
+                [
+                    from_dict(
+                        MediaItem,
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][i],
+                        config=dacite.Config(cast=[VideoProcessingStatus]),
+                    )
+                    for i in range(len(MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems']))
+                ],
+            )
+
+    @freeze_time("Jan 14th, 2020", auto_tick_seconds=59.99)
+    def test_get_all_media_items__first_call_5xx_second_call_2xx(self):
+        with requests_mock.Mocker() as request_mocker:
+            client = GPhotosClientV2(
+                "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
+            )
+            request_mocker.register_uri(
+                "GET",
+                "https://photoslibrary.googleapis.com/v1/mediaItems",
+                [
+                    {"text": "", "status_code": 500},
+                    {
+                        "text": json.dumps(MOCK_GET_MEDIA_ITEMS_RESPONSE),
+                        "status_code": 200,
+                    },
+                ],
+            )
+
+            response = client.media_items().get_all_media_items()
+
+            self.assertEqual(
+                response,
+                [
+                    from_dict(
+                        MediaItem,
+                        MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems'][i],
+                        config=dacite.Config(cast=[VideoProcessingStatus]),
+                    )
+                    for i in range(len(MOCK_GET_MEDIA_ITEMS_RESPONSE['mediaItems']))
+                ],
+            )
+
     def test_upload_photo_in_chunks__large_file(self):
         get_upload_link_url = "https://photoslibrary.googleapis.com/v1/uploads"
         upload_url = "https://photoslibrary.googleapis.com/v1/upload-url/1"
