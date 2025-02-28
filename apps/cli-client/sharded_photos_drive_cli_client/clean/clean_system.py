@@ -100,18 +100,19 @@ class SystemCleaner:
 
         # Step 5: Delete all unlinked albums
         album_ids_to_delete = all_album_ids - album_ids_to_keep
-        print('album_ids_to_delete:', len(album_ids_to_delete))
+        input(f'Deleting {len(album_ids_to_delete)} albums. Continue?')
         self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
 
         # Step 6: Delete all unlinked media items
         media_item_ids_to_delete = all_media_item_ids - media_item_ids_to_keep
-        print('media_item_ids_to_delete:', len(media_item_ids_to_delete))
+        input(f'Deleting {len(media_item_ids_to_delete)} media items. Continue?')
         self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
 
         # Step 7: Delete all unlinked gphoto media items
         gphoto_media_item_ids_to_delete = (
             all_gphoto_media_item_ids - gmedia_item_ids_to_keep
         )
+        input(f'Trashing {len(gphoto_media_item_ids_to_delete)} photos. Continue?')
         self.__move_gmedia_items_to_trash(list(gphoto_media_item_ids_to_delete))
 
         # Step 8: Prune all the leaf albums in the tree
