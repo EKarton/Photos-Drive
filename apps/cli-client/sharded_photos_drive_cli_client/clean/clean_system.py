@@ -227,9 +227,6 @@ class SystemCleaner:
                     logger.debug(
                         f'Removing child album id {child_album_id} from {album.id}'
                     )
-                    input(
-                        f'Removing child album id {child_album_id} from {album.id}. Continue?'
-                    )
                     child_album_ids_to_keep_changed = True
                     continue
 
