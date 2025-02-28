@@ -78,24 +78,26 @@ class SystemCleaner:
     def clean(self) -> CleanupResults:
         # Step 1: Find all albums
         all_album_ids = self.__find_all_albums()
-
-        print(len(all_album_ids))
+        logger.info(f'Found {len(all_album_ids)} albums')
 
         # Step 2: Find all media items
         all_media_item_ids = self.__find_all_media_items()
-
-        print(len(all_media_item_ids))
+        logger.info(f'Found {len(all_media_item_ids)} media items')
 
         # Step 3: Find all gphoto media items
         all_gphoto_media_item_ids = self.__find_all_gmedia_items()
-
-        print(len(all_gphoto_media_item_ids))
+        logger.info(f'Found {len(all_gphoto_media_item_ids)} gmedia items')
 
         # Step 4: Find all the content that we want to keep
         album_ids_to_keep, media_item_ids_to_keep, gmedia_item_ids_to_keep = (
             self.__find_content_to_keep(
                 all_album_ids, all_media_item_ids, all_gphoto_media_item_ids
             )
+        )
+        logger.info(
+            f'Keeping {len(album_ids_to_keep)} albums, '
+            + f'{len(media_item_ids_to_keep)} media items, and '
+            + f'{len(gmedia_item_ids_to_keep)} gmedia items'
         )
 
         # Step 5: Delete all unlinked albums
@@ -143,15 +145,31 @@ class SystemCleaner:
     def __find_all_gmedia_items(self) -> set[GPhotosMediaItemKey]:
         logger.info("Finding all gmedia items")
 
-        gmedia_item_ids: list[GPhotosMediaItemKey] = []
-
-        for client_id, client in self.__gphotos_clients_repo.get_all_clients():
+        def fetch_media_items(client_id, client):
+            """Fetch media items for a given client."""
             raw_gmedia_items = client.media_items().get_all_media_items()
-            gmedia_item_ids.extend(
+            return [
                 GPhotosMediaItemKey(client_id, raw_gmedia_item.id)
                 for raw_gmedia_item in raw_gmedia_items
-            )
+            ]
 
+        clients = list(self.__gphotos_clients_repo.get_all_clients())
+
+        # Use ThreadPoolExecutor to parallelize media item fetching
+        gmedia_item_ids = []
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(fetch_media_items, client_id, client)
+                for client_id, client in clients
+            ]
+
+            # Collect results in a thread-safe manner
+            results = [future.result() for future in as_completed(futures)]
+
+            # Flatten the results (safe since `results` is local)
+            gmedia_item_ids = [item for sublist in results for item in sublist]
+
+        # Convert to JSON-serializable format
         gmedia_item_ids_serializable = [
             {"client_id": str(item.client_id), "object_id": item.object_id}
             for item in gmedia_item_ids
