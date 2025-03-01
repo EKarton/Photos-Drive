@@ -1,28 +1,55 @@
 <div>
-  @let album = albumDetails();
-
-  @if (album | isPending) {
-    <div class="skeleton h-full w-full">
+  @let imageUrlResult = chosenAlbumImageUrl();
+  @if (imageUrlResult | isPending) {
+    <div class="skeleton h-full w-full" data-testid="album-image-skeleton">
       <!-- A trick to make the skeleton always be a square, regardless of its width. -->
       <svg viewBox="0 0 1 1"></svg>
     </div>
-    <div class="mt-4 mr-0 mb-6">
+  } @else if (imageUrlResult | hasFailed) {
+    <span data-testid="album-image-error"
+      >Error: {{ imageUrlResult.error!.message }}</span
+    >
+  } @else {
+    @if (imageUrlResult.data) {
+      <img
+        class="album-card__image"
+        data-testid="album-image"
+        [src]="imageUrlResult.data!"
+        loading="lazy"
+        alt="Album"
+      />
+    } @else {
+      <svg
+        data-testid="album-image-folder"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-full h-full p-4"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+        />
+      </svg>
+    }
+  }
+
+  @let albumDetailsResult = albumDetails();
+  @if (albumDetailsResult | isPending) {
+    <div class="mt-4 mr-0 mb-6" data-testid="album-details-skeleton">
       <div class="skeleton h-2 w-full mb-2"></div>
       <div class="skeleton h-2 w-full"></div>
     </div>
-  } @else if (album | hasFailed) {
-    <span>Error: {{ album.error!.message }}</span>
+  } @else if (albumDetailsResult | hasFailed) {
+    <span>Error: {{ albumDetailsResult.error!.message }}</span>
   } @else {
-    @let name = album.data!.albumName;
-    @let mediaItemsCount = album.data!.mediaItemIds.length;
-    @let childAlbumsCount = album.data!.childAlbumIds.length;
+    @let name = albumDetailsResult.data!.albumName;
+    @let mediaItemsCount = albumDetailsResult.data!.mediaItemIds.length;
+    @let childAlbumsCount = albumDetailsResult.data!.childAlbumIds.length;
 
-    <img
-      class="album-card__image"
-      src="assets/404-page/sad-cat.png"
-      loading="lazy"
-      [alt]="name + ' album'"
-    />
     <div class="album-card__details">
       <div data-testid="album-card-name">
         {{ name }}

@@ -9,13 +9,36 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { Subscription, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  filter,
+  Observable,
+  of,
+  Subscription,
+  switchMap,
+} from 'rxjs';
 
 import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
-import { Result, toPending } from '../../../../shared/results/results';
-import { Album } from '../../../services/webapi.service';
+import {
+  Result,
+  toPending,
+  toSuccess,
+} from '../../../../shared/results/results';
+import { filterOnlySuccess } from '../../../../shared/results/rxjs/filterOnlySuccess';
+import { mapResultRxJs } from '../../../../shared/results/rxjs/mapResultRxJs';
+import { switchMapResultToResultRxJs } from '../../../../shared/results/rxjs/switchMapResultToResultRxJs';
+import {
+  Album,
+  GPhotosMediaItem,
+  MediaItem,
+} from '../../../services/webapi.service';
 import { albumsActions, albumsState } from '../../../store/albums';
+import {
+  gPhotosMediaItemsActions,
+  gPhotosMediaItemsState,
+} from '../../../store/gphoto-media-items';
+import { mediaItemsActions, mediaItemsState } from '../../../store/media-items';
 
 @Component({
   selector: 'app-content-album-card',
@@ -39,11 +62,102 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
     initialValue: toPending<Album>(),
   });
 
+  private readonly chosenMediaItemId$ = new BehaviorSubject<
+    Result<string | null>
+  >(toPending());
+
+  private readonly chosenMediaItem$: Observable<Result<MediaItem | null>> =
+    this.chosenMediaItemId$.pipe(
+      switchMapResultToResultRxJs((mediaItemId: string | null) => {
+        if (!mediaItemId) {
+          return of(toSuccess(null));
+        }
+
+        return this.store.select(
+          mediaItemsState.selectMediaItemDetailsById(mediaItemId),
+        );
+      }),
+    );
+  private readonly chosenGMediaItem$: Observable<
+    Result<GPhotosMediaItem | null>
+  > = this.chosenMediaItem$.pipe(
+    switchMapResultToResultRxJs((mediaItem: MediaItem | null) => {
+      if (!mediaItem) {
+        return of(toSuccess(null));
+      }
+
+      return this.store.select(
+        gPhotosMediaItemsState.selectGPhotosMediaItemById(
+          mediaItem.gPhotosMediaItemId,
+        ),
+      );
+    }),
+  );
+  private readonly chosenAlbumImageUrl$: Observable<Result<string | null>> =
+    this.chosenGMediaItem$.pipe(
+      mapResultRxJs((image: GPhotosMediaItem | null) => {
+        if (!image) {
+          return null;
+        }
+
+        return image.baseUrl ?? null;
+      }),
+    );
+  readonly chosenAlbumImageUrl: Signal<Result<string | null>> = toSignal(
+    this.chosenAlbumImageUrl$,
+    {
+      initialValue: toPending<string | null>(),
+    },
+  );
+
   ngOnInit(): void {
     this.subscription.add(
       this.albumId$.subscribe((albumId) => {
         this.store.dispatch(albumsActions.loadAlbumDetails({ albumId }));
       }),
+    );
+
+    this.subscription.add(
+      this.albumDetails$.pipe(filterOnlySuccess()).subscribe((album) => {
+        if (album.mediaItemIds.length === 0) {
+          this.chosenMediaItemId$.next(toSuccess(null));
+        }
+
+        const randomIndex = Math.floor(
+          Math.random() * album.mediaItemIds.length,
+        );
+        this.chosenMediaItemId$.next(
+          toSuccess(album.mediaItemIds[randomIndex]),
+        );
+      }),
+    );
+
+    this.subscription.add(
+      this.chosenMediaItemId$
+        .pipe(
+          filterOnlySuccess(),
+          filter((id) => id !== null),
+        )
+        .subscribe((mediaItemId: string) => {
+          this.store.dispatch(
+            mediaItemsActions.loadMediaItemDetails({ mediaItemId }),
+          );
+        }),
+    );
+
+    this.subscription.add(
+      this.chosenMediaItem$
+        .pipe(
+          filterOnlySuccess(),
+          filter((mediaItem) => mediaItem !== null),
+        )
+        .subscribe((mediaItem: MediaItem) => {
+          this.store.dispatch(
+            gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
+              gMediaItemId: mediaItem.gPhotosMediaItemId,
+            }),
+          );
+        }),
     );
   }
 
