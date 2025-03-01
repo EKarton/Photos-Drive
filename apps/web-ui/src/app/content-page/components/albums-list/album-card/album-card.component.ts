@@ -62,12 +62,13 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
     initialValue: toPending<Album>(),
   });
 
-  private readonly chosenMediaItemId$ = new BehaviorSubject<string | null>(
-    null,
-  );
+  private readonly chosenMediaItemId$ = new BehaviorSubject<
+    Result<string | null>
+  >(toPending());
+
   private readonly chosenMediaItem$: Observable<Result<MediaItem | null>> =
     this.chosenMediaItemId$.pipe(
-      switchMap((mediaItemId: string | null) => {
+      switchMapResultToResultRxJs((mediaItemId: string | null) => {
         if (!mediaItemId) {
           return of(toSuccess(null));
         }
@@ -119,19 +120,24 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.albumDetails$.pipe(filterOnlySuccess()).subscribe((album) => {
         if (album.mediaItemIds.length === 0) {
-          this.chosenMediaItemId$.next(null);
+          this.chosenMediaItemId$.next(toSuccess(null));
         }
 
         const randomIndex = Math.floor(
           Math.random() * album.mediaItemIds.length,
         );
-        this.chosenMediaItemId$.next(album.mediaItemIds[randomIndex]);
+        this.chosenMediaItemId$.next(
+          toSuccess(album.mediaItemIds[randomIndex]),
+        );
       }),
     );
 
     this.subscription.add(
       this.chosenMediaItemId$
-        .pipe(filter((id) => id !== null))
+        .pipe(
+          filterOnlySuccess(),
+          filter((id) => id !== null),
+        )
         .subscribe((mediaItemId: string) => {
           console.log('mDispatch', mediaItemId);
           this.store.dispatch(
