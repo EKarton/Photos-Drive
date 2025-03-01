@@ -52,9 +52,6 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
 
   readonly albumId = input.required<string>();
   private readonly albumId$ = toObservable(this.albumId);
-  private readonly chosenMediaItemId$ = new BehaviorSubject<string | null>(
-    null,
-  );
 
   private readonly albumDetails$ = this.albumId$.pipe(
     switchMap((albumId) =>
@@ -65,6 +62,9 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
     initialValue: toPending<Album>(),
   });
 
+  private readonly chosenMediaItemId$ = new BehaviorSubject<string | null>(
+    null,
+  );
   private readonly chosenMediaItem$: Observable<Result<MediaItem | null>> =
     this.chosenMediaItemId$.pipe(
       switchMap((mediaItemId: string | null) => {
