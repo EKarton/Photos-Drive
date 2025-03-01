@@ -9,13 +9,11 @@ export function isPending<T>(result: Result<T>): boolean {
 }
 
 export function hasSucceed<T>(result: Result<T>): boolean {
-  return (
-    result.data != undefined && result.error === undefined && !result.isLoading
-  );
+  return result.error === undefined && !result.isLoading;
 }
 
 export function hasFailed<T>(result: Result<T>): boolean {
-  return result.error != undefined;
+  return result.error !== undefined;
 }
 
 export function toPending<T>(): Result<T> {

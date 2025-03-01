@@ -1,28 +1,34 @@
 <div>
-  @let album = albumDetails();
-
-  @if (album | isPending) {
+  @let imageUrlResult = chosenAlbumImageUrl();
+  @if (imageUrlResult | isPending) {
     <div class="skeleton h-full w-full">
       <!-- A trick to make the skeleton always be a square, regardless of its width. -->
       <svg viewBox="0 0 1 1"></svg>
     </div>
-    <div class="mt-4 mr-0 mb-6">
-      <div class="skeleton h-2 w-full mb-2"></div>
-      <div class="skeleton h-2 w-full"></div>
-    </div>
-  } @else if (album | hasFailed) {
-    <span>Error: {{ album.error!.message }}</span>
+  } @else if (imageUrlResult | hasFailed) {
+    <span>Error: {{ imageUrlResult.error!.message }}</span>
   } @else {
-    @let name = album.data!.albumName;
-    @let mediaItemsCount = album.data!.mediaItemIds.length;
-    @let childAlbumsCount = album.data!.childAlbumIds.length;
-
     <img
       class="album-card__image"
-      src="assets/404-page/sad-cat.png"
+      [src]="imageUrlResult.data!"
       loading="lazy"
-      [alt]="name + ' album'"
+      alt="Album"
     />
+  }
+
+  @let albumDetailsResult = albumDetails();
+  @if (albumDetailsResult | isPending) {
+    <div class="skeleton h-full w-full">
+      <!-- A trick to make the skeleton always be a square, regardless of its width. -->
+      <svg viewBox="0 0 1 1"></svg>
+    </div>
+  } @else if (albumDetailsResult | hasFailed) {
+    <span>Error: {{ albumDetailsResult.error!.message }}</span>
+  } @else {
+    @let name = albumDetailsResult.data!.albumName;
+    @let mediaItemsCount = albumDetailsResult.data!.mediaItemIds.length;
+    @let childAlbumsCount = albumDetailsResult.data!.childAlbumIds.length;
+
     <div class="album-card__details">
       <div data-testid="album-card-name">
         {{ name }}
