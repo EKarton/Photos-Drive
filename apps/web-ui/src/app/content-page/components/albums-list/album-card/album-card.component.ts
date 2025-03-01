@@ -139,7 +139,6 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
           filter((id) => id !== null),
         )
         .subscribe((mediaItemId: string) => {
-          console.log('mDispatch', mediaItemId);
           this.store.dispatch(
             mediaItemsActions.loadMediaItemDetails({ mediaItemId }),
           );
@@ -153,7 +152,6 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
           filter((mediaItem) => mediaItem !== null),
         )
         .subscribe((mediaItem: MediaItem) => {
-          console.log('gDispatch', mediaItem.gPhotosMediaItemId);
           this.store.dispatch(
             gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
               gMediaItemId: mediaItem.gPhotosMediaItemId,

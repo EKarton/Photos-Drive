@@ -1,15 +1,18 @@
 <div>
   @let imageUrlResult = chosenAlbumImageUrl();
   @if (imageUrlResult | isPending) {
-    <div class="skeleton h-full w-full">
+    <div class="skeleton h-full w-full" data-testid="album-image-skeleton">
       <!-- A trick to make the skeleton always be a square, regardless of its width. -->
       <svg viewBox="0 0 1 1"></svg>
     </div>
   } @else if (imageUrlResult | hasFailed) {
-    <span>Error: {{ imageUrlResult.error!.message }}</span>
+    <span data-testid="album-image-error"
+      >Error: {{ imageUrlResult.error!.message }}</span
+    >
   } @else {
     <img
       class="album-card__image"
+      data-testid="album-image"
       [src]="imageUrlResult.data!"
       loading="lazy"
       alt="Album"
@@ -18,9 +21,9 @@
 
   @let albumDetailsResult = albumDetails();
   @if (albumDetailsResult | isPending) {
-    <div class="skeleton h-full w-full">
-      <!-- A trick to make the skeleton always be a square, regardless of its width. -->
-      <svg viewBox="0 0 1 1"></svg>
+    <div class="mt-4 mr-0 mb-6" data-testid="album-details-skeleton">
+      <div class="skeleton h-2 w-full mb-2"></div>
+      <div class="skeleton h-2 w-full"></div>
     </div>
   } @else if (albumDetailsResult | hasFailed) {
     <span>Error: {{ albumDetailsResult.error!.message }}</span>

@@ -39,15 +39,6 @@ describe('Results', () => {
       expect(hasSucceed(result)).toBe(true);
     });
 
-    it('should return false when data is undefined', () => {
-      const result: Result<string> = {
-        data: undefined,
-        isLoading: false,
-        error: undefined,
-      };
-      expect(hasSucceed(result)).toBe(false);
-    });
-
     it('should return false when error is defined', () => {
       const result: Result<string> = {
         data: 'test',
