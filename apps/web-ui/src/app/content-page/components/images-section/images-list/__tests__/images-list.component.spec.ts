@@ -86,23 +86,23 @@ describe('ImagesListComponent', () => {
   [
     {
       hostElementWidth: 200,
-      expectedImageWidths: [200],
-      expectedImageHeights: [150],
+      expectedImageWidths: [95],
+      expectedImageHeights: [71],
     },
     {
       hostElementWidth: 500,
-      expectedImageWidths: [245],
-      expectedImageHeights: [184],
+      expectedImageWidths: [160],
+      expectedImageHeights: [120],
     },
     {
       hostElementWidth: 1200,
-      expectedImageWidths: [393],
-      expectedImageHeights: [295],
+      expectedImageWidths: [292],
+      expectedImageHeights: [219],
     },
     {
       hostElementWidth: 1600,
-      expectedImageWidths: [392],
-      expectedImageHeights: [294],
+      expectedImageWidths: [312],
+      expectedImageHeights: [234],
     },
   ].forEach(
     ({ hostElementWidth, expectedImageWidths, expectedImageHeights }) => {
