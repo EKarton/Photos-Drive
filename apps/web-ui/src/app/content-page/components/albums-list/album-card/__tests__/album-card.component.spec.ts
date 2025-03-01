@@ -161,9 +161,40 @@ describe('AlbumCardComponent', () => {
     fixture.detectChanges();
 
     const image = fixture.nativeElement.querySelector(
-      '[data-testid="album-image"]',
+      '[data-testid="album-image-folder"]',
     );
-    expect(image.src.includes('/assets/404-page/sad-cat.png')).toBeTrue();
+    expect(image).toBeTruthy();
+  });
+
+  it('should render template image when album has no images', () => {
+    const fixture = TestBed.createComponent(AlbumCardComponent);
+    fixture.componentRef.setInput('albumId', 'album3');
+    fixture.detectChanges();
+
+    store.setState({
+      [albumsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap().set(
+          'album3',
+          toSuccess({
+            ...ALBUM_DETAILS_1,
+            mediaItemIds: [],
+          }),
+        ),
+      },
+      [mediaItemsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap(),
+      },
+      [gPhotosMediaItemsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap(),
+      },
+    });
+    store.refreshState();
+    fixture.detectChanges();
+
+    const image = fixture.nativeElement.querySelector(
+      '[data-testid="album-image-folder"]',
+    );
+    expect(image).toBeTruthy();
   });
 
   [

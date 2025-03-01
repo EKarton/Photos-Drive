@@ -93,20 +93,20 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
       );
     }),
   );
-  private readonly chosenAlbumImageUrl$: Observable<Result<string>> =
+  private readonly chosenAlbumImageUrl$: Observable<Result<string | null>> =
     this.chosenGMediaItem$.pipe(
       mapResultRxJs((image: GPhotosMediaItem | null) => {
         if (!image) {
-          return '/assets/404-page/sad-cat.png';
+          return null;
         }
 
-        return image.baseUrl || '/assets/404-page/sad-cat.png';
+        return image.baseUrl ?? null;
       }),
     );
-  readonly chosenAlbumImageUrl: Signal<Result<string>> = toSignal(
+  readonly chosenAlbumImageUrl: Signal<Result<string | null>> = toSignal(
     this.chosenAlbumImageUrl$,
     {
-      initialValue: toPending<string>(),
+      initialValue: toPending<string | null>(),
     },
   );
 
