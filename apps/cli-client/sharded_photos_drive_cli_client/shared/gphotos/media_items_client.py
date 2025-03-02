@@ -169,6 +169,9 @@ class GPhotosMediaItemsClient:
         """
         Searches for media items.
 
+        Note: this is different from {@code get_all_media_items()} where if
+        there are no filters applied, it won't return all media items.
+
         Args:
             album_id (Optional[str]): The album ID to search in, if present.
             filters (Optional[str]): A list of filters, if present.
