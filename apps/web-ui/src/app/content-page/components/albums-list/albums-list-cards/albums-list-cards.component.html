@@ -12,7 +12,7 @@
     } @else {
       <div
         data-testid="album"
-        class="flex gap-2 border border-opacity-50 rounded-md pl-6 pr-6 pt-3 pb-4"
+        class="flex items-center gap-2 border border-opacity-50 rounded-md pl-5 pr-6 pt-3 pb-3"
         [routerLink]="['/content', album.data!.id]"
       >
         <svg
@@ -30,10 +30,8 @@
           />
         </svg>
 
-        <div>
-          <div data-testid="album-card-name">
-            {{ album.data!.albumName }}
-          </div>
+        <div data-testid="album-card-name" class="text-sm">
+          {{ album.data!.albumName }}
         </div>
       </div>
     }
