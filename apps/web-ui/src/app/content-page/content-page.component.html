@@ -10,10 +10,7 @@
     <span>Error: {{ album.error!.message }}</span>
   } @else {
     @if (album.data!.childAlbumIds.length > 0) {
-      <h1 class="text-2xl font-bold mb-4">Albums</h1>
-      <div class="mb-4xl">
-        <app-content-albums-list [albumId]="albumId()" />
-      </div>
+      <app-content-albums-list [albumId]="albumId()" />
 
       @if (album.data!.mediaItemIds.length > 0) {
         <div class="divider"></div>

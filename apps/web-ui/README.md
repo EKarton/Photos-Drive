@@ -75,13 +75,13 @@ This will compile your project and store the build artifacts in the `dist/` dire
 To check for code styles, run
 
 ```bash
-npm run lint
+npm run lint && npx stylelint 'src/**/*.scss'
 ```
 
 To automatically fix errors in code styles, run:
 
 ```bash
-npm run lint:fix
+npm run lint:fix && npx stylelint 'src/**/*.scss' --fix
 ```
 
 ### Running unit tests
