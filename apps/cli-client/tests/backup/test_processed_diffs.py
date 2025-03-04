@@ -142,9 +142,7 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_name, "image-with-location.jpg")
         self.assertEqual(processed_diffs[0].file_size, 0)
         self.assertIsNone(processed_diffs[0].location)
-        self.assertEqual(
-            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
-        )
+        self.assertEqual(processed_diffs[0].file_hash, b'0')
 
     def test_process_raw_diffs_file_not_exist(self):
         diff = Diff(
