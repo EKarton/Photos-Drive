@@ -45,7 +45,7 @@ describe('combineResults', () => {
     expect(combined).toEqual(toSuccess(0));
   });
 
-  it('should prioritize loading state over error state', () => {
+  it('should prioritize error state over loading state', () => {
     const error = new Error('Test error');
     const results: Result<number>[] = [
       toSuccess(1),
@@ -54,7 +54,7 @@ describe('combineResults', () => {
     ];
 
     const combined = combineResults(results, mapper);
-    expect(combined).toEqual(toPending<number>());
+    expect(combined).toEqual(toFailure<number>(error));
   });
 
   it('should handle complex mapper functions', () => {
