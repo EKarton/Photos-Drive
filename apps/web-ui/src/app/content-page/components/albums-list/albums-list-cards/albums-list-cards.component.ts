@@ -10,22 +10,21 @@ import {
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, map, Subscription, switchMap } from 'rxjs';
+import { combineLatest, Subscription, switchMap } from 'rxjs';
 
 import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
-import { Result, toPending } from '../../../../shared/results/results';
-import { combineResults } from '../../../../shared/results/utils/combineResults';
+import { Result } from '../../../../shared/results/results';
 import { Album } from '../../../services/webapi.service';
 import { albumsActions, albumsState } from '../../../store/albums';
 
 @Component({
-  selector: 'app-content-album-cards-list',
+  selector: 'app-content-albums-list-cards',
   imports: [CommonModule, RouterModule, IsPendingPipe, HasFailedPipe],
-  templateUrl: './album-cards-list.component.html',
-  styleUrl: './album-cards-list.component.scss',
+  templateUrl: './albums-list-cards.component.html',
+  styleUrl: './albums-list-cards.component.scss',
 })
-export class AlbumCardComponent implements OnInit, OnDestroy {
+export class AlbumsListCardsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly subscription = new Subscription();
 
@@ -40,20 +39,14 @@ export class AlbumCardComponent implements OnInit, OnDestroy {
             albumsState.selectAlbumDetailsById(childAlbumId),
           );
         }),
-      ).pipe(
-        map((childAlbumResults: Result<Album>[]) => {
-          return combineResults(childAlbumResults, (childAlbums: Album[]) => {
-            return childAlbums;
-          });
-        }),
       );
     }),
   );
 
-  readonly childAlbumResults: Signal<Result<Album[]>> = toSignal(
+  readonly childAlbumResults: Signal<Result<Album>[]> = toSignal(
     this.childAlbumResults$,
     {
-      initialValue: toPending<Album[]>(),
+      initialValue: [],
     },
   );
 

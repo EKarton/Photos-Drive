@@ -1,10 +1,9 @@
-<div class="flex flex-wrap gap-6">
-  @let album = albumResults();
-  @if (album | isPending) {
-    <span data-testid="albums-list-spinner">Loading...</span>
-  } @else if (album | hasFailed) {
-    <span>Error: {{ album.error!.message }}</span>
-  } @else {
-    <app-content-album-cards-list [album]="album.data!" />
-  }
-</div>
+@let album = albumResults();
+@if (album | isPending) {
+  <span data-testid="albums-list-spinner">Loading...</span>
+} @else if (album | hasFailed) {
+  <span>Error: {{ album.error!.message }}</span>
+} @else {
+  <!-- <app-content-albums-list-cards [album]="album.data!" /> -->
+  <app-content-albums-list-table [album]="album.data!" />
+}

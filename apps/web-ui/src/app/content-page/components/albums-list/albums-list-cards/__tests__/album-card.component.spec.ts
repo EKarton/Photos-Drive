@@ -6,7 +6,7 @@ import { Map as ImmutableMap } from 'immutable';
 import { toFailure, toSuccess } from '../../../../../shared/results/results';
 import { Album } from '../../../../services/webapi.service';
 import { albumsState } from '../../../../store/albums';
-import { AlbumCardComponent } from '../album-cards-list.component';
+import { AlbumsListCardsComponent } from '../albums-list-cards.component';
 
 const ALBUM_DETAILS_1: Album = {
   id: 'album1',
@@ -45,7 +45,7 @@ describe('AlbumCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AlbumCardComponent],
+      imports: [AlbumsListCardsComponent],
       providers: [
         provideMockStore({
           initialState: {
@@ -61,7 +61,7 @@ describe('AlbumCardComponent', () => {
   });
 
   it('should render skeleton when media item is not loaded yet', () => {
-    const fixture = TestBed.createComponent(AlbumCardComponent);
+    const fixture = TestBed.createComponent(AlbumsListCardsComponent);
     fixture.componentRef.setInput('album', ALBUM_DETAILS_1);
     fixture.detectChanges();
 
@@ -72,7 +72,7 @@ describe('AlbumCardComponent', () => {
   });
 
   it('should show error when child album has failed to load', () => {
-    const fixture = TestBed.createComponent(AlbumCardComponent);
+    const fixture = TestBed.createComponent(AlbumsListCardsComponent);
     fixture.componentRef.setInput('album', ALBUM_DETAILS_1);
     fixture.detectChanges();
 
@@ -94,7 +94,7 @@ describe('AlbumCardComponent', () => {
   });
 
   it('should render correctly when child albums has loaded already', () => {
-    const fixture = TestBed.createComponent(AlbumCardComponent);
+    const fixture = TestBed.createComponent(AlbumsListCardsComponent);
     fixture.componentRef.setInput('album', ALBUM_DETAILS_1);
     fixture.detectChanges();
 

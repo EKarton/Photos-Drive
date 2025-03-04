@@ -16,12 +16,19 @@ import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
 import { Result, toPending } from '../../../shared/results/results';
 import { Album } from '../../services/webapi.service';
 import { albumsActions, albumsState } from '../../store/albums';
-import { AlbumCardComponent } from './album-cards-list/album-cards-list.component';
+import { AlbumsListCardsComponent } from './albums-list-cards/albums-list-cards.component';
+import { AlbumsListTableComponent } from './albums-list-table/albums-list-table.component';
 
 @Component({
   standalone: true,
   selector: 'app-content-albums-list',
-  imports: [CommonModule, IsPendingPipe, HasFailedPipe, AlbumCardComponent],
+  imports: [
+    CommonModule,
+    IsPendingPipe,
+    HasFailedPipe,
+    AlbumsListCardsComponent,
+    AlbumsListTableComponent,
+  ],
   templateUrl: './albums-list.component.html',
 })
 export class AlbumsListComponent implements OnInit, OnDestroy {

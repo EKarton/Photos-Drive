@@ -1,20 +1,19 @@
 <div class="flex flex-wrap gap-4">
-  @let childAlbumDetails = childAlbumResults();
-  @if (childAlbumDetails | isPending) {
-    @for (childAlbumId of album().childAlbumIds; track childAlbumId) {
-      <div
-        data-testid="album-skeleton"
-        class="skeleton w-32 h-16 rounded-md"
-      ></div>
-    }
-  } @else if (childAlbumDetails | hasFailed) {
-    <span data-testid="albums-error">
-      Error: {{ childAlbumDetails.error!.message }}
-    </span>
-  } @else {
-    @let childAlbums = childAlbumDetails.data!;
+  @for (childAlbumResult of childAlbumResults(); track childAlbumResult) {
+    @if (childAlbumResult | isPending) {
+      @for (childAlbumId of album().childAlbumIds; track childAlbumId) {
+        <div
+          data-testid="album-skeleton"
+          class="skeleton w-32 h-16 rounded-md"
+        ></div>
+      }
+    } @else if (childAlbumResult | hasFailed) {
+      <span data-testid="albums-error">
+        Error: {{ childAlbumResult.error!.message }}
+      </span>
+    } @else {
+      @let childAlbum = childAlbumResult.data!;
 
-    @for (childAlbum of childAlbums; track childAlbum.id) {
       <div
         data-testid="album"
         class="flex gap-2 border border-opacity-50 rounded-md pl-6 pr-6 pt-3 pb-4"
