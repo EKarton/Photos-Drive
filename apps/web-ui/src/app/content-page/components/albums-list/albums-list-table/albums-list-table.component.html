@@ -7,23 +7,28 @@
       </tr>
     </thead>
     <tbody>
-      @for (childAlbumResult of childAlbumResults(); track childAlbumResult) {
-        @if (childAlbumResult | isPending) {
+      @for (album of albums(); track album) {
+        @if (album | isPending) {
           <tr>
-            <td colspan="2" class="skeleton w-full h-12 rounded-none"></td>
+            <td
+              colspan="2"
+              class="skeleton w-full h-12 rounded-none"
+              data-testid="table-row-skeleton"
+            ></td>
           </tr>
-        } @else if (childAlbumResult | hasFailed) {
+        } @else if (album | hasFailed) {
           <tr class="hover:bg-base-300">
             <th colspan="2">
-              <span>Error: {{ childAlbumResult.error! }}</span>
+              <span data-testid="albums-error">Error: {{ album.error! }}</span>
             </th>
           </tr>
         } @else {
           <tr
             class="hover:bg-base-300"
-            [routerLink]="['/content', childAlbumResult.data!.id]"
+            data-testid="album-row"
+            [routerLink]="['/content', album.data!.id]"
           >
-            <th>
+            <td>
               <div class="flex gap-2 items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -40,14 +45,13 @@
                   />
                 </svg>
                 <span>
-                  {{ childAlbumResult.data!.albumName }}
+                  {{ album.data!.albumName }}
                 </span>
               </div>
-            </th>
+            </td>
             <td>
-              @let mediaItemsCount = childAlbumResult.data!.mediaItemIds.length;
-              @let childAlbumsCount =
-                childAlbumResult.data!.childAlbumIds.length;
+              @let mediaItemsCount = album.data!.mediaItemIds.length;
+              @let childAlbumsCount = album.data!.childAlbumIds.length;
 
               @if (mediaItemsCount > 0 && childAlbumsCount > 0) {
                 {{ mediaItemsCount }}

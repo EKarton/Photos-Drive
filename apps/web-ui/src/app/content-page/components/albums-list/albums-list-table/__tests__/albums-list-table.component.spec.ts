@@ -7,7 +7,7 @@ import {
   toSuccess,
 } from '../../../../../shared/results/results';
 import { Album } from '../../../../services/webapi.service';
-import { AlbumsListCardsComponent } from '../albums-list-cards.component';
+import { AlbumsListTableComponent } from '../albums-list-table.component';
 
 const ALBUM_DETAILS_1: Album = {
   id: 'album1',
@@ -33,16 +33,16 @@ const ALBUM_DETAILS_3: Album = {
   mediaItemIds: ['photos3'],
 };
 
-describe('AlbumsListCardsComponent', () => {
+describe('AlbumsListTableComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AlbumsListCardsComponent],
+      imports: [AlbumsListTableComponent],
       providers: [provideRouter([])],
     }).compileComponents();
   });
 
   it('should render skeleton when albums are not loaded yet', () => {
-    const fixture = TestBed.createComponent(AlbumsListCardsComponent);
+    const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albums', [
       toPending(),
       toPending(),
@@ -51,13 +51,13 @@ describe('AlbumsListCardsComponent', () => {
     fixture.detectChanges();
 
     const skeletons = fixture.nativeElement.querySelectorAll(
-      '[data-testid="album-skeleton"]',
+      '[data-testid="table-row-skeleton"]',
     );
     expect(skeletons.length).toEqual(3);
   });
 
   it('should show error when albums has failed to load', () => {
-    const fixture = TestBed.createComponent(AlbumsListCardsComponent);
+    const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albums', [
       toFailure(new Error('Random error')),
       toFailure(new Error('Random error')),
@@ -72,7 +72,7 @@ describe('AlbumsListCardsComponent', () => {
   });
 
   it('should render correctly when child albums has loaded already', () => {
-    const fixture = TestBed.createComponent(AlbumsListCardsComponent);
+    const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albums', [
       toSuccess(ALBUM_DETAILS_1),
       toSuccess(ALBUM_DETAILS_2),
@@ -81,7 +81,7 @@ describe('AlbumsListCardsComponent', () => {
     fixture.detectChanges();
 
     const subAlbums = fixture.nativeElement.querySelectorAll(
-      '[data-testid="album"]',
+      '[data-testid="album-row"]',
     );
     expect(subAlbums.length).toEqual(3);
   });

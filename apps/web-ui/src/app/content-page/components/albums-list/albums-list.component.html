@@ -38,16 +38,15 @@
   </label>
 </div>
 <div class="mb-4xl">
-  @let album = albumResults();
-  @if (album | isPending) {
+  @if (album() | isPending) {
     <span data-testid="albums-list-spinner">Loading...</span>
-  } @else if (album | hasFailed) {
-    <span>Error: {{ album.error!.message }}</span>
+  } @else if (album() | hasFailed) {
+    <span>Error: {{ album().error!.message }}</span>
   } @else {
     @if (isTableViewChecked) {
-      <app-content-albums-list-table [album]="album.data!" />
+      <app-content-albums-list-table [albums]="childAlbums()" />
     } @else {
-      <app-content-albums-list-cards [album]="album.data!" />
+      <app-content-albums-list-cards [albums]="childAlbums()" />
     }
   }
 </div>
