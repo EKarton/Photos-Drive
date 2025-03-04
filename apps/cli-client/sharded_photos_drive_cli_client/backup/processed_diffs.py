@@ -49,7 +49,7 @@ class DiffsProcessor:
             return ProcessedDiff(
                 modifier=diff.modifier,
                 file_path=diff.file_path,
-                file_hash=compute_file_hash(diff.file_path),
+                file_hash=self.__compute_file_hash(diff),
                 album_name=self.__get_album_name(diff),
                 file_name=self.__get_file_name(diff),
                 file_size=self.__get_file_size_in_bytes(diff),
@@ -112,6 +112,11 @@ class DiffsProcessor:
                 locations[missing_locations_and_idx[i][1]] = location
 
         return locations
+
+    def __compute_file_hash(self, diff: Diff) -> bytes:
+        if diff.modifier == "-":
+            return b'0'
+        return compute_file_hash(diff.file_path)
 
     def __get_album_name(self, diff: Diff) -> str:
         if diff.album_name:
