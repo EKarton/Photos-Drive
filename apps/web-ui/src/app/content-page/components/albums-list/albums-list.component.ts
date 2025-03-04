@@ -5,9 +5,11 @@ import {
   input,
   OnDestroy,
   OnInit,
+  signal,
   Signal,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Subscription, switchMap } from 'rxjs';
 
@@ -24,6 +26,7 @@ import { AlbumsListTableComponent } from './albums-list-table/albums-list-table.
   selector: 'app-content-albums-list',
   imports: [
     CommonModule,
+    FormsModule,
     IsPendingPipe,
     HasFailedPipe,
     AlbumsListCardsComponent,
@@ -49,6 +52,8 @@ export class AlbumsListComponent implements OnInit, OnDestroy {
       initialValue: toPending<Album>(),
     },
   );
+
+  isTableViewChecked = false;
 
   ngOnInit(): void {
     this.subscription.add(
