@@ -11,7 +11,6 @@ import { Album } from '../../../services/webapi.service';
   selector: 'app-content-albums-list-cards',
   imports: [CommonModule, RouterModule, IsPendingPipe, HasFailedPipe],
   templateUrl: './albums-list-cards.component.html',
-  styleUrl: './albums-list-cards.component.scss',
 })
 export class AlbumsListCardsComponent {
   readonly albums = input.required<Result<Album>[]>();
