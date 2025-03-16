@@ -90,6 +90,36 @@ class TestGPhotosClientsRepository(unittest.TestCase):
             new_config.read_write_credentials.client_secret, 'clientSecret1'
         )
 
+    def test_build_from_config_with_failed_token_refresh(self):
+        repo = GPhotosClientsRepository.build_from_config(self.config)
+        client = repo.get_client_by_id(self.config.get_gphotos_configs()[0].id)
+
+        mock_refresh_response = Mock()
+        mock_refresh_response.status = 200
+        mock_refresh_response.headers = {}
+        mock_refresh_response.data = json.dumps(
+            {
+                'access_token': "newToken123",
+                'refresh_token': "newRefreshToken123",
+            }
+        ).encode('utf-8')
+
+        mock_request = Mock()
+        test_error = Exception("Random error")
+        mock_request.side_effect = test_error
+        client.session().credentials.refresh(mock_request)
+
+        new_config = self.config.get_gphotos_configs()[0]
+        self.assertEqual(new_config.read_write_credentials.token, 'token1')
+        self.assertEqual(
+            new_config.read_write_credentials.refresh_token, 'refreshToken1'
+        )
+        self.assertEqual(new_config.read_write_credentials.token_uri, 'google.com')
+        self.assertEqual(new_config.read_write_credentials.client_id, 'clientId1')
+        self.assertEqual(
+            new_config.read_write_credentials.client_secret, 'clientSecret1'
+        )
+
     def test_add_gphotos_client(self):
         client_id = ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
         client = Mock(spec=GPhotosClientV2)

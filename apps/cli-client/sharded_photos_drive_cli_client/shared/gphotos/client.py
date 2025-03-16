@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Optional
+from abc import ABC, abstractmethod
 from google.oauth2.credentials import Credentials
 from requests.exceptions import RequestException
 from google.auth.transport.requests import AuthorizedSession
@@ -95,6 +96,29 @@ class GPhotosClientV2:
         return self._media_items_client
 
 
+class TokenRefreshCallback(ABC):
+    '''
+    A callback interface whenever the token refreshes.
+    '''
+
+    @abstractmethod
+    def before_refresh(self) -> None:
+        '''Called before the token refreshes.'''
+        pass
+
+    @abstractmethod
+    def after_refresh(self, error: Optional[Exception]) -> None:
+        '''
+        Called after the token refreshes.
+        If an exception occurs in the `before_refresh()` function or during token
+        refresh, it will be passed in params.
+
+        Args:
+            error (Optional[Exception]): The error, if it exists.
+        '''
+        pass
+
+
 class ListenableCredentials(Credentials):
     '''
     A type of Credential where every time the token refreshes,
@@ -106,16 +130,21 @@ class ListenableCredentials(Credentials):
         self.__token_refresh_callback = None
 
     def refresh(self, request):
-        super().refresh(request)
-        if self.__token_refresh_callback:
-            self.__token_refresh_callback()
+        try:
+            if self.__token_refresh_callback:
+                self.__token_refresh_callback.before_refresh()
+            super().refresh(request)
+            self.__token_refresh_callback.after_refresh(None)
 
-    def set_token_refresh_callback(self, callback: Optional[Callable[[], None]]):
+        except Exception as e:
+            if self.__token_refresh_callback:
+                self.__token_refresh_callback.after_refresh(e)
+
+    def set_token_refresh_callback(self, callback: TokenRefreshCallback):
         '''
         Sets the token refresh callback.
 
         Args:
-            callback (Optional[Callable[[], None]]):
-                The callback function, which is called whenever the token is refreshed.
+            callback (TokenRefreshCallback): the callback function
         '''
         self.__token_refresh_callback = callback
