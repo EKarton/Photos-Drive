@@ -94,16 +94,6 @@ class TestGPhotosClientsRepository(unittest.TestCase):
         repo = GPhotosClientsRepository.build_from_config(self.config)
         client = repo.get_client_by_id(self.config.get_gphotos_configs()[0].id)
 
-        mock_refresh_response = Mock()
-        mock_refresh_response.status = 200
-        mock_refresh_response.headers = {}
-        mock_refresh_response.data = json.dumps(
-            {
-                'access_token': "newToken123",
-                'refresh_token': "newRefreshToken123",
-            }
-        ).encode('utf-8')
-
         mock_request = Mock()
         test_error = Exception("Random error")
         mock_request.side_effect = test_error
