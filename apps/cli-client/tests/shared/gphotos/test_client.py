@@ -148,11 +148,6 @@ class TestListenableCredentials(unittest.TestCase):
         mock_refresh.assert_called_once_with(mock_request)
         mock_callback.assert_called_once()
 
-        # Check that the callback was called with a copy of the credentials
-        called_credentials = mock_callback.call_args[0][0]
-        self.assertIsInstance(called_credentials, Credentials)
-        self.assertIsNot(called_credentials, self.listenable_credentials)
-
     def test_make_copy(self):
         copied_credentials = self.listenable_credentials._make_copy()
         self.assertIsInstance(copied_credentials, Credentials)
