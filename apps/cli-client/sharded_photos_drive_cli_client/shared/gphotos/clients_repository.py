@@ -45,7 +45,7 @@ class GPhotosClientsRepository:
 
             listenable_credentials.set_token_refresh_callback(
                 GPhotosClientsRepository.__create_new_token_refresh_handler(
-                    config_repo, gphotos_config
+                    config_repo, gphotos_config, listenable_credentials
                 )
             )
 
@@ -54,17 +54,19 @@ class GPhotosClientsRepository:
         return gphotos_clients_repo
 
     @staticmethod
-    def __create_new_token_refresh_handler(config_repo: Config, config: GPhotosConfig):
-        def handle_token_refresh(new_creds: Credentials):
+    def __create_new_token_refresh_handler(
+        config_repo: Config, config: GPhotosConfig, creds: Credentials
+    ):
+        def handle_on_token_refresh():
             logger.debug(f"Updated gphotos credentials for {config.id}")
             config_repo.update_gphotos_config(
                 UpdateGPhotosConfigRequest(
                     id=config.id,
-                    new_read_write_credentials=new_creds,
+                    new_read_write_credentials=creds,
                 )
             )
 
-        return handle_token_refresh
+        return handle_on_token_refresh
 
     def add_gphotos_client(self, id: ObjectId, client: GPhotosClientV2):
         """

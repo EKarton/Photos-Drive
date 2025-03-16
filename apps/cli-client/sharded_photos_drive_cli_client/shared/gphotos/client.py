@@ -108,17 +108,14 @@ class ListenableCredentials(Credentials):
     def refresh(self, request):
         super().refresh(request)
         if self.__token_refresh_callback:
-            self.__token_refresh_callback(self._make_copy())
+            self.__token_refresh_callback()
 
-    def set_token_refresh_callback(
-        self, callback: Optional[Callable[[Credentials], None]]
-    ):
+    def set_token_refresh_callback(self, callback: Optional[Callable[[], None]]):
         '''
         Sets the token refresh callback.
 
         Args:
-            callback (Optional[Callable[[Credentials], None]]):
-                The callback function, which returns the new credentials whenever the
-                token is refreshed.
+            callback (Optional[Callable[[], None]]):
+                The callback function, which is called whenever the token is refreshed.
         '''
         self.__token_refresh_callback = callback
