@@ -1,13 +1,35 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 from bson.objectid import ObjectId
 
-from .client import GPhotosClientV2, ListenableCredentials
+from .client import GPhotosClientV2, ListenableCredentials, TokenRefreshCallback
 from ..config.config import Config, GPhotosConfig, UpdateGPhotosConfigRequest
 
 logger = logging.getLogger(__name__)
+
+
+class TokenCallback(TokenRefreshCallback):
+    def __init__(self, config_repo: Config, config: GPhotosConfig, creds: Credentials):
+        self._config_repo = config_repo
+        self._config = config
+        self._creds = creds
+
+    def before_refresh(self) -> None:
+        pass
+
+    def after_refresh(self, error: Optional[Exception]) -> None:
+        if not error:
+            logger.debug(f"Updated gphotos credentials for {self._config.id}")
+            self._config_repo.update_gphotos_config(
+                UpdateGPhotosConfigRequest(
+                    id=self._config.id,
+                    new_read_write_credentials=self._creds,
+                )
+            )
+        else:
+            logger.error(f"Error while updating gphotos credentials: {error}")
 
 
 class GPhotosClientsRepository:
@@ -44,29 +66,12 @@ class GPhotosClientsRepository:
             )
 
             listenable_credentials.set_token_refresh_callback(
-                GPhotosClientsRepository.__create_new_token_refresh_handler(
-                    config_repo, gphotos_config, listenable_credentials
-                )
+                TokenCallback(config_repo, gphotos_config, listenable_credentials)
             )
 
             gphotos_clients_repo.add_gphotos_client(gphotos_config.id, gphotos_client)
 
         return gphotos_clients_repo
-
-    @staticmethod
-    def __create_new_token_refresh_handler(
-        config_repo: Config, config: GPhotosConfig, creds: Credentials
-    ):
-        def handle_on_token_refresh():
-            logger.debug(f"Updated gphotos credentials for {config.id}")
-            config_repo.update_gphotos_config(
-                UpdateGPhotosConfigRequest(
-                    id=config.id,
-                    new_read_write_credentials=creds,
-                )
-            )
-
-        return handle_on_token_refresh
 
     def add_gphotos_client(self, id: ObjectId, client: GPhotosClientV2):
         """

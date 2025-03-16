@@ -9,6 +9,7 @@ from google.auth.transport import Request
 from sharded_photos_drive_cli_client.shared.gphotos.client import (
     GPhotosClientV2,
     ListenableCredentials,
+    TokenRefreshCallback,
 )
 from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosStorageQuota
 from sharded_photos_drive_cli_client.shared.gphotos.albums_client import (
@@ -140,22 +141,39 @@ class TestListenableCredentials(unittest.TestCase):
     @patch.object(Credentials, 'refresh')
     def test_refresh_with_callback(self, mock_refresh):
         mock_request = Mock(spec=Request)
-        mock_callback = Mock()
+        mock_callback = Mock(spec=TokenRefreshCallback)
         self.listenable_credentials.set_token_refresh_callback(mock_callback)
 
         self.listenable_credentials.refresh(mock_request)
 
+        mock_callback.before_refresh.assert_called_once()
         mock_refresh.assert_called_once_with(mock_request)
-        mock_callback.assert_called_once()
+        mock_callback.after_refresh.assert_called_once()
 
-    def test_make_copy(self):
-        copied_credentials = self.listenable_credentials._make_copy()
-        self.assertIsInstance(copied_credentials, Credentials)
-        self.assertIsNot(copied_credentials, self.listenable_credentials)
+    @patch.object(Credentials, 'refresh')
+    def test_refresh_with_failed_before_callback(self, mock_refresh):
+        mock_request = Mock(spec=Request)
+        mock_callback = Mock(spec=TokenRefreshCallback)
+        test_error = Exception("Random error")
+        mock_callback.before_refresh.side_effect = test_error
+        self.listenable_credentials.set_token_refresh_callback(mock_callback)
 
-        # Check that all attributes are the same
-        for attr in self.mock_credentials.keys():
-            self.assertEqual(
-                getattr(copied_credentials, attr),
-                getattr(self.listenable_credentials, attr),
-            )
+        self.listenable_credentials.refresh(mock_request)
+
+        mock_callback.before_refresh.assert_called_once()
+        mock_refresh.assert_not_called()
+        mock_callback.after_refresh.assert_called_once_with(test_error)
+
+    @patch.object(Credentials, 'refresh')
+    def test_refresh_with_failed_refresh(self, mock_refresh):
+        mock_request = Mock(spec=Request)
+        mock_callback = Mock(spec=TokenRefreshCallback)
+        test_error = Exception("Random error")
+        mock_refresh.side_effect = test_error
+        self.listenable_credentials.set_token_refresh_callback(mock_callback)
+
+        self.listenable_credentials.refresh(mock_request)
+
+        mock_callback.before_refresh.assert_called_once()
+        mock_refresh.assert_called_once()
+        mock_callback.after_refresh.assert_called_once_with(test_error)
