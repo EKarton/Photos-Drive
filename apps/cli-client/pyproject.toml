@@ -2,7 +2,7 @@
 name = "sharded_photos_drive_cli_client"
 version = "1.2.13"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Emilio Kartono <e.kartonoe@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
