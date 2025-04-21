@@ -1,3 +1,4 @@
+import logger from '../../utils/logger';
 import { Vault } from '../vault/VaultStore';
 import { GPhotosClient } from './GPhotosClient';
 
@@ -22,12 +23,17 @@ export class GPhotosClientsRepository {
           return Promise.resolve();
         },
 
-        afterRefresh: () => {
-          vault.updateGPhotosConfig({
-            id: config.id,
-            newCredentials: gPhotosClient.getCredentials()
-          });
-          return Promise.resolve();
+        afterRefresh: (err?: Error) => {
+          if (!err) {
+            vault.updateGPhotosConfig({
+              id: config.id,
+              newCredentials: gPhotosClient.getCredentials()
+            });
+            return Promise.resolve();
+          } else {
+            logger.error(`Failed to update gphotos config ${err}`);
+            return Promise.reject(err);
+          }
         }
       });
 
