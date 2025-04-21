@@ -10,7 +10,7 @@ Scopes for read+write access.
 Refer to https://developers.google.com/photos/overview/authorization#library-api-scopes
 '''
 READ_WRITE_SCOPES = [
-    "https://www.googleapis.com/auth/photoslibrary.readonly",
+    "https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata",
     "https://www.googleapis.com/auth/photoslibrary.appendonly",
     "https://www.googleapis.com/auth/drive.photos.readonly",
 ]
@@ -20,7 +20,7 @@ Scopes for read-only access.
 Refer to https://developers.google.com/photos/overview/authorization#library-api-scopes
 '''
 READ_ONLY_SCOPES = [
-    "https://www.googleapis.com/auth/photoslibrary.readonly",
+    "https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata",
     "https://www.googleapis.com/auth/drive.photos.readonly",
 ]
 

@@ -262,7 +262,7 @@ It will delete all photos / videos from your system, and move all photos / video
    poetry run coverage run -m pytest && poetry run coverage report -m
    ```
 
-5. To run tests and code coverage, run:
+5. To run tests and code coverage for a particular test file, run:
 
    ```bash
    poetry run coverage run -m pytest <insert-file-path> && poetry run coverage report -m

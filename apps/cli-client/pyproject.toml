@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sharded_photos_drive_cli_client"
-version = "1.2.13"
+version = "1.2.14"
 description = ""
 authors = ["Emilio Kartono <e.kartonoe@gmail.com>"]
 readme = "README.md"
