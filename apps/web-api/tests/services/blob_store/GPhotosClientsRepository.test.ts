@@ -72,6 +72,19 @@ describe('GPhotosClientsRepository', () => {
         }
       });
     });
+
+    it('should not update configs when client refreshes token and throws an exception', async () => {
+      nock('https://oauth2.googleapis.com').post('/token').reply(500);
+
+      const client = gphotosClientsRepo.getGPhotosClientById('1');
+      try {
+        await client.refreshCredentials();
+      } catch {
+        /* empty */
+      }
+
+      expect(mockVault.updateGPhotosConfig).not.toHaveBeenCalled();
+    });
   });
 
   describe('getGPhotosClientById', () => {
