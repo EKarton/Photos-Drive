@@ -46,18 +46,15 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums"
-                + "?excludeNonAppCreatedData=False",
+                "https://photoslibrary.googleapis.com/v1/albums",
                 json={"albums": [albums[0]], "nextPageToken": "a"},
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums"
-                + "?excludeNonAppCreatedData=False&pageToken=a",
+                "https://photoslibrary.googleapis.com/v1/albums?pageToken=a",
                 json={"albums": [albums[1]], "nextPageToken": "b"},
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums"
-                + "?excludeNonAppCreatedData=False&pageToken=b",
+                "https://photoslibrary.googleapis.com/v1/albums?pageToken=b",
                 json={},
             )
 
@@ -95,13 +92,11 @@ class GPhotosAlbumClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums?"
-                + "excludeNonAppCreatedData=False",
+                "https://photoslibrary.googleapis.com/v1/albums",
                 json={"albums": [albums[0]], "nextPageToken": "a"},
             )
             request_mocker.get(
-                "https://photoslibrary.googleapis.com/v1/albums?"
-                + "excludeNonAppCreatedData=False&pageToken=a",
+                "https://photoslibrary.googleapis.com/v1/albums?pageToken=a",
                 json={"albums": [albums[1]]},
             )
 

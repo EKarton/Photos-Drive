@@ -9,7 +9,7 @@ class FakeGPhotosAlbumsClient(GPhotosAlbumsClient):
         self.id = id
         self.repository = repository
 
-    def list_albums(self, exclude_non_app_created_data: bool = False) -> list[Album]:
+    def list_albums(self) -> list[Album]:
         return self.repository.list_albums(self.id)
 
     def create_album(self, album_name: str) -> Album:
