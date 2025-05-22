@@ -325,7 +325,7 @@ class SystemCleaner:
 
     def __find_or_create_trash_album(self, client: GPhotosClientV2) -> GAlbum:
         trash_album: GAlbum | None = None
-        for album in client.albums().list_albums(exclude_non_app_created_data=True):
+        for album in client.albums().list_albums():
             if album.title == TRASH_ALBUM_TITLE:
                 trash_album = album
                 break
