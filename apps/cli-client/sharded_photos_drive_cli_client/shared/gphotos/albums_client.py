@@ -16,13 +16,9 @@ class GPhotosAlbumsClient:
     def __init__(self, session: AuthorizedSession):
         self._session = session
 
-    def list_albums(self, exclude_non_app_created_data: bool = False) -> list[Album]:
+    def list_albums(self) -> list[Album]:
         """
         Returns a list of unshared albums.
-
-        Args:
-            exclude_non_app_created_data (bool): Whether to exclude albums not
-                created by the app.
 
         Returns:
             list[Album]: A list of albums.
@@ -32,9 +28,7 @@ class GPhotosAlbumsClient:
         albums = []
         cur_page_token = None
         while True:
-            res_json = self._list_albums_in_pages(
-                cur_page_token, exclude_non_app_created_data
-            )
+            res_json = self._list_albums_in_pages(cur_page_token)
 
             if "albums" not in res_json:
                 break
@@ -49,13 +43,10 @@ class GPhotosAlbumsClient:
         return [from_dict(Album, a) for a in albums]
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
-    def _list_albums_in_pages(
-        self, page_token: str | None, exclude_non_app_created_data: bool
-    ) -> Any:
+    def _list_albums_in_pages(self, page_token: str | None) -> Any:
         uri = "https://photoslibrary.googleapis.com/v1/albums"
         params = {
             "pageToken": page_token,
-            "excludeNonAppCreatedData": exclude_non_app_created_data,
         }
         res = self._session.get(uri, params=params)
         res.raise_for_status()

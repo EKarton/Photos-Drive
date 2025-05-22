@@ -98,9 +98,7 @@ def teardown(
     # called 'To delete'
     for _, gphotos_client in gphoto_clients_repo.get_all_clients():
         trash_album_id: str | None = None
-        for album in gphotos_client.albums().list_albums(
-            exclude_non_app_created_data=True
-        ):
+        for album in gphotos_client.albums().list_albums():
             if album.title == "To delete":
                 trash_album_id = album.id
                 break
