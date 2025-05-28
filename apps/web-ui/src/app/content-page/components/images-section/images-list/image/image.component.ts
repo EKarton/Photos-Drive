@@ -189,9 +189,11 @@ export class ImageComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(
-      this.imageDataResult$.pipe(distinctUntilChanged()).subscribe(() => {
-        this.imageSizeChanged.emit(undefined);
-      }),
+      this.imageDataResult$
+        .pipe(filterOnlySuccess(), distinctUntilChanged())
+        .subscribe(() => {
+          this.imageSizeChanged.emit(undefined);
+        }),
     );
   }
 
