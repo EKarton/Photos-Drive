@@ -16,7 +16,7 @@ import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
 import { ImageComponent } from './image/image.component';
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 50;
 
 @Component({
   standalone: true,
@@ -67,7 +67,9 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
 
         const availableSpace =
           componentWidth - (numColumns - 1) * this.gutterSizePx;
-        this.columnWidth.set(Math.floor(availableSpace / numColumns));
+        const newColumnWidth = Math.floor(availableSpace / numColumns);
+
+        this.columnWidth.set(newColumnWidth);
         this.numColumns.set(numColumns);
 
         this.ngxMasonryComponent?.reloadItems();
@@ -88,6 +90,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   getMoreMediaItemIds() {
     this.maxMediaItemIds.set(this.maxMediaItemIds() + PAGE_SIZE);
     this.ngxMasonryComponent?.reloadItems();
+    this.ngxMasonryComponent?.layout();
   }
 
   ngOnDestroy(): void {

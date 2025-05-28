@@ -150,7 +150,7 @@ describe('ImagesListComponent', () => {
 
   it('should fetch more images given user has scrolled', () => {
     const mediaItemIds = Array.from(
-      { length: 100 },
+      { length: 1000 },
       (_, i) => `photos${i + 1}`,
     );
     const fixture = TestBed.createComponent(ImagesListComponent);
@@ -161,7 +161,7 @@ describe('ImagesListComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.paginatedMediaItemIds().length).toEqual(
-      30,
+      100,
     );
   });
 });
