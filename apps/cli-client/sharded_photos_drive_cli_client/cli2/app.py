@@ -1,6 +1,9 @@
 import typer
 
 from sharded_photos_drive_cli_client.cli2.commands import config
+from sharded_photos_drive_cli_client.cli2.commands import (
+    add_album_id_fields_to_media_items,
+)
 from sharded_photos_drive_cli_client.cli2.commands import add
 from sharded_photos_drive_cli_client.cli2.commands import clean
 from sharded_photos_drive_cli_client.cli2.commands import delete
@@ -19,6 +22,7 @@ def build_app() -> typer.Typer:
     app.add_typer(clean.app)
     app.add_typer(teardown.app)
     app.add_typer(usage.app)
+    app.add_typer(add_album_id_fields_to_media_items.app)
 
     return app
 

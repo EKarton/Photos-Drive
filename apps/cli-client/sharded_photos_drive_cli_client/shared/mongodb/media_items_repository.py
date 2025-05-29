@@ -260,6 +260,8 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 set_query["$set"]['gphotos_media_item_id'] = str(
                     request.new_gphotos_media_item_id
                 )
+            if request.new_album_id is not None:
+                set_query["$set"]['album_id'] = album_id_to_string(request.new_album_id)
 
             if request.clear_location:
                 set_query["$set"]['location'] = None

@@ -28,6 +28,11 @@ MOCK_ALBUM_ID = AlbumId(
     ObjectId("5f50c31e8a7d4b1c9c9b0b23"),
 )
 
+MOCK_ALBUM_ID_2 = AlbumId(
+    ObjectId("5f50c31e8a7d4b1c9c9b0c12"),
+    ObjectId("5f50c31e8a7d4b1c9c9b0c13"),
+)
+
 
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
@@ -169,6 +174,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_location=GpsLocation(latitude=10, longitude=20),
                     new_gphotos_client_id=new_gphotos_client_id,
                     new_gphotos_media_item_id="gphotos_1",
+                    new_album_id=MOCK_ALBUM_ID_2,
                 ),
                 UpdateMediaItemRequest(
                     media_item_id=media_item_2.id,
@@ -178,6 +184,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_location=GpsLocation(latitude=20, longitude=30),
                     new_gphotos_client_id=new_gphotos_client_id,
                     new_gphotos_media_item_id="gphotos_1",
+                    new_album_id=MOCK_ALBUM_ID_2,
                 ),
             ]
         )
@@ -191,6 +198,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         )
         self.assertEqual(new_media_item_1.gphotos_client_id, new_gphotos_client_id)
         self.assertEqual(new_media_item_1.gphotos_media_item_id, 'gphotos_1')
+        self.assertEqual(new_media_item_1.album_id, MOCK_ALBUM_ID_2)
 
         new_media_item_2 = self.repo.get_media_item_by_id(media_item_2.id)
         self.assertEqual(new_media_item_2.id, media_item_2.id)
@@ -201,6 +209,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         )
         self.assertEqual(new_media_item_2.gphotos_client_id, new_gphotos_client_id)
         self.assertEqual(new_media_item_2.gphotos_media_item_id, 'gphotos_1')
+        self.assertEqual(new_media_item_2.album_id, MOCK_ALBUM_ID_2)
 
     def test_update_many_media_items_update_file_name(self):
         media_item_1 = self.repo.create_media_item(
