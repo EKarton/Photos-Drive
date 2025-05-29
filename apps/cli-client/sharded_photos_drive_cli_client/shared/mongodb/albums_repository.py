@@ -6,9 +6,12 @@ from abc import ABC, abstractmethod
 from bson.objectid import ObjectId
 import pymongo
 
-from .albums import Album, AlbumId
+from .media_item_id import parse_string_to_media_item_id
+from .album_id import AlbumId, album_id_to_string, parse_string_to_album_id
+from .media_item_id import media_item_id_to_string
+from .albums import Album
 from .clients_repository import MongoDbClientsRepository
-from .media_items_repository import MediaItemId
+from .media_item_id import MediaItemId
 
 logger = logging.getLogger(__name__)
 
@@ -202,15 +205,15 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             document={
                 "name": album_name,
                 "parent_album_id": (
-                    f"{parent_album_id.client_id}:{parent_album_id.object_id}"
+                    album_id_to_string(parent_album_id)
                     if parent_album_id is not None
                     else None
                 ),
                 "child_album_ids": [
-                    f"{c_id.client_id}:{c_id.object_id}" for c_id in child_album_ids
+                    album_id_to_string(c_id) for c_id in child_album_ids
                 ],
                 "media_item_ids": [
-                    f"{m_id.client_id}:{m_id.object_id}" for m_id in media_item_ids
+                    media_item_id_to_string(m_id) for m_id in media_item_ids
                 ],
             },
             session=session,
@@ -270,20 +273,20 @@ class AlbumsRepositoryImpl(AlbumsRepository):
 
         if updated_album_fields.new_child_album_ids is not None:
             set_query["$set"]["child_album_ids"] = [
-                f"{c_id.client_id}:{c_id.object_id}"
+                album_id_to_string(c_id)
                 for c_id in updated_album_fields.new_child_album_ids
             ]
 
         if updated_album_fields.new_media_item_ids is not None:
             set_query["$set"]["media_item_ids"] = [
-                f"{m_id.client_id}:{m_id.object_id}"
+                media_item_id_to_string(m_id)
                 for m_id in updated_album_fields.new_media_item_ids
             ]
 
         if updated_album_fields.new_parent_album_id is not None:
-            c_id = updated_album_fields.new_parent_album_id.client_id
-            o_id = updated_album_fields.new_parent_album_id.object_id
-            set_query["$set"]["parent_album_id"] = f"{c_id}:{o_id}"
+            set_query["$set"]["parent_album_id"] = album_id_to_string(
+                updated_album_fields.new_parent_album_id
+            )
 
         logger.debug(f"Updating {album_id} with new fields: {set_query}")
 
@@ -315,20 +318,18 @@ class AlbumsRepositoryImpl(AlbumsRepository):
 
             if request.new_child_album_ids is not None:
                 set_query["$set"]["child_album_ids"] = [
-                    f"{c_id.client_id}:{c_id.object_id}"
-                    for c_id in request.new_child_album_ids
+                    album_id_to_string(c_id) for c_id in request.new_child_album_ids
                 ]
 
             if request.new_media_item_ids is not None:
                 set_query["$set"]["media_item_ids"] = [
-                    f"{m_id.client_id}:{m_id.object_id}"
-                    for m_id in request.new_media_item_ids
+                    media_item_id_to_string(m_id) for m_id in request.new_media_item_ids
                 ]
 
             if request.new_parent_album_id is not None:
-                c_id = request.new_parent_album_id.client_id
-                o_id = request.new_parent_album_id.object_id
-                set_query["$set"]["parent_album_id"] = f"{c_id}:{o_id}"
+                set_query["$set"]["parent_album_id"] = album_id_to_string(
+                    request.new_parent_album_id
+                )
 
             operation = pymongo.UpdateOne(
                 filter=filter_query, update=set_query, upsert=False
@@ -355,22 +356,15 @@ class AlbumsRepositoryImpl(AlbumsRepository):
     ) -> Album:
         parent_album_id = None
         if "parent_album_id" in raw_item and raw_item["parent_album_id"]:
-            pa_client_id, pa_object_id = raw_item["parent_album_id"].split(":")
-            parent_album_id = AlbumId(ObjectId(pa_client_id), ObjectId(pa_object_id))
+            parent_album_id = parse_string_to_album_id(raw_item["parent_album_id"])
 
         child_album_ids = []
         for raw_child_album_id in raw_item["child_album_ids"]:
-            ca_client_id, ca_object_id = raw_child_album_id.split(":")
-            child_album_ids.append(
-                AlbumId(ObjectId(ca_client_id), ObjectId(ca_object_id))
-            )
+            child_album_ids.append(parse_string_to_album_id(raw_child_album_id))
 
         media_item_ids = []
         for raw_media_id in raw_item["media_item_ids"]:
-            m_client_id, m_object_id = raw_media_id.split(":")
-            media_item_ids.append(
-                MediaItemId(ObjectId(m_client_id), ObjectId(m_object_id))
-            )
+            media_item_ids.append(parse_string_to_media_item_id(raw_media_id))
 
         return Album(
             id=AlbumId(client_id, cast(ObjectId, raw_item["_id"])),

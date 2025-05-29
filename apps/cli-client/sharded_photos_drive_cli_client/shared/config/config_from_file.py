@@ -3,7 +3,7 @@ from typing import override
 from google.oauth2.credentials import Credentials
 from bson.objectid import ObjectId
 
-from ..mongodb.albums import AlbumId
+from ..mongodb.album_id import AlbumId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,

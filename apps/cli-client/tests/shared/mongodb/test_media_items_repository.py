@@ -3,6 +3,11 @@ from bson import Binary
 import unittest
 from bson.objectid import ObjectId
 
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import (
+    AlbumId,
+    album_id_to_string,
+)
+from sharded_photos_drive_cli_client.shared.mongodb.media_item_id import MediaItemId
 from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
     MediaItemsRepositoryImpl,
     CreateMediaItemRequest,
@@ -10,7 +15,6 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
     UpdateMediaItemRequest,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.media_items import (
-    MediaItemId,
     GpsLocation,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.testing import (
@@ -18,6 +22,11 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
+MOCK_ALBUM_ID = AlbumId(
+    ObjectId("5f50c31e8a7d4b1c9c9b0b22"),
+    ObjectId("5f50c31e8a7d4b1c9c9b0b23"),
+)
 
 
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
@@ -44,6 +53,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "location": {"type": "Point", "coordinates": [12.34, 56.78]},
                 "gphotos_client_id": str(media_item_id.client_id),
                 "gphotos_media_item_id": "gphotos_123",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
             }
         )
 
@@ -72,6 +82,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             location=GpsLocation(longitude=12.34, latitude=56.78),
             gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
             gphotos_media_item_id="gphotos_456",
+            album_id=MOCK_ALBUM_ID,
         )
 
         # Test creation of media item
@@ -96,6 +107,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 GpsLocation(longitude=12.34, latitude=56.78),
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -131,6 +143,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 GpsLocation(longitude=12.34, latitude=56.78),
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
+                album_id=MOCK_ALBUM_ID,
             )
         )
         media_item_2 = self.repo.create_media_item(
@@ -140,6 +153,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 GpsLocation(longitude=2, latitude=3),
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -196,6 +210,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 GpsLocation(longitude=12.34, latitude=56.78),
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -227,6 +242,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 GpsLocation(longitude=12.34, latitude=56.78),
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -247,6 +263,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "file_hash": Binary(os.urandom(16)),
                 "gphotos_client_id": str(media_item_id.client_id),
                 "gphotos_media_item_id": "gphotos_789",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
             }
         )
 
@@ -282,6 +299,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     "file_hash": f"hashcode_{mid.object_id}",
                     "gphotos_client_id": str(mid.client_id),
                     "gphotos_media_item_id": f"gphotos_{mid.object_id}",
+                    "album_id": album_id_to_string(MOCK_ALBUM_ID),
                 }
             )
 
@@ -311,6 +329,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "file_hash": Binary(os.urandom(16)),
                 "gphotos_client_id": str(existing_mid.client_id),
                 "gphotos_media_item_id": f"gphotos_{existing_mid.object_id}",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
             }
         )
 

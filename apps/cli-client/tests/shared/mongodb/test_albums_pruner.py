@@ -113,6 +113,7 @@ class AlbumsPrunerTests(unittest.TestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=archives_album.id,
             )
         )
         albums_repo.update_album(
@@ -198,6 +199,7 @@ class AlbumsPrunerTests(unittest.TestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=videos_album.id,
             )
         )
         albums_repo.update_album(

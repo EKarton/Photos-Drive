@@ -1,7 +1,7 @@
 from collections import deque
 from typing import cast
 
-from ..shared.mongodb.albums import AlbumId
+from ..shared.mongodb.album_id import AlbumId
 from ..shared.hashes.xxhash import compute_file_hash
 from ..shared.config.config import Config
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl

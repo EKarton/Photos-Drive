@@ -13,7 +13,7 @@ from sharded_photos_drive_cli_client.cli2.shared.inputs import (
     READ_WRITE_SCOPES,
 )
 from sharded_photos_drive_cli_client.cli2.app import build_app
-from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
 from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
