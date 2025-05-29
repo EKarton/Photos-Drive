@@ -1,24 +1,9 @@
 from dataclasses import dataclass
 
-from bson.objectid import ObjectId
 
-from .media_items import MediaItemId
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
 
-
-@dataclass(frozen=True)
-class AlbumId:
-    """
-    Represents the ID of a album in MongoDB.
-    Since albums are distributed across different MongoDB clients, it consists of the
-    MongoDB client ID and the object ID.
-
-    Attributes:
-        client_id (ObjectId): The ID of the Mongo DB client that it is saved under.
-        object_id (ObjectId): The object ID of the document
-    """
-
-    client_id: ObjectId
-    object_id: ObjectId
+from .media_item_id import MediaItemId
 
 
 @dataclass(frozen=True)

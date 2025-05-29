@@ -13,7 +13,7 @@ from sharded_photos_drive_cli_client.shared.config.config import (
 from sharded_photos_drive_cli_client.shared.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
 from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )

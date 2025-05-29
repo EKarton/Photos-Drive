@@ -16,7 +16,7 @@ from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
 from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeItemsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
 from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
     AlbumsRepositoryImpl,
     UpdatedAlbumFields,
@@ -24,7 +24,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.media_items import MediaItemId
+from sharded_photos_drive_cli_client.shared.mongodb.media_item_id import MediaItemId
 from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
     CreateMediaItemRequest,
     MediaItemsRepositoryImpl,
@@ -34,6 +34,10 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client im
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+MOCK_ALBUM_ID = AlbumId(
+    ObjectId("5f50c31e8a7d4b1c9c9b0b22"),
+    ObjectId("5f50c31e8a7d4b1c9c9b0b23"),
+)
 
 
 class SystemCleanerTests(unittest.TestCase):
@@ -83,6 +87,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=archives_album.id,
             )
         )
         albums_repo.update_album(
@@ -160,6 +165,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=archives_album.id,
             )
         )
         albums_repo.update_album(
@@ -183,6 +189,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -262,6 +269,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=archives_album.id,
             )
         )
         albums_repo.update_album(
@@ -285,6 +293,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -417,6 +426,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -494,6 +504,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=MOCK_ALBUM_ID,
             )
         )
 
@@ -505,6 +516,7 @@ class SystemCleanerTests(unittest.TestCase):
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id='123',
+                album_id=MOCK_ALBUM_ID,
             )
         )
 

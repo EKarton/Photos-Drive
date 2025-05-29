@@ -5,6 +5,7 @@ from collections import deque
 import logging
 from bson.objectid import ObjectId
 
+from ..shared.mongodb.media_item_id import MediaItemId
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
@@ -13,7 +14,6 @@ from ..shared.mongodb.albums_repository import (
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from ..shared.mongodb.media_items import MediaItem, MediaItemId
 from ..shared.mongodb.media_items_repository import MediaItemsRepository
 from ..shared.mongodb.media_items_repository import CreateMediaItemRequest
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
@@ -106,37 +106,18 @@ class PhotosBackup:
             f"Added diffs to Google Photos: {upload_diff_to_gphotos_media_item_id}"
         )
 
-        # Step 3: Add the new media items to the database
-        new_diff_to_media_item: Dict[ProcessedDiff, MediaItem] = {}
-        for diff in upload_diff_to_gphotos_media_item_id:
-            gphotos_media_item_id = upload_diff_to_gphotos_media_item_id[diff]
-            gphotos_client_id = diff_assignments[diff]
-            create_media_item_request = CreateMediaItemRequest(
-                file_name=diff.file_name,
-                file_hash=diff.file_hash,
-                location=diff.location,
-                gphotos_client_id=gphotos_client_id,
-                gphotos_media_item_id=gphotos_media_item_id,
-            )
-
-            media_item = self.__media_items_repo.create_media_item(
-                create_media_item_request
-            )
-            new_diff_to_media_item[diff] = media_item
-
-        logger.debug(f"Created media items: {new_diff_to_media_item}")
-
-        # Step 4: Build a tree of albums with diffs on their edge nodes
+        # Step 3: Build a tree of albums with diffs on their edge nodes
         root_diffs_tree_node = self.__build_diffs_tree(diffs)
         logger.debug(f"Finished creating initial diff tree: {root_diffs_tree_node}")
 
-        # Step 5: Create the missing photo albums in Mongo DB from the diffs tree
+        # Step 4: Create the missing photo albums in Mongo DB from the diffs tree
         # and attach the albums from database to the DiffTree
         total_num_albums_created = self.__build_missing_albums(root_diffs_tree_node)
         logger.debug(f"Finished building missing albums: {total_num_albums_created}")
 
-        # Step 6: Go through the tree and modify album's media item ids list
+        # Step 5: Go through the tree and modify album's media item ids list
         total_media_item_ids_to_delete = []
+        total_media_item_ids_added = []
         total_album_ids_to_prune = []
         update_album_requests = []
         queue = deque([root_diffs_tree_node])
@@ -159,11 +140,24 @@ class PhotosBackup:
                         total_media_item_ids_to_delete.append(media_item.id)
                         media_item_ids_to_delete.add(media_item.id)
 
-            # Step 6b: Find the media items to add to the album
+            # Step 6b: Find the media items to add to the album, and create them
             media_item_ids_to_add = []
             for add_diff in add_diffs:
-                media_item_id = new_diff_to_media_item[add_diff].id
-                media_item_ids_to_add.append(media_item_id)
+                create_media_item_request = CreateMediaItemRequest(
+                    file_name=add_diff.file_name,
+                    file_hash=add_diff.file_hash,
+                    location=add_diff.location,
+                    gphotos_client_id=diff_assignments[add_diff],
+                    gphotos_media_item_id=upload_diff_to_gphotos_media_item_id[
+                        add_diff
+                    ],
+                    album_id=cur_album.id,
+                )
+                media_item = self.__media_items_repo.create_media_item(
+                    create_media_item_request
+                )
+                media_item_ids_to_add.append(media_item.id)
+                total_media_item_ids_added.append(media_item.id)
 
             # Step 6c: Get a new list of media item ids for the album
             new_media_item_ids: list[MediaItemId] = []
@@ -200,7 +194,7 @@ class PhotosBackup:
 
         # Step 10: Return the results of the backup
         return BackupResults(
-            num_media_items_added=len(new_diff_to_media_item.keys()),
+            num_media_items_added=len(total_media_item_ids_added),
             num_media_items_deleted=len(total_media_item_ids_to_delete),
             num_albums_created=total_num_albums_created,
             num_albums_deleted=total_num_albums_deleted,

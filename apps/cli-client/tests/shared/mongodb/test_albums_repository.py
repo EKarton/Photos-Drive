@@ -8,8 +8,8 @@ from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
-from sharded_photos_drive_cli_client.shared.mongodb.media_items import MediaItemId
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
+from sharded_photos_drive_cli_client.shared.mongodb.media_item_id import MediaItemId
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )

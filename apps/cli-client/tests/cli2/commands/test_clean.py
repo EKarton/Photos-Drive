@@ -83,6 +83,7 @@ class TestCleanCli(unittest.TestCase):
                 gphotos_media_item_id=media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=self.archives_album.id,
             )
         )
         self.albums_repo.update_album(

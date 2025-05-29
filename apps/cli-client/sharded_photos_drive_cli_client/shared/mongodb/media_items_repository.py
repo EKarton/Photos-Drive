@@ -6,7 +6,10 @@ from bson import Binary
 from bson.objectid import ObjectId
 import pymongo
 
-from .media_items import MediaItemId, MediaItem, GpsLocation
+from .media_item_id import MediaItemId
+from .album_id import AlbumId, parse_string_to_album_id
+from .album_id import album_id_to_string
+from .media_items import MediaItem, GpsLocation
 from .clients_repository import MongoDbClientsRepository
 
 
@@ -23,7 +26,8 @@ class CreateMediaItemRequest:
             taken.
         gphotos_client_id (ObjectId): The ID of the Google Photos client that the media
             item is saved on.
-        gphotos_media_item_id (str): The ID of the media item stored on Google Photos
+        gphotos_media_item_id (str): The ID of the media item stored on Google Photos.
+        album_id (AlbumId): The album that this media item belongs to.
     """
 
     file_name: str
@@ -31,6 +35,7 @@ class CreateMediaItemRequest:
     location: Optional[GpsLocation]
     gphotos_client_id: ObjectId
     gphotos_media_item_id: str
+    album_id: AlbumId
 
 
 @dataclass(frozen=True)
@@ -51,6 +56,7 @@ class UpdateMediaItemRequest:
             if present.
         new_gphotos_media_item_id (Optional[str]): The new GPhotos media item ID,
             if present.
+        new_album_id (Optional[AlbumId]): The new Album ID.
     '''
 
     media_item_id: MediaItemId
@@ -60,6 +66,7 @@ class UpdateMediaItemRequest:
     new_location: Optional[GpsLocation] = None
     new_gphotos_client_id: Optional[ObjectId] = None
     new_gphotos_media_item_id: Optional[str] = None
+    new_album_id: Optional[AlbumId] = None
 
 
 class MediaItemsRepository(ABC):
@@ -203,6 +210,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             'file_hash': Binary(request.file_hash),
             "gphotos_client_id": str(request.gphotos_client_id),
             "gphotos_media_item_id": str(request.gphotos_media_item_id),
+            "album_id": album_id_to_string(request.album_id),
         }
 
         if request.location:
@@ -222,6 +230,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             location=request.location,
             gphotos_client_id=request.gphotos_client_id,
             gphotos_media_item_id=request.gphotos_media_item_id,
+            album_id=request.album_id,
         )
 
     def update_media_item(self, request: UpdateMediaItemRequest):
@@ -338,4 +347,5 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             location=location,
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],
+            album_id=parse_string_to_album_id(raw_item['album_id']),
         )

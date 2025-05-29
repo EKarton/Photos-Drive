@@ -82,6 +82,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([dog_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(
@@ -159,6 +160,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([dog_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         cat_media_item = media_items_repo.create_media_item(
@@ -171,6 +173,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([cat_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2011.id,
             )
         )
         albums_repo.update_album(
@@ -250,6 +253,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([dog_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(
@@ -317,6 +321,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([dog_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(
@@ -395,6 +400,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([cat_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(
@@ -414,6 +420,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([boat_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2020.id,
             )
         )
         albums_repo.update_album(
@@ -492,6 +499,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([cat_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=archives_album.id,
             )
         )
         albums_repo.update_album(
@@ -511,6 +519,7 @@ class FolderSyncDiffTests(TestCase):
                 .add_uploaded_photos_to_gphotos([dog_upload_token])
                 .newMediaItemResults[0]
                 .mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(

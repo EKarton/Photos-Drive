@@ -11,8 +11,8 @@ from ..shared.mongodb.clients_repository import (
 from ..shared.mongodb.albums_pruner import AlbumsPruner
 from ..shared.gphotos.albums import Album as GAlbum
 from ..shared.gphotos.client import GPhotosClientV2
-from ..shared.mongodb.albums import AlbumId
-from ..shared.mongodb.media_items import MediaItemId
+from ..shared.mongodb.album_id import AlbumId
+from ..shared.mongodb.media_item_id import MediaItemId
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 from ..shared.config.config import Config
 from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields

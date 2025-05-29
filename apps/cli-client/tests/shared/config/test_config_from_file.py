@@ -13,7 +13,7 @@ from sharded_photos_drive_cli_client.shared.config.config import (
 from sharded_photos_drive_cli_client.shared.config.config_from_file import (
     ConfigFromFile,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums import AlbumId
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
 
 
 class TestConfigFromFile(unittest.TestCase):

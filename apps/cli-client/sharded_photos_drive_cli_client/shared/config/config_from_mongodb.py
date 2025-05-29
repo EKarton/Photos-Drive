@@ -13,7 +13,7 @@ from .config import (
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )
-from ..mongodb.albums import AlbumId
+from ..mongodb.album_id import AlbumId
 
 logger = logging.getLogger(__name__)
 

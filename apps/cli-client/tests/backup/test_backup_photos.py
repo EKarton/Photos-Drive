@@ -280,6 +280,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=gmedia_item_obj.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(
@@ -422,6 +423,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         cat_mitem_obj = media_items_repo.create_media_item(
@@ -433,6 +435,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(
@@ -543,6 +546,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         albums_repo.update_album(
@@ -656,6 +660,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=dog_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         cat_media_item = media_items_repo.create_media_item(
@@ -667,6 +672,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=archives_album.id,
             )
         )
         albums_repo.update_album(
@@ -794,6 +800,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=album_2010.id,
             )
         )
         cat_media_item_obj = media_items_repo.create_media_item(
@@ -805,6 +812,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
                     0
                 ].mediaItem.id,
+                album_id=public_album.id,
             )
         )
         albums_repo.update_album(
