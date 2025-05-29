@@ -49,7 +49,7 @@ def add_album_id_fields_to_media_items(
     setup_logging(verbose)
 
     logger.debug(
-        "Called add fields handler with args:\n"
+        "Called add album id fields to media items handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
         + f" verbose={verbose}"
