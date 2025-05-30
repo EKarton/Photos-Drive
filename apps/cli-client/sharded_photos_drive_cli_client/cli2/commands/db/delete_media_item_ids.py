@@ -47,7 +47,7 @@ def delete_media_item_ids(
     setup_logging(verbose)
 
     logger.debug(
-        "Called add album id fields to media items handler with args:\n"
+        "Called db delete-media-item-ids handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
         + f" verbose={verbose}"
