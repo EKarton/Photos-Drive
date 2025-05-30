@@ -134,6 +134,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         # Test assert: check the folders are made
         albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
         albums_2 = list(mongodb_client_2['sharded_google_photos']['albums'].find({}))
+
         self.assertEqual(len(albums_1), 5)
         self.assertEqual(len(albums_2), 0)
         root_album = next(filter(lambda x: x['name'] == '', albums_1))

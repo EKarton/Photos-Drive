@@ -41,14 +41,15 @@ class AlbumsPruner:
         Returns:
             int: The number of albums that have been deleted.
         '''
-        albums_to_delete: list[AlbumId] = []
+        albums_to_delete: set[AlbumId] = set()
         prev_album_id_deleted = None
         cur_album_id = album_id
         cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
 
         while True:
             cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
-            if len(cur_album.child_album_ids) > 1:
+            child_album_ids_set = set(cur_album.child_album_ids)
+            if len(child_album_ids_set - albums_to_delete) > 0:
                 break
 
             if self.__media_items_repo.get_num_media_items_in_album(cur_album_id) > 0:
@@ -58,11 +59,10 @@ class AlbumsPruner:
                 break
 
             parent_album_id = cast(AlbumId, cur_album.parent_album_id)
-            albums_to_delete.append(cur_album_id)
+            albums_to_delete.add(cur_album_id)
 
             prev_album_id_deleted = cur_album_id
             cur_album_id = parent_album_id
-            cur_album = self.__albums_repo.get_album_by_id(parent_album_id)
 
         new_child_album_ids = [
             child_album_id
@@ -76,6 +76,6 @@ class AlbumsPruner:
                 UpdatedAlbumFields(new_child_album_ids=new_child_album_ids),
             )
 
-        self.__albums_repo.delete_many_albums(albums_to_delete)
+        self.__albums_repo.delete_many_albums(list(albums_to_delete))
 
         return len(albums_to_delete)

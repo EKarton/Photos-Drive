@@ -118,9 +118,11 @@ class PhotosBackup:
         total_num_albums_created = self.__build_missing_albums(root_diffs_tree_node)
         logger.debug(f"Finished building missing albums: {total_num_albums_created}")
 
+        print(root_diffs_tree_node)
+
         # Step 5: Go through the tree and modify album's media item ids list
         total_media_item_ids_to_delete = []
-        total_media_item_ids_added = []
+        total_num_media_item_added = 0
         total_album_ids_to_prune = []
         queue = deque([root_diffs_tree_node])
         while len(queue) > 0:
@@ -157,7 +159,7 @@ class PhotosBackup:
                 media_item = self.__media_items_repo.create_media_item(
                     create_media_item_request
                 )
-                total_media_item_ids_added.append(media_item.id)
+                total_num_media_item_added += 1
                 num_media_items += 1
 
             # Step 5c: Mark album to prune if it's empty
@@ -179,7 +181,7 @@ class PhotosBackup:
 
         # Step 8: Return the results of the backup
         return BackupResults(
-            num_media_items_added=len(total_media_item_ids_added),
+            num_media_items_added=total_num_media_item_added,
             num_media_items_deleted=len(total_media_item_ids_to_delete),
             num_albums_created=total_num_albums_created,
             num_albums_deleted=total_num_albums_deleted,
