@@ -1,6 +1,5 @@
 import { Document as MongoDbDocument, ObjectId, WithId } from 'mongodb';
 import { Album, AlbumId, convertStringToAlbumId } from './Albums';
-import { convertStringToMediaItemId } from './MediaItems';
 import { MongoDbClientsRepository } from './MongoDbClientsRepository';
 
 /** A class that stores the albums from the database. */
@@ -42,9 +41,6 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
         : undefined,
       child_album_ids: doc['child_album_ids'].map((albumId: string) => {
         return convertStringToAlbumId(albumId);
-      }),
-      media_item_ids: doc['media_item_ids'].map((mediaItemId: string) => {
-        return convertStringToMediaItemId(mediaItemId);
       })
     };
   }
