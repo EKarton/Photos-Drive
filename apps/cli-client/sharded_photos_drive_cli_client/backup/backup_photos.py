@@ -72,7 +72,9 @@ class PhotosBackup:
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
         self.__diffs_assigner = DiffsAssigner(gphotos_client_repo)
-        self.__albums_pruner = AlbumsPruner(config.get_root_album_id(), albums_repo)
+        self.__albums_pruner = AlbumsPruner(
+            config.get_root_album_id(), albums_repo, media_items_repo
+        )
 
         logger.debug(f"Parallelizing uploads: {parallelize_uploads}")
         self.__gphotos_uploader = (

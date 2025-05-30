@@ -24,7 +24,6 @@ from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.media_item_id import MediaItemId
 from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
     CreateMediaItemRequest,
     MediaItemsRepositoryImpl,
@@ -390,7 +389,7 @@ class SystemCleanerTests(unittest.TestCase):
         self.assertEqual(albums[0].child_album_ids, [])
         self.assertEqual(albums[0].media_item_ids, [])
 
-    def test_clean_fixes_albums_with_false_child_album_ids_and_false_media_item_ids(
+    def test_clean_deletes_media_items_with_false_album_id(
         self,
     ):
         # Test setup 1: Build the wrapper objects
@@ -407,6 +406,16 @@ class SystemCleanerTests(unittest.TestCase):
         root_album = albums_repo.create_album('', None, [], [])
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
+        archives_album = albums_repo.create_album(
+            'Archives',
+            root_album.id,
+            [AlbumId(ObjectId(), ObjectId())],
+            [],
+        )
+        albums_repo.update_album(
+            root_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
+        )
 
         # Test setup 3: Add a new photo to gphotos
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -417,7 +426,7 @@ class SystemCleanerTests(unittest.TestCase):
                 [cat_upload_token]
             )
         )
-        cat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -428,21 +437,6 @@ class SystemCleanerTests(unittest.TestCase):
                 ].mediaItem.id,
                 album_id=MOCK_ALBUM_ID,
             )
-        )
-
-        # Test setup 4: Add a new gphoto to the album and with real and fake ids
-        archives_album = albums_repo.create_album(
-            'Archives',
-            root_album.id,
-            [AlbumId(ObjectId(), ObjectId())],
-            [
-                MediaItemId(ObjectId(), ObjectId()),
-                cat_media_item.id,
-            ],
-        )
-        albums_repo.update_album(
-            root_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
         )
 
         # Act: clean the system
@@ -456,19 +450,16 @@ class SystemCleanerTests(unittest.TestCase):
         clean_results = cleaner.clean()
 
         # Assert: check on clean results
-        self.assertEqual(clean_results.num_albums_deleted, 0)
-        self.assertEqual(clean_results.num_gmedia_items_moved_to_trash, 0)
-        self.assertEqual(clean_results.num_media_items_deleted, 0)
+        self.assertEqual(clean_results.num_albums_deleted, 1)
+        self.assertEqual(clean_results.num_gmedia_items_moved_to_trash, 1)
+        self.assertEqual(clean_results.num_media_items_deleted, 1)
 
         # Assert: check the albums
         albums = albums_repo.get_all_albums()
-        self.assertEqual(len(albums), 2)
+        self.assertEqual(len(albums), 1)
         self.assertEqual(albums[0].id, root_album.id)
-        self.assertEqual(albums[0].child_album_ids, [archives_album.id])
+        self.assertEqual(albums[0].child_album_ids, [])
         self.assertEqual(albums[0].media_item_ids, [])
-        self.assertEqual(albums[1].id, archives_album.id)
-        self.assertEqual(albums[1].child_album_ids, [])
-        self.assertEqual(albums[1].media_item_ids, [cat_media_item.id])
 
     def test_clean_fixes_albums_with_false_gmedia_item_ids(self):
         # Test setup 1: Build the wrapper objects
@@ -481,10 +472,20 @@ class SystemCleanerTests(unittest.TestCase):
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
-        # Test setup 2: Set up the root album
+        # Test setup 2: Set up the root album and archives album
         root_album = albums_repo.create_album('', None, [], [])
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
+        archives_album = albums_repo.create_album(
+            'Archives',
+            root_album.id,
+            [],
+            [],
+        )
+        albums_repo.update_album(
+            root_album.id,
+            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
+        )
 
         # Test setup 3: Add a new photo to gphotos
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -504,7 +505,7 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_media_item_id=cat_media_items_results.newMediaItemResults[
                     0
                 ].mediaItem.id,
-                album_id=MOCK_ALBUM_ID,
+                album_id=archives_album.id,
             )
         )
 
@@ -516,23 +517,14 @@ class SystemCleanerTests(unittest.TestCase):
                 location=None,
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id='123',
-                album_id=MOCK_ALBUM_ID,
+                album_id=archives_album.id,
             )
         )
-
-        # Test setup 4: Add a new gphoto to the album and with real and fake ids
-        archives_album = albums_repo.create_album(
-            'Archives',
-            root_album.id,
-            [],
-            [
-                cat_media_item.id,
-                dog_media_item.id,
-            ],
-        )
         albums_repo.update_album(
-            root_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
+            archives_album.id,
+            UpdatedAlbumFields(
+                new_media_item_ids=[cat_media_item.id, dog_media_item.id]
+            ),
         )
 
         # Act: clean the system

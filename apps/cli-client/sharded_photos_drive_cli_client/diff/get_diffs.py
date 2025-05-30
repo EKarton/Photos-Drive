@@ -11,7 +11,10 @@ from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 from ..shared.config.config import Config
 from ..shared.mongodb.albums import Album
 from ..shared.mongodb.albums_repository import AlbumsRepository
-from ..shared.mongodb.media_items_repository import MediaItemsRepository
+from ..shared.mongodb.media_items_repository import (
+    FindMediaItemRequest,
+    MediaItemsRepository,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -109,8 +112,9 @@ class FolderSyncDiff:
             local_found_files: list[RemoteFile] = []
 
             # Process media items for this album.
-            for media_item_id in album.media_item_ids:
-                media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
+            for media_item in self.__media_items_repo.find_media_items(
+                FindMediaItemRequest(album_id=album_id)
+            ):
                 file_hash_str = (
                     media_item.file_hash.hex() if media_item.file_hash else ''
                 )
