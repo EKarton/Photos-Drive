@@ -9,6 +9,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.album_id import (
 )
 from sharded_photos_drive_cli_client.shared.mongodb.media_item_id import MediaItemId
 from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
+    FindMediaItemRequest,
     MediaItemsRepositoryImpl,
     CreateMediaItemRequest,
     MongoDbClientsRepository,
@@ -78,6 +79,162 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "Media item .* does not exist!"):
             self.repo.get_media_item_by_id(media_item_id)
+
+    def test_get_all_media_items(self):
+        fake_file_hash = os.urandom(16)
+
+        # Insert a mock media item into the mock database
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image.jpg",
+                "file_hash": Binary(fake_file_hash),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": str(self.mongodb_client_id),
+                "gphotos_media_item_id": "gphotos_123",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
+            }
+        )
+
+        # Test retrieval
+        media_items = self.repo.get_all_media_items()
+
+        # Assert the retrieved media item matches the inserted data
+        self.assertEqual(len(media_items), 1)
+        self.assertEqual(media_items[0].file_name, "test_image.jpg")
+        self.assertEqual(media_items[0].file_hash, fake_file_hash)
+        self.assertIsNotNone(media_items[0].location)
+        self.assertEqual(media_items[0].location, GpsLocation(56.78, 12.34))
+        self.assertEqual(media_items[0].gphotos_client_id, self.mongodb_client_id)
+        self.assertEqual(media_items[0].gphotos_media_item_id, "gphotos_123")
+
+    def test_find_media_items(self):
+        # Insert mock media items from different albums into the mock database
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": str(self.mongodb_client_id),
+                "gphotos_media_item_id": "gphotos_1234",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
+            }
+        )
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image_1.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": str(self.mongodb_client_id),
+                "gphotos_media_item_id": "gphotos_123",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+            }
+        )
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image_2.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": str(self.mongodb_client_id),
+                "gphotos_media_item_id": "gphotos_12345",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+            }
+        )
+
+        media_items = self.repo.find_media_items(
+            FindMediaItemRequest(album_id=MOCK_ALBUM_ID_2, file_name='test_image_2.jpg')
+        )
+
+        self.assertEqual(len(media_items), 1)
+        self.assertEqual(media_items[0].album_id, MOCK_ALBUM_ID_2)
+        self.assertEqual(media_items[0].file_name, 'test_image_2.jpg')
+        self.assertEqual(media_items[0].gphotos_media_item_id, 'gphotos_12345')
+
+    def test_find_media_items_in_different_databases(self):
+        mongodb_client_id_1 = ObjectId()
+        mongodb_client_1 = create_mock_mongo_client()
+        mongodb_client_id_2 = ObjectId()
+        mongodb_client_2 = create_mock_mongo_client()
+        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_id_1, mongodb_client_1)
+        mongodb_clients_repo.add_mongodb_client(mongodb_client_id_2, mongodb_client_2)
+        repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+
+        mongodb_client_1["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": ObjectId(),
+                "gphotos_media_item_id": "gphotos_1234",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
+            }
+        )
+        mongodb_client_2["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image_1.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": ObjectId(),
+                "gphotos_media_item_id": "gphotos_123",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
+            }
+        )
+        mongodb_client_2["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image_2.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": ObjectId(),
+                "gphotos_media_item_id": "gphotos_12345",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+            }
+        )
+
+        media_items = repo.find_media_items(
+            FindMediaItemRequest(mongodb_client_ids=[mongodb_client_id_2])
+        )
+
+        self.assertEqual(len(media_items), 2)
+        self.assertEqual(media_items[0].album_id, MOCK_ALBUM_ID)
+        self.assertEqual(media_items[0].file_name, 'test_image_1.jpg')
+        self.assertEqual(media_items[1].album_id, MOCK_ALBUM_ID_2)
+        self.assertEqual(media_items[1].file_name, 'test_image_2.jpg')
+
+    def test_get_num_media_items_in_album(self):
+        # Insert mock media items from different albums into the mock database
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": ObjectId(),
+                "gphotos_media_item_id": "gphotos_1234",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
+            }
+        )
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image_1.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": ObjectId(),
+                "gphotos_media_item_id": "gphotos_123",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+            }
+        )
+        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            {
+                "file_name": "test_image_2.jpg",
+                "file_hash": Binary(os.urandom(16)),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": ObjectId(),
+                "gphotos_media_item_id": "gphotos_12345",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+            }
+        )
+
+        self.assertEqual(self.repo.get_num_media_items_in_album(MOCK_ALBUM_ID), 1)
+        self.assertEqual(self.repo.get_num_media_items_in_album(MOCK_ALBUM_ID_2), 2)
 
     def test_create_media_item(self):
         fake_file_hash = os.urandom(16)
