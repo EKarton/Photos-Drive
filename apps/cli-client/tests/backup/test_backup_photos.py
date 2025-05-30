@@ -8,6 +8,7 @@ from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeGPhotosClient,
     FakeItemsRepository,
 )
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import album_id_to_string
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
@@ -204,6 +205,20 @@ class TestPhotosBackup(ParametrizedTestCase):
         self.assertEqual(fish_item['file_hash'], Binary(MOCK_FILE_HASH))
         self.assertEqual(bird_item['file_hash'], Binary(MOCK_FILE_HASH))
 
+        # Test assert: check that the album IDs in the media items are correct
+        self.assertEqual(
+            dog_item['album_id'], f'{mongodb_client_1_id}:{album_2010['_id']}'
+        )
+        self.assertEqual(
+            cat_item['album_id'], f'{mongodb_client_1_id}:{album_2010['_id']}'
+        )
+        self.assertEqual(
+            fish_item['album_id'], f'{mongodb_client_1_id}:{album_2009['_id']}'
+        )
+        self.assertEqual(
+            bird_item['album_id'], f'{mongodb_client_1_id}:{album_2009['_id']}'
+        )
+
     @parametrize_use_parallel_uploads
     def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
@@ -302,20 +317,26 @@ class TestPhotosBackup(ParametrizedTestCase):
         self.assertEqual(len(gitems_2), 1)
         cat_gitem = next(filter(lambda x: x.filename == 'cat.png', gitems_2))
 
-        # Test assert: Check that there is a cat.png media item in the db
+        # Test assert: Check that there are two media items
         mitems_1 = list(
             mongodb_client_1['sharded_google_photos']['media_items'].find({})
         )
+        self.assertEqual(len(mitems_1), 2)
+
+        # Test assert: Check the new media item
         cat_mitem = next(filter(lambda x: x['file_name'] == 'cat.png', mitems_1))
         self.assertEqual(cat_mitem['gphotos_client_id'], str(gphotos_client_2_id))
         self.assertEqual(cat_mitem['gphotos_media_item_id'], cat_gitem.id)
+        self.assertEqual(cat_mitem['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(cat_mitem['album_id'], album_id_to_string(album_2010.id))
+
+        # Test assert: Check the old media item
+        dog_mitem = next(filter(lambda x: x['file_name'] == 'dog.png', mitems_1))
+        self.assertEqual(dog_mitem['album_id'], album_id_to_string(album_2010.id))
 
         # Test assert: Check that no new albums have been made
         albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
-
-        # Test assert: check that the file hash is added to the new media items
-        self.assertEqual(cat_mitem['file_hash'], Binary(MOCK_FILE_HASH))
 
     @parametrize_use_parallel_uploads
     def test_backup_deleted_one_item_on_album_with_two_items(
