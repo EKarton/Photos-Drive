@@ -1,3 +1,5 @@
+import { AlbumId } from './Albums';
+
 /** Represents the ID of the media item in the database. */
 export type MediaItemId = {
   /** The ID of the database client */
@@ -6,6 +8,19 @@ export type MediaItemId = {
   /** The ID of the object stored in the database */
   objectId: string;
 };
+
+/** Converts a raw-value string from database to album ID. */
+export function convertStringToMediaItemId(value: string): MediaItemId {
+  const parts = value.split(':');
+  if (parts.length == 2 && parts[0] && parts[1]) {
+    return {
+      clientId: parts[0],
+      objectId: parts[1]
+    };
+  }
+
+  throw new Error(`Cannot parse ${value} to media item ID`);
+}
 
 /** Represents a media item in the database */
 export type MediaItem = {
@@ -26,6 +41,9 @@ export type MediaItem = {
 
   /** The ID of the media item that is stored in Google Photos. */
   gphotos_media_item_id: string;
+
+  /** The album ID that this media item belongs to. */
+  album_id: AlbumId;
 };
 
 /** Represents a GPS location. */
