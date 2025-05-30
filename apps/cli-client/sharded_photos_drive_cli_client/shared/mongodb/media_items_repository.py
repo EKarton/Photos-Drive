@@ -76,13 +76,14 @@ class FindMediaItemRequest:
     the database.
 
     Attributes:
-        mongodb_client_ids (Optional[list[str]): A list of client IDs to search through,
-            if present. If not present, it will search through all MongoDB clients.
+        mongodb_client_ids (Optional[list[ObjectId]): A list of client IDs to search
+            through, if present. If not present, it will search through all MongoDB
+            clients.
         file_name (Optional[str]): The file name, if present.
         album_id (Optional[AlbumId]): The Album ID, if present.
     '''
 
-    mongodb_client_ids: Optional[list[str]] = None
+    mongodb_client_ids: Optional[list[ObjectId]] = None
     file_name: Optional[str] = None
     album_id: Optional[AlbumId] = None
 
