@@ -51,11 +51,11 @@ class FolderSyncDiffTests(TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
-        album_2011 = albums_repo.create_album('2011', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
+        album_2011 = albums_repo.create_album('2011', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -72,7 +72,7 @@ class FolderSyncDiffTests(TestCase):
         dog_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/dog.jpg', 'dog.jpg'
         )
-        media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
                 file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
@@ -84,10 +84,6 @@ class FolderSyncDiffTests(TestCase):
                 .mediaItem.id,
                 album_id=album_2010.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[media_item.id]),
         )
 
         # Act: compute the diff
@@ -125,12 +121,12 @@ class FolderSyncDiffTests(TestCase):
 
         # Test setup: create content on the cloud
         root_album = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
+            album_name='', parent_album_id=None, child_album_ids=[]
         )
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
-        album_2011 = albums_repo.create_album('2011', photos_album.id, [], [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
+        album_2011 = albums_repo.create_album('2011', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -150,7 +146,7 @@ class FolderSyncDiffTests(TestCase):
         cat_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2011/cat.jpg', 'cat.jpg'
         )
-        dog_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
                 file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
@@ -163,7 +159,7 @@ class FolderSyncDiffTests(TestCase):
                 album_id=album_2010.id,
             )
         )
-        cat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
                 file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
@@ -175,14 +171,6 @@ class FolderSyncDiffTests(TestCase):
                 .mediaItem.id,
                 album_id=album_2011.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[dog_media_item.id]),
-        )
-        albums_repo.update_album(
-            album_2011.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
         )
 
         # Act: compute the diff
@@ -221,12 +209,10 @@ class FolderSyncDiffTests(TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
-        root_album = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -243,7 +229,7 @@ class FolderSyncDiffTests(TestCase):
         dog_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/dog.jpg', 'dog.jpg'
         )
-        media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
                 file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
@@ -255,10 +241,6 @@ class FolderSyncDiffTests(TestCase):
                 .mediaItem.id,
                 album_id=album_2010.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[media_item.id]),
         )
 
         # Act: compute the diff
@@ -289,12 +271,10 @@ class FolderSyncDiffTests(TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
-        root_album = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -311,7 +291,7 @@ class FolderSyncDiffTests(TestCase):
         dog_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/dog.jpg', 'dog.jpg'
         )
-        media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
                 file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
@@ -323,10 +303,6 @@ class FolderSyncDiffTests(TestCase):
                 .mediaItem.id,
                 album_id=album_2010.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[media_item.id]),
         )
 
         # Act: compute the diff
@@ -355,15 +331,13 @@ class FolderSyncDiffTests(TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
-        root_album = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos1_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos1_album.id, [], [])
-        laptop_album = albums_repo.create_album('Laptop', root_album.id, [], [])
-        photos2_album = albums_repo.create_album('Photos', laptop_album.id, [], [])
-        album_2020 = albums_repo.create_album('2020', photos2_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos1_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos1_album.id, [])
+        laptop_album = albums_repo.create_album('Laptop', root_album.id, [])
+        photos2_album = albums_repo.create_album('Photos', laptop_album.id, [])
+        album_2020 = albums_repo.create_album('2020', photos2_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -390,7 +364,7 @@ class FolderSyncDiffTests(TestCase):
         cat_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/cat.jpg', 'cat.jpg'
         )
-        cat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
                 file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
@@ -403,14 +377,10 @@ class FolderSyncDiffTests(TestCase):
                 album_id=album_2010.id,
             )
         )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
-        )
         boat_upload_token = gphotos_client.media_items().upload_photo(
             './Laptop/Photos/2020/boat.jpg', 'boat.jpg'
         )
-        boat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='boat.jpg',
                 file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
@@ -422,10 +392,6 @@ class FolderSyncDiffTests(TestCase):
                 .mediaItem.id,
                 album_id=album_2020.id,
             )
-        )
-        albums_repo.update_album(
-            album_2020.id,
-            UpdatedAlbumFields(new_media_item_ids=[boat_media_item.id]),
         )
 
         # Act: compute the diff
@@ -467,12 +433,10 @@ class FolderSyncDiffTests(TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
-        root_album = albums_repo.create_album(
-            album_name='', parent_album_id=None, child_album_ids=[], media_item_ids=[]
-        )
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos1_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos1_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos1_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos1_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -489,7 +453,7 @@ class FolderSyncDiffTests(TestCase):
         cat_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/cat.jpg', 'cat.jpg'
         )
-        cat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.jpg',
                 file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
@@ -502,14 +466,10 @@ class FolderSyncDiffTests(TestCase):
                 album_id=archives_album.id,
             )
         )
-        albums_repo.update_album(
-            archives_album.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
-        )
         dog_upload_token = gphotos_client.media_items().upload_photo(
             './Archives/Photos/2010/dog.jpg', 'dog.jpg'
         )
-        dog_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.jpg',
                 file_hash=compute_file_hash('./Archives/Photos/2010/dog.jpg'),
@@ -521,10 +481,6 @@ class FolderSyncDiffTests(TestCase):
                 .mediaItem.id,
                 album_id=album_2010.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[dog_media_item.id]),
         )
 
         # Act: compute the diff

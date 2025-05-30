@@ -50,17 +50,17 @@ class TestTeardownCli(unittest.TestCase):
         self.media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        self.root_album = self.albums_repo.create_album('', None, [], [])
+        self.root_album = self.albums_repo.create_album('', None, [])
         config = InMemoryConfig()
         config.set_root_album_id(self.root_album.id)
 
         # Test setup 3: Attach 'Archives' in root album but others not
         self.archives_album = self.albums_repo.create_album(
-            'Archives', self.root_album.id, [], []
+            'Archives', self.root_album.id, []
         )
-        self.albums_repo.create_album('Photos', None, [], [])
-        self.albums_repo.create_album('2010', None, [], [])
-        self.albums_repo.create_album('2011', None, [], [])
+        self.albums_repo.create_album('Photos', None, [])
+        self.albums_repo.create_album('2010', None, [])
+        self.albums_repo.create_album('2011', None, [])
         self.albums_repo.update_album(
             self.root_album.id,
             UpdatedAlbumFields(new_child_album_ids=[self.archives_album.id]),
@@ -86,10 +86,6 @@ class TestTeardownCli(unittest.TestCase):
                 ].mediaItem.id,
                 album_id=self.archives_album.id,
             )
-        )
-        self.albums_repo.update_album(
-            self.archives_album.id,
-            UpdatedAlbumFields(new_media_item_ids=[self.dog_media_item.id]),
         )
 
         # Test setup: build fake config file
