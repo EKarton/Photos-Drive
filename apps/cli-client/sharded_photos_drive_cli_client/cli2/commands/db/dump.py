@@ -57,8 +57,10 @@ def dump(
     # Dump the contents of the config file
     if config_file:
         dump_config_file(config_file, folder_path)
-    else:
+    elif config_mongodb:
         dump_mongodb_config_file(config_mongodb, folder_path)
+    else:
+        raise ValueError('Unknown arg type')
 
     config = build_config_from_options(config_file, config_mongodb)
     for mongodb_config in config.get_mongodb_configs():
