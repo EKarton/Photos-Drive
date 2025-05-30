@@ -8,6 +8,7 @@ from sharded_photos_drive_cli_client.shared.gphotos.testing import (
     FakeGPhotosClient,
     FakeItemsRepository,
 )
+from sharded_photos_drive_cli_client.shared.mongodb.album_id import album_id_to_string
 from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
@@ -65,7 +66,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        root_album_obj = albums_repo.create_album('', None, [], [])
+        root_album_obj = albums_repo.create_album('', None, [])
         config.set_root_album_id(root_album_obj.id)
 
         # Act: Upload a set of processed diffs
@@ -134,6 +135,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         # Test assert: check the folders are made
         albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
         albums_2 = list(mongodb_client_2['sharded_google_photos']['albums'].find({}))
+
         self.assertEqual(len(albums_1), 5)
         self.assertEqual(len(albums_2), 0)
         root_album = next(filter(lambda x: x['name'] == '', albums_1))
@@ -147,7 +149,6 @@ class TestPhotosBackup(ParametrizedTestCase):
             f'{mongodb_client_1_id}:{archives_album['_id']}',
             root_album['child_album_ids'],
         )
-        self.assertEqual([], root_album['media_item_ids'])
         self.assertIsNone(root_album['parent_album_id'])
 
         # Test assert: check on the Archives folder and it's linked correctly
@@ -155,7 +156,6 @@ class TestPhotosBackup(ParametrizedTestCase):
             f'{mongodb_client_1_id}:{photos_album['_id']}',
             archives_album['child_album_ids'],
         )
-        self.assertEqual([], archives_album['media_item_ids'])
         self.assertIn(
             f'{root_album_obj.id.client_id}:{root_album_obj.id.object_id}',
             archives_album['parent_album_id'],
@@ -170,7 +170,6 @@ class TestPhotosBackup(ParametrizedTestCase):
             f'{mongodb_client_1_id}:{album_2010['_id']}',
             photos_album['child_album_ids'],
         )
-        self.assertEqual([], photos_album['media_item_ids'])
         self.assertIn(
             f'{mongodb_client_1_id}:{archives_album['_id']}',
             photos_album['parent_album_id'],
@@ -200,25 +199,25 @@ class TestPhotosBackup(ParametrizedTestCase):
         self.assertEqual(bird_item['gphotos_client_id'], str(gphotos_client_2_id))
         self.assertEqual(bird_item['gphotos_media_item_id'], bird_gitem.id)
 
-        # Test assert: check that the media items are linked to the albums in the db
-        self.assertIn(
-            f'{mongodb_client_1_id}:{dog_item["_id"]}', album_2010['media_item_ids']
-        )
-        self.assertIn(
-            f'{mongodb_client_1_id}:{cat_item["_id"]}', album_2010['media_item_ids']
-        )
-        self.assertIn(
-            f'{mongodb_client_1_id}:{fish_item["_id"]}', album_2009['media_item_ids']
-        )
-        self.assertIn(
-            f'{mongodb_client_1_id}:{bird_item["_id"]}', album_2009['media_item_ids']
-        )
-
         # Test assert: check that the file hash is added to the media items
         self.assertEqual(dog_item['file_hash'], Binary(MOCK_FILE_HASH))
         self.assertEqual(cat_item['file_hash'], Binary(MOCK_FILE_HASH))
         self.assertEqual(fish_item['file_hash'], Binary(MOCK_FILE_HASH))
         self.assertEqual(bird_item['file_hash'], Binary(MOCK_FILE_HASH))
+
+        # Test assert: check that the album IDs in the media items are correct
+        self.assertEqual(
+            dog_item['album_id'], f'{mongodb_client_1_id}:{album_2010['_id']}'
+        )
+        self.assertEqual(
+            cat_item['album_id'], f'{mongodb_client_1_id}:{album_2010['_id']}'
+        )
+        self.assertEqual(
+            fish_item['album_id'], f'{mongodb_client_1_id}:{album_2009['_id']}'
+        )
+        self.assertEqual(
+            bird_item['album_id'], f'{mongodb_client_1_id}:{album_2009['_id']}'
+        )
 
     @parametrize_use_parallel_uploads
     def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
@@ -246,10 +245,10 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -271,7 +270,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         gmedia_item_obj = gphotos_client_1.media_items().add_uploaded_photos_to_gphotos(
             [gupload_token]
         )
-        media_item_obj = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 file_hash=MOCK_FILE_HASH,
@@ -282,10 +281,6 @@ class TestPhotosBackup(ParametrizedTestCase):
                 ].mediaItem.id,
                 album_id=album_2010.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
         # Act: Upload a set of processed diffs
@@ -322,34 +317,26 @@ class TestPhotosBackup(ParametrizedTestCase):
         self.assertEqual(len(gitems_2), 1)
         cat_gitem = next(filter(lambda x: x.filename == 'cat.png', gitems_2))
 
-        # Test assert: Check that there is a cat.png media item in the db
+        # Test assert: Check that there are two media items
         mitems_1 = list(
             mongodb_client_1['sharded_google_photos']['media_items'].find({})
         )
-        dog_mitem = next(filter(lambda x: x['file_name'] == 'dog.png', mitems_1))
+        self.assertEqual(len(mitems_1), 2)
+
+        # Test assert: Check the new media item
         cat_mitem = next(filter(lambda x: x['file_name'] == 'cat.png', mitems_1))
         self.assertEqual(cat_mitem['gphotos_client_id'], str(gphotos_client_2_id))
         self.assertEqual(cat_mitem['gphotos_media_item_id'], cat_gitem.id)
+        self.assertEqual(cat_mitem['file_hash'], Binary(MOCK_FILE_HASH))
+        self.assertEqual(cat_mitem['album_id'], album_id_to_string(album_2010.id))
+
+        # Test assert: Check the old media item
+        dog_mitem = next(filter(lambda x: x['file_name'] == 'dog.png', mitems_1))
+        self.assertEqual(dog_mitem['album_id'], album_id_to_string(album_2010.id))
 
         # Test assert: Check that no new albums have been made
         albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
-
-        # Test assert: Check that cat.png media item is attached to the 2010 album in
-        # db, and dog.png is still kept
-        album_2010_raw = next(filter(lambda x: x['name'] == '2010', albums_1))
-        self.assertEqual(len(album_2010_raw['media_item_ids']), 2)
-        self.assertIn(
-            f'{mongodb_client_1_id}:{dog_mitem['_id']}',
-            album_2010_raw['media_item_ids'],
-        )
-        self.assertIn(
-            f'{mongodb_client_1_id}:{cat_mitem['_id']}',
-            album_2010_raw['media_item_ids'],
-        )
-
-        # Test assert: check that the file hash is added to the new media items
-        self.assertEqual(cat_mitem['file_hash'], Binary(MOCK_FILE_HASH))
 
     @parametrize_use_parallel_uploads
     def test_backup_deleted_one_item_on_album_with_two_items(
@@ -379,10 +366,10 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -414,7 +401,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 [gcat_upload_token]
             )
         )
-        dog_mitem_obj = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 file_hash=MOCK_FILE_HASH,
@@ -426,7 +413,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_id=album_2010.id,
             )
         )
-        cat_mitem_obj = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -437,10 +424,6 @@ class TestPhotosBackup(ParametrizedTestCase):
                 ].mediaItem.id,
                 album_id=album_2010.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[dog_mitem_obj.id, cat_mitem_obj.id]),
         )
 
         # Act: Upload a set of processed diffs
@@ -474,7 +457,6 @@ class TestPhotosBackup(ParametrizedTestCase):
         mitems_1 = list(
             mongodb_client_1['sharded_google_photos']['media_items'].find({})
         )
-        dog_mitem = next(filter(lambda x: x['file_name'] == 'dog.png', mitems_1))
         self.assertEqual(
             list(filter(lambda x: x['file_name'] == 'cat.png', mitems_1)), []
         )
@@ -482,14 +464,6 @@ class TestPhotosBackup(ParametrizedTestCase):
         # Test assert: Check that no new albums have been made
         albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
-
-        # Test assert: Check that cat.png is removed from album and dog.png is kept
-        album_2010_raw = next(filter(lambda x: x['name'] == '2010', albums_1))
-        self.assertEqual(len(album_2010_raw['media_item_ids']), 1)
-        self.assertIn(
-            f'{mongodb_client_1_id}:{dog_mitem['_id']}',
-            album_2010_raw['media_item_ids'],
-        )
 
     @parametrize_use_parallel_uploads
     def test_backup_pruning_1(self, use_parallel_uploads: bool):
@@ -510,10 +484,10 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -537,7 +511,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 [dog_upload_token]
             )
         )
-        media_item_obj = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 file_hash=MOCK_FILE_HASH,
@@ -548,10 +522,6 @@ class TestPhotosBackup(ParametrizedTestCase):
                 ].mediaItem.id,
                 album_id=album_2010.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[media_item_obj.id]),
         )
 
         # Act: Upload a set of processed diffs
@@ -594,7 +564,6 @@ class TestPhotosBackup(ParametrizedTestCase):
         # Test assert: Check that root albums is updated correctly
         self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(len(albums[0].child_album_ids), 0)
-        self.assertEqual(len(albums[0].media_item_ids), 0)
         self.assertEqual(albums[0].parent_album_id, None)
 
     @parametrize_use_parallel_uploads
@@ -616,10 +585,10 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -651,7 +620,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 [cat_upload_token]
             )
         )
-        dog_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 file_hash=MOCK_FILE_HASH,
@@ -663,7 +632,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_id=album_2010.id,
             )
         )
-        cat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -674,14 +643,6 @@ class TestPhotosBackup(ParametrizedTestCase):
                 ].mediaItem.id,
                 album_id=archives_album.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[dog_media_item.id]),
-        )
-        albums_repo.update_album(
-            archives_album.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
         )
 
         # Act: Upload a set of processed diffs
@@ -725,13 +686,11 @@ class TestPhotosBackup(ParametrizedTestCase):
         # Test assert: Check that root album is updated correctly
         self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(albums[0].child_album_ids, [albums[1].id])
-        self.assertEqual(albums[0].media_item_ids, [])
         self.assertEqual(albums[0].parent_album_id, None)
 
         # Test assert: Check that archives album is updated correctly
         self.assertEqual(albums[1].id, archives_album.id)
         self.assertEqual(albums[1].child_album_ids, [])
-        self.assertEqual(albums[1].media_item_ids, [cat_media_item.id])
         self.assertEqual(albums[1].parent_album_id, root_album.id)
 
     @parametrize_use_parallel_uploads
@@ -753,11 +712,11 @@ class TestPhotosBackup(ParametrizedTestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        public_album = albums_repo.create_album('Public', root_album.id, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        public_album = albums_repo.create_album('Public', root_album.id, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         config.set_root_album_id(root_album.id)
         albums_repo.update_album(
             root_album.id,
@@ -791,7 +750,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 [cat_upload_token]
             )
         )
-        dog_media_item_obj = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 file_hash=MOCK_FILE_HASH,
@@ -803,7 +762,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 album_id=album_2010.id,
             )
         )
-        cat_media_item_obj = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -814,14 +773,6 @@ class TestPhotosBackup(ParametrizedTestCase):
                 ].mediaItem.id,
                 album_id=public_album.id,
             )
-        )
-        albums_repo.update_album(
-            album_2010.id,
-            UpdatedAlbumFields(new_media_item_ids=[dog_media_item_obj.id]),
-        )
-        albums_repo.update_album(
-            public_album.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item_obj.id]),
         )
 
         # Act: Upload a set of processed diffs
@@ -865,11 +816,9 @@ class TestPhotosBackup(ParametrizedTestCase):
         # Test assert: Check that root album is updated correctly
         self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(albums[0].child_album_ids, [albums[1].id])
-        self.assertEqual(albums[0].media_item_ids, [])
         self.assertEqual(albums[0].parent_album_id, None)
 
         # Test assert: Check that archives album is updated correctly
         self.assertEqual(albums[1].id, public_album.id)
         self.assertEqual(albums[1].child_album_ids, [])
-        self.assertEqual(albums[1].media_item_ids, [cat_media_item_obj.id])
         self.assertEqual(albums[1].parent_album_id, root_album.id)

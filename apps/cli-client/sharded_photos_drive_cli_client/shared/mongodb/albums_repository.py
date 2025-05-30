@@ -6,12 +6,9 @@ from abc import ABC, abstractmethod
 from bson.objectid import ObjectId
 import pymongo
 
-from .media_item_id import parse_string_to_media_item_id
 from .album_id import AlbumId, album_id_to_string, parse_string_to_album_id
-from .media_item_id import media_item_id_to_string
 from .albums import Album
 from .clients_repository import MongoDbClientsRepository
-from .media_item_id import MediaItemId
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +18,6 @@ class UpdatedAlbumFields:
     new_name: Optional[str] = None
     new_parent_album_id: Optional[AlbumId] = None
     new_child_album_ids: Optional[list[AlbumId]] = None
-    new_media_item_ids: Optional[list[MediaItemId]] = None
 
 
 @dataclass(frozen=True)
@@ -37,15 +33,12 @@ class UpdateAlbumRequest:
             if present.
         new_child_album_ids (Optional[list[AlbumId]]): The new child album IDs,
             if present.
-        new_media_item_ids (Optional[list[MediaItemId]]): The new media item IDs,
-            if present.
     """
 
     album_id: AlbumId
     new_name: Optional[str] = None
     new_parent_album_id: Optional[AlbumId] = None
     new_child_album_ids: Optional[list[AlbumId]] = None
-    new_media_item_ids: Optional[list[MediaItemId]] = None
 
 
 class AlbumsRepository(ABC):
@@ -83,7 +76,6 @@ class AlbumsRepository(ABC):
         album_name: str,
         parent_album_id: Optional[AlbumId],
         child_album_ids: list[AlbumId],
-        media_item_ids: list[MediaItemId],
     ) -> Album:
         '''
         Creates an album in a MongoDB client with the most amount of space remaining
@@ -92,7 +84,6 @@ class AlbumsRepository(ABC):
             album_name (str): The album name
             parent_album_id (Optional[AlbumId]): The parent album ID
             child_album_ids list[AlbumId]: A list of child album IDs
-            media_item_ids (list[MediaItemId]): A list of media item IDs.
 
         Returns:
             Album: An instance of the newly created album.
@@ -193,7 +184,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         album_name: str,
         parent_album_id: AlbumId | None,
         child_album_ids: list[AlbumId],
-        media_item_ids: list[MediaItemId],
     ) -> Album:
         client_id = self._mongodb_clients_repository.find_id_of_client_with_most_space()
         client = self._mongodb_clients_repository.get_client_by_id(client_id)
@@ -212,9 +202,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
                 "child_album_ids": [
                     album_id_to_string(c_id) for c_id in child_album_ids
                 ],
-                "media_item_ids": [
-                    media_item_id_to_string(m_id) for m_id in media_item_ids
-                ],
             },
             session=session,
         )
@@ -224,7 +211,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             name=album_name,
             parent_album_id=parent_album_id,
             child_album_ids=child_album_ids,
-            media_item_ids=media_item_ids,
         )
 
     def delete_album(self, id: AlbumId):
@@ -277,12 +263,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
                 for c_id in updated_album_fields.new_child_album_ids
             ]
 
-        if updated_album_fields.new_media_item_ids is not None:
-            set_query["$set"]["media_item_ids"] = [
-                media_item_id_to_string(m_id)
-                for m_id in updated_album_fields.new_media_item_ids
-            ]
-
         if updated_album_fields.new_parent_album_id is not None:
             set_query["$set"]["parent_album_id"] = album_id_to_string(
                 updated_album_fields.new_parent_album_id
@@ -321,11 +301,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
                     album_id_to_string(c_id) for c_id in request.new_child_album_ids
                 ]
 
-            if request.new_media_item_ids is not None:
-                set_query["$set"]["media_item_ids"] = [
-                    media_item_id_to_string(m_id) for m_id in request.new_media_item_ids
-                ]
-
             if request.new_parent_album_id is not None:
                 set_query["$set"]["parent_album_id"] = album_id_to_string(
                     request.new_parent_album_id
@@ -362,14 +337,9 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         for raw_child_album_id in raw_item["child_album_ids"]:
             child_album_ids.append(parse_string_to_album_id(raw_child_album_id))
 
-        media_item_ids = []
-        for raw_media_id in raw_item["media_item_ids"]:
-            media_item_ids.append(parse_string_to_media_item_id(raw_media_id))
-
         return Album(
             id=AlbumId(client_id, cast(ObjectId, raw_item["_id"])),
             name=str(raw_item["name"]),
             parent_album_id=parent_album_id,
             child_album_ids=child_album_ids,
-            media_item_ids=media_item_ids,
         )

@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 
 
-from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
-
-from .media_item_id import MediaItemId
+from .album_id import AlbumId
 
 
 @dataclass(frozen=True)
@@ -18,12 +16,9 @@ class Album:
         parent_album_id (AlbumId | None): The parent album ID. If it is None, it does
             not have a parent album.
         child_album_ids (list[AlbumId]): The IDs of albums that is under this album.
-        media_item_ids (list[MediaItemId]): The IDs of media items that is under this
-            album.
     """
 
     id: AlbumId
     name: str | None
     parent_album_id: AlbumId | None
     child_album_ids: list[AlbumId]
-    media_item_ids: list[MediaItemId]

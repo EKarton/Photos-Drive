@@ -197,7 +197,6 @@ class SystemCleaner:
             # Process media items
             media_ids_to_keep: list[MediaItemId] = []
             gmedia_ids_to_keep: list[GPhotosMediaItemKey] = []
-            media_ids_to_keep_changed = False
 
             for media_item in self.__media_items_repo.find_media_items(
                 FindMediaItemRequest(album_id=album_id)
@@ -206,7 +205,6 @@ class SystemCleaner:
                     logger.debug(
                         f'Removing gemdia item {media_item.id} from {album.id}'
                     )
-                    media_ids_to_keep_changed = True
                     continue
 
                 gphotos_media_item_id = GPhotosMediaItemKey(
@@ -218,7 +216,6 @@ class SystemCleaner:
                     logger.debug(
                         f'Removing gemdia item {gphotos_media_item_id} from {album.id}'
                     )
-                    media_ids_to_keep_changed = True
                     continue
 
                 media_ids_to_keep.append(media_item.id)
@@ -238,7 +235,7 @@ class SystemCleaner:
                 child_album_ids_to_keep.append(child_album_id)
 
             # Update the album if any changes were detected.
-            if media_ids_to_keep_changed or child_album_ids_to_keep_changed:
+            if child_album_ids_to_keep_changed:
                 logger.debug(f'Modifying {album.id}')
                 logger.debug(media_ids_to_keep)
                 logger.debug(child_album_ids_to_keep)
@@ -246,9 +243,6 @@ class SystemCleaner:
                 self.__albums_repo.update_album(
                     album_id,
                     UpdatedAlbumFields(
-                        new_media_item_ids=(
-                            media_ids_to_keep if media_ids_to_keep_changed else None
-                        ),
                         new_child_album_ids=(
                             child_album_ids_to_keep
                             if child_album_ids_to_keep_changed

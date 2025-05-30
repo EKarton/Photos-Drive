@@ -33,10 +33,10 @@ class AlbumsPrunerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         albums_repo.update_album(
             root_album.id,
             UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
@@ -64,7 +64,6 @@ class AlbumsPrunerTests(unittest.TestCase):
         # Test assert: Check that root albums is updated correctly
         self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(len(albums[0].child_album_ids), 0)
-        self.assertEqual(len(albums[0].media_item_ids), 0)
         self.assertEqual(albums[0].parent_album_id, None)
 
     def test_prune_album__media_item_in_descendants(self):
@@ -79,10 +78,10 @@ class AlbumsPrunerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         albums_repo.update_album(
             root_album.id,
             UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
@@ -105,7 +104,7 @@ class AlbumsPrunerTests(unittest.TestCase):
                 [cat_upload_token]
             )
         )
-        cat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -116,10 +115,6 @@ class AlbumsPrunerTests(unittest.TestCase):
                 ].mediaItem.id,
                 album_id=archives_album.id,
             )
-        )
-        albums_repo.update_album(
-            archives_album.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
         )
 
         # Act: prune on 2010
@@ -141,13 +136,11 @@ class AlbumsPrunerTests(unittest.TestCase):
         # Test assert: Check that root album is updated correctly
         self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(albums[0].child_album_ids, [albums[1].id])
-        self.assertEqual(albums[0].media_item_ids, [])
         self.assertEqual(albums[0].parent_album_id, None)
 
         # Test assert: Check that Archives album is updated correctly
         self.assertEqual(albums[1].id, archives_album.id)
         self.assertEqual(albums[1].child_album_ids, [])
-        self.assertEqual(albums[1].media_item_ids, [cat_media_item.id])
         self.assertEqual(albums[1].parent_album_id, root_album.id)
 
     def test_backup_pruning_3(self):
@@ -164,11 +157,11 @@ class AlbumsPrunerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
-        root_album = albums_repo.create_album('', None, [], [])
-        archives_album = albums_repo.create_album('Archives', root_album.id, [], [])
-        videos_album = albums_repo.create_album('Videos', archives_album.id, [], [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [], [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [], [])
+        root_album = albums_repo.create_album('', None, [])
+        archives_album = albums_repo.create_album('Archives', root_album.id, [])
+        videos_album = albums_repo.create_album('Videos', archives_album.id, [])
+        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
+        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
         albums_repo.update_album(
             root_album.id,
             UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
@@ -191,7 +184,7 @@ class AlbumsPrunerTests(unittest.TestCase):
                 [cat_upload_token]
             )
         )
-        cat_media_item = media_items_repo.create_media_item(
+        media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -202,10 +195,6 @@ class AlbumsPrunerTests(unittest.TestCase):
                 ].mediaItem.id,
                 album_id=videos_album.id,
             )
-        )
-        albums_repo.update_album(
-            videos_album.id,
-            UpdatedAlbumFields(new_media_item_ids=[cat_media_item.id]),
         )
 
         # Act: Prune on 2010 album
@@ -227,16 +216,13 @@ class AlbumsPrunerTests(unittest.TestCase):
         # Test assert: Check that root album is updated correctly
         self.assertEqual(albums[0].id, root_album.id)
         self.assertEqual(albums[0].child_album_ids, [archives_album.id])
-        self.assertEqual(albums[0].media_item_ids, [])
         self.assertEqual(albums[0].parent_album_id, None)
 
         # Test assert: Check that archives album is updated correctly
         self.assertEqual(albums[1].id, archives_album.id)
         self.assertEqual(albums[1].child_album_ids, [videos_album.id])
-        self.assertEqual(albums[1].media_item_ids, [])
         self.assertEqual(albums[1].parent_album_id, root_album.id)
 
         self.assertEqual(albums[2].id, videos_album.id)
         self.assertEqual(albums[2].child_album_ids, [])
-        self.assertEqual(albums[2].media_item_ids, [cat_media_item.id])
         self.assertEqual(albums[2].parent_album_id, archives_album.id)

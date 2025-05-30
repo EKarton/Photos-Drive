@@ -93,7 +93,7 @@ def init(
     mongodb_repo = MongoDbClientsRepository.build_from_config(config)
     albums_repo = AlbumsRepositoryImpl(mongodb_repo)
     root_album = albums_repo.create_album(
-        album_name="", parent_album_id=None, child_album_ids=[], media_item_ids=[]
+        album_name="", parent_album_id=None, child_album_ids=[]
     )
     config.set_root_album_id(root_album.id)
 
