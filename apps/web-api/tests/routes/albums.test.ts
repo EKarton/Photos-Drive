@@ -33,16 +33,6 @@ const MOCK_ALBUM: Album = {
       clientId: 'albumClient1',
       objectId: 'albumObject2'
     }
-  ],
-  media_item_ids: [
-    {
-      clientId: 'albumClient1',
-      objectId: 'mediaItem1'
-    },
-    {
-      clientId: 'albumClient1',
-      objectId: 'mediaItem2'
-    }
   ]
 };
 

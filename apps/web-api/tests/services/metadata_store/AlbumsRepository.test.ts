@@ -32,15 +32,13 @@ describe('AlbumsRepositoryImpl', () => {
       _id: new ObjectId('507f1f77bcf86cd799439010'),
       name: 'Test Album',
       parent_album_id: null,
-      child_album_ids: ['client1:507f1f77bcf86cd799439011'],
-      media_item_ids: []
+      child_album_ids: ['client1:507f1f77bcf86cd799439011']
     });
     await db.collection('albums').insertOne({
       _id: new ObjectId('507f1f77bcf86cd799439011'),
       name: 'Test Album',
       parent_album_id: 'client1:507f1f77bcf86cd799439010',
-      child_album_ids: ['client1:987654321098', 'client1:111111111111'],
-      media_item_ids: ['client1:222222222222', 'client1:333333333333']
+      child_album_ids: ['client1:987654321098', 'client1:111111111111']
     });
   });
 
@@ -68,10 +66,6 @@ describe('AlbumsRepositoryImpl', () => {
         child_album_ids: [
           { clientId: 'client1', objectId: '987654321098' },
           { clientId: 'client1', objectId: '111111111111' }
-        ],
-        media_item_ids: [
-          { clientId: 'client1', objectId: '222222222222' },
-          { clientId: 'client1', objectId: '333333333333' }
         ]
       });
     });
@@ -90,8 +84,7 @@ describe('AlbumsRepositoryImpl', () => {
         parent_album_id: undefined,
         child_album_ids: [
           { clientId: 'client1', objectId: '507f1f77bcf86cd799439011' }
-        ],
-        media_item_ids: []
+        ]
       });
     });
 
