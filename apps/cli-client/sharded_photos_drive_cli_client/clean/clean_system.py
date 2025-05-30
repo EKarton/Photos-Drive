@@ -16,7 +16,10 @@ from ..shared.mongodb.media_item_id import MediaItemId
 from ..shared.gphotos.clients_repository import GPhotosClientsRepository
 from ..shared.config.config import Config
 from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields
-from ..shared.mongodb.media_items_repository import MediaItemsRepository
+from ..shared.mongodb.media_items_repository import (
+    FindMediaItemRequest,
+    MediaItemsRepository,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -195,15 +198,17 @@ class SystemCleaner:
             media_ids_to_keep: list[MediaItemId] = []
             gmedia_ids_to_keep: list[GPhotosMediaItemKey] = []
             media_ids_to_keep_changed = False
-            for media_item_id in album.media_item_ids:
-                if media_item_id not in all_media_item_ids:
+
+            for media_item in self.__media_items_repo.find_media_items(
+                FindMediaItemRequest(album_id=album_id)
+            ):
+                if media_item.id not in all_media_item_ids:
                     logger.debug(
-                        f'Removing gemdia item {media_item_id} from {album.id}'
+                        f'Removing gemdia item {media_item.id} from {album.id}'
                     )
                     media_ids_to_keep_changed = True
                     continue
 
-                media_item = self.__media_items_repo.get_media_item_by_id(media_item_id)
                 gphotos_media_item_id = GPhotosMediaItemKey(
                     media_item.gphotos_client_id,
                     media_item.gphotos_media_item_id,
@@ -216,7 +221,7 @@ class SystemCleaner:
                     media_ids_to_keep_changed = True
                     continue
 
-                media_ids_to_keep.append(media_item_id)
+                media_ids_to_keep.append(media_item.id)
                 gmedia_ids_to_keep.append(gphotos_media_item_id)
 
             # Process child albums
@@ -350,9 +355,12 @@ class SystemCleaner:
         def process_album(album_id: AlbumId) -> tuple[list[AlbumId], Optional[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
             child_album_ids = album.child_album_ids
+            num_media_item_ids = self.__media_items_repo.get_num_media_items_in_album(
+                album_id
+            )
             prune_album_id = (
                 album_id
-                if len(child_album_ids) == 0 and len(album.media_item_ids) == 0
+                if len(child_album_ids) == 0 and num_media_item_ids == 0
                 else None
             )
 
@@ -380,7 +388,9 @@ class SystemCleaner:
                 current_level = next_level
 
         total_albums_pruned = 0
-        pruner = AlbumsPruner(root_album_id, self.__albums_repo)
+        pruner = AlbumsPruner(
+            root_album_id, self.__albums_repo, self.__media_items_repo
+        )
         for album_id in empty_leaf_album_ids:
             with MongoDbTransactionsContext(self.__mongodb_clients_repo):
                 total_albums_pruned += pruner.prune_album(album_id)

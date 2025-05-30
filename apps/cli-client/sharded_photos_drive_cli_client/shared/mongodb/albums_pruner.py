@@ -1,14 +1,21 @@
 from typing import cast
 from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
+from .media_items_repository import MediaItemsRepository
 from .albums_repository import AlbumsRepository, UpdatedAlbumFields
 
 
 class AlbumsPruner:
     '''A class responsible for pruning albums in the albums tree.'''
 
-    def __init__(self, root_album_id: AlbumId, albums_repo: AlbumsRepository):
+    def __init__(
+        self,
+        root_album_id: AlbumId,
+        albums_repo: AlbumsRepository,
+        media_items_repo: MediaItemsRepository,
+    ):
         self.__albums_repo = albums_repo
         self.__root_album_id = root_album_id
+        self.__media_items_repo = media_items_repo
 
     def prune_album(self, album_id: AlbumId) -> int:
         '''
@@ -44,7 +51,7 @@ class AlbumsPruner:
             if len(cur_album.child_album_ids) > 1:
                 break
 
-            if len(cur_album.media_item_ids) > 0:
+            if self.__media_items_repo.get_num_media_items_in_album(cur_album_id) > 0:
                 break
 
             if cur_album.id == self.__root_album_id:

@@ -7,6 +7,7 @@ from ..shared.config.config import Config
 from ..shared.mongodb.albums_repository import AlbumsRepositoryImpl
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.media_items_repository import (
+    FindMediaItemRequest,
     MediaItemsRepositoryImpl,
     UpdateMediaItemRequest,
 )
@@ -33,8 +34,9 @@ class AddFileHashesHandler:
                         (child_album_id, prev_albums_path + [cast(str, album.name)])
                     )
 
-            for media_item_id in album.media_item_ids:
-                media_item = media_items_repo.get_media_item_by_id(media_item_id)
+            for media_item in media_items_repo.find_media_items(
+                FindMediaItemRequest(album_id=album_id)
+            ):
                 if album_id == root_album_id:
                     file_path = '/'.join(prev_albums_path + [media_item.file_name])
                 else:
@@ -46,7 +48,7 @@ class AddFileHashesHandler:
                 print(f'{file_path}: {file_hash.hex()}')
 
                 update_media_item_requests.append(
-                    UpdateMediaItemRequest(media_item_id, new_file_hash=file_hash)
+                    UpdateMediaItemRequest(media_item.id, new_file_hash=file_hash)
                 )
 
         media_items_repo.update_many_media_items(update_media_item_requests)

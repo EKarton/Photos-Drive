@@ -14,7 +14,10 @@ from ..shared.mongodb.albums_repository import (
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from ..shared.mongodb.media_items_repository import MediaItemsRepository
+from ..shared.mongodb.media_items_repository import (
+    FindMediaItemRequest,
+    MediaItemsRepository,
+)
 from ..shared.mongodb.media_items_repository import CreateMediaItemRequest
 from ..shared.mongodb.clients_repository import MongoDbClientsRepository
 from ..shared.mongodb.clients_repository import MongoDbTransactionsContext
@@ -72,7 +75,9 @@ class PhotosBackup:
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
         self.__diffs_assigner = DiffsAssigner(gphotos_client_repo)
-        self.__albums_pruner = AlbumsPruner(config.get_root_album_id(), albums_repo)
+        self.__albums_pruner = AlbumsPruner(
+            config.get_root_album_id(), albums_repo, media_items_repo
+        )
 
         logger.debug(f"Parallelizing uploads: {parallelize_uploads}")
         self.__gphotos_uploader = (
@@ -131,14 +136,12 @@ class PhotosBackup:
             # Step 6a: Find media items to delete
             file_names_to_delete_set = set([diff.file_name for diff in delete_diffs])
             media_item_ids_to_delete = set([])
-            if len(delete_diffs) > 0:
-                for media_item_id in cur_album.media_item_ids:
-                    media_item = self.__media_items_repo.get_media_item_by_id(
-                        media_item_id
-                    )
-                    if media_item.file_name in file_names_to_delete_set:
-                        total_media_item_ids_to_delete.append(media_item.id)
-                        media_item_ids_to_delete.add(media_item.id)
+            for file_name in file_names_to_delete_set:
+                for media_item in self.__media_items_repo.find_media_items(
+                    FindMediaItemRequest(album_id=cur_album.id, file_name=file_name)
+                ):
+                    total_media_item_ids_to_delete.append(media_item.id)
+                    media_item_ids_to_delete.add(media_item.id)
 
             # Step 6b: Find the media items to add to the album, and create them
             media_item_ids_to_add = []

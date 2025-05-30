@@ -69,6 +69,25 @@ class UpdateMediaItemRequest:
     new_album_id: Optional[AlbumId] = None
 
 
+@dataclass(frozen=True)
+class FindMediaItemRequest:
+    '''
+    A class that represents the parameters needed to find existing media items in
+    the database.
+
+    Attributes:
+        mongodb_client_ids (Optional[list[ObjectId]): A list of client IDs to search
+            through, if present. If not present, it will search through all MongoDB
+            clients.
+        file_name (Optional[str]): The file name, if present.
+        album_id (Optional[AlbumId]): The Album ID, if present.
+    '''
+
+    mongodb_client_ids: Optional[list[ObjectId]] = None
+    file_name: Optional[str] = None
+    album_id: Optional[AlbumId] = None
+
+
 class MediaItemsRepository(ABC):
     """
     A class that represents a repository of all of the media items in the database.
@@ -94,6 +113,30 @@ class MediaItemsRepository(ABC):
         Returns:
             list[MediaItem]: A list of all media items.
         """
+
+    @abstractmethod
+    def find_media_items(self, request: FindMediaItemRequest) -> list[MediaItem]:
+        '''
+        Finds all media items that satisfies the request.
+
+        Args:
+            request (FindMediaItemRequest): The request.
+
+        Returns:
+            list[MediaItem]: A list of found media items.
+        '''
+
+    @abstractmethod
+    def get_num_media_items_in_album(self, album_id: AlbumId) -> int:
+        '''
+        Returns the total number of media items in an album.
+
+        Args:
+            album_id (AlbumId): The album ID.
+
+        Returns:
+            int: total number of media items in an album.
+        '''
 
     @abstractmethod
     def create_media_item(self, request: CreateMediaItemRequest) -> MediaItem:
@@ -197,6 +240,49 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 media_items.append(media_item)
 
         return media_items
+
+    def find_media_items(self, request: FindMediaItemRequest) -> list[MediaItem]:
+        all_clients = self._mongodb_clients_repository.get_all_clients()
+        if request.mongodb_client_ids is not None:
+            clients = [
+                (client_id, client)
+                for client_id, client in all_clients
+                if client_id in request.mongodb_client_ids
+            ]
+        else:
+            clients = all_clients
+
+        mongo_filter = {}
+        if request.album_id:
+            mongo_filter['album_id'] = album_id_to_string(request.album_id)
+        if request.file_name:
+            mongo_filter['file_name'] = request.file_name
+
+        media_items = []
+        for client_id, client in clients:
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            for raw_item in client['sharded_google_photos']['media_items'].find(
+                filter=mongo_filter, session=session
+            ):
+                media_items.append(
+                    self.__parse_raw_document_to_media_item_obj(client_id, raw_item)
+                )
+
+        return media_items
+
+    def get_num_media_items_in_album(self, album_id: AlbumId) -> int:
+        total = 0
+        for client_id, client in self._mongodb_clients_repository.get_all_clients():
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            total += client['sharded_google_photos']['media_items'].count_documents(
+                filter={'album_id': album_id_to_string(album_id)}, session=session
+            )
+
+        return total
 
     def create_media_item(self, request: CreateMediaItemRequest) -> MediaItem:
         client_id = self._mongodb_clients_repository.find_id_of_client_with_most_space()

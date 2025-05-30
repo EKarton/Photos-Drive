@@ -30,6 +30,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         mongodb_clients_repo = MongoDbClientsRepository()
         mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
+        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup: Set up the existing albums
         root_album = albums_repo.create_album('', None, [], [])
@@ -50,7 +51,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         )
 
         # Act: Prune on album 2010
-        pruner = AlbumsPruner(root_album.id, albums_repo)
+        pruner = AlbumsPruner(root_album.id, albums_repo, media_items_repo)
         num_albums_deleted = pruner.prune_album(album_2010.id)
 
         # Test assert
@@ -122,7 +123,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         )
 
         # Act: prune on 2010
-        pruner = AlbumsPruner(root_album.id, albums_repo)
+        pruner = AlbumsPruner(root_album.id, albums_repo, media_items_repo)
         num_albums_deleted = pruner.prune_album(album_2010.id)
 
         # Test assert:
@@ -208,7 +209,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         )
 
         # Act: Prune on 2010 album
-        pruner = AlbumsPruner(root_album.id, albums_repo)
+        pruner = AlbumsPruner(root_album.id, albums_repo, media_items_repo)
         num_albums_deleted = pruner.prune_album(album_2010.id)
 
         # Test assert:
