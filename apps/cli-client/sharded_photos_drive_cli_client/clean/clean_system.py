@@ -355,9 +355,12 @@ class SystemCleaner:
         def process_album(album_id: AlbumId) -> tuple[list[AlbumId], Optional[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
             child_album_ids = album.child_album_ids
+            num_media_item_ids = self.__media_items_repo.get_num_media_items_in_album(
+                album_id
+            )
             prune_album_id = (
                 album_id
-                if len(child_album_ids) == 0 and len(album.media_item_ids) == 0
+                if len(child_album_ids) == 0 and num_media_item_ids == 0
                 else None
             )
 
