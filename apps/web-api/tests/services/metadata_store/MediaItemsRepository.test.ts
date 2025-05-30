@@ -26,19 +26,6 @@ describe('MediaItemsRepositoryImpl', () => {
 
     // Initialize the repository
     mediaItemsRepo = new MediaItemsRepositoryImpl(mockMongoDbClientsRepository);
-
-    // Set up the database and collection
-    const db = mongoClient.db('sharded_google_photos');
-    await db.collection('media_items').insertOne({
-      _id: new ObjectId('507f1f77bcf86cd799439011'),
-      file_name: 'test_image.jpg',
-      gphotos_client_id: 'gphotos_client_1',
-      gphotos_media_item_id: 'media_item_1',
-      location: {
-        coordinates: [40.7128, -74.006] // longitude, latitude
-      },
-      album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`
-    });
   });
 
   afterAll(async () => {
@@ -47,6 +34,22 @@ describe('MediaItemsRepositoryImpl', () => {
   });
 
   describe('getMediaItemById', () => {
+    beforeEach(async () => {
+      // Set up the database and collection
+      const db = mongoClient.db('sharded_google_photos');
+      await db.collection('media_items').deleteMany({});
+      await db.collection('media_items').insertOne({
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
+        file_name: 'test_image.jpg',
+        gphotos_client_id: 'gphotos_client_1',
+        gphotos_media_item_id: 'media_item_1',
+        location: {
+          coordinates: [40.7128, -74.006] // longitude, latitude
+        },
+        album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`
+      });
+    });
+
     it('should return a media item when found', async () => {
       const mediaItemId: MediaItemId = {
         clientId: 'client1',
