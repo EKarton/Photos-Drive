@@ -1,8 +1,8 @@
 import typer
 
-from sharded_photos_drive_cli_client.cli2.commands.config import add
-from sharded_photos_drive_cli_client.cli2.commands.config import reauthorize
-from sharded_photos_drive_cli_client.cli2.commands.config.init import init
+from . import add
+from . import reauthorize
+from .init import init
 
 
 app = typer.Typer()
