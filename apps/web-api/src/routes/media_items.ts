@@ -35,7 +35,8 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
                 longitude: mediaItem.location.longitude
               }
             : null,
-          gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`
+          gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`,
+          albumId: `${mediaItem.album_id.clientId}:${mediaItem.album_id.objectId}`
         };
 
         return res.status(200).json(response);

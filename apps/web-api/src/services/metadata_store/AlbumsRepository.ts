@@ -1,5 +1,6 @@
 import { Document as MongoDbDocument, ObjectId, WithId } from 'mongodb';
-import { Album, AlbumId } from './Albums';
+import { Album, AlbumId, convertStringToAlbumId } from './Albums';
+import { convertStringToMediaItemId } from './MediaItems';
 import { MongoDbClientsRepository } from './MongoDbClientsRepository';
 
 /** A class that stores the albums from the database. */
@@ -36,26 +37,16 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
     return {
       id: id,
       name: doc['name'],
-      parent_album_id: this.convertMongoDbObjectId(doc['parent_album_id']),
+      parent_album_id: doc['parent_album_id']
+        ? convertStringToAlbumId(doc['parent_album_id'])
+        : undefined,
       child_album_ids: doc['child_album_ids'].map((albumId: string) => {
-        return this.convertMongoDbObjectId(albumId);
+        return convertStringToAlbumId(albumId);
       }),
       media_item_ids: doc['media_item_ids'].map((mediaItemId: string) => {
-        return this.convertMongoDbObjectId(mediaItemId);
+        return convertStringToMediaItemId(mediaItemId);
       })
     };
-  }
-
-  private convertMongoDbObjectId(rawType?: string): AlbumId | undefined {
-    const parts = rawType?.split(':') || [];
-    if (parts.length == 2 && parts[0] && parts[1]) {
-      return {
-        clientId: parts[0],
-        objectId: parts[1]
-      };
-    }
-
-    return undefined;
   }
 }
 

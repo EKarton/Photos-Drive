@@ -82,7 +82,8 @@ export class App {
     this.app.use(
       await albumsRouter(
         await this.config.getRootAlbumId(),
-        this.albumsRepository
+        this.albumsRepository,
+        this.mediaItemsRepository
       )
     );
     this.app.use(await mediaItemsRouter(this.mediaItemsRepository));

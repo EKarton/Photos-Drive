@@ -43,7 +43,11 @@ describe('Media Items Router', () => {
           longitude: 456
         },
         gphotos_client_id: 'gPhotosClient1',
-        gphotos_media_item_id: 'gPhotosMediaItem1'
+        gphotos_media_item_id: 'gPhotosMediaItem1',
+        album_id: {
+          clientId: '407f1f77bcf86cd799439001',
+          objectId: '407f1f77bcf86cd799439002'
+        }
       };
       const repo = mock<MediaItemsRepository>();
       repo.getMediaItemById.mockResolvedValue(mockMediaItem);
@@ -62,7 +66,8 @@ describe('Media Items Router', () => {
           latitude: 123,
           longitude: 456
         },
-        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1'
+        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+        albumId: '407f1f77bcf86cd799439001:407f1f77bcf86cd799439002'
       });
     });
 
@@ -74,7 +79,11 @@ describe('Media Items Router', () => {
         },
         file_name: 'dog.png',
         gphotos_client_id: 'gPhotosClient1',
-        gphotos_media_item_id: 'gPhotosMediaItem1'
+        gphotos_media_item_id: 'gPhotosMediaItem1',
+        album_id: {
+          clientId: '407f1f77bcf86cd799439001',
+          objectId: '407f1f77bcf86cd799439002'
+        }
       };
       const repo = mock<MediaItemsRepository>();
       repo.getMediaItemById.mockResolvedValue(mockMediaItem);
@@ -90,7 +99,8 @@ describe('Media Items Router', () => {
         id: 'mediaItemClientId1:mediaItem1',
         fileName: 'dog.png',
         location: null,
-        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1'
+        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+        albumId: '407f1f77bcf86cd799439001:407f1f77bcf86cd799439002'
       });
     });
 

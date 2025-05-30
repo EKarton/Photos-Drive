@@ -7,11 +7,13 @@ import {
   AlbumNotFoundError,
   AlbumsRepository
 } from '../services/metadata_store/AlbumsRepository';
+import { MediaItemsRepository } from '../services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/MongoDbClientsRepository';
 
 export default async function (
   rootAlbumId: AlbumId,
-  albumsRepo: AlbumsRepository
+  albumsRepo: AlbumsRepository,
+  mediaItemsRepo: MediaItemsRepository
 ) {
   const router: Router = Router();
 
@@ -38,7 +40,11 @@ export default async function (
       };
 
       try {
-        const album = await albumsRepo.getAlbumById(albumId);
+        const [album, mediaItems] = await Promise.all([
+          albumsRepo.getAlbumById(albumId),
+          mediaItemsRepo.getMediaItemsInAlbum(albumId)
+        ]);
+
         const response = {
           id: `${album.id.clientId}:${album.id.objectId}`,
           albumName: album.name,
@@ -48,8 +54,8 @@ export default async function (
           childAlbumIds: album.child_album_ids.map(
             (id) => `${id.clientId}:${id.objectId}`
           ),
-          mediaItemIds: album.media_item_ids.map(
-            (id) => `${id.clientId}:${id.objectId}`
+          mediaItemIds: mediaItems.map(
+            (mediaItem) => `${mediaItem.id.clientId}:${mediaItem.id.objectId}`
           )
         };
         return res.status(200).json(response);
