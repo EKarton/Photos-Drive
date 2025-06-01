@@ -212,6 +212,7 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
   }
 }
 
+/** Returns -1 if a should go before b; else 1 based on {@code SortBy} */
 export function sortMediaItem(
   a: MediaItem,
   b: MediaItem,
