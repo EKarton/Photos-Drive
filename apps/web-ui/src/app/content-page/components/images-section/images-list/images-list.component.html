@@ -4,16 +4,19 @@
   [infiniteScrollDistance]="2"
   [infiniteScrollUpDistance]="1.5"
   [infiniteScrollThrottle]="300"
-  (scrolled)="getMoreMediaItemIds()"
+  (scrolled)="loadMoreMediaItems()"
 >
+  <h1>Hola</h1>
   <ngx-masonry [options]="masonryOptions()">
-    @for (mediaItemId of paginatedMediaItemIds(); track mediaItemId) {
+    @for (image of images(); track image.id) {
       <div ngxMasonryItem class="masonry-item">
         <app-image
           masonryLazy
-          [mediaItemId]="mediaItemId"
-          [width]="columnWidth()"
-          (imageSizeChanged)="imageSizesChanged()"
+          [mediaItemId]="image.id"
+          [gPhotosMediaItemId]="image.gPhotosMediaItemId"
+          [fileName]="image.fileName"
+          [width]="image.width"
+          [height]="image.height"
         />
       </div>
     }

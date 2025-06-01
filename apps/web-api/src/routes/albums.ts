@@ -98,7 +98,21 @@ export default async function (
           )
         }
       });
-      return res.status(200).json(response);
+      return res.status(200).json({
+        mediaItems: response.mediaItems.map((mediaItem) => ({
+          id: mediaIdToString(mediaItem.id),
+          fileName: mediaItem.file_name,
+          location: mediaItem.location
+            ? {
+                latitude: mediaItem.location.latitude,
+                longitude: mediaItem.location.longitude
+              }
+            : null,
+          gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`,
+          albumId: albumIdToString(mediaItem.album_id)
+        })),
+        nextPageToken: response.nextPageToken
+      });
     })
   );
 

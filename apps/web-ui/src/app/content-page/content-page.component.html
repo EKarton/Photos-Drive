@@ -18,12 +18,7 @@
     }
 
     @if (album.data!.mediaItemIds.length > 0) {
-      <h1 class="text-2xl font-bold mb-4">Photos</h1>
-      <div class="mb-4xl">
-        <div class="mb-4xl">
-          <app-content-images-section [albumId]="albumId()" />
-        </div>
-      </div>
+      <app-content-images-section [albumId]="albumId()" />
     }
 
     @if (

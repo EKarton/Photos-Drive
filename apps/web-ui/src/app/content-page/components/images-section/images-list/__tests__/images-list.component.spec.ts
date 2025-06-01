@@ -72,7 +72,7 @@ describe('ImagesListComponent', () => {
 
   it('should render images', () => {
     const fixture = TestBed.createComponent(ImagesListComponent);
-    fixture.componentRef.setInput('mediaItemIds', ['photos1']);
+    fixture.componentRef.setInput('albumId', ['album1']);
     fixture.detectChanges();
 
     const elements = fixture.nativeElement.querySelectorAll('img');
@@ -109,7 +109,7 @@ describe('ImagesListComponent', () => {
       it(`should resize images correctly when the component width changes to ${hostElementWidth}`, async () => {
         // Render the component
         const fixture = TestBed.createComponent(ImagesListComponent);
-        fixture.componentRef.setInput('mediaItemIds', ['photos1']);
+        fixture.componentRef.setInput('albumId', ['album1']);
         fixture.detectChanges();
 
         // Simulate a resize event
@@ -149,19 +149,13 @@ describe('ImagesListComponent', () => {
   );
 
   it('should fetch more images given user has scrolled', () => {
-    const mediaItemIds = Array.from(
-      { length: 1000 },
-      (_, i) => `photos${i + 1}`,
-    );
     const fixture = TestBed.createComponent(ImagesListComponent);
-    fixture.componentRef.setInput('mediaItemIds', mediaItemIds);
+    fixture.componentRef.setInput('albumId', ['album1']);
     fixture.detectChanges();
 
-    fixture.componentInstance.getMoreMediaItemIds();
+    fixture.componentInstance.loadMoreMediaItems();
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.paginatedMediaItemIds().length).toEqual(
-      100,
-    );
+    expect(fixture.componentInstance.images().length).toEqual(100);
   });
 });

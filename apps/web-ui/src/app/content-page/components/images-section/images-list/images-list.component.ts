@@ -3,6 +3,7 @@ import {
   AfterViewInit,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   input,
@@ -15,8 +16,17 @@ import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
 import { ImageComponent } from './image/image.component';
+import { ImagesListStore } from './images-list.store';
 
-const PAGE_SIZE = 50;
+const DEFAULT_PAGE_SIZE = 50;
+
+export interface Image {
+  id: string;
+  gPhotosMediaItemId: string;
+  fileName: string;
+  width: number;
+  height: number;
+}
 
 @Component({
   standalone: true,
@@ -29,12 +39,15 @@ const PAGE_SIZE = 50;
   ],
   templateUrl: './images-list.component.html',
   styleUrl: './images-list.component.scss',
+  providers: [ImagesListStore],
 })
 export class ImagesListComponent implements AfterViewInit, OnDestroy {
   private readonly resizeObserverFactory = inject(
     RESIZE_OBSERVER_FACTORY_TOKEN,
   );
-  readonly mediaItemIds = input.required<string[]>();
+  readonly componentStore = inject(ImagesListStore);
+
+  readonly albumId = input.required<string>();
 
   @ViewChild(NgxMasonryComponent) ngxMasonryComponent?: NgxMasonryComponent;
   @ViewChild('masonryContainer') masonryContainer?: ElementRef;
@@ -42,8 +55,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   private observer?: ResizeObserver;
   private readonly gutterSizePx = 10;
   private readonly numColumns = signal(3);
-
-  readonly columnWidth = signal(200);
+  private readonly columnWidth = signal(200);
 
   readonly masonryOptions = computed(() => {
     return {
@@ -53,10 +65,23 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     };
   });
 
-  private maxMediaItemIds = signal(PAGE_SIZE);
+  constructor() {
+    effect(() => {
+      this.componentStore.loadInitialPage({
+        albumId: this.albumId(),
+        pageSize: DEFAULT_PAGE_SIZE,
+      });
+    });
+  }
 
-  readonly paginatedMediaItemIds = computed(() => {
-    return this.mediaItemIds().slice(0, this.maxMediaItemIds());
+  readonly images = computed(() => {
+    return this.componentStore.mediaItems().map((mediaItem) => ({
+      id: mediaItem.id,
+      gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
+      fileName: mediaItem.fileName,
+      width: this.columnWidth(),
+      height: this.columnWidth(),
+    }));
   });
 
   ngAfterViewInit() {
@@ -83,14 +108,10 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  imageSizesChanged() {
-    this.ngxMasonryComponent?.layout();
-  }
-
-  getMoreMediaItemIds() {
-    this.maxMediaItemIds.set(this.maxMediaItemIds() + PAGE_SIZE);
-    this.ngxMasonryComponent?.reloadItems();
-    this.ngxMasonryComponent?.layout();
+  loadMoreMediaItems() {
+    this.componentStore.loadMoreMediaItems({
+      pageSize: DEFAULT_PAGE_SIZE,
+    });
   }
 
   ngOnDestroy(): void {
