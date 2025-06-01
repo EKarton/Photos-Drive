@@ -7,6 +7,11 @@ export type AlbumId = {
   objectId: string;
 };
 
+/** Converts an {@code AlbumId} to string form stored in the database. */
+export function albumIdToString(albumId: AlbumId): string {
+  return `${albumId.clientId}:${albumId.objectId}`;
+}
+
 /** Converts a raw-value string from database to album ID. */
 export function convertStringToAlbumId(value: string): AlbumId {
   const parts = value.split(':');
