@@ -18,6 +18,7 @@ import {
   SortByField
 } from '../services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/MongoDbClientsRepository';
+import parseEnumOrElse from '../utils/parseEnumOrElse';
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -84,33 +85,20 @@ export default async function (
       const sortBy = req.query['sortBy'];
       const sortDir = req.query['sortDir'];
 
-      try {
-        const response = await mediaItemsRepo.listMediaItemsInAlbum({
-          albumId: convertStringToAlbumId(albumId),
-          pageSize: !isNaN(pageSize) ? pageSize : 25,
-          pageToken,
-          sortBy:
-            sortBy && sortDir
-              ? {
-                  field: SortByField.ID,
-                  direction:
-                    sortDir === 'asc'
-                      ? SortByDirection.ASCENDING
-                      : SortByDirection.DESCENDING
-                }
-              : undefined
-        });
-        return res.status(200).json(response);
-      } catch (error) {
-        if (error instanceof MongoDbClientNotFoundError) {
-          return res.status(404).json({ error: 'Album not found' });
+      const response = await mediaItemsRepo.listMediaItemsInAlbum({
+        albumId: convertStringToAlbumId(albumId),
+        pageSize: !isNaN(pageSize) ? pageSize : 25,
+        pageToken,
+        sortBy: {
+          field: parseEnumOrElse(SortByField, sortBy, SortByField.ID),
+          direction: parseEnumOrElse(
+            SortByDirection,
+            sortDir,
+            SortByDirection.ASCENDING
+          )
         }
-        if (error instanceof AlbumNotFoundError) {
-          return res.status(404).json({ error: 'Album not found' });
-        }
-
-        throw error;
-      }
+      });
+      return res.status(200).json(response);
     })
   );
 

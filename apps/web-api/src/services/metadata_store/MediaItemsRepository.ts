@@ -37,7 +37,7 @@ export interface ListMediaItemsRequest {
   albumId: AlbumId;
   pageSize: number;
   pageToken?: string;
-  sortBy?: SortBy;
+  sortBy: SortBy;
 }
 
 /** Response for {@code MediaItemsRepository.listMediaItems} */
@@ -128,18 +128,16 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
         }
 
         const sortObj: Sort = {};
-        if (req.sortBy) {
-          const mongoSortDirection =
-            req.sortBy.direction === SortByDirection.ASCENDING ? 1 : -1;
+        const mongoSortDirection =
+          req.sortBy.direction === SortByDirection.ASCENDING ? 1 : -1;
 
-          switch (req.sortBy.field) {
-            case SortByField.ID: {
-              sortObj['_id'] = mongoSortDirection;
-              break;
-            }
-            default:
-              throw Error(`Unhandled sortBy field: ${req.sortBy.field}`);
+        switch (req.sortBy.field) {
+          case SortByField.ID: {
+            sortObj['_id'] = mongoSortDirection;
+            break;
           }
+          default:
+            throw Error(`Unhandled sortBy field: ${req.sortBy.field}`);
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
@@ -214,14 +212,12 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
   }
 }
 
+/** Returns -1 if a should go before b; else 1 based on {@code SortBy} */
 export function sortMediaItem(
   a: MediaItem,
   b: MediaItem,
-  sortBy?: SortBy
+  sortBy: SortBy
 ): number {
-  if (sortBy === undefined) {
-    return 0;
-  }
   switch (sortBy.field) {
     case SortByField.ID:
       if (sortBy.direction === SortByDirection.ASCENDING) {

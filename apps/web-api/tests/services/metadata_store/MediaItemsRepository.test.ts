@@ -340,20 +340,6 @@ describe('MediaItemsRepositoryImpl', () => {
       expect(clientIds.has('client1')).toBe(true);
       expect(clientIds.has('client2')).toBe(true);
     });
-
-    it('returns media items when sortBy is not provided', async () => {
-      const res = await mediaItemsRepo.listMediaItemsInAlbum({
-        albumId,
-        pageSize: 10
-      });
-
-      // Default order (likely _id descending, meaning newest inserted first)
-      expect(res.mediaItems.map((m) => m.file_name)).toEqual([
-        'a.jpg',
-        'b.jpg',
-        'c.jpg'
-      ]);
-    });
   });
 });
 
@@ -373,13 +359,6 @@ describe('sortMediaItem', () => {
       album_id: albumId
     };
   }
-
-  it('returns 0 when sortBy is undefined', () => {
-    const a = createMediaItem('clientA', 'obj1');
-    const b = createMediaItem('clientB', 'obj2');
-
-    expect(sortMediaItem(a, b, undefined)).toBe(0);
-  });
 
   describe('sorting by ID ascending', () => {
     const sortBy: SortBy = {
