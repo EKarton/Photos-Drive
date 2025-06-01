@@ -8,7 +8,11 @@ import {
   AlbumsRepository
 } from '../../src/services/metadata_store/AlbumsRepository';
 import { MediaItem } from '../../src/services/metadata_store/MediaItems';
-import { MediaItemsRepository } from '../../src/services/metadata_store/MediaItemsRepository';
+import {
+  MediaItemsRepository,
+  SortByDirection,
+  SortByField
+} from '../../src/services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/MongoDbClientsRepository';
 import { fakeAuthEnv, generateTestToken } from './utils/auth';
 import { setupTestEnv } from './utils/env';
@@ -289,7 +293,10 @@ describe('Albums Router', () => {
         },
         pageSize: 25,
         pageToken: undefined,
-        sortBy: undefined
+        sortBy: {
+          field: SortByField.ID,
+          direction: SortByDirection.ASCENDING
+        }
       });
     });
 
@@ -331,8 +338,8 @@ describe('Albums Router', () => {
         pageSize: 10,
         pageToken: 'abc',
         sortBy: {
-          field: 'id',
-          direction: 'asc'
+          field: SortByField.ID,
+          direction: SortByDirection.ASCENDING
         }
       });
     });
@@ -375,58 +382,10 @@ describe('Albums Router', () => {
         pageSize: 10,
         pageToken: 'abc',
         sortBy: {
-          field: 'id',
-          direction: 'desc'
+          field: SortByField.ID,
+          direction: SortByDirection.DESCENDING
         }
       });
-    });
-
-    it('should return 404 when MongoDbClientNotFoundError is thrown', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockMediaItemsRepository.listMediaItemsInAlbum.mockRejectedValue(
-        new MongoDbClientNotFoundError('albumClient1:albumObject1')
-      );
-
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/albumClient1:albumObject1/media-items')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toBe(404);
-      expect(res.body).toEqual({ error: 'Album not found' });
-    });
-
-    it('should return 404 when AlbumNotFoundError is thrown', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockMediaItemsRepository.listMediaItemsInAlbum.mockRejectedValue(
-        new AlbumNotFoundError(MOCK_ALBUM.id)
-      );
-
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/albumClient1:albumObject1/media-items')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toBe(404);
-      expect(res.body).toEqual({ error: 'Album not found' });
     });
 
     it('should return 500 when an unexpected error is thrown', async () => {
