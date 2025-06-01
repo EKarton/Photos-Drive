@@ -178,17 +178,7 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
       .map((page) => page.mediaItems)
       .flat()
       .sort((a: MediaItem, b: MediaItem) => {
-        if (req.sortBy === undefined) {
-          return 0;
-        }
-        switch (req.sortBy.field) {
-          case SortByField.ID:
-            if (req.sortBy.direction === SortByDirection.ASCENDING) {
-              return a.id < b.id ? -1 : 1;
-            } else {
-              return a.id > b.id ? -1 : 1;
-            }
-        }
+        return sortMediaItem(a, b, req.sortBy);
       });
 
     return {
@@ -221,6 +211,24 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
     }
 
     return mediaItem;
+  }
+}
+
+export function sortMediaItem(
+  a: MediaItem,
+  b: MediaItem,
+  sortBy?: SortBy
+): number {
+  if (sortBy === undefined) {
+    return 0;
+  }
+  switch (sortBy.field) {
+    case SortByField.ID:
+      if (sortBy.direction === SortByDirection.ASCENDING) {
+        return mediaIdToString(a.id) < mediaIdToString(b.id) ? -1 : 1;
+      } else {
+        return mediaIdToString(a.id) > mediaIdToString(b.id) ? -1 : 1;
+      }
   }
 }
 

@@ -2,12 +2,17 @@ import { mock } from 'jest-mock-extended';
 import { MongoClient, ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { AlbumId } from '../../../src/services/metadata_store/Albums';
-import { MediaItemId } from '../../../src/services/metadata_store/MediaItems';
+import {
+  MediaItem,
+  MediaItemId
+} from '../../../src/services/metadata_store/MediaItems';
 import {
   MediaItemNotFoundError,
   MediaItemsRepositoryImpl,
+  SortBy,
   SortByDirection,
-  SortByField
+  SortByField,
+  sortMediaItem
 } from '../../../src/services/metadata_store/MediaItemsRepository';
 import { MongoDbClientsRepository } from '../../../src/services/metadata_store/MongoDbClientsRepository';
 
@@ -314,7 +319,7 @@ describe('MediaItemsRepositoryImpl', () => {
       ).rejects.toThrow('Unhandled sortBy field: invalid');
     });
 
-    it('returns merged results from multiple clients', async () => {
+    it('returns merged results in sorted order from multiple clients', async () => {
       // Simulate same data under two clients
       mockMongoDbClientsRepository.listClients.mockReturnValue([
         ['client1', mongoClient],
@@ -326,7 +331,7 @@ describe('MediaItemsRepositoryImpl', () => {
         pageSize: 10,
         sortBy: {
           field: SortByField.ID,
-          direction: SortByDirection.ASCENDING
+          direction: SortByDirection.DESCENDING
         }
       });
 
@@ -348,6 +353,76 @@ describe('MediaItemsRepositoryImpl', () => {
         'b.jpg',
         'c.jpg'
       ]);
+    });
+  });
+});
+
+describe('sortMediaItem', () => {
+  const albumId: AlbumId = {
+    clientId: 'albumClient1',
+    objectId: 'albumObject1'
+  };
+
+  // Helper to create MediaItem with a given id string
+  function createMediaItem(clientId: string, objectId: string): MediaItem {
+    return {
+      id: { clientId, objectId },
+      file_name: 'file.jpg',
+      gphotos_client_id: 'gphotos_client',
+      gphotos_media_item_id: 'gphotos_media_id',
+      album_id: albumId
+    };
+  }
+
+  it('returns 0 when sortBy is undefined', () => {
+    const a = createMediaItem('clientA', 'obj1');
+    const b = createMediaItem('clientB', 'obj2');
+
+    expect(sortMediaItem(a, b, undefined)).toBe(0);
+  });
+
+  describe('sorting by ID ascending', () => {
+    const sortBy: SortBy = {
+      field: SortByField.ID,
+      direction: SortByDirection.ASCENDING
+    };
+
+    it('returns -1 if a.id < b.id', () => {
+      const a = createMediaItem('clientA', 'obj1');
+      const b = createMediaItem('clientB', 'obj2');
+      // Compare string versions: "clientA:obj1" < "clientB:obj2"?
+
+      // Since 'clientA:obj1' < 'clientB:obj2' lex order, expect -1
+      expect(sortMediaItem(a, b, sortBy)).toBe(-1);
+    });
+
+    it('returns 1 if a.id > b.id', () => {
+      const a = createMediaItem('clientC', 'obj9');
+      const b = createMediaItem('clientB', 'obj2');
+      // "clientC:obj9" > "clientB:obj2" lex order, expect 1
+      expect(sortMediaItem(a, b, sortBy)).toBe(1);
+    });
+  });
+
+  describe('sorting by ID descending', () => {
+    const sortBy: SortBy = {
+      field: SortByField.ID,
+      direction: SortByDirection.DESCENDING
+    };
+
+    it('returns -1 if a.id > b.id', () => {
+      const a = createMediaItem('clientC', 'obj9');
+      const b = createMediaItem('clientB', 'obj2');
+      // Descending means reversed logic:
+      // if a.id > b.id => return -1
+      expect(sortMediaItem(a, b, sortBy)).toBe(-1);
+    });
+
+    it('returns 1 if a.id < b.id', () => {
+      const a = createMediaItem('clientA', 'obj1');
+      const b = createMediaItem('clientB', 'obj2');
+      // Descending means if a.id < b.id => return 1
+      expect(sortMediaItem(a, b, sortBy)).toBe(1);
     });
   });
 });
