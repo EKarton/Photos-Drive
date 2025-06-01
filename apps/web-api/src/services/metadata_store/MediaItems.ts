@@ -9,6 +9,11 @@ export type MediaItemId = {
   objectId: string;
 };
 
+/** Converts a {@code MediaItemId} to a string. */
+export function mediaIdToString(mediaId: MediaItemId): string {
+  return `${mediaId.clientId}:${mediaId.objectId}`;
+}
+
 /** Converts a raw-value string from database to album ID. */
 export function convertStringToMediaItemId(value: string): MediaItemId {
   const parts = value.split(':');
