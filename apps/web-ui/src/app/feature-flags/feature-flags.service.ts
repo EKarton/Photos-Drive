@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NavigationEnd, ParamMap, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 /** Defines all of the feature flags. */
@@ -40,7 +40,7 @@ export class FeatureFlagsService {
     return this.flags.get(flag) === true;
   }
 
-  getFlagsObservable() {
-    return this.flags$.asObservable();
+  isEnabled$(flag: FeatureFlags): Observable<boolean> {
+    return this.flags$.pipe(map((flags) => flags.get(flag) === true));
   }
 }
