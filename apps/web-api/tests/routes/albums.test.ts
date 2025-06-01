@@ -252,4 +252,204 @@ describe('Albums Router', () => {
       );
     });
   });
+
+  describe('GET api/v1/albums/:albumId/media-items', () => {
+    it('should return 200 with default pageSize and no sort when query params are missing', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockMediaItemsRepository.listMediaItemsInAlbum.mockResolvedValue({
+        mediaItems: MOCK_MEDIA_ITEMS,
+        nextPageToken: undefined
+      });
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1/media-items')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        mediaItems: MOCK_MEDIA_ITEMS,
+        nextPageToken: undefined
+      });
+      expect(
+        mockMediaItemsRepository.listMediaItemsInAlbum
+      ).toHaveBeenCalledWith({
+        albumId: {
+          clientId: 'albumClient1',
+          objectId: 'albumObject1'
+        },
+        pageSize: 25,
+        pageToken: undefined,
+        sortBy: undefined
+      });
+    });
+
+    it('should return 200 with pageToken, sortBy=id, and sortDir=asc', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockMediaItemsRepository.listMediaItemsInAlbum.mockResolvedValue({
+        mediaItems: [],
+        nextPageToken: 'next-token'
+      });
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get(
+          '/api/v1/albums/albumClient1:albumObject1/media-items?pageSize=10&pageToken=abc&sortBy=id&sortDir=asc'
+        )
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        mediaItems: [],
+        nextPageToken: 'next-token'
+      });
+      expect(
+        mockMediaItemsRepository.listMediaItemsInAlbum
+      ).toHaveBeenCalledWith({
+        albumId: {
+          clientId: 'albumClient1',
+          objectId: 'albumObject1'
+        },
+        pageSize: 10,
+        pageToken: 'abc',
+        sortBy: {
+          field: 'id',
+          direction: 'asc'
+        }
+      });
+    });
+
+    it('should return 200 with pageToken, sortBy=id, and sortDir=desc', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockMediaItemsRepository.listMediaItemsInAlbum.mockResolvedValue({
+        mediaItems: [],
+        nextPageToken: 'next-token'
+      });
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get(
+          '/api/v1/albums/albumClient1:albumObject1/media-items?pageSize=10&pageToken=abc&sortBy=id&sortDir=desc'
+        )
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        mediaItems: [],
+        nextPageToken: 'next-token'
+      });
+      expect(
+        mockMediaItemsRepository.listMediaItemsInAlbum
+      ).toHaveBeenCalledWith({
+        albumId: {
+          clientId: 'albumClient1',
+          objectId: 'albumObject1'
+        },
+        pageSize: 10,
+        pageToken: 'abc',
+        sortBy: {
+          field: 'id',
+          direction: 'desc'
+        }
+      });
+    });
+
+    it('should return 404 when MongoDbClientNotFoundError is thrown', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockMediaItemsRepository.listMediaItemsInAlbum.mockRejectedValue(
+        new MongoDbClientNotFoundError('albumClient1:albumObject1')
+      );
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1/media-items')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body).toEqual({ error: 'Album not found' });
+    });
+
+    it('should return 404 when AlbumNotFoundError is thrown', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockMediaItemsRepository.listMediaItemsInAlbum.mockRejectedValue(
+        new AlbumNotFoundError(MOCK_ALBUM.id)
+      );
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1/media-items')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body).toEqual({ error: 'Album not found' });
+    });
+
+    it('should return 500 when an unexpected error is thrown', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockMediaItemsRepository.listMediaItemsInAlbum.mockRejectedValue(
+        new Error('Something went wrong')
+      );
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1/media-items')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(500);
+    });
+  });
 });

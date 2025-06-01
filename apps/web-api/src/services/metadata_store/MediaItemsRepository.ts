@@ -9,6 +9,7 @@ import logger from '../../utils/logger';
 import { AlbumId, albumIdToString, convertStringToAlbumId } from './Albums';
 import {
   convertStringToMediaItemId,
+  mediaIdToString,
   MediaItem,
   MediaItemId
 } from './MediaItems';
@@ -35,7 +36,7 @@ export interface SortBy {
 export interface ListMediaItemsRequest {
   albumId: AlbumId;
   pageSize: number;
-  pageToken: string;
+  pageToken?: string;
   sortBy?: SortBy;
 }
 
@@ -114,70 +115,69 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
       })
     );
 
-    const clientIdToNextPageToken = new Map<string, string>();
-    const totalMediaItems: MediaItem[] = [];
-
-    for (const [clientId, mongoClient] of clientIdToMongoClient) {
-      logger.debug(`Album ID: ${albumIdToString(req.albumId)}`);
-      const filterObj: Filter<MongoDbDocument> = {
-        album_id: albumIdToString(req.albumId)
-      };
-      if (clientIdToPageToken.has(clientId)) {
-        filterObj['_id'] = {
-          $gt: clientIdToPageToken.get(clientId)
+    const pages: ListMediaItemsResponse[] = await Promise.all(
+      Array.from(clientIdToMongoClient).map(async ([clientId, mongoClient]) => {
+        logger.debug(`Album ID: ${albumIdToString(req.albumId)}`);
+        const filterObj: Filter<MongoDbDocument> = {
+          album_id: albumIdToString(req.albumId)
         };
-      }
-
-      const sortObj: Sort = {};
-      if (req.sortBy) {
-        const mongoSortDirection =
-          req.sortBy.direction === SortByDirection.ASCENDING ? 1 : -1;
-
-        switch (req.sortBy.field) {
-          case SortByField.ID: {
-            sortObj['_id'] = mongoSortDirection;
-            break;
-          }
-          default:
-            throw Error(`Unhandled sortBy field: ${req.sortBy.field}`);
+        if (clientIdToPageToken.has(clientId)) {
+          filterObj['_id'] = {
+            $gt: clientIdToPageToken.get(clientId)
+          };
         }
-      }
 
-      logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
-      logger.debug(`Sort object: ${JSON.stringify(sortObj)}`);
-      logger.debug(`Limit size: ${req.pageSize}`);
+        const sortObj: Sort = {};
+        if (req.sortBy) {
+          const mongoSortDirection =
+            req.sortBy.direction === SortByDirection.ASCENDING ? 1 : -1;
 
-      const rawDocs = await mongoClient
-        .db('sharded_google_photos')
-        .collection('media_items')
-        .find(filterObj)
-        .sort(sortObj)
-        .limit(req.pageSize)
-        .toArray();
+          switch (req.sortBy.field) {
+            case SortByField.ID: {
+              sortObj['_id'] = mongoSortDirection;
+              break;
+            }
+            default:
+              throw Error(`Unhandled sortBy field: ${req.sortBy.field}`);
+          }
+        }
 
-      logger.debug('I am here');
+        logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
+        logger.debug(`Sort object: ${JSON.stringify(sortObj)}`);
+        logger.debug(`Limit size: ${req.pageSize}`);
 
-      const mediaItems = rawDocs.map((rawDoc) => {
-        const mediaItemId: MediaItemId = {
-          clientId: clientId,
-          objectId: rawDoc._id.toString()
+        const rawDocs = await mongoClient
+          .db('sharded_google_photos')
+          .collection('media_items')
+          .find(filterObj)
+          .sort(sortObj)
+          .limit(req.pageSize)
+          .toArray();
+
+        const mediaItems = rawDocs.map((rawDoc) => {
+          const mediaItemId: MediaItemId = {
+            clientId: clientId,
+            objectId: rawDoc._id.toString()
+          };
+          return this.convertMongoDbDocToMediaItemInstance(mediaItemId, rawDoc);
+        });
+
+        logger.debug(`Num MediaItems: ${mediaItems.length}`);
+
+        return {
+          mediaItems,
+          nextPageToken:
+            mediaItems.length > 0
+              ? mediaIdToString(mediaItems[mediaItems.length - 1].id)
+              : undefined
         };
-        return this.convertMongoDbDocToMediaItemInstance(mediaItemId, rawDoc);
-      });
+      })
+    );
 
-      logger.debug(`MediaItems: ${mediaItems}`);
-
-      if (mediaItems.length > 0) {
-        totalMediaItems.push(...mediaItems);
-        clientIdToNextPageToken.set(
-          clientId,
-          mediaItems[mediaItems.length - 1].id.objectId
-        );
-      }
-    }
-
-    const sortedMediaItems = totalMediaItems.sort(
-      (a: MediaItem, b: MediaItem) => {
+    const sortedMediaItems = pages
+      .map((page) => page.mediaItems)
+      .flat()
+      .sort((a: MediaItem, b: MediaItem) => {
         if (req.sortBy === undefined) {
           return 0;
         }
@@ -188,19 +188,16 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
             } else {
               return a.id > b.id ? -1 : 1;
             }
-          default:
-            throw Error(`Unhandled sortBy field: ${req.sortBy.field}`);
         }
-      }
-    );
-
-    const nextPageToken = Array.from(clientIdToNextPageToken)
-      .map(([key, value]) => `${key}:${value}`)
-      .join(',');
+      });
 
     return {
       mediaItems: sortedMediaItems,
-      nextPageToken: nextPageToken.length > 0 ? nextPageToken : undefined
+      nextPageToken:
+        pages
+          .map((page) => page.nextPageToken)
+          .filter((nextToken) => nextToken)
+          .join(',') || undefined
     };
   }
 
