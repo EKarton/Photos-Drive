@@ -81,14 +81,13 @@ describe('webApiHttpCacheInterceptor', () => {
   });
 
   it('should skip caching for URLs outside webApiEndpoint', (done) => {
-    httpClient.get('https://other.com/api/data').subscribe((res) => {
+    const testUrl = 'https://other.com/api/data';
+    httpClient.get(testUrl).subscribe((res) => {
       expect(res).toEqual('My data');
-      expect(mockCacheService.get).toHaveBeenCalledWith(
-        'https://other.com/api/data',
-      );
-      expect(mockCacheService.set).toHaveBeenCalledTimes(0);
+      expect(mockCacheService.get).not.toHaveBeenCalled();
+      expect(mockCacheService.set).not.toHaveBeenCalled();
       done();
     });
-    httpMock.expectOne('https://other.com/api/data').flush('My data');
+    httpMock.expectOne(testUrl).flush('My data');
   });
 });
