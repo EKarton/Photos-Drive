@@ -26,6 +26,7 @@ describe('webApiHttpCacheInterceptor', () => {
       'HttpCacheService',
       ['get', 'set'],
     );
+    environment.webApiEndpoint = 'http://localhost:3000';
 
     TestBed.configureTestingModule({
       providers: [
@@ -37,6 +38,10 @@ describe('webApiHttpCacheInterceptor', () => {
 
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should return cached response if available', (done) => {
