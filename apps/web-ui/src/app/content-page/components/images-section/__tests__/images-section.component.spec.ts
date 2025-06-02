@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import { WINDOW } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
+import { toSuccess } from '../../../../shared/results/results';
 import {
   ListMediaItemsInAlbumResponse,
   WebApiService,
@@ -36,7 +37,7 @@ describe('ImagesSectionComponent', () => {
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
-      'listMediaItemsInAlbum',
+      'listMediaItems',
     ]);
 
     await TestBed.configureTestingModule({
@@ -67,7 +68,7 @@ describe('ImagesSectionComponent', () => {
   });
 
   it('should render images given album, media items, and gphotos media items have loaded yet', () => {
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(PAGE_1));
+    mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
 
     const fixture = TestBed.createComponent(ImagesSectionComponent);
     fixture.componentRef.setInput('albumId', 'album1');

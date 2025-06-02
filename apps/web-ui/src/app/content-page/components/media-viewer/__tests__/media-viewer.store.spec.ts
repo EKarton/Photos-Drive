@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
 import {
   GPhotosMediaItem,
+  GPhotosMediaItemDetailsApiResponse,
   MediaItem,
+  MediaItemDetailsApiResponse,
   WebApiService,
 } from '../../../services/webapi.service';
 import { INITIAL_STATE, MediaViewerStore } from '../media-viewer.store';
@@ -40,8 +42,8 @@ describe('MediaViewerStore', () => {
 
   beforeEach(() => {
     const webApiSpy = jasmine.createSpyObj('WebApiService', [
-      'fetchMediaItemDetails',
-      'fetchGPhotosMediaItemDetails',
+      'getMediaItem',
+      'getGPhotosMediaItem',
     ]);
 
     TestBed.configureTestingModule({
@@ -71,22 +73,22 @@ describe('MediaViewerStore', () => {
   });
 
   it('should load media and gPhotos item details successfully', () => {
-    webApiService.fetchMediaItemDetails.and.returnValue(
-      of(fakeMediaItemDetails),
+    webApiService.getMediaItem.and.returnValue(
+      of(toSuccess(fakeMediaItemDetails)),
     );
-    webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(fakeGPhotosDetails),
+    webApiService.getGPhotosMediaItem.and.returnValue(
+      of(toSuccess(fakeGPhotosDetails)),
     );
 
     store.loadDetails(fakeMediaItemId);
 
     expect(store.mediaItemResult()).toEqual(toSuccess(fakeMediaItemDetails));
     expect(store.gMediaItemResult()).toEqual(toSuccess(fakeGPhotosDetails));
-    expect(webApiService.fetchMediaItemDetails).toHaveBeenCalledWith(
+    expect(webApiService.getMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
       fakeMediaItemId,
     );
-    expect(webApiService.fetchGPhotosMediaItemDetails).toHaveBeenCalledWith(
+    expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
       'gPhotosClientId1:gPhotosMediaItem1',
     );
@@ -94,8 +96,8 @@ describe('MediaViewerStore', () => {
 
   it('should handle error when first API call throws an error', () => {
     const error = new Error('API fail');
-    webApiService.fetchMediaItemDetails.and.returnValue(
-      throwError(() => error),
+    webApiService.getMediaItem.and.returnValue(
+      of(toFailure<MediaItemDetailsApiResponse>(error)),
     );
 
     store.loadDetails(fakeMediaItemId);
@@ -106,15 +108,15 @@ describe('MediaViewerStore', () => {
 
   it('should handle error when second API call throws an error', () => {
     const error = new Error('gPhotos fail');
-
-    webApiService.fetchMediaItemDetails.and.returnValue(
-      of(fakeMediaItemDetails),
+    webApiService.getMediaItem.and.returnValue(
+      of(toSuccess(fakeMediaItemDetails)),
     );
-    webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      throwError(() => error),
+    webApiService.getGPhotosMediaItem.and.returnValue(
+      of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
     );
 
     store.loadDetails(fakeMediaItemId);
+
     expect(store.mediaItemResult()).toEqual(toSuccess(fakeMediaItemDetails));
     expect(store.gMediaItemResult()).toEqual(toFailure(error));
   });

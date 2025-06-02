@@ -4,11 +4,7 @@ import { Store } from '@ngrx/store';
 import { distinct, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { authState } from '../../../auth/store';
-import { toResult } from '../../../shared/results/rxjs/toResult';
-import {
-  AlbumDetailsApiResponse,
-  WebApiService,
-} from '../../services/webapi.service';
+import { WebApiService } from '../../services/webapi.service';
 import * as albumsActions from './albums.actions';
 
 @Injectable()
@@ -25,9 +21,8 @@ export class AlbumsEffects {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
             return this.webApiService
-              .fetchAlbumDetails(accessToken, albumId)
+              .getAlbum(accessToken, albumId)
               .pipe(
-                toResult<AlbumDetailsApiResponse>(),
                 map((result) =>
                   albumsActions.loadAlbumDetailsResult({ albumId, result }),
                 ),

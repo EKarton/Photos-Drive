@@ -6,7 +6,6 @@ import { switchMap, tap } from 'rxjs/operators';
 import { authState } from '../../../auth/store';
 import { Result, toPending } from '../../../shared/results/results';
 import { switchMapResultToResultRxJs } from '../../../shared/results/rxjs/switchMapResultToResultRxJs';
-import { toResult } from '../../../shared/results/rxjs/toResult';
 import {
   GPhotosMediaItem,
   GPhotosMediaItemDetailsApiResponse,
@@ -78,20 +77,18 @@ export class MediaViewerStore extends ComponentStore<MediaViewerState> {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
             return this.webApiService
-              .fetchMediaItemDetails(accessToken, mediaItemId)
+              .getMediaItem(accessToken, mediaItemId)
               .pipe(
-                toResult<MediaItemDetailsApiResponse>(),
                 tap((mediaItemResult) =>
                   this.setMediaItemResult(mediaItemResult),
                 ),
                 switchMapResultToResultRxJs((mediaItem) => {
                   return this.webApiService
-                    .fetchGPhotosMediaItemDetails(
+                    .getGPhotosMediaItem(
                       accessToken,
                       mediaItem.gPhotosMediaItemId,
                     )
                     .pipe(
-                      toResult<GPhotosMediaItemDetailsApiResponse>(),
                       tap((gMediaItemResult) =>
                         this.setGMediaItemResult(gMediaItemResult),
                       ),
