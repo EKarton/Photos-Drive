@@ -14,6 +14,7 @@ import { routes } from './app.routes';
 import { AuthEffects } from './auth/store/auth.effects';
 import { authFeature } from './auth/store/auth.reducer';
 import { webApiAuthRequestInterceptor } from './content-page/interceptors/webapi-auth-request.interceptor';
+import { webApiHttpCacheInterceptor } from './content-page/interceptors/webapi-cache.interceptor';
 import { AlbumsEffects } from './content-page/store/albums/albums.effects';
 import { albumsFeature } from './content-page/store/albums/albums.reducer';
 import { mediaViewerFeature } from './content-page/store/media-viewer/media-viewer.reducer';
@@ -23,7 +24,12 @@ import { themeFeature } from './themes/store/theme.reducer';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
-    provideHttpClient(withInterceptors([webApiAuthRequestInterceptor])),
+    provideHttpClient(
+      withInterceptors([
+        webApiAuthRequestInterceptor,
+        webApiHttpCacheInterceptor,
+      ]),
+    ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideStore({}),
