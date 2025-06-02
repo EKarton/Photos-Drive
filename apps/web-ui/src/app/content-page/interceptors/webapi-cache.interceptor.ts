@@ -28,7 +28,7 @@ export const webApiHttpCacheInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     tap((event) => {
       if (event instanceof HttpResponse) {
-        const ttl = getTTLForUrl(req.urlWithParams);
+        const ttl = getTTLForUrl();
         cacheService.set(req.urlWithParams, event, ttl);
       }
     }),
@@ -36,8 +36,6 @@ export const webApiHttpCacheInterceptor: HttpInterceptorFn = (req, next) => {
 };
 
 // TTL logic — customize this per endpoint
-function getTTLForUrl(url: string): number {
-  if (url.includes('/api/v1/albums')) return 10 * 60 * 1000; // 10 min
-  if (url.includes('/api/v1/config')) return 60 * 60 * 1000; // 1 hour
-  return 5 * 60 * 1000; // default: 5 min
+function getTTLForUrl(): number {
+  return 60 * 60 * 1000;
 }

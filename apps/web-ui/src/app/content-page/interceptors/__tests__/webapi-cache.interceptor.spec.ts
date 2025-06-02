@@ -1,6 +1,5 @@
 import {
   HttpClient,
-  HttpRequest,
   HttpResponse,
   provideHttpClient,
   withInterceptors,
@@ -21,10 +20,6 @@ describe('webApiHttpCacheInterceptor', () => {
   let httpMock: HttpTestingController;
 
   const testUrl = `${environment.webApiEndpoint}/api/v1/albums/123/media-items`;
-  const mockResponse = new HttpResponse({
-    body: { message: 'ok' },
-    status: 200,
-  });
 
   beforeEach(() => {
     mockCacheService = jasmine.createSpyObj<HttpCacheService>(
@@ -45,10 +40,15 @@ describe('webApiHttpCacheInterceptor', () => {
   });
 
   it('should return cached response if available', (done) => {
-    mockCacheService.get.and.returnValue(mockResponse);
+    mockCacheService.get.and.returnValue(
+      new HttpResponse({
+        body: 'My data',
+        status: 200,
+      }),
+    );
 
     httpClient.get(testUrl).subscribe((res) => {
-      expect(res).toEqual(mockResponse);
+      expect(res).toEqual('My data');
       expect(mockCacheService.get).toHaveBeenCalledWith(testUrl);
       done();
     });
@@ -58,49 +58,37 @@ describe('webApiHttpCacheInterceptor', () => {
     mockCacheService.get.and.returnValue(undefined);
 
     httpClient.get(testUrl).subscribe((res) => {
-      expect(res).toEqual(mockResponse);
+      expect(res).toEqual('My data');
       expect(mockCacheService.get).toHaveBeenCalledWith(testUrl);
       expect(mockCacheService.set).toHaveBeenCalledWith(
         testUrl,
         jasmine.any(HttpResponse),
-        10 * 60 * 1000,
+        60 * 60 * 1000,
       );
       done();
     });
-    httpMock.expectOne(testUrl).flush(mockResponse);
+    httpMock.expectOne(testUrl).flush('My data');
   });
 
   it('should skip caching for non-GET requests', (done) => {
     httpClient.post(testUrl, {}).subscribe((res) => {
-      expect(res).toBe(mockResponse);
+      expect(res).toEqual('My data');
       expect(mockCacheService.get).not.toHaveBeenCalled();
       expect(mockCacheService.set).not.toHaveBeenCalled();
       done();
     });
-    httpMock.expectOne(testUrl).flush(mockResponse);
+    httpMock.expectOne(testUrl).flush('My data');
   });
 
   it('should skip caching for URLs outside webApiEndpoint', (done) => {
-    httpClient.get(testUrl).subscribe((res) => {
-      expect(res).toBe(mockResponse);
-      expect(mockCacheService.get).not.toHaveBeenCalled();
-      expect(mockCacheService.set).not.toHaveBeenCalled();
-      done();
-    });
-    httpMock.expectOne(testUrl).flush(mockResponse);
-  });
-
-  it('should use correct TTL based on URL', (done) => {
-    mockCacheService.get.and.returnValue(undefined);
-
-    const configUrl = `${environment.webApiEndpoint}/api/v1/config`;
-    httpClient.get(configUrl).subscribe(() => {
-      expect(mockCacheService.set).toHaveBeenCalledWith(
-        configUrl,
-        jasmine.any(HttpResponse),
-        60 * 60 * 1000, // 1 hour
+    httpClient.get('https://other.com/api/data').subscribe((res) => {
+      expect(res).toEqual('My data');
+      expect(mockCacheService.get).toHaveBeenCalledWith(
+        'https://other.com/api/data',
       );
+      expect(mockCacheService.set).toHaveBeenCalledTimes(0);
       done();
     });
+    httpMock.expectOne(testUrl).flush('My data');
   });
 });
