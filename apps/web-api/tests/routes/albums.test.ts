@@ -281,7 +281,28 @@ describe('Albums Router', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
-        mediaItems: MOCK_MEDIA_ITEMS,
+        mediaItems: [
+          {
+            id: 'albumClient1:mediaItem1',
+            albumId: 'albumClient1:albumObject1',
+            fileName: 'dog.png',
+            gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+            location: {
+              latitude: 123,
+              longitude: 456
+            }
+          },
+          {
+            id: 'albumClient1:mediaItem2',
+            albumId: 'albumClient1:albumObject1',
+            fileName: 'cat.png',
+            gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+            location: {
+              latitude: 123,
+              longitude: 456
+            }
+          }
+        ],
         nextPageToken: undefined
       });
       expect(
