@@ -113,7 +113,9 @@
 
   <!-- Middle content -->
   @if (mediaDetails | isPending) {
-    <span class="modal-box loading loading-spinner loading-lg"></span>
+    <div class="modal-box w-auto h-auto bg-transparent shadow-none">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
   } @else if (mediaDetails | hasFailed) {
     <div class="modal-box p-0 m-0">
       <span data-testid="media-viewer-error"
