@@ -8,7 +8,7 @@ describe('HttpCacheService', () => {
 
   beforeEach(() => {
     service = new HttpCacheService();
-    service.clear(); // ensure clean state
+    service.clear();
   });
 
   function createResponse<T>(body: T): HttpResponse<T> {
