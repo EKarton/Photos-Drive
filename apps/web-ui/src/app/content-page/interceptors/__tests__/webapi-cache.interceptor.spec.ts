@@ -89,6 +89,6 @@ describe('webApiHttpCacheInterceptor', () => {
       expect(mockCacheService.set).toHaveBeenCalledTimes(0);
       done();
     });
-    httpMock.expectOne(testUrl).flush('My data');
+    httpMock.expectOne('https://other.com/api/data').flush('My data');
   });
 });
