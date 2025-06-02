@@ -77,14 +77,14 @@ export class MediaViewerStore extends ComponentStore<MediaViewerState> {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
             return this.webApiService
-              .fetchMediaItemDetails(accessToken, mediaItemId)
+              .getMediaItem(accessToken, mediaItemId)
               .pipe(
                 tap((mediaItemResult) =>
                   this.setMediaItemResult(mediaItemResult),
                 ),
                 switchMapResultToResultRxJs((mediaItem) => {
                   return this.webApiService
-                    .fetchGPhotosMediaItemDetails(
+                    .getGPhotosMediaItem(
                       accessToken,
                       mediaItem.gPhotosMediaItemId,
                     )

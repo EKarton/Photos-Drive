@@ -42,8 +42,8 @@ describe('MediaViewerStore', () => {
 
   beforeEach(() => {
     const webApiSpy = jasmine.createSpyObj('WebApiService', [
-      'fetchMediaItemDetails',
-      'fetchGPhotosMediaItemDetails',
+      'getMediaItem',
+      'getGPhotosMediaItem',
     ]);
 
     TestBed.configureTestingModule({
@@ -73,10 +73,10 @@ describe('MediaViewerStore', () => {
   });
 
   it('should load media and gPhotos item details successfully', () => {
-    webApiService.fetchMediaItemDetails.and.returnValue(
+    webApiService.getMediaItem.and.returnValue(
       of(toSuccess(fakeMediaItemDetails)),
     );
-    webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+    webApiService.getGPhotosMediaItem.and.returnValue(
       of(toSuccess(fakeGPhotosDetails)),
     );
 
@@ -84,11 +84,11 @@ describe('MediaViewerStore', () => {
 
     expect(store.mediaItemResult()).toEqual(toSuccess(fakeMediaItemDetails));
     expect(store.gMediaItemResult()).toEqual(toSuccess(fakeGPhotosDetails));
-    expect(webApiService.fetchMediaItemDetails).toHaveBeenCalledWith(
+    expect(webApiService.getMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
       fakeMediaItemId,
     );
-    expect(webApiService.fetchGPhotosMediaItemDetails).toHaveBeenCalledWith(
+    expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
       'gPhotosClientId1:gPhotosMediaItem1',
     );
@@ -96,7 +96,7 @@ describe('MediaViewerStore', () => {
 
   it('should handle error when first API call throws an error', () => {
     const error = new Error('API fail');
-    webApiService.fetchMediaItemDetails.and.returnValue(
+    webApiService.getMediaItem.and.returnValue(
       of(toFailure<MediaItemDetailsApiResponse>(error)),
     );
 
@@ -108,10 +108,10 @@ describe('MediaViewerStore', () => {
 
   it('should handle error when second API call throws an error', () => {
     const error = new Error('gPhotos fail');
-    webApiService.fetchMediaItemDetails.and.returnValue(
+    webApiService.getMediaItem.and.returnValue(
       of(toSuccess(fakeMediaItemDetails)),
     );
-    webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+    webApiService.getGPhotosMediaItem.and.returnValue(
       of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
     );
 

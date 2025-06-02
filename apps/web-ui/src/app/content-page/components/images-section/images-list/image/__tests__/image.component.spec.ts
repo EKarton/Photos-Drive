@@ -34,7 +34,7 @@ describe('ImageComponent', () => {
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
-      'fetchGPhotosMediaItemDetails',
+      'getGPhotosMediaItem',
     ]);
 
     await TestBed.configureTestingModule({
@@ -66,7 +66,7 @@ describe('ImageComponent', () => {
   });
 
   it('should render skeleton when media item is not loaded yet', () => {
-    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+    mockWebApiService.getGPhotosMediaItem.and.returnValue(
       of(toPending<GPhotosMediaItemDetailsApiResponse>()),
     );
 
@@ -85,7 +85,7 @@ describe('ImageComponent', () => {
   });
 
   it('should fetch gphotos media item and render image when it is in viewport', () => {
-    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+    mockWebApiService.getGPhotosMediaItem.and.returnValue(
       of(toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1)),
     );
     const fixture = TestBed.createComponent(ImageComponent);
@@ -99,7 +99,7 @@ describe('ImageComponent', () => {
     fixture.componentInstance.setIsInViewport(true);
     fixture.detectChanges();
 
-    expect(mockWebApiService.fetchGPhotosMediaItemDetails).toHaveBeenCalledWith(
+    expect(mockWebApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       'mockAccessToken',
       'gPhotos1',
     );
@@ -125,7 +125,7 @@ describe('ImageComponent', () => {
     },
   ].forEach(({ event }) => {
     it(`should dispatch request to open image in new tab when user emits event ${event} on image`, () => {
-      mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      mockWebApiService.getGPhotosMediaItem.and.returnValue(
         of(toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1)),
       );
       const fixture = TestBed.createComponent(ImageComponent);
@@ -161,7 +161,7 @@ describe('ImageComponent', () => {
     },
   ].forEach(({ event }) => {
     it(`should dispatch request to open media viewer when user emits ${event} on image`, () => {
-      mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      mockWebApiService.getGPhotosMediaItem.and.returnValue(
         of(toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1)),
       );
       const fixture = TestBed.createComponent(ImageComponent);

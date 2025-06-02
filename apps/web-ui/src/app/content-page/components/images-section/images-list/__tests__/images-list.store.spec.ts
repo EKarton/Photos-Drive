@@ -38,7 +38,7 @@ describe('ImagesListStore', () => {
 
   beforeEach(() => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
-      'listMediaItemsInAlbum',
+      'listMediaItems',
     ]);
 
     TestBed.configureTestingModule({
@@ -60,7 +60,7 @@ describe('ImagesListStore', () => {
   });
 
   it('should load initial page successfully', () => {
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+    mockWebApiService.listMediaItems.and.returnValue(
       of(toSuccess(dummyResponse)),
     );
 
@@ -70,7 +70,7 @@ describe('ImagesListStore', () => {
   });
 
   it('should reset state on failed initial load', () => {
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+    mockWebApiService.listMediaItems.and.returnValue(
       of(toFailure<ListMediaItemsInAlbumResponse>(new Error('API error'))),
     );
 
@@ -98,14 +98,10 @@ describe('ImagesListStore', () => {
     };
 
     // Set up initial state manually
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
-      of(toSuccess(firstPage)),
-    );
+    mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(firstPage)));
     store.loadInitialPage({ albumId: dummyAlbumId });
 
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
-      of(toSuccess(secondPage)),
-    );
+    mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(secondPage)));
     store.loadMoreMediaItems({});
 
     expect(store.mediaItems()).toEqual([
@@ -121,12 +117,10 @@ describe('ImagesListStore', () => {
     };
 
     // Set up initial state manually
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
-      of(toSuccess(firstPage)),
-    );
+    mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(firstPage)));
     store.loadInitialPage({ albumId: dummyAlbumId });
 
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+    mockWebApiService.listMediaItems.and.returnValue(
       of(toFailure<ListMediaItemsInAlbumResponse>(new Error('API Error'))),
     );
     store.loadMoreMediaItems({});
@@ -140,13 +134,11 @@ describe('ImagesListStore', () => {
       nextPageToken: undefined,
     };
 
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
-      of(toSuccess(firstPage)),
-    );
+    mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(firstPage)));
     store.loadInitialPage({ albumId: dummyAlbumId });
     store.loadMoreMediaItems({});
 
-    expect(mockWebApiService.listMediaItemsInAlbum).toHaveBeenCalledTimes(1);
+    expect(mockWebApiService.listMediaItems).toHaveBeenCalledTimes(1);
     expect(store.mediaItems()).toEqual(dummyMediaItems);
   });
 });

@@ -80,14 +80,14 @@ describe('ImagesListComponent', () => {
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
-      'listMediaItemsInAlbum',
-      'fetchGPhotosMediaItemDetails',
+      'listMediaItems',
+      'getGPhotosMediaItem',
     ]);
-    mockWebApiService.listMediaItemsInAlbum.and.returnValues(
+    mockWebApiService.listMediaItems.and.returnValues(
       of(toSuccess(PAGE_1)),
       of(toSuccess(PAGE_2)),
     );
-    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValues(
+    mockWebApiService.getGPhotosMediaItem.and.returnValues(
       of(toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_1)),
       of(toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_2)),
       of(toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_3)),

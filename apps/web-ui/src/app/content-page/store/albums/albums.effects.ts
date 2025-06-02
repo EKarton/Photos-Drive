@@ -21,7 +21,7 @@ export class AlbumsEffects {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
             return this.webApiService
-              .fetchAlbumDetails(accessToken, albumId)
+              .getAlbum(accessToken, albumId)
               .pipe(
                 map((result) =>
                   albumsActions.loadAlbumDetailsResult({ albumId, result }),

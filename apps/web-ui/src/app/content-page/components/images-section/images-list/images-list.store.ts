@@ -114,7 +114,7 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
               pageToken: undefined,
             };
             return this.webApiService
-              .listMediaItemsInAlbum(accessToken, apiRequest)
+              .listMediaItems(accessToken, apiRequest)
               .pipe(
                 tap((response) =>
                   this.setNewPage({ request: apiRequest, response }),
@@ -144,7 +144,7 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
                 pageToken: state.nextPageToken,
               };
               return this.webApiService
-                .listMediaItemsInAlbum(accessToken, apiRequest)
+                .listMediaItems(accessToken, apiRequest)
                 .pipe(tap((response) => this.appendMediaItems(response)));
             }),
           );

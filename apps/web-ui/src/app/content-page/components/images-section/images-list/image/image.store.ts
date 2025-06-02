@@ -60,7 +60,7 @@ export class ImageStore extends ComponentStore<ImageState> {
           return this.store.select(authState.selectAuthToken).pipe(
             switchMap((accessToken) => {
               return this.webApiService
-                .fetchGPhotosMediaItemDetails(accessToken, gPhotosMediaItemId)
+                .getGPhotosMediaItem(accessToken, gPhotosMediaItemId)
                 .pipe(tap((response) => this.setGPhotosMediaItem(response)));
             }),
           );

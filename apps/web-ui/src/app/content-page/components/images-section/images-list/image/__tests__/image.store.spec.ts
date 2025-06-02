@@ -29,7 +29,7 @@ describe('ImageStore', () => {
 
   beforeEach(() => {
     const webApiServiceSpy = jasmine.createSpyObj('WebApiService', [
-      'fetchGPhotosMediaItemDetails',
+      'getGPhotosMediaItem',
     ]);
 
     TestBed.configureTestingModule({
@@ -58,13 +58,13 @@ describe('ImageStore', () => {
   });
 
   it('should load and update state on success', () => {
-    webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+    webApiService.getGPhotosMediaItem.and.returnValue(
       of(toSuccess(gPhotosMediaItem)),
     );
 
     store.loadGPhotosMediaItemDetails(gPhotoId);
 
-    expect(webApiService.fetchGPhotosMediaItemDetails).toHaveBeenCalledWith(
+    expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
       gPhotoId,
     );
@@ -75,7 +75,7 @@ describe('ImageStore', () => {
 
   it('should update state to failure on API error', () => {
     const error = new Error('API failed');
-    webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+    webApiService.getGPhotosMediaItem.and.returnValue(
       of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
     );
 
@@ -96,7 +96,7 @@ describe('ImageStore', () => {
       },
     };
 
-    webApiService.fetchGPhotosMediaItemDetails.and.returnValues(
+    webApiService.getGPhotosMediaItem.and.returnValues(
       of(toSuccess(gPhotosMediaItem)),
       of(toSuccess(secondImage)),
     );

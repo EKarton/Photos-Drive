@@ -38,7 +38,7 @@ describe('WebApiService', () => {
     httpMock.verify();
   });
 
-  describe('fetchAlbumDetails()', () => {
+  describe('getAlbum()', () => {
     it('should fetch album details', () => {
       const albumId = 'album123';
       const mockResponse: AlbumDetailsApiResponse = {
@@ -48,11 +48,9 @@ describe('WebApiService', () => {
         mediaItemIds: ['media1', 'media2'],
       };
 
-      service
-        .fetchAlbumDetails('authToken123', albumId)
-        .subscribe((response) => {
-          expect(response).toEqual(toSuccess(mockResponse));
-        });
+      service.getAlbum('authToken123', albumId).subscribe((response) => {
+        expect(response).toEqual(toSuccess(mockResponse));
+      });
 
       const req = httpMock.expectOne(
         `${environment.webApiEndpoint}/api/v1/albums/${albumId}`,
@@ -65,7 +63,7 @@ describe('WebApiService', () => {
     });
   });
 
-  describe('fetchMediaItemDetails()', () => {
+  describe('getMediaItem()', () => {
     it('should fetch media item details', () => {
       const mediaItemId = 'media123';
       const mockResponse: MediaItemDetailsApiResponse = {
@@ -76,7 +74,7 @@ describe('WebApiService', () => {
       };
 
       service
-        .fetchMediaItemDetails('authToken123', mediaItemId)
+        .getMediaItem('authToken123', mediaItemId)
         .subscribe((response) => {
           expect(response).toEqual(toSuccess(mockResponse));
         });
@@ -92,7 +90,7 @@ describe('WebApiService', () => {
     });
   });
 
-  describe('fetchGPhotosMediaItemDetails', () => {
+  describe('getGPhotosMediaItem', () => {
     it('should fetch GPhotos media item details', () => {
       const gMediaItemId = 'client1:gphoto123';
       const mockResponse: GPhotosMediaItemDetailsApiResponse = {
@@ -114,7 +112,7 @@ describe('WebApiService', () => {
       };
 
       service
-        .fetchGPhotosMediaItemDetails('authToken123', gMediaItemId)
+        .getGPhotosMediaItem('authToken123', gMediaItemId)
         .subscribe((response) => {
           expect(response).toEqual(toSuccess(mockResponse));
         });
@@ -130,7 +128,7 @@ describe('WebApiService', () => {
     });
   });
 
-  describe('listMediaItemsInAlbum', () => {
+  describe('listMediaItems', () => {
     const accessToken = 'fake-token';
     const albumId = 'album123';
 
@@ -148,11 +146,9 @@ describe('WebApiService', () => {
         nextPageToken: 'next123',
       };
 
-      service
-        .listMediaItemsInAlbum(accessToken, request)
-        .subscribe((response) => {
-          expect(response).toEqual(toSuccess(mockResponse));
-        });
+      service.listMediaItems(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(toSuccess(mockResponse));
+      });
 
       const req = httpMock.expectOne(
         `${environment.webApiEndpoint}/api/v1/albums/${albumId}/media-items`,
@@ -180,11 +176,9 @@ describe('WebApiService', () => {
 
       const mockResponse = { mediaItems: [], nextPageToken: undefined };
 
-      service
-        .listMediaItemsInAlbum(accessToken, request)
-        .subscribe((response) => {
-          expect(response).toEqual(toSuccess(mockResponse));
-        });
+      service.listMediaItems(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(toSuccess(mockResponse));
+      });
 
       const req = httpMock.expectOne((req) => {
         return (

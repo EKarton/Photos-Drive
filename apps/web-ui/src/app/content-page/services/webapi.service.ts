@@ -15,7 +15,7 @@ export interface Album {
   mediaItemIds: string[];
 }
 
-/** Represents the api response returned from {@code fetchAlbumDetails()} */
+/** Represents the api response returned from {@code getAlbum()} */
 export type AlbumDetailsApiResponse = Album;
 
 export interface MediaItemLocation {
@@ -164,7 +164,7 @@ export class WebApiService {
   private readonly httpClient = inject(HttpClient);
 
   /** Fetches the details of an album. */
-  fetchAlbumDetails(
+  getAlbum(
     accessToken: string,
     albumId: string,
   ): Observable<Result<AlbumDetailsApiResponse>> {
@@ -179,7 +179,7 @@ export class WebApiService {
   }
 
   /** Fetches the details of a media item. */
-  fetchMediaItemDetails(
+  getMediaItem(
     accessToken: string,
     mediaItemId: string,
   ): Observable<Result<MediaItemDetailsApiResponse>> {
@@ -194,7 +194,7 @@ export class WebApiService {
   }
 
   /** Fetches the details of a gphotos media item. */
-  fetchGPhotosMediaItemDetails(
+  getGPhotosMediaItem(
     accessToken: string,
     gMediaItemId: string,
   ): Observable<Result<GPhotosMediaItemDetailsApiResponse>> {
@@ -208,8 +208,8 @@ export class WebApiService {
       .pipe(toResult());
   }
 
-  /** Lists all the media items. */
-  listMediaItemsInAlbum(
+  /** Lists all the media items in a paginated way. */
+  listMediaItems(
     accessToken: string,
     request: ListMediaItemsInAlbumRequest,
   ): Observable<Result<ListMediaItemsInAlbumResponse>> {

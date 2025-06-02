@@ -18,7 +18,7 @@ describe('AlbumsEffects', () => {
 
   beforeEach(() => {
     const webapiServiceSpy = jasmine.createSpyObj('WebApiService', [
-      'fetchAlbumDetails',
+      'getAlbum',
     ]);
     const actions$ = of(albumsActions.loadAlbumDetails({ albumId: '123' }));
 
@@ -51,9 +51,7 @@ describe('AlbumsEffects', () => {
       childAlbumIds: [],
       mediaItemIds: [],
     };
-    webapiService.fetchAlbumDetails.and.returnValue(
-      of(toSuccess(albumDetails)),
-    );
+    webapiService.getAlbum.and.returnValue(of(toSuccess(albumDetails)));
 
     effects.loadAlbumDetails$.subscribe((action) => {
       expect(action).toEqual(
@@ -68,7 +66,7 @@ describe('AlbumsEffects', () => {
 
   it('should handle error when fetching album details', (done) => {
     const error = new Error('Test error');
-    webapiService.fetchAlbumDetails.and.returnValue(
+    webapiService.getAlbum.and.returnValue(
       of(toFailure<AlbumDetailsApiResponse>(error)),
     );
 
