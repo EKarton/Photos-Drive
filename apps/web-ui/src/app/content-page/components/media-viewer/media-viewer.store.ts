@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { Store } from '@ngrx/store';
 import { switchMap, tap } from 'rxjs/operators';
@@ -15,16 +15,20 @@ import {
   WebApiService,
 } from '../../services/webapi.service';
 
+/** The state definition for {@code MediaViewerStore} */
 export interface MediaViewerState {
   mediaItemResult: Result<MediaItem>;
   gMediaItemResult: Result<GPhotosMediaItem>;
 }
 
+/** The initial state for the {@code MediaViewerStore} */
 export const INITIAL_STATE: MediaViewerState = {
   mediaItemResult: toPending(),
   gMediaItemResult: toPending(),
 };
 
+/** A component store for the {@code MediaViewerComponent} */
+@Injectable()
 export class MediaViewerStore extends ComponentStore<MediaViewerState> {
   private readonly store = inject(Store);
   private readonly webApiService = inject(WebApiService);
