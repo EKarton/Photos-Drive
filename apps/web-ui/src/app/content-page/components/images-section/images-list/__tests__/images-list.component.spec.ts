@@ -117,15 +117,15 @@ describe('ImagesListComponent', () => {
     ) as MockResizeObserverFactory;
   });
 
-  it('should render images', () => {
+  it('should load image skeletons', () => {
     const fixture = TestBed.createComponent(ImagesListComponent);
     fixture.componentRef.setInput('albumId', ['album1']);
     fixture.detectChanges();
 
-    const elements = fixture.nativeElement.querySelectorAll('img');
+    const elements = fixture.nativeElement.querySelectorAll(
+      '[data-testid="image-loading"]',
+    );
     expect(elements.length).toEqual(2);
-    expect(elements[0].src).toEqual('https://www.google.com/photos/1');
-    expect(elements[1].src).toEqual('https://www.google.com/photos/2');
   });
 
   [
@@ -182,11 +182,13 @@ describe('ImagesListComponent', () => {
         await fixture.whenStable();
 
         // Assert the images resized correctly
-        const elements: HTMLImageElement[] = Array.from(
-          fixture.nativeElement.querySelectorAll('img'),
+        const elements: HTMLElement[] = Array.from(
+          fixture.nativeElement.querySelectorAll(
+            '[data-testid="image-loading"]',
+          ),
         );
-        const widths = Array.from(elements).map((e) => e.width);
-        const heights = Array.from(elements).map((e) => e.height);
+        const widths = Array.from(elements).map((e) => e.clientWidth);
+        const heights = Array.from(elements).map((e) => e.clientHeight);
         expect(widths).toEqual(expectedImageWidths);
         expect(heights).toEqual(expectedImageHeights);
       });

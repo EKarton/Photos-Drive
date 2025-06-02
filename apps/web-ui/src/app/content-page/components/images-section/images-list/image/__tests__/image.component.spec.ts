@@ -80,38 +80,10 @@ describe('ImageComponent', () => {
     expect(spinner).toBeTruthy();
   });
 
-  it('should render image when gmedia item has loaded already', () => {
+  it('should fetch gphotos media item and render image when it is in viewport', () => {
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
       of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
     );
-
-    const fixture = TestBed.createComponent(ImageComponent);
-    fixture.componentRef.setInput('mediaItemId', 'photos1');
-    fixture.componentRef.setInput('gPhotosMediaItemId', 'gPhotos1');
-    fixture.componentRef.setInput('fileName', 'dog.png');
-    fixture.componentRef.setInput('width', 250);
-    fixture.componentRef.setInput('height', 300);
-    fixture.detectChanges();
-
-    store.setState({
-      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-    });
-    store.refreshState();
-    fixture.detectChanges();
-
-    const image = fixture.nativeElement.querySelector(
-      '[data-testid="media-item-image"]',
-    );
-    expect(image.src).toEqual('http://www.google.com/photos/1');
-    expect(image.width).toEqual(250);
-    expect(image.width).toEqual(250);
-  });
-
-  it('should dispatch event to load gphotos media item when media item is only loaded and it is in viewport', () => {
-    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(EMPTY);
-    store.setState({
-      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-    });
     const fixture = TestBed.createComponent(ImageComponent);
     fixture.componentRef.setInput('mediaItemId', 'photos1');
     fixture.componentRef.setInput('gPhotosMediaItemId', 'gPhotos1');
@@ -127,6 +99,13 @@ describe('ImageComponent', () => {
       'mockAccessToken',
       'gPhotos1',
     );
+
+    const image = fixture.nativeElement.querySelector(
+      '[data-testid="media-item-image"]',
+    );
+    expect(image.src).toEqual('http://www.google.com/photos/1');
+    expect(image.width).toEqual(250);
+    expect(image.width).toEqual(250);
   });
 
   [
@@ -152,11 +131,7 @@ describe('ImageComponent', () => {
       fixture.componentRef.setInput('width', 250);
       fixture.componentRef.setInput('height', 300);
       fixture.detectChanges();
-
-      store.setState({
-        [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      });
-      store.refreshState();
+      fixture.componentInstance.setIsInViewport(true);
       fixture.detectChanges();
 
       fixture.nativeElement
@@ -192,11 +167,7 @@ describe('ImageComponent', () => {
       fixture.componentRef.setInput('width', 250);
       fixture.componentRef.setInput('height', 300);
       fixture.detectChanges();
-
-      store.setState({
-        [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      });
-      store.refreshState();
+      fixture.componentInstance.setIsInViewport(true);
       fixture.detectChanges();
 
       fixture.nativeElement

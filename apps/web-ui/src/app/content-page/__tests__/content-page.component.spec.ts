@@ -11,12 +11,10 @@ import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
 import {
   Album,
-  GPhotosMediaItem,
   ListMediaItemsInAlbumResponse,
   WebApiService,
 } from '../services/webapi.service';
 import { albumsState } from '../store/albums';
-import { gPhotosMediaItemsState } from '../store/gphoto-media-items';
 import { gPhotosClientsState } from '../store/gphotos-clients';
 import { mediaItemsState } from '../store/media-items';
 import { mediaViewerState } from '../store/media-viewer';
@@ -77,26 +75,6 @@ const PAGE_1: ListMediaItemsInAlbumResponse = {
   ],
 };
 
-const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
-  baseUrl: 'http://www.google.com/photos/1',
-  mimeType: 'image/jpeg',
-  mediaMetadata: {
-    creationTime: '',
-    width: '200',
-    height: '200',
-  },
-};
-
-const G_MEDIA_ITEM_DETAILS_PHOTO_2: GPhotosMediaItem = {
-  baseUrl: 'http://www.google.com/photos/2',
-  mimeType: 'image/jpeg',
-  mediaMetadata: {
-    creationTime: '',
-    width: '300',
-    height: '300',
-  },
-};
-
 describe('ContentPageComponent', () => {
   let component: ContentPageComponent;
   let fixture: ComponentFixture<ContentPageComponent>;
@@ -106,7 +84,6 @@ describe('ContentPageComponent', () => {
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
       'listMediaItemsInAlbum',
-      'fetchGPhotosMediaItemDetails',
     ]);
 
     await TestBed.configureTestingModule({
@@ -115,8 +92,6 @@ describe('ContentPageComponent', () => {
         provideMockStore({
           initialState: {
             [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
-            [gPhotosMediaItemsState.FEATURE_KEY]:
-              gPhotosMediaItemsState.buildInitialState(),
             [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
             [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
@@ -151,10 +126,6 @@ describe('ContentPageComponent', () => {
 
   it('should show albums and photos given data has been loaded', () => {
     mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(PAGE_1));
-    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValues(
-      of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-      of(G_MEDIA_ITEM_DETAILS_PHOTO_2),
-    );
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -190,16 +161,8 @@ describe('ContentPageComponent', () => {
     expect(subAlbums[1].textContent!.trim()).toBe('2011');
 
     // Assert that the images rendered correctly
-    const mediaItemImages = fixture.nativeElement.querySelectorAll(
-      '[data-testid="media-item-image"]',
-    );
+    const mediaItemImages = fixture.nativeElement.querySelectorAll('app-image');
     expect(mediaItemImages.length).toEqual(2);
-    expect(mediaItemImages[0].getAttribute('src')).toEqual(
-      'http://www.google.com/photos/1',
-    );
-    expect(mediaItemImages[1].getAttribute('src')).toEqual(
-      'http://www.google.com/photos/2',
-    );
   });
 
   it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', () => {
