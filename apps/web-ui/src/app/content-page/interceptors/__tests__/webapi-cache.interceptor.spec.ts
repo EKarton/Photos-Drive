@@ -18,8 +18,7 @@ describe('webApiHttpCacheInterceptor', () => {
   let mockCacheService: jasmine.SpyObj<HttpCacheService>;
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
-
-  const testUrl = `${environment.webApiEndpoint}/api/v1/albums/123/media-items`;
+  let testUrl: string;
 
   beforeEach(() => {
     mockCacheService = jasmine.createSpyObj<HttpCacheService>(
@@ -27,6 +26,7 @@ describe('webApiHttpCacheInterceptor', () => {
       ['get', 'set'],
     );
     environment.webApiEndpoint = 'http://localhost:3000';
+    testUrl = `${environment.webApiEndpoint}/api/v1/albums/123/media-items`;
 
     TestBed.configureTestingModule({
       providers: [
