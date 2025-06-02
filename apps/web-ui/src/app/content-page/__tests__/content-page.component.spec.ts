@@ -15,8 +15,6 @@ import {
   WebApiService,
 } from '../services/webapi.service';
 import { albumsState } from '../store/albums';
-import { gPhotosClientsState } from '../store/gphotos-clients';
-import { mediaItemsState } from '../store/media-items';
 import { mediaViewerState } from '../store/media-viewer';
 
 const ALBUM_DETAILS_ROOT: Album = {
@@ -92,8 +90,7 @@ describe('ContentPageComponent', () => {
         provideMockStore({
           initialState: {
             [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
-            [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-            [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
+            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
             [authState.FEATURE_KEY]: authState.buildInitialState(),
           },
@@ -135,8 +132,7 @@ describe('ContentPageComponent', () => {
           .set('album4', toSuccess(ALBUM_DETAILS_2010))
           .set('album5', toSuccess(ALBUM_DETAILS_2011)),
       },
-      [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-      [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
+      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
       [themeState.FEATURE_KEY]: themeState.initialState,
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
@@ -187,8 +183,7 @@ describe('ContentPageComponent', () => {
             }),
           ),
       },
-      [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-      [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
+      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
       [themeState.FEATURE_KEY]: themeState.initialState,
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });

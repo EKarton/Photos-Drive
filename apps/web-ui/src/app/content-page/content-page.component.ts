@@ -15,7 +15,6 @@ import { ImagesSectionComponent } from './components/images-section/images-secti
 import { MediaViewerComponent } from './components/media-viewer/media-viewer.component';
 import { Album } from './services/webapi.service';
 import { albumsActions, albumsState } from './store/albums';
-import { gPhotosClientsActions } from './store/gphotos-clients';
 
 @Component({
   standalone: true,
@@ -54,10 +53,6 @@ export class ContentPageComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit() {
-    this.subscription.add(
-      this.store.dispatch(gPhotosClientsActions.loadGPhotoClients()),
-    );
-
     this.subscription.add(
       this.albumId$.subscribe((albumId) => {
         this.store.dispatch(albumsActions.loadAlbumDetails({ albumId }));
