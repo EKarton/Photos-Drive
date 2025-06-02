@@ -122,7 +122,9 @@ describe('ContentPageComponent', () => {
   });
 
   it('should show albums and photos given data has been loaded', () => {
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(PAGE_1));
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      of(toSuccess(PAGE_1)),
+    );
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -163,9 +165,11 @@ describe('ContentPageComponent', () => {
 
   it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', () => {
     mockWebApiService.listMediaItemsInAlbum.and.returnValue(
-      of({
-        mediaItems: [],
-      }),
+      of(
+        toSuccess({
+          mediaItems: [],
+        }),
+      ),
     );
     store.setState({
       [albumsState.FEATURE_KEY]: {

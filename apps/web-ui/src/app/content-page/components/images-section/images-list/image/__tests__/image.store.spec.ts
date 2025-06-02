@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 
 import { authState } from '../../../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../../../shared/results/results';
 import {
   GPhotosMediaItem,
+  GPhotosMediaItemDetailsApiResponse,
   WebApiService,
 } from '../../../../../services/webapi.service';
 import { ImageStore, INITIAL_STATE } from '../image.store';
@@ -58,7 +59,7 @@ describe('ImageStore', () => {
 
   it('should load and update state on success', () => {
     webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(gPhotosMediaItem),
+      of(toSuccess(gPhotosMediaItem)),
     );
 
     store.loadGPhotosMediaItemDetails(gPhotoId);
@@ -75,7 +76,7 @@ describe('ImageStore', () => {
   it('should update state to failure on API error', () => {
     const error = new Error('API failed');
     webApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      throwError(() => error),
+      of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
     );
 
     store.loadGPhotosMediaItemDetails(gPhotoId);
@@ -96,8 +97,8 @@ describe('ImageStore', () => {
     };
 
     webApiService.fetchGPhotosMediaItemDetails.and.returnValues(
-      of(gPhotosMediaItem),
-      of(secondImage),
+      of(toSuccess(gPhotosMediaItem)),
+      of(toSuccess(secondImage)),
     );
 
     store.loadGPhotosMediaItemDetails('1');

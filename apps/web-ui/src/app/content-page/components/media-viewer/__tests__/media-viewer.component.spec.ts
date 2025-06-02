@@ -1,12 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { EMPTY, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { NAVIGATOR } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
+import { toPending, toSuccess } from '../../../../shared/results/results';
 import {
   GPhotosMediaItem,
+  GPhotosMediaItemDetailsApiResponse,
   MediaItem,
+  MediaItemDetailsApiResponse,
   WebApiService,
 } from '../../../services/webapi.service';
 import {
@@ -118,8 +121,12 @@ describe('MediaViewerComponent', () => {
   });
 
   it('should show dialog and spinner given data is still loading', () => {
-    mockWebApiService.fetchMediaItemDetails.and.returnValue(EMPTY);
-    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(EMPTY);
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(toPending<MediaItemDetailsApiResponse>()),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+    );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
@@ -141,10 +148,10 @@ describe('MediaViewerComponent', () => {
 
   it('should render error message given unhandled mime type', () => {
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of(MEDIA_ITEM_AUDIO),
+      of(toSuccess(MEDIA_ITEM_AUDIO)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_AUDIO),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_AUDIO)),
     );
 
     store.setState({
@@ -173,10 +180,10 @@ describe('MediaViewerComponent', () => {
 
   it('should render items correctly given loaded image data', () => {
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of(MEDIA_ITEM_IMAGE),
+      of(toSuccess(MEDIA_ITEM_IMAGE)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
 
     store.setState({
@@ -250,10 +257,10 @@ describe('MediaViewerComponent', () => {
 
   it('should render items correctly given loaded video data', () => {
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of(MEDIA_ITEM_VIDEO),
+      of(toSuccess(MEDIA_ITEM_VIDEO)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_VIDEO),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_VIDEO)),
     );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
@@ -324,13 +331,15 @@ describe('MediaViewerComponent', () => {
 
   it('should not render location when data has no location data', () => {
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of({
-        ...MEDIA_ITEM_IMAGE,
-        location: undefined,
-      }),
+      of(
+        toSuccess({
+          ...MEDIA_ITEM_IMAGE,
+          location: undefined,
+        }),
+      ),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
@@ -354,10 +363,10 @@ describe('MediaViewerComponent', () => {
     mockNavigator.canShare.and.returnValue(true);
     mockNavigator.share.and.resolveTo(undefined);
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of(MEDIA_ITEM_IMAGE),
+      of(toSuccess(MEDIA_ITEM_IMAGE)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
@@ -386,10 +395,10 @@ describe('MediaViewerComponent', () => {
     mockNavigator.canShare.and.returnValue(true);
     mockNavigator.share.and.resolveTo(undefined);
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of(MEDIA_ITEM_VIDEO),
+      of(toSuccess(MEDIA_ITEM_VIDEO)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_VIDEO),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_VIDEO)),
     );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
@@ -418,10 +427,10 @@ describe('MediaViewerComponent', () => {
     mockNavigator.canShare.and.returnValue(false);
     mockNavigator.share.and.resolveTo(undefined);
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of(MEDIA_ITEM_IMAGE),
+      of(toSuccess(MEDIA_ITEM_IMAGE)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
@@ -444,10 +453,10 @@ describe('MediaViewerComponent', () => {
 
   it('should dispatch an event when user clicks on the close button', () => {
     mockWebApiService.fetchMediaItemDetails.and.returnValue(
-      of(MEDIA_ITEM_IMAGE),
+      of(toSuccess(MEDIA_ITEM_IMAGE)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {

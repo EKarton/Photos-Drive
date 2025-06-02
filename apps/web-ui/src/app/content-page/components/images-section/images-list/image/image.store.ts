@@ -5,7 +5,6 @@ import { switchMap, tap } from 'rxjs/operators';
 
 import { authState } from '../../../../../auth/store';
 import { Result, toPending } from '../../../../../shared/results/results';
-import { toResult } from '../../../../../shared/results/rxjs/toResult';
 import {
   GPhotosMediaItem,
   GPhotosMediaItemDetailsApiResponse,
@@ -62,10 +61,7 @@ export class ImageStore extends ComponentStore<ImageState> {
             switchMap((accessToken) => {
               return this.webApiService
                 .fetchGPhotosMediaItemDetails(accessToken, gPhotosMediaItemId)
-                .pipe(
-                  toResult<GPhotosMediaItemDetailsApiResponse>(),
-                  tap((response) => this.setGPhotosMediaItem(response)),
-                );
+                .pipe(tap((response) => this.setGPhotosMediaItem(response)));
             }),
           );
         }),

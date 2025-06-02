@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { MockResizeObserverFactory } from '../../../../../shared/resize-observer-factory/__mocks__/MockResizeObserverFactory';
+import { toSuccess } from '../../../../../shared/results/results';
 import {
   GPhotosMediaItem,
   ListMediaItemsInAlbumResponse,
@@ -83,13 +84,13 @@ describe('ImagesListComponent', () => {
       'fetchGPhotosMediaItemDetails',
     ]);
     mockWebApiService.listMediaItemsInAlbum.and.returnValues(
-      of(PAGE_1),
-      of(PAGE_2),
+      of(toSuccess(PAGE_1)),
+      of(toSuccess(PAGE_2)),
     );
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValues(
-      of(GMEDIA_ITEM_DETAILS_PHOTO_1),
-      of(GMEDIA_ITEM_DETAILS_PHOTO_2),
-      of(GMEDIA_ITEM_DETAILS_PHOTO_3),
+      of(toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_1)),
+      of(toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_2)),
+      of(toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_3)),
     );
 
     await TestBed.configureTestingModule({

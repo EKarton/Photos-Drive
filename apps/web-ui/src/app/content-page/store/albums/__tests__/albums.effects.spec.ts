@@ -1,11 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
-import { WebApiService } from '../../../services/webapi.service';
+import {
+  AlbumDetailsApiResponse,
+  WebApiService,
+} from '../../../services/webapi.service';
 import * as albumsActions from '../albums.actions';
 import { AlbumsEffects } from '../albums.effects';
 
@@ -48,7 +51,9 @@ describe('AlbumsEffects', () => {
       childAlbumIds: [],
       mediaItemIds: [],
     };
-    webapiService.fetchAlbumDetails.and.returnValue(of(albumDetails));
+    webapiService.fetchAlbumDetails.and.returnValue(
+      of(toSuccess(albumDetails)),
+    );
 
     effects.loadAlbumDetails$.subscribe((action) => {
       expect(action).toEqual(
@@ -63,7 +68,9 @@ describe('AlbumsEffects', () => {
 
   it('should handle error when fetching album details', (done) => {
     const error = new Error('Test error');
-    webapiService.fetchAlbumDetails.and.returnValue(throwError(() => error));
+    webapiService.fetchAlbumDetails.and.returnValue(
+      of(toFailure<AlbumDetailsApiResponse>(error)),
+    );
 
     effects.loadAlbumDetails$.subscribe((action) => {
       expect(action).toEqual(

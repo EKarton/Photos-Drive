@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { EMPTY, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { WINDOW } from '../../../../../../app.tokens';
 import { authState } from '../../../../../../auth/store';
+import { toPending, toSuccess } from '../../../../../../shared/results/results';
 import {
   GPhotosMediaItem,
+  GPhotosMediaItemDetailsApiResponse,
   WebApiService,
 } from '../../../../../services/webapi.service';
 import {
@@ -64,7 +66,9 @@ describe('ImageComponent', () => {
   });
 
   it('should render skeleton when media item is not loaded yet', () => {
-    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(EMPTY);
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+    );
 
     const fixture = TestBed.createComponent(ImageComponent);
     fixture.componentRef.setInput('mediaItemId', 'photos1');
@@ -82,7 +86,7 @@ describe('ImageComponent', () => {
 
   it('should fetch gphotos media item and render image when it is in viewport', () => {
     mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-      of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+      of(toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1)),
     );
     const fixture = TestBed.createComponent(ImageComponent);
     fixture.componentRef.setInput('mediaItemId', 'photos1');
@@ -122,7 +126,7 @@ describe('ImageComponent', () => {
   ].forEach(({ event }) => {
     it(`should dispatch request to open image in new tab when user emits event ${event} on image`, () => {
       mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-        of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+        of(toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1)),
       );
       const fixture = TestBed.createComponent(ImageComponent);
       fixture.componentRef.setInput('mediaItemId', 'photos1');
@@ -158,7 +162,7 @@ describe('ImageComponent', () => {
   ].forEach(({ event }) => {
     it(`should dispatch request to open media viewer when user emits ${event} on image`, () => {
       mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
-        of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+        of(toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1)),
       );
       const fixture = TestBed.createComponent(ImageComponent);
       fixture.componentRef.setInput('mediaItemId', 'photos1');

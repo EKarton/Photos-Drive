@@ -3,17 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-
-/** Represents a GPhotos client. */
-export interface GPhotosClient {
-  id: string;
-  token: string;
-}
-
-/** Represents the api response returned from {@code fetchGPhotosClients()} */
-export interface GPhotosClientsListApiResponse {
-  gphotoClients: GPhotosClient[];
-}
+import { Result } from '../../shared/results/results';
+import { toResult } from '../../shared/results/rxjs/toResult';
 
 /** Represents an album. */
 export interface Album {
@@ -66,10 +57,6 @@ export interface ListMediaItemsInAlbumRequest {
 export interface ListMediaItemsInAlbumResponse {
   mediaItems: MediaItem[];
   nextPageToken?: string;
-}
-
-export interface RefreshTokenApiResponse {
-  newToken: string;
 }
 
 /**
@@ -176,74 +163,56 @@ export type GPhotosMediaItemDetailsApiResponse = GPhotosMediaItem;
 export class WebApiService {
   private readonly httpClient = inject(HttpClient);
 
-  /** Fetches a list of GPhotos clients */
-  fetchGPhotosClients(
-    accessToken: string,
-  ): Observable<GPhotosClientsListApiResponse> {
-    const url = `${environment.webApiEndpoint}/api/v1/gphotos-clients`;
-    return this.httpClient.get<GPhotosClientsListApiResponse>(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-  }
-
-  refreshGPhotoClientAccessToken(
-    accessToken: string,
-    clientId: string,
-  ): Observable<RefreshTokenApiResponse> {
-    const url = `${environment.webApiEndpoint}/api/v1/gphotos-clients/${clientId}/token-refresh`;
-    const options = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    };
-    return this.httpClient.post<RefreshTokenApiResponse>(url, null, options);
-  }
-
   /** Fetches the details of an album. */
   fetchAlbumDetails(
     accessToken: string,
     albumId: string,
-  ): Observable<AlbumDetailsApiResponse> {
+  ): Observable<Result<AlbumDetailsApiResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/albums/${albumId}`;
-    return this.httpClient.get<AlbumDetailsApiResponse>(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    return this.httpClient
+      .get<AlbumDetailsApiResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .pipe(toResult());
   }
 
   /** Fetches the details of a media item. */
   fetchMediaItemDetails(
     accessToken: string,
     mediaItemId: string,
-  ): Observable<MediaItemDetailsApiResponse> {
+  ): Observable<Result<MediaItemDetailsApiResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/media-items/${mediaItemId}`;
-    return this.httpClient.get<MediaItemDetailsApiResponse>(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    return this.httpClient
+      .get<MediaItemDetailsApiResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .pipe(toResult());
   }
 
   /** Fetches the details of a gphotos media item. */
   fetchGPhotosMediaItemDetails(
     accessToken: string,
     gMediaItemId: string,
-  ): Observable<GPhotosMediaItemDetailsApiResponse> {
+  ): Observable<Result<GPhotosMediaItemDetailsApiResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${gMediaItemId}`;
-    return this.httpClient.get<GPhotosMediaItemDetailsApiResponse>(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    return this.httpClient
+      .get<GPhotosMediaItemDetailsApiResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .pipe(toResult());
   }
 
+  /** Lists all the media items. */
   listMediaItemsInAlbum(
     accessToken: string,
     request: ListMediaItemsInAlbumRequest,
-  ): Observable<ListMediaItemsInAlbumResponse> {
+  ): Observable<Result<ListMediaItemsInAlbumResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/albums/${request.albumId}/media-items`;
 
     let params = new HttpParams();
@@ -258,11 +227,13 @@ export class WebApiService {
       params = params.set('sortDir', request.sortBy.direction);
     }
 
-    return this.httpClient.get<ListMediaItemsInAlbumResponse>(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      params,
-    });
+    return this.httpClient
+      .get<ListMediaItemsInAlbumResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params,
+      })
+      .pipe(toResult());
   }
 }

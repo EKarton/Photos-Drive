@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 
 import { authState } from '../../../../../auth/store';
+import { toFailure, toSuccess } from '../../../../../shared/results/results';
 import {
   ListMediaItemsInAlbumResponse,
   MediaItem,
@@ -59,7 +60,9 @@ describe('ImagesListStore', () => {
   });
 
   it('should load initial page successfully', () => {
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(dummyResponse));
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      of(toSuccess(dummyResponse)),
+    );
 
     store.loadInitialPage({ albumId: dummyAlbumId });
 
@@ -68,7 +71,7 @@ describe('ImagesListStore', () => {
 
   it('should reset state on failed initial load', () => {
     mockWebApiService.listMediaItemsInAlbum.and.returnValue(
-      throwError(() => new Error('API error')),
+      of(toFailure<ListMediaItemsInAlbumResponse>(new Error('API error'))),
     );
 
     store.loadInitialPage({ albumId: dummyAlbumId });
@@ -95,10 +98,14 @@ describe('ImagesListStore', () => {
     };
 
     // Set up initial state manually
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(firstPage));
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      of(toSuccess(firstPage)),
+    );
     store.loadInitialPage({ albumId: dummyAlbumId });
 
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(secondPage));
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      of(toSuccess(secondPage)),
+    );
     store.loadMoreMediaItems({});
 
     expect(store.mediaItems()).toEqual([
@@ -114,11 +121,13 @@ describe('ImagesListStore', () => {
     };
 
     // Set up initial state manually
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(firstPage));
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      of(toSuccess(firstPage)),
+    );
     store.loadInitialPage({ albumId: dummyAlbumId });
 
     mockWebApiService.listMediaItemsInAlbum.and.returnValue(
-      throwError(() => new Error('API Error')),
+      of(toFailure<ListMediaItemsInAlbumResponse>(new Error('API Error'))),
     );
     store.loadMoreMediaItems({});
 
@@ -131,7 +140,9 @@ describe('ImagesListStore', () => {
       nextPageToken: undefined,
     };
 
-    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(firstPage));
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      of(toSuccess(firstPage)),
+    );
     store.loadInitialPage({ albumId: dummyAlbumId });
     store.loadMoreMediaItems({});
 

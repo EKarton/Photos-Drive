@@ -9,7 +9,6 @@ import {
   isPending,
   Result,
 } from '../../../../shared/results/results';
-import { toResult } from '../../../../shared/results/rxjs/toResult';
 import {
   ListMediaItemsInAlbumRequest,
   ListMediaItemsInAlbumResponse,
@@ -117,7 +116,6 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
             return this.webApiService
               .listMediaItemsInAlbum(accessToken, apiRequest)
               .pipe(
-                toResult<ListMediaItemsInAlbumResponse>(),
                 tap((response) =>
                   this.setNewPage({ request: apiRequest, response }),
                 ),
@@ -147,10 +145,7 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
               };
               return this.webApiService
                 .listMediaItemsInAlbum(accessToken, apiRequest)
-                .pipe(
-                  toResult<ListMediaItemsInAlbumResponse>(),
-                  tap((response) => this.appendMediaItems(response)),
-                );
+                .pipe(tap((response) => this.appendMediaItems(response)));
             }),
           );
         }),
