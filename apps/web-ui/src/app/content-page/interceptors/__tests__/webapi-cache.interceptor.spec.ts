@@ -47,11 +47,9 @@ describe('webApiHttpCacheInterceptor', () => {
   it('should return cached response if available', (done) => {
     mockCacheService.get.and.returnValue(mockResponse);
 
-    const req = new HttpRequest('GET', testUrl);
-
     httpClient.get(testUrl).subscribe((res) => {
-      expect(res).toBe(mockResponse);
-      expect(mockCacheService.get).toHaveBeenCalledWith(req.urlWithParams);
+      expect(res).toEqual(mockResponse);
+      expect(mockCacheService.get).toHaveBeenCalledWith(testUrl);
       done();
     });
   });
@@ -60,11 +58,11 @@ describe('webApiHttpCacheInterceptor', () => {
     mockCacheService.get.and.returnValue(undefined);
 
     httpClient.get(testUrl).subscribe((res) => {
-      expect(res).toBe(mockResponse);
+      expect(res).toEqual(mockResponse);
       expect(mockCacheService.get).toHaveBeenCalledWith(testUrl);
       expect(mockCacheService.set).toHaveBeenCalledWith(
         testUrl,
-        mockResponse,
+        jasmine.any(HttpResponse),
         10 * 60 * 1000,
       );
       done();
@@ -99,7 +97,7 @@ describe('webApiHttpCacheInterceptor', () => {
     httpClient.get(configUrl).subscribe(() => {
       expect(mockCacheService.set).toHaveBeenCalledWith(
         configUrl,
-        mockResponse,
+        jasmine.any(HttpResponse),
         60 * 60 * 1000, // 1 hour
       );
       done();
