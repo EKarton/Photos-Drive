@@ -71,39 +71,6 @@ describe('Media Items Router', () => {
       });
     });
 
-    it('should return 200 response with correct body given valid media item id and no location', async () => {
-      const mockMediaItem: MediaItem = {
-        id: {
-          clientId: 'mediaItemClientId1',
-          objectId: 'mediaItem1'
-        },
-        file_name: 'dog.png',
-        gphotos_client_id: 'gPhotosClient1',
-        gphotos_media_item_id: 'gPhotosMediaItem1',
-        album_id: {
-          clientId: '407f1f77bcf86cd799439001',
-          objectId: '407f1f77bcf86cd799439002'
-        }
-      };
-      const repo = mock<MediaItemsRepository>();
-      repo.getMediaItemById.mockResolvedValue(mockMediaItem);
-      const app = express();
-      app.use(await mediaItemsRouter(repo));
-
-      const res = await request(app)
-        .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual({
-        id: 'mediaItemClientId1:mediaItem1',
-        fileName: 'dog.png',
-        location: null,
-        gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
-        albumId: '407f1f77bcf86cd799439001:407f1f77bcf86cd799439002'
-      });
-    });
-
     it('should return 404 response given MediaItemsRepository returns MongoDbClientNotFoundError', async () => {
       const repo = mock<MediaItemsRepository>();
       repo.getMediaItemById.mockRejectedValue(

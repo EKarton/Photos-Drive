@@ -23,6 +23,7 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
+    "@ngrx/component-store": "^19.2.1",
     "@ngrx/effects": "^19.0.0",
     "@ngrx/operators": "^19.0.0",
     "@ngrx/store": "^19.0.0",

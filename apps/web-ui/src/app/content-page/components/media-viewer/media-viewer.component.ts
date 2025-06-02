@@ -2,26 +2,26 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
+  effect,
   ElementRef,
   inject,
   OnDestroy,
+  Signal,
   ViewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of, Subscription, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { NAVIGATOR } from '../../../app.tokens';
 import { HasFailedPipe } from '../../../shared/results/pipes/has-failed.pipe';
 import { HasSucceededPipe } from '../../../shared/results/pipes/has-succeeded.pipe';
 import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
-import { Result, toPending } from '../../../shared/results/results';
-import { switchMapResultToResultRxJs } from '../../../shared/results/rxjs/switchMapResultToResultRxJs';
+import { Result } from '../../../shared/results/results';
 import { combineResults2 } from '../../../shared/results/utils/combineResults2';
-import { GPhotosMediaItem, MediaItem } from '../../services/webapi.service';
-import { gPhotosMediaItemsState } from '../../store/gphoto-media-items';
-import { mediaItemsState } from '../../store/media-items';
+import { GPhotosMediaItem } from '../../services/webapi.service';
 import { mediaViewerActions, mediaViewerState } from '../../store/media-viewer';
+import { MediaViewerStore } from './media-viewer.store';
 
 /** The details to display to the UI. */
 interface MediaDetails {
@@ -39,71 +39,54 @@ interface MediaDetails {
   selector: 'app-content-media-viewer',
   imports: [CommonModule, IsPendingPipe, HasFailedPipe, HasSucceededPipe],
   templateUrl: './media-viewer.component.html',
+  providers: [MediaViewerStore],
 })
 export class MediaViewerComponent implements AfterViewInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly navigator = inject(NAVIGATOR);
   private readonly subscription = new Subscription();
+  private readonly mediaViewerStore = inject(MediaViewerStore);
 
   @ViewChild('modal') myModal?: ElementRef;
 
   private readonly isOpen$ = this.store.select(mediaViewerState.selectIsOpen());
+  private readonly requests = this.store.selectSignal(
+    mediaViewerState.selectRequest(),
+  );
 
   readonly isShareSupported = !!this.navigator.share;
 
-  readonly mediaDetailsResult = (() => {
-    const requests$ = this.store.select(mediaViewerState.selectRequest());
-
-    const mediaItemResult$: Observable<Result<MediaItem>> = requests$.pipe(
-      switchMap((request) => {
-        if (!request?.mediaItemId) {
-          return of(toPending<MediaItem>());
-        }
-        return this.store.select(
-          mediaItemsState.selectMediaItemDetailsById(request.mediaItemId),
-        );
-      }),
-    );
-
-    const gPhotosMediaItemResult$: Observable<Result<GPhotosMediaItem>> =
-      mediaItemResult$.pipe(
-        switchMapResultToResultRxJs((mediaItem) =>
-          this.store.select(
-            gPhotosMediaItemsState.selectGPhotosMediaItemById(
-              mediaItem.gPhotosMediaItemId,
-            ),
-          ),
-        ),
-      );
-
-    const mediaDetailsResult$: Observable<Result<MediaDetails>> = combineLatest(
-      [mediaItemResult$, gPhotosMediaItemResult$],
-      (mediaItemResult, gPhotosMediaItemResult) => {
-        return combineResults2(
-          mediaItemResult,
-          gPhotosMediaItemResult,
-          (mediaItem, gPhotosMediaItem) => ({
-            url: getUrl(gPhotosMediaItem),
-            downloadUrl: getDownloadUrl(gPhotosMediaItem),
-            mimeType: gPhotosMediaItem.mimeType,
-            imageAlt: `Image of ${mediaItem.fileName}`,
-            fileName: mediaItem.fileName,
-            formattedDate: 'Sunday, November 20, 2016 at 12:35 PM',
-            locationName: mediaItem.location
-              ? `@ ${mediaItem.location?.latitude}, ${mediaItem.location?.longitude}`
-              : undefined,
-            locationUrl: mediaItem.location
-              ? `https://www.google.com/maps/place/${mediaItem.location?.latitude},${mediaItem.location?.longitude}`
-              : undefined,
-          }),
-        );
+  readonly mediaDetailsResult: Signal<Result<MediaDetails>> = computed(() => {
+    return combineResults2(
+      this.mediaViewerStore.mediaItemResult(),
+      this.mediaViewerStore.gMediaItemResult(),
+      (mediaItem, gMediaItem) => {
+        return {
+          url: getUrl(gMediaItem),
+          downloadUrl: getDownloadUrl(gMediaItem),
+          mimeType: gMediaItem.mimeType,
+          imageAlt: `Image of ${mediaItem.fileName}`,
+          fileName: mediaItem.fileName,
+          formattedDate: 'Sunday, November 20, 2016 at 12:35 PM',
+          locationName: mediaItem.location
+            ? `@ ${mediaItem.location?.latitude}, ${mediaItem.location?.longitude}`
+            : undefined,
+          locationUrl: mediaItem.location
+            ? `https://www.google.com/maps/place/${mediaItem.location?.latitude},${mediaItem.location?.longitude}`
+            : undefined,
+        };
       },
     );
+  });
 
-    return toSignal(mediaDetailsResult$, {
-      initialValue: toPending<MediaDetails>(),
+  constructor() {
+    effect(() => {
+      const request = this.requests();
+      if (request) {
+        this.mediaViewerStore.loadDetails(request.mediaItemId);
+      }
     });
-  })();
+  }
 
   share(url: string, fileName: string) {
     const shareData = {

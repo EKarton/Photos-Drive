@@ -1,52 +1,25 @@
 import {
   Component,
+  computed,
+  effect,
   inject,
   input,
-  OnDestroy,
-  OnInit,
-  output,
-  Signal,
+  signal,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { InViewportModule } from 'ng-in-viewport';
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  map,
-  Observable,
-  Subscription,
-  switchMap,
-} from 'rxjs';
 
 import { WINDOW } from '../../../../../app.tokens';
 import { HasFailedPipe } from '../../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../../shared/results/pipes/is-pending.pipe';
-import { Result, toPending } from '../../../../../shared/results/results';
-import { filterOnlySuccess } from '../../../../../shared/results/rxjs/filterOnlySuccess';
-import { switchMapResultToResultRxJs } from '../../../../../shared/results/rxjs/switchMapResultToResultRxJs';
-import { combineResults2 } from '../../../../../shared/results/utils/combineResults2';
-import {
-  GPhotosMediaItem,
-  MediaItem,
-} from '../../../../services/webapi.service';
-import {
-  gPhotosMediaItemsActions,
-  gPhotosMediaItemsState,
-} from '../../../../store/gphoto-media-items';
-import {
-  mediaItemsActions,
-  mediaItemsState,
-} from '../../../../store/media-items';
+import { mapResult } from '../../../../../shared/results/utils/mapResult';
+import { GPhotosMediaItem } from '../../../../services/webapi.service';
 import { mediaViewerActions } from '../../../../store/media-viewer';
+import { ImageStore } from './image.store';
 
 export interface ImageData {
   id: string;
   baseUrl: string;
-  width: number;
-  height: number;
   fileName: string;
   onClick: (event: MouseEvent) => void;
   onKeyDown: (event: KeyboardEvent) => void;
@@ -56,87 +29,46 @@ export interface ImageData {
   selector: 'app-image',
   imports: [InViewportModule, HasFailedPipe, IsPendingPipe],
   templateUrl: './image.component.html',
+  providers: [ImageStore],
 })
-export class ImageComponent implements OnInit, OnDestroy {
+export class ImageComponent {
   private readonly store = inject(Store);
+  private readonly imageStore = inject(ImageStore);
   private readonly window = inject(WINDOW);
 
   readonly mediaItemId = input.required<string>();
+  readonly gPhotosMediaItemId = input.required<string>();
+  readonly fileName = input.required<string>();
   readonly width = input.required<number>();
-  readonly imageSizeChanged = output<void>();
+  readonly height = input.required<number>();
 
-  private readonly mediaItemId$ = toObservable(this.mediaItemId);
-  private readonly width$ = toObservable(this.width);
-  private readonly isInViewport$ = new BehaviorSubject(false);
+  private readonly isInViewport = signal(false);
 
-  private subscription = new Subscription();
+  readonly imageDataResult = computed(() => {
+    const gMediaItemResult = this.imageStore.gPhotosMediaItem();
 
-  private readonly mediaItemResult$ = this.mediaItemId$.pipe(
-    switchMap((mediaItemId: string) =>
-      this.store.select(
-        mediaItemsState.selectMediaItemDetailsById(mediaItemId),
-      ),
-    ),
-  );
-
-  private readonly gMediaItemResult$ = this.mediaItemResult$.pipe(
-    switchMapResultToResultRxJs((mediaItem: MediaItem) => {
-      return this.store.select(
-        gPhotosMediaItemsState.selectGPhotosMediaItemById(
-          mediaItem.gPhotosMediaItemId,
-        ),
-      );
-    }),
-  );
-
-  private readonly imageDataResult$: Observable<Result<ImageData>> =
-    combineLatest([
-      this.mediaItemResult$,
-      this.gMediaItemResult$,
-      this.width$,
-    ]).pipe(
-      map(([mediaItemResult, gMediaItemResult, width]) => {
-        return combineResults2(
-          mediaItemResult,
-          gMediaItemResult,
-          (mediaItem, gMediaItem) => {
-            const originalWidth = Number(gMediaItem.mediaMetadata.width);
-            const originalHeight = Number(gMediaItem.mediaMetadata.height);
-
-            return {
-              id: mediaItem.id,
-              baseUrl: gMediaItem.baseUrl!,
-              width: width,
-              height: (originalHeight / originalWidth) * width,
-              fileName: mediaItem.fileName,
-              onClick: (event: MouseEvent) => {
-                if (event.ctrlKey) {
-                  this.openImageInNewTab(gMediaItem);
-                } else {
-                  this.openImageInDialog(mediaItem.id);
-                }
-              },
-              onKeyDown: (event: KeyboardEvent) => {
-                if (event.ctrlKey && event.key === 'Enter') {
-                  event.preventDefault();
-                  this.openImageInNewTab(gMediaItem);
-                } else if (event.key === 'Enter') {
-                  event.preventDefault();
-                  this.openImageInDialog(mediaItem.id);
-                }
-              },
-            };
-          },
-        );
-      }),
-    );
-
-  readonly imageDataResult: Signal<Result<ImageData>> = toSignal(
-    this.imageDataResult$,
-    {
-      initialValue: toPending<ImageData>(),
-    },
-  );
+    return mapResult(gMediaItemResult, (gMediaItem) => {
+      return {
+        baseUrl: gMediaItem.baseUrl!,
+        onClick: (event: MouseEvent) => {
+          if (event.ctrlKey) {
+            this.openImageInNewTab(gMediaItem);
+          } else {
+            this.openImageInDialog(this.mediaItemId());
+          }
+        },
+        onKeyDown: (event: KeyboardEvent) => {
+          if (event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            this.openImageInNewTab(gMediaItem);
+          } else if (event.key === 'Enter') {
+            event.preventDefault();
+            this.openImageInDialog(this.mediaItemId());
+          }
+        },
+      };
+    });
+  });
 
   private openImageInNewTab(detail: GPhotosMediaItem) {
     const width = detail.mediaMetadata.width;
@@ -153,55 +85,15 @@ export class ImageComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit(): void {
-    this.subscription.add(
-      this.isInViewport$
-        .pipe(
-          filter(Boolean),
-          switchMap(() => this.mediaItemId$),
-          distinctUntilChanged(),
-        )
-        .subscribe((mediaItemId) => {
-          this.store.dispatch(
-            mediaItemsActions.loadMediaItemDetails({ mediaItemId }),
-          );
-        }),
-    );
-
-    this.subscription.add(
-      this.isInViewport$
-        .pipe(
-          filter(Boolean),
-          switchMap(() => {
-            return this.mediaItemResult$.pipe(
-              filterOnlySuccess(),
-              distinctUntilChanged(),
-            );
-          }),
-        )
-        .subscribe((mediaItem) => {
-          this.store.dispatch(
-            gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-              gMediaItemId: mediaItem.gPhotosMediaItemId,
-            }),
-          );
-        }),
-    );
-
-    this.subscription.add(
-      this.imageDataResult$
-        .pipe(filterOnlySuccess(), distinctUntilChanged())
-        .subscribe(() => {
-          this.imageSizeChanged.emit(undefined);
-        }),
-    );
+  constructor() {
+    effect(() => {
+      if (this.isInViewport()) {
+        this.imageStore.loadGPhotosMediaItemDetails(this.gPhotosMediaItemId());
+      }
+    });
   }
 
   setIsInViewport(visible: boolean) {
-    this.isInViewport$.next(visible);
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.isInViewport.set(visible);
   }
 }

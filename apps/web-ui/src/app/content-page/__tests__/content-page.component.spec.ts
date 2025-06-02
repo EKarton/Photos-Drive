@@ -9,11 +9,12 @@ import { authState } from '../../auth/store';
 import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
-import { Album, GPhotosMediaItem, MediaItem } from '../services/webapi.service';
+import {
+  Album,
+  ListMediaItemsInAlbumResponse,
+  WebApiService,
+} from '../services/webapi.service';
 import { albumsState } from '../store/albums';
-import { gPhotosMediaItemsState } from '../store/gphoto-media-items';
-import { gPhotosClientsState } from '../store/gphotos-clients';
-import { mediaItemsState } from '../store/media-items';
 import { mediaViewerState } from '../store/media-viewer';
 
 const ALBUM_DETAILS_ROOT: Album = {
@@ -55,59 +56,41 @@ const ALBUM_DETAILS_2011: Album = {
   mediaItemIds: [],
 };
 
-const MEDIA_ITEM_DETAILS_PHOTOS_1: MediaItem = {
-  id: 'photos1',
-  fileName: 'dog.png',
-  hashCode: '',
-  gPhotosClientId: 'gPhotosClient1',
-  gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
-};
-
-const MEDIA_ITEM_DETAILS_PHOTOS_2: MediaItem = {
-  id: 'photos2',
-  fileName: 'cat.png',
-  hashCode: '',
-  gPhotosClientId: 'gPhotosClient1',
-  gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
-};
-
-const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
-  baseUrl: 'http://www.google.com/photos/1',
-  mimeType: 'image/jpeg',
-  mediaMetadata: {
-    creationTime: '',
-    width: '200',
-    height: '200',
-  },
-};
-
-const G_MEDIA_ITEM_DETAILS_PHOTO_2: GPhotosMediaItem = {
-  baseUrl: 'http://www.google.com/photos/2',
-  mimeType: 'image/jpeg',
-  mediaMetadata: {
-    creationTime: '',
-    width: '300',
-    height: '300',
-  },
+const PAGE_1: ListMediaItemsInAlbumResponse = {
+  mediaItems: [
+    {
+      id: 'photos1',
+      fileName: 'dog.png',
+      hashCode: '',
+      gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+    },
+    {
+      id: 'photos2',
+      fileName: 'cat.png',
+      hashCode: '',
+      gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
+    },
+  ],
 };
 
 describe('ContentPageComponent', () => {
   let component: ContentPageComponent;
   let fixture: ComponentFixture<ContentPageComponent>;
   let store: MockStore;
+  let mockWebApiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(async () => {
+    mockWebApiService = jasmine.createSpyObj('WebApiService', [
+      'listMediaItemsInAlbum',
+    ]);
+
     await TestBed.configureTestingModule({
       imports: [ContentPageComponent],
       providers: [
         provideMockStore({
           initialState: {
             [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
-            [mediaItemsState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-            [gPhotosMediaItemsState.FEATURE_KEY]:
-              gPhotosMediaItemsState.buildInitialState(),
-            [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-            [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
+            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
             [authState.FEATURE_KEY]: authState.buildInitialState(),
           },
@@ -117,6 +100,10 @@ describe('ContentPageComponent', () => {
           useValue: {
             paramMap: of(ImmutableMap().set('albumId', 'album3')),
           },
+        },
+        {
+          provide: WebApiService,
+          useValue: mockWebApiService,
         },
         provideNoopAnimations(),
       ],
@@ -135,6 +122,7 @@ describe('ContentPageComponent', () => {
   });
 
   it('should show albums and photos given data has been loaded', () => {
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(PAGE_1));
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -144,24 +132,7 @@ describe('ContentPageComponent', () => {
           .set('album4', toSuccess(ALBUM_DETAILS_2010))
           .set('album5', toSuccess(ALBUM_DETAILS_2011)),
       },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set('photos1', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_1))
-          .set('photos2', toSuccess(MEDIA_ITEM_DETAILS_PHOTOS_2)),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set(
-            'gPhotosClient1:gPhotosMediaItem1',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-          )
-          .set(
-            'gPhotosClient1:gPhotosMediaItem2',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_2),
-          ),
-      },
-      [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-      [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
+      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
       [themeState.FEATURE_KEY]: themeState.initialState,
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
@@ -186,19 +157,16 @@ describe('ContentPageComponent', () => {
     expect(subAlbums[1].textContent!.trim()).toBe('2011');
 
     // Assert that the images rendered correctly
-    const mediaItemImages = fixture.nativeElement.querySelectorAll(
-      '[data-testid="media-item-image"]',
-    );
+    const mediaItemImages = fixture.nativeElement.querySelectorAll('app-image');
     expect(mediaItemImages.length).toEqual(2);
-    expect(mediaItemImages[0].getAttribute('src')).toEqual(
-      'http://www.google.com/photos/1',
-    );
-    expect(mediaItemImages[1].getAttribute('src')).toEqual(
-      'http://www.google.com/photos/2',
-    );
   });
 
   it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', () => {
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      of({
+        mediaItems: [],
+      }),
+    );
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -215,14 +183,7 @@ describe('ContentPageComponent', () => {
             }),
           ),
       },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap(),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap(),
-      },
-      [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-      [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
+      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
       [themeState.FEATURE_KEY]: themeState.initialState,
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });

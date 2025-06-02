@@ -2,7 +2,11 @@ import { wrap } from 'async-middleware';
 import { Router } from 'express';
 import { verifyAuthentication } from '../middlewares/authentication';
 import { verifyAuthorization } from '../middlewares/authorization';
-import { MediaItemId } from '../services/metadata_store/MediaItems';
+import { albumIdToString } from '../services/metadata_store/Albums';
+import {
+  mediaIdToString,
+  MediaItemId
+} from '../services/metadata_store/MediaItems';
 import {
   MediaItemNotFoundError,
   MediaItemsRepository
@@ -27,16 +31,11 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
       try {
         const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId);
         const response = {
-          id: `${mediaItem.id.clientId}:${mediaItem.id.objectId}`,
+          id: mediaIdToString(mediaItem.id),
           fileName: mediaItem.file_name,
-          location: mediaItem.location
-            ? {
-                latitude: mediaItem.location.latitude,
-                longitude: mediaItem.location.longitude
-              }
-            : null,
+          location: mediaItem.location,
           gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`,
-          albumId: `${mediaItem.album_id.clientId}:${mediaItem.album_id.objectId}`
+          albumId: albumIdToString(mediaItem.album_id)
         };
 
         return res.status(200).json(response);

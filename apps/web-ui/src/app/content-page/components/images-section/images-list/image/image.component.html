@@ -3,15 +3,15 @@
     <div
       data-testid="image-loading"
       class="skeleton animate-pulse"
-      [style.height.px]="width()"
       [style.width.px]="width()"
+      [style.height.px]="height()"
     ></div>
   } @else if (imageDataResult() | hasFailed) {
     <div
       data-testid="image-error"
       class="skeleton"
-      [style.height.px]="width()"
       [style.width.px]="width()"
+      [style.height.px]="height()"
     >
       <div class="absolute inset-0 flex items-center justify-center">
         <div
@@ -27,9 +27,9 @@
       loading="lazy"
       data-testid="media-item-image"
       [src]="imageData.baseUrl"
-      [style.height.px]="imageData.height"
-      [style.width.px]="imageData.width"
-      [alt]="imageData.fileName"
+      [style.width.px]="width()"
+      [style.height.px]="height()"
+      [alt]="fileName()"
       (click)="imageData.onClick($event)"
       (keydown)="imageData.onKeyDown($event)"
       tabindex="0"

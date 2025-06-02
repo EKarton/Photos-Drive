@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { Map as ImmutableMap } from 'immutable';
+import { EMPTY, of } from 'rxjs';
 
 import { NAVIGATOR } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
-import { toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItem, MediaItem } from '../../../services/webapi.service';
-import { gPhotosMediaItemsState } from '../../../store/gphoto-media-items';
-import { mediaItemsState } from '../../../store/media-items';
+import {
+  GPhotosMediaItem,
+  MediaItem,
+  WebApiService,
+} from '../../../services/webapi.service';
 import {
   mediaViewerActions,
   mediaViewerState,
@@ -22,7 +23,6 @@ const MEDIA_ITEM_IMAGE: MediaItem = {
     latitude: 123,
     longitude: 456,
   },
-  gPhotosClientId: 'gPhotosClientId1',
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem1',
 };
 
@@ -44,7 +44,6 @@ const MEDIA_ITEM_VIDEO: MediaItem = {
     latitude: 123,
     longitude: 456,
   },
-  gPhotosClientId: 'gPhotosClientId1',
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem2',
 };
 
@@ -62,7 +61,6 @@ const MEDIA_ITEM_AUDIO: MediaItem = {
   id: 'mediaItem3',
   fileName: 'dog.mp3',
   hashCode: '1234',
-  gPhotosClientId: 'gPhotosClientId1',
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem3',
 };
 
@@ -79,9 +77,14 @@ describe('MediaViewerComponent', () => {
   let component: MediaViewerComponent;
   let fixture: ComponentFixture<MediaViewerComponent>;
   let store: MockStore;
+  let mockWebApiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(async () => {
     mockNavigator = jasmine.createSpyObj(Navigator, ['canShare', 'share']);
+    mockWebApiService = jasmine.createSpyObj('WebApiService', [
+      'fetchMediaItemDetails',
+      'fetchGPhotosMediaItemDetails',
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [MediaViewerComponent],
@@ -89,18 +92,13 @@ describe('MediaViewerComponent', () => {
         provideMockStore({
           initialState: {
             [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-            [mediaItemsState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-            [gPhotosMediaItemsState.FEATURE_KEY]:
-              gPhotosMediaItemsState.buildInitialState(),
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
           ],
         }),
-        {
-          provide: NAVIGATOR,
-          useValue: mockNavigator,
-        },
+        { provide: NAVIGATOR, useValue: mockNavigator },
+        { provide: WebApiService, useValue: mockWebApiService },
       ],
     }).compileComponents();
 
@@ -120,6 +118,8 @@ describe('MediaViewerComponent', () => {
   });
 
   it('should show dialog and spinner given data is still loading', () => {
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(EMPTY);
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(EMPTY);
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
@@ -127,9 +127,6 @@ describe('MediaViewerComponent', () => {
         },
         isOpen: true,
       },
-      [mediaItemsState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
-      [gPhotosMediaItemsState.FEATURE_KEY]:
-        gPhotosMediaItemsState.buildInitialState(),
     });
     store.refreshState();
 
@@ -143,24 +140,19 @@ describe('MediaViewerComponent', () => {
   });
 
   it('should render error message given unhandled mime type', () => {
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(MEDIA_ITEM_AUDIO),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_AUDIO),
+    );
+
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem3',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem3',
-          toSuccess(MEDIA_ITEM_AUDIO),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem3',
-          toSuccess(GPHOTOS_MEDIA_ITEM_AUDIO),
-        ),
       },
     });
     store.refreshState();
@@ -180,24 +172,19 @@ describe('MediaViewerComponent', () => {
   });
 
   it('should render items correctly given loaded image data', () => {
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(MEDIA_ITEM_IMAGE),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+    );
+
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem1',
-          toSuccess(MEDIA_ITEM_IMAGE),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem1',
-          toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE),
-        ),
       },
     });
     store.refreshState();
@@ -262,24 +249,18 @@ describe('MediaViewerComponent', () => {
   });
 
   it('should render items correctly given loaded video data', () => {
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(MEDIA_ITEM_VIDEO),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_VIDEO),
+    );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem2',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem2',
-          toSuccess(MEDIA_ITEM_VIDEO),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem2',
-          toSuccess(GPHOTOS_MEDIA_ITEM_VIDEO),
-        ),
       },
     });
     store.refreshState();
@@ -342,27 +323,21 @@ describe('MediaViewerComponent', () => {
   });
 
   it('should not render location when data has no location data', () => {
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of({
+        ...MEDIA_ITEM_IMAGE,
+        location: undefined,
+      }),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+    );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem1',
-          toSuccess({
-            ...MEDIA_ITEM_IMAGE,
-            location: undefined,
-          }),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem1',
-          toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE),
-        ),
       },
     });
     store.refreshState();
@@ -378,24 +353,18 @@ describe('MediaViewerComponent', () => {
   it('should call navigator api correctly when user clicks on share button on an image', () => {
     mockNavigator.canShare.and.returnValue(true);
     mockNavigator.share.and.resolveTo(undefined);
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(MEDIA_ITEM_IMAGE),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+    );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem1',
-          toSuccess(MEDIA_ITEM_IMAGE),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem1',
-          toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE),
-        ),
       },
     });
     store.refreshState();
@@ -416,24 +385,18 @@ describe('MediaViewerComponent', () => {
   it('should call navigator api correctly when user clicks on share button on a video', () => {
     mockNavigator.canShare.and.returnValue(true);
     mockNavigator.share.and.resolveTo(undefined);
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(MEDIA_ITEM_VIDEO),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_VIDEO),
+    );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem2',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem2',
-          toSuccess(MEDIA_ITEM_VIDEO),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem2',
-          toSuccess(GPHOTOS_MEDIA_ITEM_VIDEO),
-        ),
       },
     });
     store.refreshState();
@@ -454,24 +417,18 @@ describe('MediaViewerComponent', () => {
   it('should not call navigator.share() when user clicks on share button but sharing fails', () => {
     mockNavigator.canShare.and.returnValue(false);
     mockNavigator.share.and.resolveTo(undefined);
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(MEDIA_ITEM_IMAGE),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+    );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem1',
-          toSuccess(MEDIA_ITEM_IMAGE),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem1',
-          toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE),
-        ),
       },
     });
     store.refreshState();
@@ -486,24 +443,18 @@ describe('MediaViewerComponent', () => {
   });
 
   it('should dispatch an event when user clicks on the close button', () => {
+    mockWebApiService.fetchMediaItemDetails.and.returnValue(
+      of(MEDIA_ITEM_IMAGE),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(GPHOTOS_MEDIA_ITEM_IMAGE),
+    );
     store.setState({
       [mediaViewerState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
         isOpen: true,
-      },
-      [mediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'mediaItem1',
-          toSuccess(MEDIA_ITEM_IMAGE),
-        ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotosClientId1:gPhotosMediaItem1',
-          toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE),
-        ),
       },
     });
     store.refreshState();

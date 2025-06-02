@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -37,11 +37,36 @@ export interface MediaItem {
   fileName: string;
   hashCode: string;
   location?: MediaItemLocation;
-  gPhotosClientId: string;
   gPhotosMediaItemId: string;
 }
 
 export type MediaItemDetailsApiResponse = MediaItem;
+
+export enum ListMediaItemsInAlbumSortByFields {
+  ID = 'id',
+}
+
+export enum ListMediaItemsInAlbumSortDirection {
+  ASCENDING = 'asc',
+  DESCENDING = 'desc',
+}
+
+export interface ListMediaItemsInAlbumSortBy {
+  field: ListMediaItemsInAlbumSortByFields;
+  direction: ListMediaItemsInAlbumSortDirection;
+}
+
+export interface ListMediaItemsInAlbumRequest {
+  albumId: string;
+  pageSize?: number;
+  pageToken?: string;
+  sortBy?: ListMediaItemsInAlbumSortBy;
+}
+
+export interface ListMediaItemsInAlbumResponse {
+  mediaItems: MediaItem[];
+  nextPageToken?: string;
+}
 
 export interface RefreshTokenApiResponse {
   newToken: string;
@@ -212,6 +237,32 @@ export class WebApiService {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+    });
+  }
+
+  listMediaItemsInAlbum(
+    accessToken: string,
+    request: ListMediaItemsInAlbumRequest,
+  ): Observable<ListMediaItemsInAlbumResponse> {
+    const url = `${environment.webApiEndpoint}/api/v1/albums/${request.albumId}/media-items`;
+
+    let params = new HttpParams();
+    if (request.pageSize) {
+      params = params.set('pageSize', request.pageSize);
+    }
+    if (request.pageToken) {
+      params = params.set('pageToken', request.pageToken);
+    }
+    if (request.sortBy) {
+      params = params.set('sortBy', request.sortBy.field);
+      params = params.set('sortDir', request.sortBy.direction);
+    }
+
+    return this.httpClient.get<ListMediaItemsInAlbumResponse>(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params,
     });
   }
 }
