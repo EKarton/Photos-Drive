@@ -22,7 +22,6 @@ const MEDIA_ITEM_IMAGE: MediaItem = {
     latitude: 123,
     longitude: 456,
   },
-  gPhotosClientId: 'gPhotosClientId1',
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem1',
 };
 
@@ -44,7 +43,6 @@ const MEDIA_ITEM_VIDEO: MediaItem = {
     latitude: 123,
     longitude: 456,
   },
-  gPhotosClientId: 'gPhotosClientId1',
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem2',
 };
 
@@ -62,7 +60,6 @@ const MEDIA_ITEM_AUDIO: MediaItem = {
   id: 'mediaItem3',
   fileName: 'dog.mp3',
   hashCode: '1234',
-  gPhotosClientId: 'gPhotosClientId1',
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem3',
 };
 

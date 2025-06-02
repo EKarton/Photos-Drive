@@ -37,7 +37,6 @@ export interface MediaItem {
   fileName: string;
   hashCode: string;
   location?: MediaItemLocation;
-  gPhotosClientId: string;
   gPhotosMediaItemId: string;
 }
 

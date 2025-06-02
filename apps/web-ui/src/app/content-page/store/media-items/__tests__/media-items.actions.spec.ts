@@ -23,7 +23,6 @@ describe('Media Item Actions', () => {
       id: mediaItemId,
       fileName: '',
       hashCode: '',
-      gPhotosClientId: '',
       gPhotosMediaItemId: '',
     };
 

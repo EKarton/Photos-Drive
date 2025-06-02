@@ -19,7 +19,6 @@ describe('Media Items Reducer', () => {
       id: 'item123',
       fileName: '',
       hashCode: '',
-      gPhotosClientId: '',
       gPhotosMediaItemId: '',
     };
     const mockResult = toSuccess(mediaItem);

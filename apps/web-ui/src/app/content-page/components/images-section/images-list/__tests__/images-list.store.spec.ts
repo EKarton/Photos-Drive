@@ -21,14 +21,12 @@ describe('ImagesListStore', () => {
       id: '1',
       fileName: 'dog.png',
       hashCode: '123',
-      gPhotosClientId: 'client1',
       gPhotosMediaItemId: 'gMediaItem1',
     },
     {
       id: '2',
       fileName: 'cat.png',
       hashCode: 'xyz',
-      gPhotosClientId: 'client1',
       gPhotosMediaItemId: 'gMediaItem2',
     },
   ];
@@ -90,7 +88,6 @@ describe('ImagesListStore', () => {
           id: '3',
           fileName: 'lizard.png',
           hashCode: 'wasd',
-          gPhotosClientId: 'client3',
           gPhotosMediaItemId: 'gMediaItem3',
         },
       ],
@@ -110,6 +107,24 @@ describe('ImagesListStore', () => {
     ]);
   });
 
+  it('should handle errors when loading more media items fail', () => {
+    const firstPage: ListMediaItemsInAlbumResponse = {
+      mediaItems: dummyMediaItems,
+      nextPageToken: 'next123',
+    };
+
+    // Set up initial state manually
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(firstPage));
+    store.loadInitialPage({ albumId: dummyAlbumId });
+
+    mockWebApiService.listMediaItemsInAlbum.and.returnValue(
+      throwError(() => new Error('API Error')),
+    );
+    store.loadMoreMediaItems({});
+
+    expect(store.mediaItems()).toEqual([...dummyMediaItems]);
+  });
+
   it('should not load more if already at end of list', () => {
     const firstPage: ListMediaItemsInAlbumResponse = {
       mediaItems: dummyMediaItems,
@@ -118,6 +133,7 @@ describe('ImagesListStore', () => {
 
     mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(firstPage));
     store.loadInitialPage({ albumId: dummyAlbumId });
+    store.loadMoreMediaItems({});
 
     expect(mockWebApiService.listMediaItemsInAlbum).toHaveBeenCalledTimes(1);
     expect(store.mediaItems()).toEqual(dummyMediaItems);

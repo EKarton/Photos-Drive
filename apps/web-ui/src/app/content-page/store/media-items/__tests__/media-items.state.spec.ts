@@ -40,7 +40,6 @@ describe('Media Items Selectors', () => {
       id: 'item123',
       fileName: '',
       hashCode: '',
-      gPhotosClientId: '',
       gPhotosMediaItemId: '',
     };
     const state: MediaItemsState = {
@@ -63,7 +62,6 @@ describe('Media Items Selectors', () => {
       id: 'existingId',
       fileName: '',
       hashCode: '',
-      gPhotosClientId: '',
       gPhotosMediaItemId: '',
     };
     const state: MediaItemsState = {

@@ -52,7 +52,6 @@ describe('MediaItemsEffects', () => {
       id: 'item123',
       fileName: '',
       hashCode: '',
-      gPhotosClientId: '',
       gPhotosMediaItemId: '',
     };
     actions$ = new Actions(
