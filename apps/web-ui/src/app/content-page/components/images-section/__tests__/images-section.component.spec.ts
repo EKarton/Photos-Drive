@@ -1,12 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { Map as ImmutableMap } from 'immutable';
 import { of } from 'rxjs';
 
 import { WINDOW } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
-import { toSuccess } from '../../../../shared/results/results';
 import {
   GPhotosMediaItem,
   ListMediaItemsInAlbumResponse,
@@ -61,6 +59,7 @@ describe('ImagesSectionComponent', () => {
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
       'listMediaItemsInAlbum',
+      'fetchGPhotosMediaItemDetails',
     ]);
 
     await TestBed.configureTestingModule({
@@ -94,6 +93,10 @@ describe('ImagesSectionComponent', () => {
 
   it('should render images given album, media items, and gphotos media items have loaded yet', () => {
     mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(PAGE_1));
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValues(
+      of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+      of(G_MEDIA_ITEM_DETAILS_PHOTO_2),
+    );
 
     const fixture = TestBed.createComponent(ImagesSectionComponent);
     fixture.componentRef.setInput('albumId', 'album1');
@@ -101,17 +104,6 @@ describe('ImagesSectionComponent', () => {
 
     store.setState({
       [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set(
-            'gPhotosClient1:gPhotosMediaItem1',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-          )
-          .set(
-            'gPhotosClient1:gPhotosMediaItem2',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_2),
-          ),
-      },
     });
     store.refreshState();
     fixture.detectChanges();

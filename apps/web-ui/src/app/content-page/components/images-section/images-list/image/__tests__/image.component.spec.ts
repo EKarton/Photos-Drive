@@ -1,15 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { Map as ImmutableMap } from 'immutable';
+import { EMPTY, of } from 'rxjs';
 
 import { WINDOW } from '../../../../../../app.tokens';
-import { toSuccess } from '../../../../../../shared/results/results';
-import { GPhotosMediaItem } from '../../../../../services/webapi.service';
+import { authState } from '../../../../../../auth/store';
 import {
-  gPhotosMediaItemsActions,
-  gPhotosMediaItemsState,
-} from '../../../../../store/gphoto-media-items';
+  GPhotosMediaItem,
+  WebApiService,
+} from '../../../../../services/webapi.service';
 import {
   mediaViewerActions,
   mediaViewerState,
@@ -29,8 +28,13 @@ const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
 describe('ImageComponent', () => {
   let store: MockStore;
   let mockWindow: Window;
+  let mockWebApiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(async () => {
+    mockWebApiService = jasmine.createSpyObj('WebApiService', [
+      'fetchGPhotosMediaItemDetails',
+    ]);
+
     await TestBed.configureTestingModule({
       imports: [ImageComponent],
       providers: [
@@ -38,13 +42,18 @@ describe('ImageComponent', () => {
         provideMockStore({
           initialState: {
             [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-            [gPhotosMediaItemsState.FEATURE_KEY]:
-              gPhotosMediaItemsState.buildInitialState(),
           },
+          selectors: [
+            { selector: authState.selectAuthToken, value: 'mockAccessToken' },
+          ],
         }),
         {
           provide: WINDOW,
           useValue: { open: jasmine.createSpy() },
+        },
+        {
+          provide: WebApiService,
+          useValue: mockWebApiService,
         },
       ],
     }).compileComponents();
@@ -55,6 +64,8 @@ describe('ImageComponent', () => {
   });
 
   it('should render skeleton when media item is not loaded yet', () => {
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(EMPTY);
+
     const fixture = TestBed.createComponent(ImageComponent);
     fixture.componentRef.setInput('mediaItemId', 'photos1');
     fixture.componentRef.setInput('gPhotosMediaItemId', 'gPhotos1');
@@ -70,6 +81,10 @@ describe('ImageComponent', () => {
   });
 
   it('should render image when gmedia item has loaded already', () => {
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+      of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+    );
+
     const fixture = TestBed.createComponent(ImageComponent);
     fixture.componentRef.setInput('mediaItemId', 'photos1');
     fixture.componentRef.setInput('gPhotosMediaItemId', 'gPhotos1');
@@ -80,12 +95,6 @@ describe('ImageComponent', () => {
 
     store.setState({
       [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap().set(
-          'gPhotos1',
-          toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-        ),
-      },
     });
     store.refreshState();
     fixture.detectChanges();
@@ -99,10 +108,9 @@ describe('ImageComponent', () => {
   });
 
   it('should dispatch event to load gphotos media item when media item is only loaded and it is in viewport', () => {
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(EMPTY);
     store.setState({
       [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      [gPhotosMediaItemsState.FEATURE_KEY]:
-        gPhotosMediaItemsState.buildInitialState(),
     });
     const fixture = TestBed.createComponent(ImageComponent);
     fixture.componentRef.setInput('mediaItemId', 'photos1');
@@ -115,10 +123,9 @@ describe('ImageComponent', () => {
     fixture.componentInstance.setIsInViewport(true);
     fixture.detectChanges();
 
-    expect(store.dispatch).toHaveBeenCalledWith(
-      gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-        gMediaItemId: 'gPhotos1',
-      }),
+    expect(mockWebApiService.fetchGPhotosMediaItemDetails).toHaveBeenCalledWith(
+      'mockAccessToken',
+      'gPhotos1',
     );
   });
 
@@ -135,6 +142,9 @@ describe('ImageComponent', () => {
     },
   ].forEach(({ event }) => {
     it(`should dispatch request to open image in new tab when user emits event ${event} on image`, () => {
+      mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+        of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+      );
       const fixture = TestBed.createComponent(ImageComponent);
       fixture.componentRef.setInput('mediaItemId', 'photos1');
       fixture.componentRef.setInput('gPhotosMediaItemId', 'gPhotos1');
@@ -145,12 +155,6 @@ describe('ImageComponent', () => {
 
       store.setState({
         [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-        [gPhotosMediaItemsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap().set(
-            'gPhotos1',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-          ),
-        },
       });
       store.refreshState();
       fixture.detectChanges();
@@ -178,6 +182,9 @@ describe('ImageComponent', () => {
     },
   ].forEach(({ event }) => {
     it(`should dispatch request to open media viewer when user emits ${event} on image`, () => {
+      mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValue(
+        of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+      );
       const fixture = TestBed.createComponent(ImageComponent);
       fixture.componentRef.setInput('mediaItemId', 'photos1');
       fixture.componentRef.setInput('gPhotosMediaItemId', 'gPhotos1');
@@ -188,12 +195,6 @@ describe('ImageComponent', () => {
 
       store.setState({
         [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-        [gPhotosMediaItemsState.FEATURE_KEY]: {
-          idToDetails: ImmutableMap().set(
-            'gPhotos1',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-          ),
-        },
       });
       store.refreshState();
       fixture.detectChanges();

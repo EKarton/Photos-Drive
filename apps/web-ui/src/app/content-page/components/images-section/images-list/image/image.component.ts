@@ -14,11 +14,8 @@ import { HasFailedPipe } from '../../../../../shared/results/pipes/has-failed.pi
 import { IsPendingPipe } from '../../../../../shared/results/pipes/is-pending.pipe';
 import { mapResult } from '../../../../../shared/results/utils/mapResult';
 import { GPhotosMediaItem } from '../../../../services/webapi.service';
-import {
-  gPhotosMediaItemsActions,
-  gPhotosMediaItemsState,
-} from '../../../../store/gphoto-media-items';
 import { mediaViewerActions } from '../../../../store/media-viewer';
+import { ImageStore } from './image.store';
 
 export interface ImageData {
   id: string;
@@ -32,9 +29,11 @@ export interface ImageData {
   selector: 'app-image',
   imports: [InViewportModule, HasFailedPipe, IsPendingPipe],
   templateUrl: './image.component.html',
+  providers: [ImageStore],
 })
 export class ImageComponent {
   private readonly store = inject(Store);
+  private readonly imageStore = inject(ImageStore);
   private readonly window = inject(WINDOW);
 
   readonly mediaItemId = input.required<string>();
@@ -46,11 +45,7 @@ export class ImageComponent {
   private readonly isInViewport = signal(false);
 
   readonly imageDataResult = computed(() => {
-    const gMediaItemResult = this.store.selectSignal(
-      gPhotosMediaItemsState.selectGPhotosMediaItemById(
-        this.gPhotosMediaItemId(),
-      ),
-    )();
+    const gMediaItemResult = this.imageStore.gPhotosMediaItem();
 
     return mapResult(gMediaItemResult, (gMediaItem) => {
       return {
@@ -93,11 +88,7 @@ export class ImageComponent {
   constructor() {
     effect(() => {
       if (this.isInViewport()) {
-        this.store.dispatch(
-          gPhotosMediaItemsActions.loadGPhotosMediaItemDetails({
-            gMediaItemId: this.gPhotosMediaItemId(),
-          }),
-        );
+        this.imageStore.loadGPhotosMediaItemDetails(this.gPhotosMediaItemId());
       }
     });
   }

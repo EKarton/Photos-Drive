@@ -106,6 +106,7 @@ describe('ContentPageComponent', () => {
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
       'listMediaItemsInAlbum',
+      'fetchGPhotosMediaItemDetails',
     ]);
 
     await TestBed.configureTestingModule({
@@ -150,6 +151,10 @@ describe('ContentPageComponent', () => {
 
   it('should show albums and photos given data has been loaded', () => {
     mockWebApiService.listMediaItemsInAlbum.and.returnValue(of(PAGE_1));
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValues(
+      of(G_MEDIA_ITEM_DETAILS_PHOTO_1),
+      of(G_MEDIA_ITEM_DETAILS_PHOTO_2),
+    );
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -158,17 +163,6 @@ describe('ContentPageComponent', () => {
           .set('album3', toSuccess(ALBUM_DETAILS_PHOTOS))
           .set('album4', toSuccess(ALBUM_DETAILS_2010))
           .set('album5', toSuccess(ALBUM_DETAILS_2011)),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set(
-            'gPhotosClient1:gPhotosMediaItem1',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_1),
-          )
-          .set(
-            'gPhotosClient1:gPhotosMediaItem2',
-            toSuccess(G_MEDIA_ITEM_DETAILS_PHOTO_2),
-          ),
       },
       [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
       [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,
@@ -229,9 +223,6 @@ describe('ContentPageComponent', () => {
               mediaItemIds: [],
             }),
           ),
-      },
-      [gPhotosMediaItemsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap(),
       },
       [mediaViewerState.FEATURE_KEY]: mediaItemsState.buildInitialState(),
       [gPhotosClientsState.FEATURE_KEY]: gPhotosClientsState.initialState,

@@ -1,19 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideMockStore } from '@ngrx/store/testing';
-import { Map as ImmutableMap } from 'immutable';
 import { of } from 'rxjs';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { MockResizeObserverFactory } from '../../../../../shared/resize-observer-factory/__mocks__/MockResizeObserverFactory';
-import { toSuccess } from '../../../../../shared/results/results';
 import {
   GPhotosMediaItem,
   ListMediaItemsInAlbumResponse,
   WebApiService,
 } from '../../../../services/webapi.service';
-import { gPhotosMediaItemsState } from '../../../../store/gphoto-media-items';
 import { mediaViewerState } from '../../../../store/media-viewer';
 import { ImagesListComponent } from '../images-list.component';
 
@@ -85,6 +82,15 @@ describe('ImagesListComponent', () => {
       'listMediaItemsInAlbum',
       'fetchGPhotosMediaItemDetails',
     ]);
+    mockWebApiService.listMediaItemsInAlbum.and.returnValues(
+      of(PAGE_1),
+      of(PAGE_2),
+    );
+    mockWebApiService.fetchGPhotosMediaItemDetails.and.returnValues(
+      of(GMEDIA_ITEM_DETAILS_PHOTO_1),
+      of(GMEDIA_ITEM_DETAILS_PHOTO_2),
+      of(GMEDIA_ITEM_DETAILS_PHOTO_3),
+    );
 
     await TestBed.configureTestingModule({
       imports: [ImagesListComponent],
@@ -93,21 +99,6 @@ describe('ImagesListComponent', () => {
         provideMockStore({
           initialState: {
             [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-            [gPhotosMediaItemsState.FEATURE_KEY]: {
-              idToDetails: ImmutableMap()
-                .set(
-                  'gPhotosClient1:gPhotosMediaItem1',
-                  toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_1),
-                )
-                .set(
-                  'gPhotosClient1:gPhotosMediaItem2',
-                  toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_2),
-                )
-                .set(
-                  'gPhotosClient1:gPhotosMediaItem3',
-                  toSuccess(GMEDIA_ITEM_DETAILS_PHOTO_3),
-                ),
-            },
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
@@ -127,11 +118,6 @@ describe('ImagesListComponent', () => {
   });
 
   it('should render images', () => {
-    mockWebApiService.listMediaItemsInAlbum.and.returnValues(
-      of(PAGE_1),
-      of(PAGE_2),
-    );
-
     const fixture = TestBed.createComponent(ImagesListComponent);
     fixture.componentRef.setInput('albumId', ['album1']);
     fixture.detectChanges();
@@ -166,11 +152,6 @@ describe('ImagesListComponent', () => {
   ].forEach(
     ({ hostElementWidth, expectedImageWidths, expectedImageHeights }) => {
       it(`should resize images correctly when the component width changes to ${hostElementWidth}`, async () => {
-        mockWebApiService.listMediaItemsInAlbum.and.returnValues(
-          of(PAGE_1),
-          of(PAGE_2),
-        );
-
         // Render the component
         const fixture = TestBed.createComponent(ImagesListComponent);
         fixture.componentRef.setInput('albumId', ['album1']);
@@ -213,11 +194,6 @@ describe('ImagesListComponent', () => {
   );
 
   it('should fetch more images given user has scrolled', () => {
-    mockWebApiService.listMediaItemsInAlbum.and.returnValues(
-      of(PAGE_1),
-      of(PAGE_2),
-    );
-
     const fixture = TestBed.createComponent(ImagesListComponent);
     fixture.componentRef.setInput('albumId', ['album1']);
     fixture.detectChanges();
