@@ -119,7 +119,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   }
 }
 
-function determineNumColumns(componentWidth: number) {
+function determineNumColumns(componentWidth: number): number {
   if (componentWidth < 400) {
     return 2;
   }
