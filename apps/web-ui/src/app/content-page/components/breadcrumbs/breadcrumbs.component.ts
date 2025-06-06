@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  ElementRef,
   inject,
   input,
   OnDestroy,
   OnInit,
-  Signal,
+  ViewChild,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map, Observable, of, Subscription, switchMap } from 'rxjs';
@@ -38,29 +39,24 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
   readonly albumId = input.required<string>();
 
+  @ViewChild('breadcrumbContainer')
+  breadcrumbContainer?: ElementRef<HTMLDivElement>;
+
   private readonly albums$: Observable<Result<Album>[]> = toObservable(
     this.albumId,
   ).pipe(switchMap((albumId) => this.getParentAlbums(albumId)));
 
-  readonly breadcrumbItems: Signal<Result<BreadcrumbItem[]>> = (() => {
-    const breadcrumbs$: Observable<Result<BreadcrumbItem[]>> =
-      this.albums$.pipe(
-        map((albumsResults) =>
-          combineResults(albumsResults, (albums) => albums),
-        ),
-        mapResultRxJs((albums: Album[]) => {
-          return albums.map((album) => ({
-            id: album.id,
-            text: album.albumName || 'Home',
-            routerLink: `/content/${album.id}`,
-          }));
-        }),
-      );
-
-    return toSignal(breadcrumbs$, {
-      initialValue: toPending<BreadcrumbItem[]>(),
-    });
-  })();
+  readonly breadcrumbItems$: Observable<Result<BreadcrumbItem[]>> =
+    this.albums$.pipe(
+      map((albumsResults) => combineResults(albumsResults, (albums) => albums)),
+      mapResultRxJs((albums: Album[]) => {
+        return albums.map((album) => ({
+          id: album.id,
+          text: album.albumName || 'Home',
+          routerLink: `/content/${album.id}`,
+        }));
+      }),
+    );
 
   private getParentAlbums(albumId: string): Observable<Result<Album>[]> {
     const curAlbumResult$ = this.store.select(
@@ -89,6 +85,17 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.subscriptions.add(
+      this.breadcrumbItems$.pipe(filterOnlySuccess()).subscribe(() => {
+        setTimeout(() => {
+          const el = this.breadcrumbContainer?.nativeElement;
+          if (el) {
+            el.scrollLeft = el.scrollWidth;
+          }
+        }, 0);
+      }),
+    );
+
     this.subscriptions.add(
       this.albums$
         .pipe(
