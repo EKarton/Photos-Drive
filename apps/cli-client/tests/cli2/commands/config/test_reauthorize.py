@@ -62,6 +62,7 @@ class TestReauthorizeCli(unittest.TestCase):
         os.unlink(self.temp_file_path)
 
     def test_reauthorize_gphotos(self):
+        self.maxDiff = None
         # Test setup: mock getpass
         mock_get_pass = patch('getpass.getpass').start()
         mock_get_pass.side_effect = [
@@ -108,7 +109,7 @@ class TestReauthorizeCli(unittest.TestCase):
                 "--config-file",
                 self.temp_file_path,
             ],
-            input="yes\nbob@gmail.com\nyes\nyes\n",
+            input="yes\nbob@gmail.com\nyes\nyes\nyes\nyes\n",
         )
 
         # Test assert: check on output
@@ -118,7 +119,9 @@ class TestReauthorizeCli(unittest.TestCase):
             + 'Do you want to change the name? (Y/N): '
             + 'Enter new name: '
             + 'Do you want to change the read+write credentials? (Y/N): '
+            + 'Do you want to use existing client ID / client secrets? (Y/N): '
             + 'Do you want to change the read-only credentials? (Y/N): '
+            + 'Do you want to use existing client ID / client secrets? (Y/N): '
             + f'Successfully updated gphotos config {self.gphotos_client_id}\n',
         )
         self.assertEqual(result.exit_code, 0)

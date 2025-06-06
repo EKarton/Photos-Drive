@@ -4,7 +4,18 @@ from datetime import datetime, timezone
 import logging
 import os
 from typing import Optional, cast
-from exiftool import ExifToolHelper  # type: ignore
+from exiftool import ExifToolHelper
+
+from ..shared.dimensions.cv2_video_dimensions import (
+    get_width_height_of_video,
+)
+from ..shared.dimensions.pillow_image_dimensions import (
+    get_width_height_of_image,
+)
+from ..shared.gphotos.valid_file_extensions import (
+    IMAGE_FILE_EXTENSIONS,
+    VIDEO_FILE_EXTENSIONS,
+)
 
 from ..shared.hashes.xxhash import compute_file_hash
 from ..shared.mongodb.media_items import GpsLocation
@@ -48,8 +59,6 @@ class ProcessedDiff:
 @dataclass(frozen=True)
 class ExtractedExifMetadata:
     location: GpsLocation | None
-    width: int
-    height: int
     date_taken: datetime
 
 
@@ -57,12 +66,18 @@ class DiffsProcessor:
     def process_raw_diffs(self, diffs: list[Diff]) -> list[ProcessedDiff]:
         """Processes raw diffs into processed diffs, parsing their metadata."""
 
-        def process_diff(diff):
+        def process_diff(diff: Diff) -> ProcessedDiff:
             if diff.modifier not in ("+", "-"):
                 raise ValueError(f"Modifier {diff.modifier} in {diff} not allowed.")
 
             if diff.modifier == "+" and not os.path.exists(diff.file_path):
                 raise ValueError(f"File {diff.file_path} does not exist.")
+
+            width, height = None, None
+            if diff.file_path.endswith(IMAGE_FILE_EXTENSIONS):
+                width, height = get_width_height_of_image(diff.file_path)
+            elif diff.file_path.endswith(VIDEO_FILE_EXTENSIONS):
+                width, height = get_width_height_of_video(diff.file_path)
 
             return ProcessedDiff(
                 modifier=diff.modifier,
@@ -72,8 +87,8 @@ class DiffsProcessor:
                 file_name=self.__get_file_name(diff),
                 file_size=self.__get_file_size_in_bytes(diff),
                 location=None,  # Placeholder; will be updated later
-                width=0,  # Placeholder; will be updated later
-                height=0,  # Placeholder; will be updated later
+                width=width,
+                height=height,
                 date_taken=datetime.now(),  # Placeholder; will be updated later
             )
 
@@ -92,23 +107,23 @@ class DiffsProcessor:
         # Update locations in processed diffs
         for i, processed_diff in enumerate(processed_diffs):
             processed_diffs[i] = replace(
-                cast(ProcessedDiff, processed_diff), location=exif_metadatas[i].location
+                cast(ProcessedDiff, processed_diff),
+                location=exif_metadatas[i].location,
+                date_taken=exif_metadatas[i].date_taken,
             )
 
         return cast(list[ProcessedDiff], processed_diffs)
 
     def __get_exif_metadatas(self, diffs: list[Diff]) -> list[ExtractedExifMetadata]:
-        metadatas = [ExtractedExifMetadata(None, 0, 0, datetime.now())] * len(diffs)
+        metadatas = [ExtractedExifMetadata(None, datetime.now())] * len(diffs)
 
         missing_metadata_and_idx: list[tuple[Diff, int]] = []
         for i, diff in enumerate(diffs):
             if diff.modifier == "-":
                 continue
 
-            if diff.location and diff.width and diff.height and diff.date_taken:
-                new_metadata = ExtractedExifMetadata(
-                    diff.location, diff.width, diff.height, diff.date_taken
-                )
+            if diff.location and diff.date_taken:
+                new_metadata = ExtractedExifMetadata(diff.location, diff.date_taken)
                 metadatas[i] = new_metadata
                 continue
 
@@ -126,66 +141,38 @@ class DiffsProcessor:
                     "Composite:GPSLongitude",
                     "EXIF:DateTimeOriginal",  # for images
                     "QuickTime:CreateDate",  # for videos (QuickTime/MP4)
-                    "EXIF:ImageWidth",  # for images
-                    "EXIF:ImageHeight",
-                    "Composite:ImageSize",  # fallback for image size (as WxH string)
-                    "Composite:Rotation",  # adjust dimensions for rotated videos
-                    "QuickTime:ImageWidth",  # for videos
-                    "QuickTime:ImageHeight",
+                    "QuickTime:CreationDate",
+                    "TrackCreateDate",
+                    "MediaCreateDate",
                 ],
             )
 
             for i, raw_metadata in enumerate(raw_metadatas):
-                latitude = raw_metadata.get("Composite:GPSLatitude")
-                longitude = raw_metadata.get("Composite:GPSLongitude")
+                location = diffs[i].location
+                if location is None:
+                    latitude = raw_metadata.get("Composite:GPSLatitude")
+                    longitude = raw_metadata.get("Composite:GPSLongitude")
+                    if latitude and longitude:
+                        location = GpsLocation(
+                            latitude=cast(int, latitude), longitude=cast(int, longitude)
+                        )
 
-                location = None
-                if latitude and longitude:
-                    location = GpsLocation(
-                        latitude=cast(int, latitude), longitude=cast(int, longitude)
+                date_taken = diffs[i].date_taken
+                if date_taken is None:
+                    date_str = (
+                        raw_metadata.get("EXIF:DateTimeOriginal")
+                        or raw_metadata.get("QuickTime:CreateDate")
+                        or raw_metadata.get('QuickTime:CreationDate')
+                        or raw_metadata.get('TrackCreateDate')
+                        or raw_metadata.get('MediaCreateDate')
                     )
-
-                date_str = raw_metadata.get(
-                    "EXIF:DateTimeOriginal"
-                ) or raw_metadata.get("QuickTime:CreateDate")
-                date_taken = datetime.now()
-                if date_str:
-                    try:
-                        date_taken = datetime.strptime(
-                            date_str, "%Y:%m:%d %H:%M:%S"
-                        ).replace(tzinfo=timezone.utc)
-                    except ValueError:
-                        logger.debug('Failed to parse date taken. Attempt 2')
-                        try:
-                            # Try ISO format fallback
-                            date_taken = datetime.fromisoformat(
-                                date_str.replace("Z", "+00:00")
-                            )
-                        except Exception:
-                            logger.debug('Failed to parse date taken. No more attempts')
-                            pass
-
-                width = raw_metadata.get("QuickTime:ImageWidth") or raw_metadata.get(
-                    "EXIF:ImageWidth"
-                )
-                height = raw_metadata.get("QuickTime:ImageHeight") or raw_metadata.get(
-                    "EXIF:ImageHeight"
-                )
-
-                if not width or not height:
-                    size_str = raw_metadata.get(
-                        "Composite:ImageSize"
-                    )  # e.g., "1920x1080"
-                    if isinstance(size_str, str) and "x" in size_str:
-                        w_str, h_str = size_str.split("x")
-                        width = int(w_str)
-                        height = int(h_str)
+                    if date_str:
+                        date_taken = datetime.strptime(date_str, '%Y:%m:%d %H:%M:%S')
                     else:
-                        width = 0
-                        height = 0
+                        date_taken = None
 
                 metadatas[missing_metadata_and_idx[i][1]] = ExtractedExifMetadata(
-                    location, width, height, date_taken
+                    location, date_taken
                 )
 
         return metadatas

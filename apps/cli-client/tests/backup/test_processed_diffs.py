@@ -14,6 +14,7 @@ MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 class TestDiffsProcessor(unittest.TestCase):
     def test_process_raw_diffs_multiple_images(self):
+        self.maxDiff = None
         test_file_names = [
             "heic-image.heic",
             "image-with-location-2.jpg",
@@ -47,9 +48,9 @@ class TestDiffsProcessor(unittest.TestCase):
                     location=GpsLocation(
                         latitude=40.7425527777778, longitude=-74.0101694444444
                     ),
-                    width=100,
-                    height=200,
-                    date_taken=MOCK_DATE_TAKEN,
+                    width=4032,
+                    height=3024,
+                    date_taken=datetime(2022, 11, 18, 16, 39, 21),
                 ),
                 ProcessedDiff(
                     modifier='+',
@@ -59,9 +60,9 @@ class TestDiffsProcessor(unittest.TestCase):
                     file_size=2622777,
                     file_hash=b'l\x94Y\xa2\xa4W\x06\x1a',
                     location=GpsLocation(latitude=-40.7128, longitude=-74.006),
-                    width=100,
-                    height=200,
-                    date_taken=MOCK_DATE_TAKEN,
+                    width=3264,
+                    height=2448,
+                    date_taken=datetime(2013, 5, 30, 10, 30, 39),
                 ),
                 ProcessedDiff(
                     modifier='+',
@@ -73,9 +74,9 @@ class TestDiffsProcessor(unittest.TestCase):
                     location=GpsLocation(
                         latitude=43.1244649220222, longitude=-79.0687927483022
                     ),
-                    width=100,
-                    height=200,
-                    date_taken=MOCK_DATE_TAKEN,
+                    width=3264,
+                    height=2448,
+                    date_taken=datetime(2013, 5, 30, 10, 30, 39),
                 ),
                 ProcessedDiff(
                     modifier='+',
@@ -85,9 +86,9 @@ class TestDiffsProcessor(unittest.TestCase):
                     file_size=2622651,
                     file_hash=b'v\x04\x83s]\xe3tw',
                     location=None,
-                    width=100,
-                    height=200,
-                    date_taken=MOCK_DATE_TAKEN,
+                    width=3264,
+                    height=2448,
+                    date_taken=datetime(2013, 5, 30, 10, 30, 39),
                 ),
                 ProcessedDiff(
                     modifier='+',
@@ -99,9 +100,9 @@ class TestDiffsProcessor(unittest.TestCase):
                     location=GpsLocation(
                         latitude=39.1834944444444, longitude=-119.926863888889
                     ),
-                    width=100,
-                    height=200,
-                    date_taken=MOCK_DATE_TAKEN,
+                    width=4032,
+                    height=3024,
+                    date_taken=datetime(2022, 6, 20, 15, 15, 53),
                 ),
                 ProcessedDiff(
                     modifier='+',
@@ -111,9 +112,9 @@ class TestDiffsProcessor(unittest.TestCase):
                     file_size=2571720,
                     file_hash=b'\xc6K\xa09\x17Wq\x9d',
                     location=GpsLocation(latitude=40.1872, longitude=-121.1004),
-                    width=100,
-                    height=200,
-                    date_taken=MOCK_DATE_TAKEN,
+                    width=1744,
+                    height=1308,
+                    date_taken=datetime(2022, 5, 29, 11, 19, 1),
                 ),
             ],
         )

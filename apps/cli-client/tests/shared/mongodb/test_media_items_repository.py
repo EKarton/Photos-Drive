@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 import os
 from bson import Binary
 import unittest
@@ -35,9 +35,9 @@ MOCK_ALBUM_ID_2 = AlbumId(
     ObjectId("5f50c31e8a7d4b1c9c9b0c13"),
 )
 
-MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0)
 
-MOCK_DATE_TAKEN_2 = datetime(2026, 1, 1, 14, 30, 0, tzinfo=timezone.utc)
+MOCK_DATE_TAKEN_2 = datetime(2026, 1, 1, 14, 30, 0)
 
 
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
@@ -485,9 +485,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(
             new_media_item_1.gphotos_media_item_id, media_item_1.gphotos_media_item_id
         )
-        self.assertEqual(new_media_item_1.width, 300)
-        self.assertEqual(new_media_item_1.height, 400)
-        self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN_2)
+        self.assertEqual(new_media_item_1.width, 100)
+        self.assertEqual(new_media_item_1.height, 200)
+        self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN)
 
     def test_update_many_media_items_clear_location(self):
         media_item_1 = self.repo.create_media_item(

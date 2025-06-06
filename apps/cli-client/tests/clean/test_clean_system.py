@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 import unittest
 
 from bson import ObjectId
@@ -40,7 +40,7 @@ MOCK_ALBUM_ID = AlbumId(
     ObjectId("5f50c31e8a7d4b1c9c9b0b23"),
 )
 
-MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0)
 
 
 class SystemCleanerTests(unittest.TestCase):
