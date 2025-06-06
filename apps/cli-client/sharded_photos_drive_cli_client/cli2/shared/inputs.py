@@ -50,6 +50,8 @@ def prompt_user_for_mongodb_connection_string(prompt_text: str) -> str:
 
 def prompt_user_for_gphotos_credentials(
     scopes: list[str] = READ_WRITE_SCOPES,
+    existing_client_id: Optional[str] = None,
+    existing_client_secret: Optional[str] = None,
 ) -> Credentials:
     """
     Prompts the user to enter Google Photos account.
@@ -63,11 +65,17 @@ def prompt_user_for_gphotos_credentials(
     credentials: Optional[Credentials] = None
     is_login_successful = False
     while not is_login_successful:
-        client_id = prompt_user_for_non_empty_password(
-            "Enter Google Photos Client ID: "
+        client_id = (
+            existing_client_id
+            if existing_client_id
+            else prompt_user_for_non_empty_password("Enter Google Photos Client ID: ")
         )
-        client_secret = prompt_user_for_non_empty_password(
-            "Enter Google Photos client secret: "
+        client_secret = (
+            existing_client_secret
+            if existing_client_secret
+            else prompt_user_for_non_empty_password(
+                "Enter Google Photos client secret: "
+            )
         )
 
         try:
@@ -87,6 +95,10 @@ def prompt_user_for_gphotos_credentials(
                 authorization_prompt_message=message,
                 success_message="The auth flow is complete; you may close this window.",
                 open_browser=False,
+                authorization_url_params={
+                    "access_type": "offline",
+                    "prompt": "consent",
+                },
             )
 
             credentials = iaflow.credentials
