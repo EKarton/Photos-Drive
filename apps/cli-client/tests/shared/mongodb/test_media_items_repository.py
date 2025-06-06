@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import os
 from bson import Binary
 import unittest
@@ -34,6 +35,10 @@ MOCK_ALBUM_ID_2 = AlbumId(
     ObjectId("5f50c31e8a7d4b1c9c9b0c13"),
 )
 
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
+
+MOCK_DATE_TAKEN_2 = datetime(2026, 1, 1, 14, 30, 0, tzinfo=timezone.utc)
+
 
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
@@ -60,6 +65,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(media_item_id.client_id),
                 "gphotos_media_item_id": "gphotos_123",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
 
@@ -73,6 +81,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.location, GpsLocation(56.78, 12.34))
         self.assertEqual(media_item.gphotos_client_id, media_item_id.client_id)
         self.assertEqual(media_item.gphotos_media_item_id, "gphotos_123")
+        self.assertEqual(media_item.width, 100)
+        self.assertEqual(media_item.height, 200)
+        self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
 
     def test_get_media_item_by_id_not_found(self):
         media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
@@ -92,6 +103,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(self.mongodb_client_id),
                 "gphotos_media_item_id": "gphotos_123",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
 
@@ -106,6 +120,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].location, GpsLocation(56.78, 12.34))
         self.assertEqual(media_items[0].gphotos_client_id, self.mongodb_client_id)
         self.assertEqual(media_items[0].gphotos_media_item_id, "gphotos_123")
+        self.assertEqual(media_items[0].width, 100)
+        self.assertEqual(media_items[0].height, 200)
+        self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
 
     def test_find_media_items(self):
         # Insert mock media items from different albums into the mock database
@@ -117,6 +134,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(self.mongodb_client_id),
                 "gphotos_media_item_id": "gphotos_1234",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
         self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
@@ -127,6 +147,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(self.mongodb_client_id),
                 "gphotos_media_item_id": "gphotos_123",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
         self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
@@ -137,6 +160,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(self.mongodb_client_id),
                 "gphotos_media_item_id": "gphotos_12345",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
 
@@ -148,6 +174,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].album_id, MOCK_ALBUM_ID_2)
         self.assertEqual(media_items[0].file_name, 'test_image_2.jpg')
         self.assertEqual(media_items[0].gphotos_media_item_id, 'gphotos_12345')
+        self.assertEqual(media_items[0].width, 100)
+        self.assertEqual(media_items[0].height, 200)
+        self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
 
     def test_find_media_items_in_different_databases(self):
         mongodb_client_id_1 = ObjectId()
@@ -167,6 +196,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": ObjectId(),
                 "gphotos_media_item_id": "gphotos_1234",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
         mongodb_client_2["sharded_google_photos"]["media_items"].insert_one(
@@ -177,6 +209,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": ObjectId(),
                 "gphotos_media_item_id": "gphotos_123",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
         mongodb_client_2["sharded_google_photos"]["media_items"].insert_one(
@@ -187,6 +222,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": ObjectId(),
                 "gphotos_media_item_id": "gphotos_12345",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
 
@@ -199,6 +237,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].file_name, 'test_image_1.jpg')
         self.assertEqual(media_items[1].album_id, MOCK_ALBUM_ID_2)
         self.assertEqual(media_items[1].file_name, 'test_image_2.jpg')
+        self.assertEqual(media_items[1].width, 100)
+        self.assertEqual(media_items[1].height, 200)
+        self.assertEqual(media_items[1].date_taken, MOCK_DATE_TAKEN)
 
     def test_get_num_media_items_in_album(self):
         # Insert mock media items from different albums into the mock database
@@ -210,6 +251,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": ObjectId(),
                 "gphotos_media_item_id": "gphotos_1234",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
         self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
@@ -220,6 +264,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": ObjectId(),
                 "gphotos_media_item_id": "gphotos_123",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
         self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
@@ -230,6 +277,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": ObjectId(),
                 "gphotos_media_item_id": "gphotos_12345",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
 
@@ -245,6 +295,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
             gphotos_media_item_id="gphotos_456",
             album_id=MOCK_ALBUM_ID,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
         )
 
         # Test creation of media item
@@ -260,6 +313,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(
             media_item.gphotos_media_item_id, request.gphotos_media_item_id
         )
+        self.assertEqual(media_item.width, 100)
+        self.assertEqual(media_item.height, 200)
+        self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
 
     def test_update_media_item(self):
         media_item_1 = self.repo.create_media_item(
@@ -270,6 +326,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -284,6 +343,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 new_location=GpsLocation(latitude=10, longitude=20),
                 new_gphotos_client_id=new_gphotos_client_id,
                 new_gphotos_media_item_id="gphotos_1",
+                new_width=300,
+                new_height=400,
+                new_date_taken=MOCK_DATE_TAKEN_2,
             ),
         )
 
@@ -296,6 +358,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         )
         self.assertEqual(new_media_item_1.gphotos_client_id, new_gphotos_client_id)
         self.assertEqual(new_media_item_1.gphotos_media_item_id, 'gphotos_1')
+        self.assertEqual(new_media_item_1.width, 300)
+        self.assertEqual(new_media_item_1.height, 400)
+        self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN_2)
 
     def test_update_many_media_items(self):
         media_item_1 = self.repo.create_media_item(
@@ -306,6 +371,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         media_item_2 = self.repo.create_media_item(
@@ -316,6 +384,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -332,6 +403,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_gphotos_client_id=new_gphotos_client_id,
                     new_gphotos_media_item_id="gphotos_1",
                     new_album_id=MOCK_ALBUM_ID_2,
+                    new_width=300,
+                    new_height=400,
+                    new_date_taken=MOCK_DATE_TAKEN_2,
                 ),
                 UpdateMediaItemRequest(
                     media_item_id=media_item_2.id,
@@ -342,6 +416,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_gphotos_client_id=new_gphotos_client_id,
                     new_gphotos_media_item_id="gphotos_1",
                     new_album_id=MOCK_ALBUM_ID_2,
+                    new_width=300,
+                    new_height=400,
+                    new_date_taken=MOCK_DATE_TAKEN_2,
                 ),
             ]
         )
@@ -356,6 +433,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(new_media_item_1.gphotos_client_id, new_gphotos_client_id)
         self.assertEqual(new_media_item_1.gphotos_media_item_id, 'gphotos_1')
         self.assertEqual(new_media_item_1.album_id, MOCK_ALBUM_ID_2)
+        self.assertEqual(new_media_item_1.width, 300)
+        self.assertEqual(new_media_item_1.height, 400)
+        self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN_2)
 
         new_media_item_2 = self.repo.get_media_item_by_id(media_item_2.id)
         self.assertEqual(new_media_item_2.id, media_item_2.id)
@@ -367,6 +447,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(new_media_item_2.gphotos_client_id, new_gphotos_client_id)
         self.assertEqual(new_media_item_2.gphotos_media_item_id, 'gphotos_1')
         self.assertEqual(new_media_item_2.album_id, MOCK_ALBUM_ID_2)
+        self.assertEqual(new_media_item_2.width, 300)
+        self.assertEqual(new_media_item_2.height, 400)
+        self.assertEqual(new_media_item_2.date_taken, MOCK_DATE_TAKEN_2)
 
     def test_update_many_media_items_update_file_name(self):
         media_item_1 = self.repo.create_media_item(
@@ -377,6 +460,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -399,6 +485,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(
             new_media_item_1.gphotos_media_item_id, media_item_1.gphotos_media_item_id
         )
+        self.assertEqual(new_media_item_1.width, 300)
+        self.assertEqual(new_media_item_1.height, 400)
+        self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN_2)
 
     def test_update_many_media_items_clear_location(self):
         media_item_1 = self.repo.create_media_item(
@@ -409,6 +498,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
                 gphotos_media_item_id="gphotos_456",
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -430,6 +522,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(media_item_id.client_id),
                 "gphotos_media_item_id": "gphotos_789",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
 
@@ -466,6 +561,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     "gphotos_client_id": str(mid.client_id),
                     "gphotos_media_item_id": f"gphotos_{mid.object_id}",
                     "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                    "width": 100,
+                    "height": 200,
+                    "date_taken": MOCK_DATE_TAKEN,
                 }
             )
 
@@ -496,6 +594,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(existing_mid.client_id),
                 "gphotos_media_item_id": f"gphotos_{existing_mid.object_id}",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+                "date_taken": MOCK_DATE_TAKEN,
             }
         )
 

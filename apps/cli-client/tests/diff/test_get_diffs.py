@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pyfakefs.fake_filesystem_unittest import TestCase
 from bson.objectid import ObjectId
 
@@ -27,6 +28,8 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
 from sharded_photos_drive_cli_client.shared.mongodb.testing import (
     create_mock_mongo_client,
 )
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class FolderSyncDiffTests(TestCase):
@@ -83,6 +86,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -157,6 +163,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         media_items_repo.create_media_item(
@@ -170,6 +179,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2011.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -240,6 +252,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -302,6 +317,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -375,6 +393,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         boat_upload_token = gphotos_client.media_items().upload_photo(
@@ -391,6 +412,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2020.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -464,6 +488,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         dog_upload_token = gphotos_client.media_items().upload_photo(
@@ -480,6 +507,9 @@ class FolderSyncDiffTests(TestCase):
                 .newMediaItemResults[0]
                 .mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 

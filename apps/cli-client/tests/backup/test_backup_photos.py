@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from bson import Binary
 from bson.objectid import ObjectId
 from unittest_parametrize import parametrize
@@ -36,6 +37,8 @@ parametrize_use_parallel_uploads = parametrize(
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class TestPhotosBackup(ParametrizedTestCase):
@@ -79,6 +82,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
             ProcessedDiff(
                 modifier='+',
@@ -88,6 +94,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-2, longitude=2),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
             ProcessedDiff(
                 modifier='+',
@@ -97,6 +106,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-3, longitude=3),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
             ProcessedDiff(
                 modifier='+',
@@ -106,6 +118,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-4, longitude=4),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
         ]
         backup = PhotosBackup(
@@ -280,6 +295,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -293,6 +311,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
         ]
         backup = PhotosBackup(
@@ -411,6 +432,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         media_items_repo.create_media_item(
@@ -423,6 +447,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -436,6 +463,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
         ]
         backup = PhotosBackup(
@@ -521,6 +551,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -534,6 +567,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_hash=MOCK_FILE_HASH,
                 file_size=10,
                 location=GpsLocation(latitude=-1, longitude=1),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
         ]
         backup = PhotosBackup(
@@ -630,6 +666,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         media_items_repo.create_media_item(
@@ -642,6 +681,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -655,6 +697,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
         ]
         backup = PhotosBackup(
@@ -760,6 +805,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=album_2010.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         media_items_repo.create_media_item(
@@ -772,6 +820,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                     0
                 ].mediaItem.id,
                 album_id=public_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -785,6 +836,9 @@ class TestPhotosBackup(ParametrizedTestCase):
                 file_size=10,
                 file_hash=MOCK_FILE_HASH,
                 location=GpsLocation(latitude=-1, longitude=1),
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
         ]
         backup = PhotosBackup(

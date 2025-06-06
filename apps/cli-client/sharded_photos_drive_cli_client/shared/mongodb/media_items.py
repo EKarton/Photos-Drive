@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-
+from datetime import datetime
 from bson.objectid import ObjectId
 
 from sharded_photos_drive_cli_client.shared.mongodb.media_item_id import MediaItemId
@@ -37,6 +37,9 @@ class MediaItem:
             under.
         gphotos_media_item_id (str): The media item ID that is saved in Google Photos.
         album_id (AlbumId): The album ID that it belongs to.
+        width: (int): The width of the image / video.
+        height (int): The height of the image / video.
+        date_taken (datetime): The date and time for when the image / video was taken.
     """
 
     id: MediaItemId
@@ -46,3 +49,6 @@ class MediaItem:
     gphotos_client_id: ObjectId
     gphotos_media_item_id: str
     album_id: AlbumId
+    width: int
+    height: int
+    date_taken: datetime
