@@ -1,6 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, replace
-from datetime import datetime, timezone
+from datetime import datetime
 import logging
 import os
 from typing import Optional, cast
@@ -14,7 +14,6 @@ from ..shared.dimensions.pillow_image_dimensions import (
 )
 from ..shared.gphotos.valid_file_extensions import (
     IMAGE_FILE_EXTENSIONS,
-    VIDEO_FILE_EXTENSIONS,
 )
 
 from ..shared.hashes.xxhash import compute_file_hash
@@ -76,7 +75,7 @@ class DiffsProcessor:
             width, height = None, None
             if diff.file_path.endswith(IMAGE_FILE_EXTENSIONS):
                 width, height = get_width_height_of_image(diff.file_path)
-            elif diff.file_path.endswith(VIDEO_FILE_EXTENSIONS):
+            else:
                 width, height = get_width_height_of_video(diff.file_path)
 
             return ProcessedDiff(
@@ -169,7 +168,7 @@ class DiffsProcessor:
                     if date_str:
                         date_taken = datetime.strptime(date_str, '%Y:%m:%d %H:%M:%S')
                     else:
-                        date_taken = None
+                        date_taken = datetime(1970, 1, 1)
 
                 metadatas[missing_metadata_and_idx[i][1]] = ExtractedExifMetadata(
                     location, date_taken
