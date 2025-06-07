@@ -141,7 +141,8 @@ class DiffsProcessor:
                     "EXIF:DateTimeOriginal",  # for images
                     "QuickTime:CreateDate",  # for videos (QuickTime/MP4)
                     "QuickTime:CreationDate",
-                    'RIFF:DateTimeOriginal',
+                    'RIFF:DateTimeOriginal',  # for avi videos
+                    'XMP-exif:DateTimeOriginal',  # for gifs
                     "TrackCreateDate",
                     "MediaCreateDate",
                 ],
@@ -164,6 +165,7 @@ class DiffsProcessor:
                         or raw_metadata.get("QuickTime:CreateDate")
                         or raw_metadata.get('QuickTime:CreationDate')
                         or raw_metadata.get('RIFF:DateTimeOriginal')
+                        or raw_metadata.get('XMP-exif:DateTimeOriginal')
                         or raw_metadata.get('TrackCreateDate')
                         or raw_metadata.get('MediaCreateDate')
                     )
