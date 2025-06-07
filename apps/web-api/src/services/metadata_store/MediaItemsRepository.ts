@@ -198,7 +198,10 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
       file_name: doc['file_name'],
       gphotos_client_id: doc['gphotos_client_id'],
       gphotos_media_item_id: doc['gphotos_media_item_id'],
-      album_id: convertStringToAlbumId(doc['album_id'])
+      album_id: convertStringToAlbumId(doc['album_id']),
+      width: doc['width'] || 0,
+      height: doc['height'] || 0,
+      date_taken: doc['date_taken'] || new Date(1970, 1, 1)
     };
 
     if (doc['location']) {
