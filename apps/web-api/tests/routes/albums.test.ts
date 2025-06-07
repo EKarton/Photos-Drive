@@ -56,7 +56,10 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
     album_id: {
       clientId: 'albumClient1',
       objectId: 'albumObject1'
-    }
+    },
+    width: 1000,
+    height: 2000,
+    date_taken: new Date('2025-06-07T17:00:00.000Z')
   },
   {
     id: {
@@ -73,7 +76,10 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
     album_id: {
       clientId: 'albumClient1',
       objectId: 'albumObject1'
-    }
+    },
+    width: 100,
+    height: 200,
+    date_taken: new Date('2024-06-07T17:00:00.000Z')
   }
 ];
 
@@ -290,7 +296,10 @@ describe('Albums Router', () => {
             location: {
               latitude: 123,
               longitude: 456
-            }
+            },
+            width: 1000,
+            height: 2000,
+            date_taken: '2025-06-07T17:00:00.000Z'
           },
           {
             id: 'albumClient1:mediaItem2',
@@ -300,7 +309,10 @@ describe('Albums Router', () => {
             location: {
               latitude: 123,
               longitude: 456
-            }
+            },
+            width: 100,
+            height: 200,
+            date_taken: '2024-06-07T17:00:00.000Z'
           }
         ],
         nextPageToken: undefined

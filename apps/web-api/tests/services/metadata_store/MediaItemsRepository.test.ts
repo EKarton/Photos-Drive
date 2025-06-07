@@ -41,7 +41,54 @@ describe('MediaItemsRepositoryImpl', () => {
   });
 
   describe('getMediaItemById', () => {
+    const mediaItemId: MediaItemId = {
+      clientId: 'client1',
+      objectId: '507f1f77bcf86cd799439011'
+    };
+    const albumId: AlbumId = {
+      clientId: '407f1f77bcf86cd799439001',
+      objectId: '407f1f77bcf86cd799439002'
+    };
+
     beforeEach(async () => {
+      // Set up the database and collection
+      const db = mongoClient.db('sharded_google_photos');
+      await db.collection('media_items').deleteMany({});
+      await db.collection('media_items').insertOne({
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
+        file_name: 'test_image.jpg',
+        gphotos_client_id: 'gphotos_client_1',
+        gphotos_media_item_id: 'media_item_1',
+        location: {
+          coordinates: [40.7128, -74.006] // longitude, latitude
+        },
+        album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`,
+        width: 1000,
+        height: 2000,
+        date_taken: new Date(2024, 4, 4)
+      });
+    });
+
+    it('should return a media item when found', async () => {
+      const result = await mediaItemsRepo.getMediaItemById(mediaItemId);
+
+      expect(result).toEqual({
+        id: mediaItemId,
+        file_name: 'test_image.jpg',
+        gphotos_client_id: 'gphotos_client_1',
+        gphotos_media_item_id: 'media_item_1',
+        location: {
+          longitude: 40.7128,
+          latitude: -74.006
+        },
+        album_id: albumId,
+        width: 1000,
+        height: 2000,
+        date_taken: new Date(2024, 4, 4)
+      });
+    });
+
+    it('should return the media item correctly when width, height, and date_time is not set', async () => {
       // Set up the database and collection
       const db = mongoClient.db('sharded_google_photos');
       await db.collection('media_items').deleteMany({});
@@ -55,17 +102,6 @@ describe('MediaItemsRepositoryImpl', () => {
         },
         album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`
       });
-    });
-
-    it('should return a media item when found', async () => {
-      const mediaItemId: MediaItemId = {
-        clientId: 'client1',
-        objectId: '507f1f77bcf86cd799439011'
-      };
-      const albumId: AlbumId = {
-        clientId: '407f1f77bcf86cd799439001',
-        objectId: '407f1f77bcf86cd799439002'
-      };
 
       const result = await mediaItemsRepo.getMediaItemById(mediaItemId);
 
@@ -78,7 +114,10 @@ describe('MediaItemsRepositoryImpl', () => {
           longitude: 40.7128,
           latitude: -74.006
         },
-        album_id: albumId
+        album_id: albumId,
+        width: 0,
+        height: 0,
+        date_taken: new Date(1970, 1, 1)
       });
     });
 
@@ -116,14 +155,20 @@ describe('MediaItemsRepositoryImpl', () => {
           album_id: `${albumId.clientId}:${albumId.objectId}`,
           location: {
             coordinates: [40.0, -70.0]
-          }
+          },
+          width: 1000,
+          height: 2000,
+          date_taken: new Date(2024, 4, 4)
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
           file_name: 'image2.jpg',
           gphotos_client_id: 'gphotos_client_2',
           gphotos_media_item_id: 'media_item_2',
-          album_id: `${albumId.clientId}:${albumId.objectId}`
+          album_id: `${albumId.clientId}:${albumId.objectId}`,
+          width: 1000,
+          height: 2000,
+          date_taken: new Date(2024, 4, 4)
         }
       ]);
     });
@@ -187,7 +232,10 @@ describe('MediaItemsRepositoryImpl', () => {
           file_name: 'a.jpg',
           gphotos_client_id: 'gphotos_client_1',
           gphotos_media_item_id: 'item_1',
-          album_id: `${albumId.clientId}:${albumId.objectId}`
+          album_id: `${albumId.clientId}:${albumId.objectId}`,
+          width: 1000,
+          height: 2000,
+          date_taken: new Date(2024, 4, 4)
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439011'),
@@ -195,7 +243,10 @@ describe('MediaItemsRepositoryImpl', () => {
           file_name: 'b.jpg',
           gphotos_client_id: 'gphotos_client_1',
           gphotos_media_item_id: 'item_2',
-          album_id: `${albumId.clientId}:${albumId.objectId}`
+          album_id: `${albumId.clientId}:${albumId.objectId}`,
+          width: 100,
+          height: 200,
+          date_taken: new Date(2022, 4, 4)
         },
         {
           _id: new ObjectId('507f1f77bcf86cd799439012'),
@@ -203,7 +254,10 @@ describe('MediaItemsRepositoryImpl', () => {
           file_name: 'c.jpg',
           gphotos_client_id: 'gphotos_client_1',
           gphotos_media_item_id: 'item_3',
-          album_id: `${albumId.clientId}:${albumId.objectId}`
+          album_id: `${albumId.clientId}:${albumId.objectId}`,
+          width: 200,
+          height: 400,
+          date_taken: new Date(2021, 4, 4)
         }
       ]);
 
@@ -356,7 +410,10 @@ describe('sortMediaItem', () => {
       file_name: 'file.jpg',
       gphotos_client_id: 'gphotos_client',
       gphotos_media_item_id: 'gphotos_media_id',
-      album_id: albumId
+      album_id: albumId,
+      width: 1000,
+      height: 2000,
+      date_taken: new Date(2025, 1, 1)
     };
   }
 

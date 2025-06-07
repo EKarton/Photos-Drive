@@ -35,7 +35,10 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
           fileName: mediaItem.file_name,
           location: mediaItem.location,
           gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`,
-          albumId: albumIdToString(mediaItem.album_id)
+          albumId: albumIdToString(mediaItem.album_id),
+          width: mediaItem.width,
+          height: mediaItem.height,
+          date_taken: mediaItem.date_taken.toISOString()
         };
 
         return res.status(200).json(response);

@@ -47,7 +47,10 @@ describe('Media Items Router', () => {
         album_id: {
           clientId: '407f1f77bcf86cd799439001',
           objectId: '407f1f77bcf86cd799439002'
-        }
+        },
+        width: 1000,
+        height: 2000,
+        date_taken: new Date('2025-06-07T17:00:00.000Z')
       };
       const repo = mock<MediaItemsRepository>();
       repo.getMediaItemById.mockResolvedValue(mockMediaItem);
@@ -67,7 +70,10 @@ describe('Media Items Router', () => {
           longitude: 456
         },
         gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
-        albumId: '407f1f77bcf86cd799439001:407f1f77bcf86cd799439002'
+        albumId: '407f1f77bcf86cd799439001:407f1f77bcf86cd799439002',
+        width: 1000,
+        height: 2000,
+        date_taken: '2025-06-07T17:00:00.000Z'
       });
     });
 

@@ -49,6 +49,15 @@ export type MediaItem = {
 
   /** The album ID that this media item belongs to. */
   album_id: AlbumId;
+
+  /** The width of the media item. */
+  width: number;
+
+  /** The height of the media item. */
+  height: number;
+
+  /** The date and time that the media item was taken. */
+  date_taken: Date
 };
 
 /** Represents a GPS location. */
