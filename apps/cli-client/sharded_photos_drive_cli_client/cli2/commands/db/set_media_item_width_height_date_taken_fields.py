@@ -89,6 +89,8 @@ def set_media_item_width_height_date_taken_fields(
     root_album_id = config.get_root_album_id()
     albums_queue: deque[tuple[AlbumId, list[str]]] = deque([(root_album_id, [])])
 
+    errors: list[Exception] = []
+
     while len(albums_queue) > 0:
         album_id, prev_albums_path = albums_queue.popleft()
         album = albums_repo.get_album_by_id(album_id)
@@ -119,7 +121,10 @@ def set_media_item_width_height_date_taken_fields(
             else:
                 raise ValueError(f'{file_path} is not image or video')
 
-            date_taken = get_date_taken(file_path)
+            try:
+                date_taken = get_date_taken(file_path)
+            except Exception as e:
+                errors.append(e)
 
             print(f'{file_path}: {width}x{height} from {date_taken}')
 
@@ -131,6 +136,9 @@ def set_media_item_width_height_date_taken_fields(
                     new_date_taken=date_taken,
                 )
             )
+
+    if len(errors) > 0:
+        raise ExceptionGroup("Multiple errors", errors)
 
     if prompt_user_for_yes_no_answer('Is this correct? [Y/N]:'):
         media_items_repo.update_many_media_items(update_media_item_requests)
