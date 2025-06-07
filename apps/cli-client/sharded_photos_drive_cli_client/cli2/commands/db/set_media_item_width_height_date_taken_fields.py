@@ -112,9 +112,9 @@ def set_media_item_width_height_date_taken_fields(
                 )
 
             width, height = None, None
-            if file_path.endswith(IMAGE_FILE_EXTENSIONS):
+            if file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
                 width, height = get_width_height_of_image(file_path)
-            elif file_path.endswith(VIDEO_FILE_EXTENSIONS):
+            elif file_path.lower().endswith(VIDEO_FILE_EXTENSIONS):
                 width, height = get_width_height_of_video(file_path)
             else:
                 print(f'{file_path} is not image or video')
