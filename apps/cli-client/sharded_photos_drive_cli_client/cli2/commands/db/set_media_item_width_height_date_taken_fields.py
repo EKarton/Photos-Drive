@@ -124,6 +124,7 @@ def set_media_item_width_height_date_taken_fields(
             try:
                 date_taken = get_date_taken(file_path)
             except Exception as e:
+                print("Exception for getting date taken", e)
                 errors.append(e)
 
             print(f'{file_path}: {width}x{height} from {date_taken}')
