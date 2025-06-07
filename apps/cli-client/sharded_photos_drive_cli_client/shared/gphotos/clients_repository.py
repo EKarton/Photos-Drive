@@ -33,7 +33,7 @@ class TokenCallback(TokenRefreshCallback):
 
 
 class GPhotosClientsRepository:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__id_to_client: Dict[ObjectId, GPhotosClientV2] = {}
 
     @staticmethod

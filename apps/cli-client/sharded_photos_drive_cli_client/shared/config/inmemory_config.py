@@ -16,10 +16,10 @@ from .config import (
 class InMemoryConfig(Config):
     """Represents the config repository stored in memory."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.__id_to_mongodb_config: Dict[ObjectId, MongoDbConfig] = {}
         self.__id_to_gphotos_config: Dict[ObjectId, GPhotosConfig] = {}
-        self.__root_album_id = None
+        self.__root_album_id: AlbumId | None = None
 
     @override
     def get_mongodb_configs(self) -> list[MongoDbConfig]:

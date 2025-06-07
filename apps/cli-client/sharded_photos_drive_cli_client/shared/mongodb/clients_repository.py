@@ -15,7 +15,7 @@ BYTES_512MB = 536870912
 
 
 class MongoDbClientsRepository:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__id_to_client: Dict[str, MongoClient] = {}
         self.__client_id_to_session: dict[ObjectId, ClientSession] = {}
         self.__transaction_in_progress = False

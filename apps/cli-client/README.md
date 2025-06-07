@@ -253,7 +253,7 @@ It will delete all photos / videos from your system, and move all photos / video
 3. To lint your code, run:
 
    ```bash
-   poetry run mypy . --check-untyped-defs && poetry run flake8 && poetry run black .
+   poetry run mypy . && poetry run flake8 && poetry run black .
    ```
 
 4. To run all tests and code coverage, run:
