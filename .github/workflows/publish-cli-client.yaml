@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2
@@ -31,7 +31,7 @@ jobs:
       - name: Get local version from pyproject.toml
         id: get-version
         run: |
-          cd apps/cli-client
+          cd ./apps/cli-client
           echo "version=$(poetry version -s)" >> $GITHUB_OUTPUT
 
       - name: Check if version already exists on PyPI
@@ -46,13 +46,13 @@ jobs:
           else
             echo "publish=true" >> $GITHUB_OUTPUT
           fi
-        working-directory: apps/cli-client
+        working-directory: ./apps/cli-client
 
       - name: Publish to PyPI
         if: steps.check-pypi.outputs.publish == 'true'
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
-          cd apps/cli-client
+          cd ./apps/cli-client
           poetry config pypi-token.pypi $PYPI_TOKEN
           poetry publish --build
