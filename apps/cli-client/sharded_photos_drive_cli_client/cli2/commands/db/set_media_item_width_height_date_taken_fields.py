@@ -113,19 +113,27 @@ def set_media_item_width_height_date_taken_fields(
                     prev_albums_path + [cast(str, album.name), media_item.file_name]
                 )
 
-            width, height = None, None
-            if file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
-                width, height = get_width_height_of_image(file_path)
-            elif file_path.lower().endswith(VIDEO_FILE_EXTENSIONS):
-                width, height = get_width_height_of_video(file_path)
-            else:
-                raise ValueError(f'{file_path} is not image or video')
+            try:
+                width, height = None, None
+                if file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
+                    width, height = get_width_height_of_image(file_path)
+                elif file_path.lower().endswith(VIDEO_FILE_EXTENSIONS):
+                    width, height = get_width_height_of_video(file_path)
+                else:
+                    raise ValueError(f'{file_path} is not image or video')
+            except Exception as e:
+                print(f"get_width_height() error for {file_path}:")
+                print(e)
+                errors.append(e)
+                continue
 
             try:
                 date_taken = get_date_taken(file_path)
             except Exception as e:
-                print("Exception for getting date taken", e)
+                print(f"get_date_taken() error for {file_path}:")
+                print(e)
                 errors.append(e)
+                continue
 
             print(f'{file_path}: {width}x{height} from {date_taken}')
 
