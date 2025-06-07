@@ -172,6 +172,7 @@ def get_date_taken(file_path: str) -> datetime:
                 "QuickTime:CreateDate",  # for videos (QuickTime/MP4)
                 "QuickTime:CreationDate",
                 'RIFF:DateTimeOriginal',  # for avi videos
+                'XMP-exif:DateTimeOriginal',  # for gifs
                 "TrackCreateDate",
                 "MediaCreateDate",
             ],
@@ -182,6 +183,7 @@ def get_date_taken(file_path: str) -> datetime:
             or raw_metadata.get("QuickTime:CreateDate")
             or raw_metadata.get('QuickTime:CreationDate')
             or raw_metadata.get('RIFF:DateTimeOriginal')
+            or raw_metadata.get('XMP-exif:DateTimeOriginal')
             or raw_metadata.get('TrackCreateDate')
             or raw_metadata.get('MediaCreateDate')
         )
