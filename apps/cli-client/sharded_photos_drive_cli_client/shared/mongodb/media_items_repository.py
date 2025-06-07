@@ -454,6 +454,20 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         else:
             file_hash = b''
 
+        width = 0
+        if 'width' in raw_item and raw_item['width']:
+            width = raw_item['width']
+
+        height = 0
+        if 'height' in raw_item and raw_item['height']:
+            height = raw_item['height']
+
+        date_taken = None
+        if 'date_taken' in raw_item and raw_item['date_taken']:
+            date_taken = cast(datetime, raw_item['date_taken'])
+        else:
+            date_taken = datetime(1970, 1, 1)
+
         return MediaItem(
             id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
             file_name=raw_item["file_name"],
@@ -462,7 +476,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],
             album_id=parse_string_to_album_id(raw_item['album_id']),
-            width=raw_item['width'],
-            height=raw_item['height'],
-            date_taken=raw_item['date_taken'],
+            width=width,
+            height=height,
+            date_taken=date_taken,
         )
