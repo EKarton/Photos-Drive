@@ -73,7 +73,7 @@ class DiffsProcessor:
                 raise ValueError(f"File {diff.file_path} does not exist.")
 
             width, height = None, None
-            if diff.file_path.endswith(IMAGE_FILE_EXTENSIONS):
+            if diff.file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
                 width, height = get_width_height_of_image(diff.file_path)
             else:
                 width, height = get_width_height_of_video(diff.file_path)
