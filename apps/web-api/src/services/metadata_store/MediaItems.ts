@@ -57,7 +57,7 @@ export type MediaItem = {
   height: number;
 
   /** The date and time that the media item was taken. */
-  date_taken: Date
+  date_taken: Date;
 };
 
 /** Represents a GPS location. */
