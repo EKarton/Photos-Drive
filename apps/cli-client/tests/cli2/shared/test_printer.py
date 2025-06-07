@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import unittest
 from io import StringIO
 from unittest.mock import patch
@@ -9,6 +10,8 @@ from sharded_photos_drive_cli_client.cli2.shared.printer import (
     pretty_print_processed_diffs,
 )
 from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocation
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class TestPrettyPrintProcessedDiffs(unittest.TestCase):
@@ -24,6 +27,9 @@ class TestPrettyPrintProcessedDiffs(unittest.TestCase):
                 file_hash=b'hash1',
                 location=None,
                 file_size=1000,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
             ProcessedDiff(
                 modifier='-',
@@ -33,6 +39,9 @@ class TestPrettyPrintProcessedDiffs(unittest.TestCase):
                 file_hash=b'hash2',
                 location=GpsLocation(latitude=40, longitude=100),
                 file_size=2000,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             ),
         ]
 

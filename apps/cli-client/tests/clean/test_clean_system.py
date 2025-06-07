@@ -1,3 +1,4 @@
+from datetime import datetime
 import unittest
 
 from bson import ObjectId
@@ -33,10 +34,13 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client im
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
 MOCK_ALBUM_ID = AlbumId(
     ObjectId("5f50c31e8a7d4b1c9c9b0b22"),
     ObjectId("5f50c31e8a7d4b1c9c9b0b23"),
 )
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0)
 
 
 class SystemCleanerTests(unittest.TestCase):
@@ -87,6 +91,9 @@ class SystemCleanerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -159,6 +166,9 @@ class SystemCleanerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -179,6 +189,9 @@ class SystemCleanerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -257,6 +270,9 @@ class SystemCleanerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -277,6 +293,9 @@ class SystemCleanerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -416,6 +435,9 @@ class SystemCleanerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -484,6 +506,9 @@ class SystemCleanerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -496,6 +521,9 @@ class SystemCleanerTests(unittest.TestCase):
                 gphotos_client_id=ObjectId(gphotos_client_id),
                 gphotos_media_item_id='123',
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 

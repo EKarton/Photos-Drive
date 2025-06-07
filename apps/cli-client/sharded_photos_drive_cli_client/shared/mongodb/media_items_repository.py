@@ -1,5 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, Dict, Any, cast, Mapping
 from abc import ABC, abstractmethod
 from bson import Binary
@@ -28,6 +29,9 @@ class CreateMediaItemRequest:
             item is saved on.
         gphotos_media_item_id (str): The ID of the media item stored on Google Photos.
         album_id (AlbumId): The album that this media item belongs to.
+        width (int): The width of the media item.
+        height (int): The height of the media item.
+        new_date_taken (datetime): The date and time of when the media item was taken.
     """
 
     file_name: str
@@ -36,6 +40,9 @@ class CreateMediaItemRequest:
     gphotos_client_id: ObjectId
     gphotos_media_item_id: str
     album_id: AlbumId
+    width: int
+    height: int
+    date_taken: datetime
 
 
 @dataclass(frozen=True)
@@ -57,6 +64,10 @@ class UpdateMediaItemRequest:
         new_gphotos_media_item_id (Optional[str]): The new GPhotos media item ID,
             if present.
         new_album_id (Optional[AlbumId]): The new Album ID.
+        new_width (Optional[int]): The new width.
+        new_height (Optional[int]): The new height.
+        new_date_taken (Optional[datetime]): The new date and time of when the
+            image / video was taken.
     '''
 
     media_item_id: MediaItemId
@@ -67,6 +78,9 @@ class UpdateMediaItemRequest:
     new_gphotos_client_id: Optional[ObjectId] = None
     new_gphotos_media_item_id: Optional[str] = None
     new_album_id: Optional[AlbumId] = None
+    new_width: Optional[int] = None
+    new_height: Optional[int] = None
+    new_date_taken: Optional[datetime] = None
 
 
 @dataclass(frozen=True)
@@ -297,6 +311,9 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             "gphotos_client_id": str(request.gphotos_client_id),
             "gphotos_media_item_id": str(request.gphotos_media_item_id),
             "album_id": album_id_to_string(request.album_id),
+            "width": request.width,
+            "height": request.height,
+            "date_taken": request.date_taken,
         }
 
         if request.location:
@@ -317,6 +334,9 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             gphotos_client_id=request.gphotos_client_id,
             gphotos_media_item_id=request.gphotos_media_item_id,
             album_id=request.album_id,
+            width=request.width,
+            height=request.height,
+            date_taken=request.date_taken,
         )
 
     def update_media_item(self, request: UpdateMediaItemRequest):
@@ -348,6 +368,12 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 )
             if request.new_album_id is not None:
                 set_query["$set"]['album_id'] = album_id_to_string(request.new_album_id)
+            if request.new_width is not None:
+                set_query['$set']['width'] = request.new_width
+            if request.new_height is not None:
+                set_query['$set']['height'] = request.new_height
+            if request.new_date_taken is not None:
+                set_query['$set']['date_taken'] = request.new_date_taken
 
             if request.clear_location:
                 set_query["$set"]['location'] = None
@@ -436,4 +462,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],
             album_id=parse_string_to_album_id(raw_item['album_id']),
+            width=raw_item['width'],
+            height=raw_item['height'],
+            date_taken=raw_item['date_taken'],
         )

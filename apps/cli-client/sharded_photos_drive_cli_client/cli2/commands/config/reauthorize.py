@@ -70,8 +70,12 @@ def gphotos(
     id_obj = ObjectId(id)
     cur_config = next(filter(lambda x: x.id == id_obj, config.get_gphotos_configs()))
     new_name = __get_new_name(cur_config.name)
-    new_read_write_credentials = __get_new_read_write_credentials()
-    new_read_only_credentials = __get_new_read_only_credentials()
+    new_read_write_credentials = __get_new_read_write_credentials(
+        cur_config.read_write_credentials
+    )
+    new_read_only_credentials = __get_new_read_only_credentials(
+        cur_config.read_only_credentials
+    )
 
     has_change = (
         new_name is not None
@@ -165,22 +169,36 @@ def __get_new_name(cur_name: str) -> str | None:
     return prompt_user_for_non_empty_input_string("Enter new name: ")
 
 
-def __get_new_read_write_credentials() -> Credentials | None:
+def __get_new_read_write_credentials(existing_creds: Credentials) -> Credentials | None:
     if not prompt_user_for_yes_no_answer(
         "Do you want to change the read+write credentials? (Y/N): "
     ):
         return None
 
-    return prompt_user_for_gphotos_credentials(READ_WRITE_SCOPES)
+    if not prompt_user_for_yes_no_answer(
+        "Do you want to use existing client ID / client secrets? (Y/N): "
+    ):
+        return prompt_user_for_gphotos_credentials(READ_WRITE_SCOPES)
+
+    return prompt_user_for_gphotos_credentials(
+        READ_WRITE_SCOPES, existing_creds.client_id, existing_creds.client_secret
+    )
 
 
-def __get_new_read_only_credentials() -> Credentials | None:
+def __get_new_read_only_credentials(existing_creds: Credentials) -> Credentials | None:
     if not prompt_user_for_yes_no_answer(
         "Do you want to change the read-only credentials? (Y/N): "
     ):
         return None
 
-    return prompt_user_for_gphotos_credentials(READ_ONLY_SCOPES)
+    if not prompt_user_for_yes_no_answer(
+        "Do you want to use existing client ID / client secrets? (Y/N): "
+    ):
+        return prompt_user_for_gphotos_credentials(READ_WRITE_SCOPES)
+
+    return prompt_user_for_gphotos_credentials(
+        READ_ONLY_SCOPES, existing_creds.client_id, existing_creds.client_secret
+    )
 
 
 def __get_new_read_write_connection_string() -> str | None:

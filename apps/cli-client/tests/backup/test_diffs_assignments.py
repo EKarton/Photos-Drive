@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import unittest
 from unittest.mock import MagicMock
 from bson import ObjectId
@@ -9,6 +10,8 @@ from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class TestDiffsAssigner(unittest.TestCase):
@@ -33,6 +36,9 @@ class TestDiffsAssigner(unittest.TestCase):
             file_name='photo1.jpg',
             location=None,
             file_hash=MOCK_FILE_HASH,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
         )
         diff2 = ProcessedDiff(
             modifier="+",
@@ -42,6 +48,9 @@ class TestDiffsAssigner(unittest.TestCase):
             file_name='photo2.jpg',
             location=None,
             file_hash=MOCK_FILE_HASH,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
         )
         assignments = diffs_assigner.get_diffs_assignments([diff1, diff2])
 
@@ -65,6 +74,9 @@ class TestDiffsAssigner(unittest.TestCase):
             file_name='photo1.jpg',
             location=None,
             file_hash=MOCK_FILE_HASH,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
         )
         with self.assertRaisesRegex(
             ValueError, "Cannot allocate .* to any GPhotos client"
@@ -92,6 +104,9 @@ class TestDiffsAssigner(unittest.TestCase):
             file_name='photo1.jpg',
             location=None,
             file_hash=MOCK_FILE_HASH,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
         )
         diff2 = ProcessedDiff(
             modifier="+",
@@ -101,6 +116,9 @@ class TestDiffsAssigner(unittest.TestCase):
             file_name='photo2.jpg',
             location=None,
             file_hash=MOCK_FILE_HASH,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
         )
         diff3 = ProcessedDiff(
             modifier="+",
@@ -110,6 +128,9 @@ class TestDiffsAssigner(unittest.TestCase):
             file_name='photo3.jpg',
             location=None,
             file_hash=MOCK_FILE_HASH,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
         )
 
         with self.assertRaisesRegex(

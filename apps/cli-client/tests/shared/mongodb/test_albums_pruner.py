@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import unittest
 from bson.objectid import ObjectId
 
@@ -22,6 +23,8 @@ from sharded_photos_drive_cli_client.shared.mongodb.testing import (
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class AlbumsPrunerTests(unittest.TestCase):
@@ -114,6 +117,9 @@ class AlbumsPrunerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
@@ -194,6 +200,9 @@ class AlbumsPrunerTests(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=videos_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 

@@ -155,6 +155,9 @@ class PhotosBackup:
                         add_diff
                     ],
                     album_id=cur_album.id,
+                    width=add_diff.width,
+                    height=add_diff.height,
+                    date_taken=add_diff.date_taken,
                 )
                 media_item = self.__media_items_repo.create_media_item(
                     create_media_item_request

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import os
 import tempfile
 import unittest
@@ -30,6 +31,8 @@ from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository impor
 from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class TestTeardownCli(unittest.TestCase):
@@ -85,6 +88,9 @@ class TestTeardownCli(unittest.TestCase):
                     0
                 ].mediaItem.id,
                 album_id=self.archives_album.id,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
             )
         )
 
