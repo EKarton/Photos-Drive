@@ -143,11 +143,10 @@ def get_date_taken(file_path: str) -> datetime:
         raw_metadata = exiftool_client.get_tags(
             [file_path],
             [
-                "Composite:GPSLatitude",
-                "Composite:GPSLongitude",
                 "EXIF:DateTimeOriginal",  # for images
                 "QuickTime:CreateDate",  # for videos (QuickTime/MP4)
                 "QuickTime:CreationDate",
+                'RIFF:DateTimeOriginal',  # for avi videos
                 "TrackCreateDate",
                 "MediaCreateDate",
             ],
@@ -157,6 +156,7 @@ def get_date_taken(file_path: str) -> datetime:
             raw_metadata.get("EXIF:DateTimeOriginal")
             or raw_metadata.get("QuickTime:CreateDate")
             or raw_metadata.get('QuickTime:CreationDate')
+            or raw_metadata.get('RIFF:DateTimeOriginal')
             or raw_metadata.get('TrackCreateDate')
             or raw_metadata.get('MediaCreateDate')
         )
