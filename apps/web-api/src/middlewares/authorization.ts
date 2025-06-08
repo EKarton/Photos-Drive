@@ -10,7 +10,7 @@ export async function verifyAuthorization() {
   const validSubject = getAppConfig().accessTokenAllowedSubject;
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (req.decodedAccessToken.id === validSubject) {
+    if (validSubject === '*' || req.decodedAccessToken.id === validSubject) {
       next();
     } else {
       logger.debug(`User ${req.decodedAccessToken.id} is forbidden`);

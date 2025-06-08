@@ -43,6 +43,33 @@ describe('verifyAuthorization()', () => {
     expect(res.text).toEqual('OK');
   });
 
+  it('should return 200 when ACCESS_TOKEN_ALLOWED_SUBJECT is *, given any subject', async () => {
+    process.env.ACCESS_TOKEN_ALLOWED_SUBJECT = '*';
+    const mockAuthentication = (
+      req: Request,
+      _res: Response,
+      next: NextFunction
+    ) => {
+      req.decodedAccessToken = { id: '9999' };
+      next();
+    };
+
+    const app = express();
+    app.get(
+      '/api/v1/protected-resource',
+      mockAuthentication,
+      await verifyAuthorization(),
+      (_req, res) => {
+        res.send('OK');
+      }
+    );
+
+    const res = await request(app).get('/api/v1/protected-resource');
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.text).toEqual('OK');
+  });
+
   it('should return 403, given incorrect subject', async () => {
     const mockAuthentication = (
       req: Request,
