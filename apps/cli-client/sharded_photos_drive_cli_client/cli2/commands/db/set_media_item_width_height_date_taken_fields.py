@@ -144,8 +144,8 @@ def set_media_item_width_height_date_taken_fields(
             update_media_item_requests.append(
                 UpdateMediaItemRequest(
                     media_item_id=media_item.id,
-                    new_width=media_item.width,
-                    new_height=media_item.height,
+                    new_width=width,
+                    new_height=height,
                     new_date_taken=date_taken,
                 )
             )
