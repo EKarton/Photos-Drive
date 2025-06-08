@@ -72,6 +72,12 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
         pageSize: DEFAULT_PAGE_SIZE,
       });
     });
+
+    effect(() => {
+      this.images();
+      this.ngxMasonryComponent?.reloadItems();
+      this.ngxMasonryComponent?.layout();
+    });
   }
 
   readonly images = computed(() => {
