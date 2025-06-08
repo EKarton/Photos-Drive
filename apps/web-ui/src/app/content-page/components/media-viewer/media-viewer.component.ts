@@ -67,7 +67,13 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
           mimeType: gMediaItem.mimeType,
           imageAlt: `Image of ${mediaItem.fileName}`,
           fileName: mediaItem.fileName,
-          formattedDate: 'Sunday, November 20, 2016 at 12:35 PM',
+          formattedDate: mediaItem.dateTaken.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
           locationName: mediaItem.location
             ? `@ ${mediaItem.location?.latitude}, ${mediaItem.location?.longitude}`
             : undefined,

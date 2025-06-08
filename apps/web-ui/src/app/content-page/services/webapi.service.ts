@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { Result } from '../../shared/results/results';
@@ -23,12 +23,28 @@ export interface MediaItemLocation {
   longitude: number;
 }
 
+interface RawMediaItem {
+  id: string;
+  fileName: string;
+  hashCode: string;
+  location?: MediaItemLocation;
+  gPhotosMediaItemId: string;
+  width: number;
+  height: number;
+  dateTaken: string;
+}
+
+type RawMediaItemDetailsApiResponse = RawMediaItem;
+
 export interface MediaItem {
   id: string;
   fileName: string;
   hashCode: string;
   location?: MediaItemLocation;
   gPhotosMediaItemId: string;
+  width: number;
+  height: number;
+  dateTaken: Date;
 }
 
 export type MediaItemDetailsApiResponse = MediaItem;
@@ -52,6 +68,11 @@ export interface ListMediaItemsInAlbumRequest {
   pageSize?: number;
   pageToken?: string;
   sortBy?: ListMediaItemsInAlbumSortBy;
+}
+
+interface RawListMediaItemsInAlbumResponse {
+  mediaItems: RawMediaItem[];
+  nextPageToken?: string;
 }
 
 export interface ListMediaItemsInAlbumResponse {
@@ -185,12 +206,12 @@ export class WebApiService {
   ): Observable<Result<MediaItemDetailsApiResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/media-items/${mediaItemId}`;
     return this.httpClient
-      .get<MediaItemDetailsApiResponse>(url, {
+      .get<RawMediaItemDetailsApiResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
-      .pipe(toResult());
+      .pipe(map(this.convertRawMediaItemToMediaItem), toResult());
   }
 
   /** Fetches the details of a gphotos media item. */
@@ -228,12 +249,30 @@ export class WebApiService {
     }
 
     return this.httpClient
-      .get<ListMediaItemsInAlbumResponse>(url, {
+      .get<RawListMediaItemsInAlbumResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
         params,
       })
-      .pipe(toResult());
+      .pipe(
+        map((res) => ({
+          mediaItems: res.mediaItems.map(this.convertRawMediaItemToMediaItem),
+          nextPageToken: res.nextPageToken,
+        })),
+        toResult(),
+      );
+  }
+
+  private convertRawMediaItemToMediaItem(rawDoc: RawMediaItem): MediaItem {
+    return {
+      id: rawDoc.id,
+      fileName: rawDoc.fileName,
+      hashCode: rawDoc.hashCode,
+      gPhotosMediaItemId: rawDoc.gPhotosMediaItemId,
+      width: rawDoc.width,
+      height: rawDoc.height,
+      dateTaken: new Date(rawDoc.dateTaken),
+    };
   }
 }

@@ -27,6 +27,9 @@ const MEDIA_ITEM_IMAGE: MediaItem = {
     longitude: 456,
   },
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem1',
+  width: 200,
+  height: 300,
+  dateTaken: new Date('2024-05-27T13:17:46.000Z'),
 };
 
 const GPHOTOS_MEDIA_ITEM_IMAGE: GPhotosMediaItem = {
@@ -48,6 +51,9 @@ const MEDIA_ITEM_VIDEO: MediaItem = {
     longitude: 456,
   },
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem2',
+  width: 200,
+  height: 300,
+  dateTaken: new Date('2024-05-27T13:17:46.000Z'),
 };
 
 const GPHOTOS_MEDIA_ITEM_VIDEO: GPhotosMediaItem = {
@@ -65,6 +71,9 @@ const MEDIA_ITEM_AUDIO: MediaItem = {
   fileName: 'dog.mp3',
   hashCode: '1234',
   gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem3',
+  width: 200,
+  height: 300,
+  dateTaken: new Date('2024-05-27T13:17:46.000Z'),
 };
 
 const GPHOTOS_MEDIA_ITEM_AUDIO: GPhotosMediaItem = {
@@ -206,7 +215,7 @@ describe('MediaViewerComponent', () => {
       '[data-testid="media-viewer-formatted-date-text"]',
     );
     expect(formattedText.textContent!.trim()).toEqual(
-      'Sunday, November 20, 2016 at 12:35 PM',
+      'May 27, 2024 at 06:17 AM',
     );
 
     // Assert the new window button is present
@@ -282,7 +291,7 @@ describe('MediaViewerComponent', () => {
       '[data-testid="media-viewer-formatted-date-text"]',
     );
     expect(formattedText.textContent!.trim()).toEqual(
-      'Sunday, November 20, 2016 at 12:35 PM',
+      'May 27, 2024 at 06:17 AM',
     );
 
     // Assert the new window button is present

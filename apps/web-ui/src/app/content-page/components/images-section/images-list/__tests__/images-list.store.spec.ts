@@ -23,12 +23,18 @@ describe('ImagesListStore', () => {
       fileName: 'dog.png',
       hashCode: '123',
       gPhotosMediaItemId: 'gMediaItem1',
+      width: 200,
+      height: 300,
+      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
     {
       id: '2',
       fileName: 'cat.png',
       hashCode: 'xyz',
       gPhotosMediaItemId: 'gMediaItem2',
+      width: 200,
+      height: 300,
+      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
   ];
   const dummyResponse: ListMediaItemsInAlbumResponse = {
@@ -92,6 +98,9 @@ describe('ImagesListStore', () => {
           fileName: 'lizard.png',
           hashCode: 'wasd',
           gPhotosMediaItemId: 'gMediaItem3',
+          width: 200,
+          height: 300,
+          dateTaken: new Date('2024-05-27T13:17:46.000Z'),
         },
       ],
       nextPageToken: undefined,
