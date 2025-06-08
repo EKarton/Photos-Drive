@@ -270,6 +270,7 @@ export class WebApiService {
       fileName: rawDoc.fileName,
       hashCode: rawDoc.hashCode,
       gPhotosMediaItemId: rawDoc.gPhotosMediaItemId,
+      location: rawDoc.location,
       width: rawDoc.width,
       height: rawDoc.height,
       dateTaken: new Date(rawDoc.dateTaken),
