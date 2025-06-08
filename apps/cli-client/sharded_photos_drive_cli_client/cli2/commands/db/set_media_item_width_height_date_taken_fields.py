@@ -111,8 +111,6 @@ def set_media_item_width_height_date_taken_fields(
                     prev_albums_path + [cast(str, album.name), media_item.file_name]
                 )
 
-            print(media_item)
-
             if (
                 media_item.width != 0
                 and media_item.height != 0
