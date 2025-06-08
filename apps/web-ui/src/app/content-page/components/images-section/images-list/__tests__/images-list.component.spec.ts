@@ -22,12 +22,18 @@ const PAGE_1: ListMediaItemsInAlbumResponse = {
       fileName: 'cat.png',
       hashCode: '',
       gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+      width: 200,
+      height: 300,
+      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
     {
       id: 'photos2',
       fileName: 'cat.png',
       hashCode: '',
       gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
+      width: 200,
+      height: 300,
+      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
   ],
   nextPageToken: '123456789',
@@ -40,6 +46,9 @@ const PAGE_2: ListMediaItemsInAlbumResponse = {
       fileName: 'lizard.png',
       hashCode: '',
       gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem3',
+      width: 200,
+      height: 300,
+      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
   ],
 };
@@ -133,22 +142,22 @@ describe('ImagesListComponent', () => {
     {
       hostElementWidth: 200,
       expectedImageWidths: [95, 95],
-      expectedImageHeights: [95, 95],
+      expectedImageHeights: [143, 143],
     },
     {
       hostElementWidth: 500,
       expectedImageWidths: [160, 160],
-      expectedImageHeights: [160, 160],
+      expectedImageHeights: [240, 240],
     },
     {
       hostElementWidth: 1200,
       expectedImageWidths: [292, 292],
-      expectedImageHeights: [292, 292],
+      expectedImageHeights: [438, 438],
     },
     {
       hostElementWidth: 1600,
       expectedImageWidths: [312, 312],
-      expectedImageHeights: [312, 312],
+      expectedImageHeights: [468, 468],
     },
   ].forEach(
     ({ hostElementWidth, expectedImageWidths, expectedImageHeights }) => {

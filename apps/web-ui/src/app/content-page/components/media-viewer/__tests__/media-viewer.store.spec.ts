@@ -28,6 +28,9 @@ describe('MediaViewerStore', () => {
       longitude: 456,
     },
     gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem1',
+    width: 200,
+    height: 300,
+    dateTaken: new Date('2024-05-27T13:17:46.000Z'),
   };
 
   const fakeGPhotosDetails: GPhotosMediaItem = {

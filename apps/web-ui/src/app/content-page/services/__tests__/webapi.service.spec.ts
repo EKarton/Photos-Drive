@@ -11,9 +11,9 @@ import {
   AlbumDetailsApiResponse,
   GPhotosMediaItemDetailsApiResponse,
   ListMediaItemsInAlbumRequest,
+  ListMediaItemsInAlbumResponse,
   ListMediaItemsInAlbumSortByFields,
   ListMediaItemsInAlbumSortDirection,
-  MediaItemDetailsApiResponse,
   WebApiService,
 } from '../webapi.service';
 
@@ -66,17 +66,31 @@ describe('WebApiService', () => {
   describe('getMediaItem()', () => {
     it('should fetch media item details', () => {
       const mediaItemId = 'media123';
-      const mockResponse: MediaItemDetailsApiResponse = {
+      const mockResponse = {
         id: mediaItemId,
         fileName: 'test.jpg',
         hashCode: 'abc123',
         gPhotosMediaItemId: 'client1:gphoto123',
+        width: 200,
+        height: 300,
+        dateTaken: '2024-05-27T13:17:46.000Z',
       };
 
       service
         .getMediaItem('authToken123', mediaItemId)
         .subscribe((response) => {
-          expect(response).toEqual(toSuccess(mockResponse));
+          expect(response).toEqual(
+            toSuccess({
+              id: mediaItemId,
+              fileName: 'test.jpg',
+              hashCode: 'abc123',
+              gPhotosMediaItemId: 'client1:gphoto123',
+              location: undefined,
+              width: 200,
+              height: 300,
+              dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+            }),
+          );
         });
 
       const req = httpMock.expectOne(
@@ -141,13 +155,32 @@ describe('WebApiService', () => {
             fileName: 'photo.jpg',
             hashCode: 'abc',
             gPhotosMediaItemId: 'g1',
+            width: 200,
+            height: 300,
+            dateTaken: '2024-05-27T13:17:46.000Z',
           },
         ],
         nextPageToken: 'next123',
       };
 
       service.listMediaItems(accessToken, request).subscribe((response) => {
-        expect(response).toEqual(toSuccess(mockResponse));
+        expect(response).toEqual(
+          toSuccess<ListMediaItemsInAlbumResponse>({
+            mediaItems: [
+              {
+                id: '1',
+                fileName: 'photo.jpg',
+                hashCode: 'abc',
+                gPhotosMediaItemId: 'g1',
+                location: undefined,
+                width: 200,
+                height: 300,
+                dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+              },
+            ],
+            nextPageToken: 'next123',
+          }),
+        );
       });
 
       const req = httpMock.expectOne(

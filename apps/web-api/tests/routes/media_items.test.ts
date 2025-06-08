@@ -73,7 +73,7 @@ describe('Media Items Router', () => {
         albumId: '407f1f77bcf86cd799439001:407f1f77bcf86cd799439002',
         width: 1000,
         height: 2000,
-        date_taken: '2025-06-07T17:00:00.000Z'
+        dateTaken: '2025-06-07T17:00:00.000Z'
       });
     });
 

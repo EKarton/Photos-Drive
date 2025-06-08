@@ -299,7 +299,7 @@ describe('Albums Router', () => {
             },
             width: 1000,
             height: 2000,
-            date_taken: '2025-06-07T17:00:00.000Z'
+            dateTaken: '2025-06-07T17:00:00.000Z'
           },
           {
             id: 'albumClient1:mediaItem2',
@@ -312,7 +312,7 @@ describe('Albums Router', () => {
             },
             width: 100,
             height: 200,
-            date_taken: '2024-06-07T17:00:00.000Z'
+            dateTaken: '2024-06-07T17:00:00.000Z'
           }
         ],
         nextPageToken: undefined

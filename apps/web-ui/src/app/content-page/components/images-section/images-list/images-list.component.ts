@@ -80,7 +80,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
       gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
       fileName: mediaItem.fileName,
       width: this.columnWidth(),
-      height: this.columnWidth(),
+      height: (mediaItem.height / mediaItem.width) * this.columnWidth(),
     }));
   });
 

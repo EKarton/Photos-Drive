@@ -1,50 +1,100 @@
 <dialog #modal class="modal backdrop-blur-3xl">
   @let mediaDetails = mediaDetailsResult();
 
-  <!-- Top left content -->
-  @if (mediaDetails | hasSucceeded) {
-    <div
-      data-testid="media-viewer-formatted-date-text"
-      class="absolute top-2 left-2 p-1"
-    >
-      <span class="text-sm"> {{ mediaDetails.data!.formattedDate }} </span>
-    </div>
-  }
-
-  <!-- Top right content -->
-  <div class="flex gap-2 absolute top-2 right-2 p-1">
-    <!-- The open in new window button -->
+  <!-- Top bar -->
+  <div
+    class="flex justify-center items-center gap-4 w-full absolute top-2 left-2 p-1"
+  >
     @if (mediaDetails | hasSucceeded) {
-      <a
-        data-testid="media-viewer-new-window-button"
-        class="btn btn-circle btn-outline border-none btn-sm"
-        [href]="mediaDetails.data!.url"
-        target="_blank"
-        rel="noopener noreferrer"
+      <div
+        data-testid="media-viewer-formatted-date-text"
+        class="text-sm whitespace-nowrap"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="size-5"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-          />
-        </svg>
-      </a>
+        {{ mediaDetails.data!.formattedDate }}
+      </div>
     }
 
-    <!-- The share button -->
-    @if (isShareSupported && (mediaDetails | hasSucceeded)) {
+    <div class="flex gap-2">
+      <!-- The open in new window button -->
+      @if (mediaDetails | hasSucceeded) {
+        <a
+          data-testid="media-viewer-new-window-button"
+          class="btn btn-circle btn-outline border-none btn-sm"
+          [href]="mediaDetails.data!.url"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+            />
+          </svg>
+        </a>
+      }
+
+      <!-- The share button -->
+      @if (isShareSupported && (mediaDetails | hasSucceeded)) {
+        <button
+          data-testid="media-viewer-share-button"
+          class="btn btn-circle btn-outline border-none btn-sm"
+          (click)="share(mediaDetails.data!.url, mediaDetails.data!.fileName)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
+            />
+          </svg>
+        </button>
+      }
+
+      <!-- The download button -->
+      @if (mediaDetails | hasSucceeded) {
+        <a
+          data-testid="media-viewer-download-button"
+          class="btn btn-circle btn-outline border-none btn-sm"
+          [href]="mediaDetails.data!.downloadUrl"
+          [download]="mediaDetails.data!.fileName"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+            />
+          </svg>
+        </a>
+      }
+
+      <!-- The close dialog button -->
       <button
-        data-testid="media-viewer-share-button"
+        data-testid="media-viewer-close-button"
         class="btn btn-circle btn-outline border-none btn-sm"
-        (click)="share(mediaDetails.data!.url, mediaDetails.data!.fileName)"
+        (click)="closeDialog()"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -57,58 +107,11 @@
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
+            d="M6 18 18 6M6 6l12 12"
           />
         </svg>
       </button>
-    }
-
-    <!-- The download button -->
-    @if (mediaDetails | hasSucceeded) {
-      <a
-        data-testid="media-viewer-download-button"
-        class="btn btn-circle btn-outline border-none btn-sm"
-        [href]="mediaDetails.data!.downloadUrl"
-        [download]="mediaDetails.data!.fileName"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="size-5"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-          />
-        </svg>
-      </a>
-    }
-
-    <!-- The close dialog button -->
-    <button
-      data-testid="media-viewer-close-button"
-      class="btn btn-circle btn-outline border-none btn-sm"
-      (click)="closeDialog()"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="size-5"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M6 18 18 6M6 6l12 12"
-        />
-      </svg>
-    </button>
+    </div>
   </div>
 
   <!-- Middle content -->

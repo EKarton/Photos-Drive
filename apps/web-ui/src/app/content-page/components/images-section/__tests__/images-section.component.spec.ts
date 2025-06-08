@@ -21,12 +21,18 @@ const PAGE_1: ListMediaItemsInAlbumResponse = {
       fileName: 'dog.png',
       hashCode: '',
       gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+      width: 200,
+      height: 300,
+      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
     {
       id: 'photos2',
       fileName: 'cat.png',
       hashCode: '',
       gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
+      width: 200,
+      height: 300,
+      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
   ],
 };

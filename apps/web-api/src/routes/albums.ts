@@ -107,7 +107,7 @@ export default async function (
           albumId: albumIdToString(mediaItem.album_id),
           width: mediaItem.width,
           height: mediaItem.height,
-          date_taken: mediaItem.date_taken.toISOString()
+          dateTaken: mediaItem.date_taken.toISOString()
         })),
         nextPageToken: response.nextPageToken
       });
