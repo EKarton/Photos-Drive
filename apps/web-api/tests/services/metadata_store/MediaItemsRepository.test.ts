@@ -266,7 +266,7 @@ describe('MediaItemsRepositoryImpl', () => {
       ]);
     });
 
-    it('returns sorted media items in ascending order', async () => {
+    it('returns sorted media items in ascending order by ID', async () => {
       const res = await mediaItemsRepo.listMediaItemsInAlbum({
         albumId,
         pageSize: 10,
@@ -284,7 +284,7 @@ describe('MediaItemsRepositoryImpl', () => {
       ]);
     });
 
-    it('returns sorted media items in descending order', async () => {
+    it('returns sorted media items in descending order by ID', async () => {
       const res = await mediaItemsRepo.listMediaItemsInAlbum({
         albumId,
         pageSize: 10,
@@ -315,7 +315,7 @@ describe('MediaItemsRepositoryImpl', () => {
       expect(res.nextPageToken).toBeDefined();
     });
 
-    it('uses nextPageToken to continue pagination', async () => {
+    it('uses nextPageToken to continue pagination given sort is by ID in ascending order', async () => {
       const firstPage = await mediaItemsRepo.listMediaItemsInAlbum({
         albumId,
         pageSize: 2,
@@ -335,8 +335,37 @@ describe('MediaItemsRepositoryImpl', () => {
         }
       });
 
+      expect(firstPage.mediaItems).toHaveLength(2);
+      expect(firstPage.mediaItems[0].file_name).toEqual('a.jpg');
+      expect(firstPage.mediaItems[1].file_name).toEqual('b.jpg');
       expect(secondPage.mediaItems).toHaveLength(1);
       expect(secondPage.mediaItems[0].file_name).toEqual('c.jpg');
+    });
+
+    it('uses nextPageToken to continue pagination given sort is by ID in descending order', async () => {
+      const firstPage = await mediaItemsRepo.listMediaItemsInAlbum({
+        albumId,
+        pageSize: 2,
+        sortBy: {
+          field: SortByField.ID,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      const secondPage = await mediaItemsRepo.listMediaItemsInAlbum({
+        albumId,
+        pageSize: 2,
+        pageToken: firstPage.nextPageToken!,
+        sortBy: {
+          field: SortByField.ID,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      expect(firstPage.mediaItems[0].file_name).toEqual('c.jpg');
+      expect(firstPage.mediaItems[1].file_name).toEqual('b.jpg');
+      expect(secondPage.mediaItems).toHaveLength(1);
+      expect(secondPage.mediaItems[0].file_name).toEqual('a.jpg');
     });
 
     it('returns empty result if no items match the album', async () => {
@@ -356,21 +385,6 @@ describe('MediaItemsRepositoryImpl', () => {
 
       expect(res.mediaItems).toHaveLength(0);
       expect(res.nextPageToken).toBeUndefined();
-    });
-
-    it('throws if sort field is invalid', async () => {
-      const invalidSortReq = {
-        albumId,
-        pageSize: 10,
-        sortBy: {
-          field: 'invalid' as SortByField,
-          direction: SortByDirection.ASCENDING
-        }
-      };
-
-      await expect(
-        mediaItemsRepo.listMediaItemsInAlbum(invalidSortReq)
-      ).rejects.toThrow('Unhandled sortBy field: invalid');
     });
 
     it('returns merged results in sorted order from multiple clients', async () => {

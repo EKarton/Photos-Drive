@@ -121,23 +121,23 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
         const filterObj: Filter<MongoDbDocument> = {
           album_id: albumIdToString(req.albumId)
         };
-        if (clientIdToPageToken.has(clientId)) {
-          filterObj['_id'] = {
-            $gt: clientIdToPageToken.get(clientId)
-          };
+
+        const lastSeenId = clientIdToPageToken.get(clientId);
+        if (lastSeenId) {
+          if (req.sortBy.field === SortByField.ID) {
+            filterObj['_id'] =
+              req.sortBy.direction === SortByDirection.ASCENDING
+                ? { $gt: lastSeenId }
+                : { $lt: lastSeenId };
+          }
         }
 
         const sortObj: Sort = {};
         const mongoSortDirection =
           req.sortBy.direction === SortByDirection.ASCENDING ? 1 : -1;
 
-        switch (req.sortBy.field) {
-          case SortByField.ID: {
-            sortObj['_id'] = mongoSortDirection;
-            break;
-          }
-          default:
-            throw Error(`Unhandled sortBy field: ${req.sortBy.field}`);
+        if (req.sortBy.field === SortByField.ID) {
+          sortObj['_id'] = mongoSortDirection;
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
