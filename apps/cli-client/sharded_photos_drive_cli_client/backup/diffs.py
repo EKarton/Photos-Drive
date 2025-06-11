@@ -1,9 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 
 from ..shared.mongodb.media_items import GpsLocation
+
+'''
+The valid modifiers of a Diff. "-" means a removal from the system, and "+" means
+an addition to the system.
+'''
+Modifier = Literal["-", "+"]
 
 
 @dataclass(frozen=True)
@@ -13,7 +19,7 @@ class Diff:
     A media item represents either a video or image.
 
     Attributes:
-        modifier (str): The modifier (required).
+        modifier (Modifier): The modifier (required).
         file_path (str): The file path (required).
         album_name (Optional[str]): The album name (optional). If not provided, it will
             be determined by the file_path.
@@ -29,7 +35,7 @@ class Diff:
             was taken.
     """
 
-    modifier: str
+    modifier: Modifier
     file_path: str
     album_name: Optional[str | None] = None
     file_name: Optional[str | None] = None
