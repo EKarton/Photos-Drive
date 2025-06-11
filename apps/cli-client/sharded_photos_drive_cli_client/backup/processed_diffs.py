@@ -19,7 +19,7 @@ from ..shared.gphotos.valid_file_extensions import (
 from ..shared.hashes.xxhash import compute_file_hash
 from ..shared.mongodb.media_items import GpsLocation
 
-from .diffs import Diff
+from .diffs import Diff, Modifier
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class ProcessedDiff:
     A media item represents either a video or image.
 
     Attributes:
-        modifier (str): The modifier.
+        modifier (Modifier): The modifier.
         file_path (str): The file path.
         album_name (str): The album name.
         file_name (str): The file name
@@ -43,7 +43,7 @@ class ProcessedDiff:
         date_taken (datetime): The date and time for when the image / video was taken.
     """
 
-    modifier: str
+    modifier: Modifier
     file_path: str
     album_name: str
     file_name: str
@@ -66,9 +66,6 @@ class DiffsProcessor:
         """Processes raw diffs into processed diffs, parsing their metadata."""
 
         def process_diff(diff: Diff) -> ProcessedDiff:
-            if diff.modifier not in ("+", "-"):
-                raise ValueError(f"Modifier {diff.modifier} in {diff} not allowed.")
-
             if diff.modifier == "+" and not os.path.exists(diff.file_path):
                 raise ValueError(f"File {diff.file_path} does not exist.")
 
