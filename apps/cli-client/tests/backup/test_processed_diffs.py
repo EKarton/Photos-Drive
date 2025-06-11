@@ -128,6 +128,7 @@ class TestDiffsProcessor(unittest.TestCase):
             file_name='dog.png',
             file_size=1000,
             location=GpsLocation(latitude=100, longitude=200),
+            date_taken=datetime(2010, 2, 2),
         )
 
         processor = DiffsProcessor()
@@ -141,6 +142,30 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(
             processed_diffs[0].file_hash, compute_file_hash(test_file_path)
         )
+        self.assertEqual(processed_diffs[0].date_taken, datetime(2010, 2, 2))
+
+    def test_process_raw_diffs_with_no_date_taken(self):
+        test_file_path = self.__get_file_path("image-without-dates.jpg")
+        diff = Diff(
+            modifier="+",
+            file_path=test_file_path,
+        )
+
+        processor = DiffsProcessor()
+        processed_diffs = processor.process_raw_diffs([diff])
+
+        self.assertEqual(len(processed_diffs), 1)
+        self.assertEqual(
+            processed_diffs[0].album_name,
+            'tests/backup/resources/test_processed_diffs_files',
+        )
+        self.assertEqual(processed_diffs[0].file_name, 'image-without-dates.jpg')
+        self.assertEqual(processed_diffs[0].file_size, 2620046)
+        self.assertEqual(processed_diffs[0].location, None)
+        self.assertEqual(
+            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
+        )
+        self.assertEqual(processed_diffs[0].date_taken, datetime(1970, 1, 1))
 
     def test_process_raw_diffs_with_deletion_diff(self):
         test_file_path = self.__get_file_path('image-with-location.jpg')
@@ -165,6 +190,9 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].file_size, 0)
         self.assertIsNone(processed_diffs[0].location)
         self.assertEqual(processed_diffs[0].file_hash, b'0')
+        self.assertEqual(processed_diffs[0].width, 0)
+        self.assertEqual(processed_diffs[0].height, 0)
+        self.assertEqual(processed_diffs[0].date_taken, datetime(1970, 1, 1))
 
     def test_process_raw_diffs_file_not_exist(self):
         diff = Diff(

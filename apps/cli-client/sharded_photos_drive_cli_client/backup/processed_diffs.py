@@ -72,11 +72,7 @@ class DiffsProcessor:
             if diff.modifier == "+" and not os.path.exists(diff.file_path):
                 raise ValueError(f"File {diff.file_path} does not exist.")
 
-            width, height = None, None
-            if diff.file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
-                width, height = get_width_height_of_image(diff.file_path)
-            else:
-                width, height = get_width_height_of_video(diff.file_path)
+            width, height = self.__get_width_height(diff)
 
             return ProcessedDiff(
                 modifier=diff.modifier,
@@ -88,7 +84,7 @@ class DiffsProcessor:
                 location=None,  # Placeholder; will be updated later
                 width=width,
                 height=height,
-                date_taken=datetime.now(),  # Placeholder; will be updated later
+                date_taken=datetime(1970, 1, 1),  # Placeholder; will be updated later
             )
 
         processed_diffs: list[Optional[ProcessedDiff]] = [None] * len(diffs)
@@ -114,7 +110,7 @@ class DiffsProcessor:
         return cast(list[ProcessedDiff], processed_diffs)
 
     def __get_exif_metadatas(self, diffs: list[Diff]) -> list[ExtractedExifMetadata]:
-        metadatas = [ExtractedExifMetadata(None, datetime.now())] * len(diffs)
+        metadatas = [ExtractedExifMetadata(None, datetime(1970, 1, 1))] * len(diffs)
 
         missing_metadata_and_idx: list[tuple[Diff, int]] = []
         for i, diff in enumerate(diffs):
@@ -219,3 +215,12 @@ class DiffsProcessor:
             return diff.file_size
 
         return os.path.getsize(diff.file_path)
+
+    def __get_width_height(self, diff: Diff) -> tuple[int, int]:
+        if diff.modifier == '-':
+            return 0, 0
+
+        if diff.file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
+            return get_width_height_of_image(diff.file_path)
+        else:
+            return get_width_height_of_video(diff.file_path)
