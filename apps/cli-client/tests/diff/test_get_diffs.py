@@ -29,7 +29,7 @@ from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
 from sharded_photos_drive_cli_client.shared.metadata.media_items_repository import (
     CreateMediaItemRequest,
 )
-from sharded_photos_drive_cli_client.shared.metadata.testing import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

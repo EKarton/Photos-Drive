@@ -31,7 +31,7 @@ from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repositor
 )
 from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
 from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
-from sharded_photos_drive_cli_client.shared.metadata.testing import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

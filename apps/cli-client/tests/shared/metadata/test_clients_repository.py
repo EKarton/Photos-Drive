@@ -14,7 +14,7 @@ from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository 
 from sharded_photos_drive_cli_client.shared.config.config import (
     AddMongoDbConfigRequest,
 )
-from sharded_photos_drive_cli_client.shared.metadata.testing import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

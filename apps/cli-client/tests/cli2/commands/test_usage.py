@@ -22,7 +22,7 @@ from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_i
 from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 

@@ -14,7 +14,7 @@ from sharded_photos_drive_cli_client.cli2.shared.inputs import (
 )
 from sharded_photos_drive_cli_client.cli2.app import build_app
 from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
-from sharded_photos_drive_cli_client.shared.metadata.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 
