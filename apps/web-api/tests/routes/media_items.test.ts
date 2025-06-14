@@ -10,7 +10,7 @@ import {
   MediaItemNotFoundError,
   MediaItemsRepository
 } from '../../src/services/metadata_store/MediaItemsRepository';
-import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/MongoDbClientsRepository';
+import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
 import { fakeAuthEnv, generateTestToken } from './utils/auth';
 import { setupTestEnv } from './utils/env';
 

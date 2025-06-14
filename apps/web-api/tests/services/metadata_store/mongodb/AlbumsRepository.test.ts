@@ -1,12 +1,10 @@
 import { mock } from 'jest-mock-extended';
 import { MongoClient, ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { AlbumId } from '../../../src/services/metadata_store/Albums';
-import {
-  AlbumNotFoundError,
-  AlbumsRepositoryImpl
-} from '../../../src/services/metadata_store/AlbumsRepository';
-import { MongoDbClientsRepository } from '../../../src/services/metadata_store/MongoDbClientsRepository';
+import { AlbumId } from '../../../../src/services/metadata_store/Albums';
+import { AlbumNotFoundError } from '../../../../src/services/metadata_store/AlbumsRepository';
+import { AlbumsRepositoryImpl } from '../../../../src/services/metadata_store/mongodb/AlbumsRepositoryImpl';
+import { MongoDbClientsRepository } from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
 
 describe('AlbumsRepositoryImpl', () => {
   let mongoServer: MongoMemoryServer;

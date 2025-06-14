@@ -1,11 +1,11 @@
 import { AxiosError } from 'axios';
 import nock from 'nock';
-import { MediaItem } from '../../../src/services/blob_store/GMediaItems';
+import { MediaItem } from '../../../../src/services/blob_store/gphotos/GMediaItems';
 import {
   GPhotosClient,
   GPhotosCredentials,
   RefreshCredentialsListener
-} from '../../../src/services/blob_store/GPhotosClient';
+} from '../../../../src/services/blob_store/gphotos/GPhotosClient';
 
 const sampleMediaItem: MediaItem = {
   id: 'sample-media-item-001',

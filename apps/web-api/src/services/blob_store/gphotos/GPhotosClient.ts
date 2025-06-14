@@ -1,7 +1,7 @@
 import axios from 'axios';
 import qs from 'qs';
-import checkNotNull from '../../utils/checkNotNull';
-import logger from '../../utils/logger';
+import checkNotNull from '../../../utils/checkNotNull';
+import logger from '../../../utils/logger';
 import { MediaItem } from './GMediaItems';
 
 /** Represents the credentials of a Google Photos client. */

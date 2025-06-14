@@ -17,7 +17,7 @@ import {
   SortByDirection,
   SortByField
 } from '../services/metadata_store/MediaItemsRepository';
-import { MongoDbClientNotFoundError } from '../services/metadata_store/MongoDbClientsRepository';
+import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
 
 export default async function (
