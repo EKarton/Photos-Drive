@@ -10,19 +10,15 @@ import authRouter from './routes/authentication';
 import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
 import mediaItemsRouter from './routes/media_items';
-import { GPhotosClientsRepository } from './services/blob_store/GPhotosClientsRepository';
-import {
-  AlbumsRepository,
-  AlbumsRepositoryImpl
-} from './services/metadata_store/AlbumsRepository';
-import {
-  MediaItemsRepository,
-  MediaItemsRepositoryImpl
-} from './services/metadata_store/MediaItemsRepository';
+import { GPhotosClientsRepository } from './services/blob_store/gphotos/GPhotosClientsRepository';
+import { AlbumsRepository } from './services/metadata_store/AlbumsRepository';
+import { MediaItemsRepository } from './services/metadata_store/MediaItemsRepository';
+import { AlbumsRepositoryImpl } from './services/metadata_store/mongodb/AlbumsRepositoryImpl';
+import { MediaItemsRepositoryImpl } from './services/metadata_store/mongodb/MediaItemsRepositoryImpl';
 import {
   MongoDbClientsRepository,
   MongoDbClientsRepositoryImpl
-} from './services/metadata_store/MongoDbClientsRepository';
+} from './services/metadata_store/mongodb/MongoDbClientsRepository';
 import { Vault } from './services/vault/VaultStore';
 import { VaultStoreFromFile } from './services/vault/VaultStoreFromFile';
 import { VaultStoreFromMongoDb } from './services/vault/VaultStoreFromMongoDb';

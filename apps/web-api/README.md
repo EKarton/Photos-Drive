@@ -1,4 +1,4 @@
-# Sharded-Photos-Drive-Web-Api
+# Photos-Drive-Web-Api
 
 ## Description
 
@@ -20,9 +20,9 @@ This is the web api app used to serve content to the web ui.
 
 ## Running them locally with Docker
 
-1. To build the app, run `docker build -t sharded-photos-drive-web-api .`
+1. To build the app, run `docker build -t photos-drive-web-api .`
 
-2. To run the app, run `docker run -p 8080:3000 sharded-photos-drive-web-api`
+2. To run the app, run `docker run -p 8080:3000 photos-drive-web-api`
 
 ## Running lints and tests
 

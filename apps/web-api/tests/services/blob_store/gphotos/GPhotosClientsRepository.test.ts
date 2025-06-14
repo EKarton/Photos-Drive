@@ -1,11 +1,11 @@
 import { mock } from 'jest-mock-extended';
 import nock from 'nock';
-import { GPhotosCredentials } from '../../../src/services/blob_store/GPhotosClient';
+import { GPhotosCredentials } from '../../../../src/services/blob_store/gphotos/GPhotosClient';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
-} from '../../../src/services/blob_store/GPhotosClientsRepository';
-import { Vault } from '../../../src/services/vault/VaultStore';
+} from '../../../../src/services/blob_store/gphotos/GPhotosClientsRepository';
+import { Vault } from '../../../../src/services/vault/VaultStore';
 
 const gPhotosCredentials1: GPhotosCredentials = {
   token: 'token1',

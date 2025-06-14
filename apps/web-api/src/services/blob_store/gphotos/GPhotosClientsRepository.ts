@@ -1,5 +1,5 @@
-import logger from '../../utils/logger';
-import { Vault } from '../vault/VaultStore';
+import logger from '../../../utils/logger';
+import { Vault } from '../../vault/VaultStore';
 import { GPhotosClient } from './GPhotosClient';
 
 /** Stores all of the GPhotoClients in the repository. */

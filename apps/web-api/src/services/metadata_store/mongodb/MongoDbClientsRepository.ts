@@ -1,5 +1,5 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
-import { Vault } from '../vault/VaultStore';
+import { Vault } from '../../vault/VaultStore';
 
 /** Represents a repository of all MongoDB clients. */
 export interface MongoDbClientsRepository {

@@ -11,7 +11,7 @@ import {
   MediaItemNotFoundError,
   MediaItemsRepository
 } from '../services/metadata_store/MediaItemsRepository';
-import { MongoDbClientNotFoundError } from '../services/metadata_store/MongoDbClientsRepository';
+import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
 
 export default async function (mediaItemsRepo: MediaItemsRepository) {
   const router: Router = Router();

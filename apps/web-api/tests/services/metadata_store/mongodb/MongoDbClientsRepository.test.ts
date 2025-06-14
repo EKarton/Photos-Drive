@@ -2,8 +2,8 @@ import { mock } from 'jest-mock-extended';
 import {
   MongoDbClientNotFoundError,
   MongoDbClientsRepositoryImpl
-} from '../../../src/services/metadata_store/MongoDbClientsRepository';
-import { Vault } from '../../../src/services/vault/VaultStore';
+} from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+import { Vault } from '../../../../src/services/vault/VaultStore';
 
 describe('MongoDbClientsRepositoryImpl', () => {
   let mockVault: jest.Mocked<Vault>;

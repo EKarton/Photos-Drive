@@ -3,11 +3,11 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import gPhotosMediaItemsRouter from '../../src/routes/gphotos_media_items';
-import { GPhotosClient } from '../../src/services/blob_store/GPhotosClient';
+import { GPhotosClient } from '../../src/services/blob_store/gphotos/GPhotosClient';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
-} from '../../src/services/blob_store/GPhotosClientsRepository';
+} from '../../src/services/blob_store/gphotos/GPhotosClientsRepository';
 import { fakeAuthEnv, generateTestToken } from './utils/auth';
 import { setupTestEnv } from './utils/env';
 

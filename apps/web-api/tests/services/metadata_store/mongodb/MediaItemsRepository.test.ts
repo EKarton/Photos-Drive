@@ -1,20 +1,22 @@
 import { mock } from 'jest-mock-extended';
 import { MongoClient, ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { AlbumId } from '../../../src/services/metadata_store/Albums';
+import { AlbumId } from '../../../../src/services/metadata_store/Albums';
 import {
   MediaItem,
   MediaItemId
-} from '../../../src/services/metadata_store/MediaItems';
+} from '../../../../src/services/metadata_store/MediaItems';
 import {
   MediaItemNotFoundError,
-  MediaItemsRepositoryImpl,
   SortBy,
   SortByDirection,
-  SortByField,
+  SortByField
+} from '../../../../src/services/metadata_store/MediaItemsRepository';
+import {
+  MediaItemsRepositoryImpl,
   sortMediaItem
-} from '../../../src/services/metadata_store/MediaItemsRepository';
-import { MongoDbClientsRepository } from '../../../src/services/metadata_store/MongoDbClientsRepository';
+} from '../../../../src/services/metadata_store/mongodb/MediaItemsRepositoryImpl';
+import { MongoDbClientsRepository } from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
 
 describe('MediaItemsRepositoryImpl', () => {
   let mongoServer: MongoMemoryServer;
