@@ -1,4 +1,4 @@
-import { GPhotosCredentials } from '../blob_store/GPhotosClient';
+import { GPhotosCredentials } from '../blob_store/gphotos/GPhotosClient';
 import { AlbumId } from '../metadata_store/Albums';
 
 /** Represents a Google Photos config. */
