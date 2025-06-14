@@ -5,7 +5,7 @@ import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
 } from '../../../../src/services/blob_store/gphotos/GPhotosClientsRepository';
-import { Vault } from '../../../../src/services/vault/VaultStore';
+import { ConfigStore } from '../../../../src/services/config_store/ConfigStore';
 
 const gPhotosCredentials1: GPhotosCredentials = {
   token: 'token1',
@@ -24,12 +24,12 @@ const gPhotosCredentials2: GPhotosCredentials = {
 };
 
 describe('GPhotosClientsRepository', () => {
-  let mockVault: jest.Mocked<Vault>;
+  let mockConfigStore: jest.Mocked<ConfigStore>;
   let gphotosClientsRepo: GPhotosClientsRepository;
 
   beforeEach(async () => {
-    mockVault = mock<Vault>();
-    mockVault.getGPhotosConfigs.mockResolvedValue([
+    mockConfigStore = mock<ConfigStore>();
+    mockConfigStore.getGPhotosConfigs.mockResolvedValue([
       {
         id: '1',
         name: 'bob@gmail.com',
@@ -43,7 +43,7 @@ describe('GPhotosClientsRepository', () => {
     ]);
 
     gphotosClientsRepo =
-      await GPhotosClientsRepository.buildFromVault(mockVault);
+      await GPhotosClientsRepository.buildFromVault(mockConfigStore);
   });
 
   afterEach(() => {
@@ -61,7 +61,7 @@ describe('GPhotosClientsRepository', () => {
       const client = gphotosClientsRepo.getGPhotosClientById('1');
       await client.refreshCredentials();
 
-      expect(mockVault.updateGPhotosConfig).toHaveBeenCalledWith({
+      expect(mockConfigStore.updateGPhotosConfig).toHaveBeenCalledWith({
         id: '1',
         newCredentials: {
           clientId: 'client_id_1',
@@ -83,7 +83,7 @@ describe('GPhotosClientsRepository', () => {
         /* empty */
       }
 
-      expect(mockVault.updateGPhotosConfig).not.toHaveBeenCalled();
+      expect(mockConfigStore.updateGPhotosConfig).not.toHaveBeenCalled();
     });
   });
 

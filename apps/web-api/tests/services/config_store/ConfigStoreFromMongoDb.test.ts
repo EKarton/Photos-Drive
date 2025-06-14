@@ -2,24 +2,24 @@
 
 import { MongoClient, ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { UpdateGPhotosConfigRequest } from '../../../src/services/vault/VaultStore';
+import { UpdateGPhotosConfigRequest } from '../../../src/services/config_store/ConfigStore';
 import {
+  ConfigStoreFromMongoDb,
   DatabaseCollections,
-  DatabaseName,
-  VaultStoreFromMongoDb
-} from '../../../src/services/vault/VaultStoreFromMongoDb';
+  DatabaseName
+} from '../../../src/services/config_store/ConfigStoreFromMongoDb';
 
-describe('VaultStoreFromMongoDb', () => {
+describe('ConfigStoreFromMongoDb', () => {
   let mongoServer: MongoMemoryServer;
   let mongoClient: MongoClient;
-  let vaultStore: VaultStoreFromMongoDb;
+  let vaultStore: ConfigStoreFromMongoDb;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
 
     mongoClient = await MongoClient.connect(mongoUri);
-    vaultStore = new VaultStoreFromMongoDb(mongoClient);
+    vaultStore = new ConfigStoreFromMongoDb(mongoClient);
   });
 
   afterAll(async () => {

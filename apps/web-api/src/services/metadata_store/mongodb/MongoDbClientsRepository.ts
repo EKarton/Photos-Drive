@@ -1,5 +1,5 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
-import { Vault } from '../../vault/VaultStore';
+import { ConfigStore } from '../../config_store/ConfigStore';
 
 /** Represents a repository of all MongoDB clients. */
 export interface MongoDbClientsRepository {
@@ -23,7 +23,7 @@ export class MongoDbClientsRepositoryImpl implements MongoDbClientsRepository {
   private idToClient = new Map<string, MongoClient>();
 
   static async buildFromVault(
-    vault: Vault
+    vault: ConfigStore
   ): Promise<MongoDbClientsRepositoryImpl> {
     const repo = new MongoDbClientsRepositoryImpl();
 

@@ -3,15 +3,15 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { UpdateGPhotosConfigRequest } from '../../../src/services/vault/VaultStore';
+import { UpdateGPhotosConfigRequest } from '../../../src/services/config_store/ConfigStore';
 import {
-  SectionTypes,
-  VaultStoreFromFile
-} from '../../../src/services/vault/VaultStoreFromFile';
+  ConfigStoreFromFile,
+  SectionTypes
+} from '../../../src/services/config_store/ConfigStoreFromFile';
 
-describe('VaultStoreFromFile', () => {
+describe('ConfigStoreFromFile', () => {
   let tempConfigPath: string;
-  let vaultStore: VaultStoreFromFile;
+  let vaultStore: ConfigStoreFromFile;
 
   beforeEach(async () => {
     // Create a temporary file
@@ -43,8 +43,8 @@ describe('VaultStoreFromFile', () => {
       'type = invalid-section';
     fs.writeFileSync(tempConfigPath, testConfig);
 
-    // Create VaultStoreFromFile instance
-    vaultStore = new VaultStoreFromFile(tempConfigPath);
+    // Create ConfigStoreFromFile instance
+    vaultStore = new ConfigStoreFromFile(tempConfigPath);
   });
 
   afterEach(async () => {
@@ -208,7 +208,7 @@ describe('VaultStoreFromFile', () => {
       const newConfigPath = path.join(os.tmpdir(), 'test-config-no-root.ini');
       fs.writeFileSync(newConfigPath, '[some_section]\ntype = other');
 
-      const newVaultStore = new VaultStoreFromFile(newConfigPath);
+      const newVaultStore = new ConfigStoreFromFile(newConfigPath);
 
       await expect(newVaultStore.getRootAlbumId()).rejects.toThrow(
         'Cannot find root album'

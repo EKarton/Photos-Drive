@@ -35,7 +35,7 @@ export interface UpdateGPhotosConfigRequest {
 }
 
 /** Represents the config of the entire system. */
-export interface Vault {
+export interface ConfigStore {
   /**
    * Returns a list of MongoDB configs.
    */

@@ -1,18 +1,18 @@
 import { mock } from 'jest-mock-extended';
+import { ConfigStore } from '../../../../src/services/config_store/ConfigStore';
 import {
   MongoDbClientNotFoundError,
   MongoDbClientsRepositoryImpl
 } from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
-import { Vault } from '../../../../src/services/vault/VaultStore';
 
 describe('MongoDbClientsRepositoryImpl', () => {
-  let mockVault: jest.Mocked<Vault>;
+  let mockConfigStore: jest.Mocked<ConfigStore>;
   let mongoDbClientsRepo: MongoDbClientsRepositoryImpl;
 
   beforeEach(async () => {
     // Create a mocked implementation of Vault
-    mockVault = mock<Vault>();
-    mockVault.getMongoDbConfigs.mockResolvedValue([
+    mockConfigStore = mock<ConfigStore>();
+    mockConfigStore.getMongoDbConfigs.mockResolvedValue([
       {
         id: '1',
         name: 'bob@gmail.com',
@@ -27,7 +27,7 @@ describe('MongoDbClientsRepositoryImpl', () => {
 
     // Build the repository from the mocked vault
     mongoDbClientsRepo =
-      await MongoDbClientsRepositoryImpl.buildFromVault(mockVault);
+      await MongoDbClientsRepositoryImpl.buildFromVault(mockConfigStore);
   });
 
   afterEach(() => {

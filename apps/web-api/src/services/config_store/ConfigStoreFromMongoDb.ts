@@ -1,11 +1,11 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { AlbumId } from '../metadata_store/Albums';
 import {
+  ConfigStore,
   GPhotosConfig,
   MongoDbConfig,
-  UpdateGPhotosConfigRequest,
-  Vault
-} from './VaultStore';
+  UpdateGPhotosConfigRequest
+} from './ConfigStore';
 
 export const DatabaseName = 'sharded_google_photos';
 
@@ -17,7 +17,7 @@ export enum DatabaseCollections {
 }
 
 /** Implementation of {@code Vault} read from Mongo Db. */
-export class VaultStoreFromMongoDb implements Vault {
+export class ConfigStoreFromMongoDb implements ConfigStore {
   private _client: MongoClient;
 
   constructor(client: MongoClient) {
