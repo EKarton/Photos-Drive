@@ -11,7 +11,9 @@ export class GPhotosClientsRepository {
    * @param vault The config.
    * @returns An instance of {@code GPhotosClientsRepository}.
    */
-  static async buildFromVault(vault: ConfigStore): Promise<GPhotosClientsRepository> {
+  static async buildFromVault(
+    vault: ConfigStore
+  ): Promise<GPhotosClientsRepository> {
     const repo = new GPhotosClientsRepository();
 
     const configs = await vault.getGPhotosConfigs();

@@ -6,7 +6,7 @@ import * as ini from 'ini';
 import { GPhotosCredentials } from '../blob_store/gphotos/GPhotosClient';
 import { AlbumId } from '../metadata_store/Albums';
 import {
-  ConfigStore as ConfigStore,
+  ConfigStore,
   GPhotosConfig,
   MongoDbConfig,
   UpdateGPhotosConfigRequest

@@ -1,7 +1,7 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { AlbumId } from '../metadata_store/Albums';
 import {
-  ConfigStore as ConfigStore,
+  ConfigStore,
   GPhotosConfig,
   MongoDbConfig,
   UpdateGPhotosConfigRequest
