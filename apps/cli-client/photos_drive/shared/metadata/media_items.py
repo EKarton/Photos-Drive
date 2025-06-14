@@ -3,8 +3,8 @@ from typing import Optional
 from datetime import datetime
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.metadata.media_item_id import MediaItemId
-from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.album_id import AlbumId
 
 
 @dataclass(frozen=True)

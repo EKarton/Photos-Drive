@@ -4,16 +4,16 @@ import os
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 
-from sharded_photos_drive_cli_client.shared.config.config import (
+from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )
-from sharded_photos_drive_cli_client.shared.config.config_from_file import (
+from photos_drive.shared.config.config_from_file import (
     ConfigFromFile,
 )
-from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.album_id import AlbumId
 
 
 class TestConfigFromFile(unittest.TestCase):

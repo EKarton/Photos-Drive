@@ -2,7 +2,7 @@ import unittest
 import threading
 import time
 
-from sharded_photos_drive_cli_client.shared.utils.synchronized import synchronized
+from photos_drive.shared.utils.synchronized import synchronized
 
 
 class TestSynchronizedDecorator(unittest.TestCase):

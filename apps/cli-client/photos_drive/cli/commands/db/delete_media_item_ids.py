@@ -2,12 +2,12 @@ import logging
 from typing_extensions import Annotated
 import typer
 
-from sharded_photos_drive_cli_client.cli.shared.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.cli.shared.typer import (
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 

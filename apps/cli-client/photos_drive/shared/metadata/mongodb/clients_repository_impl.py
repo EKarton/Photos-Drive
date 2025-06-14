@@ -6,7 +6,7 @@ from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.metadata.clients_repository import (
+from photos_drive.shared.metadata.clients_repository import (
     ClientsRepository,
 )
 

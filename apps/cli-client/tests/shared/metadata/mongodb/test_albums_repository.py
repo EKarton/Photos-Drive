@@ -2,19 +2,19 @@ from typing import Dict, cast
 import unittest
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
+from photos_drive.shared.metadata.albums_repository import (
     AlbumsRepository,
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

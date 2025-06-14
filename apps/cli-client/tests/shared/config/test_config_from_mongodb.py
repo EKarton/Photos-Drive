@@ -3,18 +3,18 @@ import unittest
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 
-from sharded_photos_drive_cli_client.shared.config.config import (
+from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     MongoDbConfig,
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )
-from sharded_photos_drive_cli_client.shared.config.config_from_mongodb import (
+from photos_drive.shared.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
-from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

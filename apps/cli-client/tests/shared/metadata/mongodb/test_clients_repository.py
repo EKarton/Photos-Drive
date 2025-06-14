@@ -5,15 +5,15 @@ from bson.objectid import ObjectId
 import mongomock
 from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     BYTES_512MB,
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.config.config import (
+from photos_drive.shared.config.config import (
     AddMongoDbConfigRequest,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

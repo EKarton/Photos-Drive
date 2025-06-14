@@ -2,8 +2,8 @@ from prettytable import HRuleStyle, PrettyTable, VRuleStyle
 from termcolor import colored
 from typing import Literal
 
-from sharded_photos_drive_cli_client.backup.diffs import Diff
-from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
+from photos_drive.backup.diffs import Diff
+from photos_drive.backup.processed_diffs import ProcessedDiff
 
 
 def pretty_print_processed_diffs(processed_diffs: list[ProcessedDiff]):
