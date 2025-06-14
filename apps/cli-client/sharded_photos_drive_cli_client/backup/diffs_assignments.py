@@ -1,7 +1,7 @@
 from typing import Dict
 from bson import ObjectId
 
-from ..shared.gphotos.clients_repository import GPhotosClientsRepository
+from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
 from .processed_diffs import ProcessedDiff
 
 

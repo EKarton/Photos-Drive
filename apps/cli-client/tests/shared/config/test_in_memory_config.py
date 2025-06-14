@@ -10,7 +10,7 @@ from sharded_photos_drive_cli_client.shared.config.config import (
     UpdateMongoDbConfigRequest,
 )
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
+from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
 
 
 class TestInMemoryConfig(unittest.TestCase):

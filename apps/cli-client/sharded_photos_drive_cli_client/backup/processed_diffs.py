@@ -6,18 +6,18 @@ import os
 from typing import Optional, cast
 from exiftool import ExifToolHelper
 
-from ..shared.dimensions.cv2_video_dimensions import (
+from ..shared.utils.dimensions.cv2_video_dimensions import (
     get_width_height_of_video,
 )
-from ..shared.dimensions.pillow_image_dimensions import (
+from ..shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
-from ..shared.gphotos.valid_file_extensions import (
+from ..shared.blob_store.gphotos.valid_file_extensions import (
     IMAGE_FILE_EXTENSIONS,
 )
 
-from ..shared.hashes.xxhash import compute_file_hash
-from ..shared.mongodb.media_items import GpsLocation
+from ..shared.utils.hashes.xxhash import compute_file_hash
+from ..shared.metadata.media_items import GpsLocation
 
 from .diffs import Diff, Modifier
 

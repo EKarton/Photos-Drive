@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Literal, Optional
 
 
-from ..shared.mongodb.media_items import GpsLocation
+from ..shared.metadata.media_items import GpsLocation
 
 '''
 The valid modifiers of a Diff. "-" means a removal from the system, and "+" means

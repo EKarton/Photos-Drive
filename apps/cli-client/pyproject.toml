@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sharded_photos_drive_cli_client"
-version = "3.1.13"
+version = "4.0.0"
 description = ""
 authors = ["Emilio Kartono <e.kartonoe@gmail.com>"]
 readme = "README.md"
@@ -47,7 +47,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-sharded_photos_drive_cli2 = "sharded_photos_drive_cli_client.cli2.app:main"
+photos_drive_cli = "sharded_photos_drive_cli_client.cli.app:main"
 
 [[tool.mypy.overrides]]
 module = "google_auth_oauthlib.*"

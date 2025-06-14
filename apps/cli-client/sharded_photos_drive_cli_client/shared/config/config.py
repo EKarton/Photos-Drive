@@ -4,7 +4,7 @@ from typing import Optional
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 
-from ..mongodb.album_id import AlbumId
+from ..metadata.album_id import AlbumId
 
 
 @dataclass(frozen=True)
