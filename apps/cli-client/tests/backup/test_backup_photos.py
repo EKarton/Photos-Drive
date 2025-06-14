@@ -195,12 +195,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
 
         # Test assert: check the media items in the db are made
-        mitems_1 = list(
-            mongodb_client_1['photos_drive']['media_items'].find({})
-        )
-        mitems_2 = list(
-            mongodb_client_2['photos_drive']['media_items'].find({})
-        )
+        mitems_1 = list(mongodb_client_1['photos_drive']['media_items'].find({}))
+        mitems_2 = list(mongodb_client_2['photos_drive']['media_items'].find({}))
         self.assertEqual(len(mitems_1), 4)
         self.assertEqual(len(mitems_2), 0)
         dog_item = next(filter(lambda x: x['file_name'] == 'dog.png', mitems_1))
@@ -343,9 +339,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_gitem = next(filter(lambda x: x.filename == 'cat.png', gitems_2))
 
         # Test assert: Check that there are two media items
-        mitems_1 = list(
-            mongodb_client_1['photos_drive']['media_items'].find({})
-        )
+        mitems_1 = list(mongodb_client_1['photos_drive']['media_items'].find({}))
         self.assertEqual(len(mitems_1), 2)
 
         # Test assert: Check the new media item
@@ -488,9 +482,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         self.assertTrue(backup_results.total_elapsed_time > 0)
 
         # Test assert: Check that there is dog.png but no cat.png media item in the db
-        mitems_1 = list(
-            mongodb_client_1['photos_drive']['media_items'].find({})
-        )
+        mitems_1 = list(mongodb_client_1['photos_drive']['media_items'].find({}))
         self.assertEqual(
             list(filter(lambda x: x['file_name'] == 'cat.png', mitems_1)), []
         )

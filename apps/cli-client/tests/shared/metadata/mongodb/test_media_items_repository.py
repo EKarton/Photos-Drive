@@ -536,9 +536,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.repo.delete_media_item(media_item_id)
 
         # Assert that the media item has been deleted
-        deleted_media = self.mongodb_client["photos_drive"][
-            "media_items"
-        ].find_one({"_id": media_item_id.object_id})
+        deleted_media = self.mongodb_client["photos_drive"]["media_items"].find_one(
+            {"_id": media_item_id.object_id}
+        )
         self.assertIsNone(deleted_media)
 
     def test_delete_media_item_not_found(self):
@@ -576,9 +576,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         # Assert that all items have been deleted
         for mid in ids_to_delete:
-            deleted_media = self.mongodb_client["photos_drive"][
-                "media_items"
-            ].find_one({"_id": mid.object_id})
+            deleted_media = self.mongodb_client["photos_drive"]["media_items"].find_one(
+                {"_id": mid.object_id}
+            )
             self.assertIsNone(deleted_media)
 
     def test_delete_many_media_items_partial_failure(self):
