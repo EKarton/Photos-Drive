@@ -4,7 +4,6 @@ import { AlbumNotFoundError, AlbumsRepository } from '../AlbumsRepository';
 import { MongoDbClientsRepository } from './MongoDbClientsRepository';
 
 /** Implementation of {@code AlbumsRepository} */
-
 export class AlbumsRepositoryImpl implements AlbumsRepository {
   private mongoDbRepository: MongoDbClientsRepository;
 
