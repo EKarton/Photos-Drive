@@ -2,23 +2,25 @@ import logging
 from typing_extensions import Annotated
 import typer
 
-from sharded_photos_drive_cli_client.cli2.shared.inputs import (
+from ...cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.cli2.shared.typer import (
+from ...cli2.shared.config import build_config_from_options
+from ...cli2.shared.logging import setup_logging
+from ...cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
-from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+from ...shared.blob_store.gphotos.client import GPhotosClientV2
+from ...shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
+from ...shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
+)
+from ...shared.metadata.albums_repository import (
     UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from ...shared.metadata.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
 

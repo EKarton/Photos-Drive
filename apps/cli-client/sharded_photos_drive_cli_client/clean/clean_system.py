@@ -4,19 +4,19 @@ from bson.objectid import ObjectId
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
-from ..shared.mongodb.clients_repository import (
+from ..shared.metadata.mongodb.clients_repository import (
     MongoDbClientsRepository,
     MongoDbTransactionsContext,
 )
-from ..shared.mongodb.albums_pruner import AlbumsPruner
-from ..shared.gphotos.albums import Album as GAlbum
-from ..shared.gphotos.client import GPhotosClientV2
-from ..shared.mongodb.album_id import AlbumId
-from ..shared.mongodb.media_item_id import MediaItemId
-from ..shared.gphotos.clients_repository import GPhotosClientsRepository
+from ..shared.metadata.albums_pruner import AlbumsPruner
+from ..shared.blob_store.gphotos.albums import Album as GAlbum
+from ..shared.blob_store.gphotos.client import GPhotosClientV2
+from ..shared.metadata.album_id import AlbumId
+from ..shared.metadata.media_item_id import MediaItemId
+from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
 from ..shared.config.config import Config
-from ..shared.mongodb.albums_repository import AlbumsRepository, UpdatedAlbumFields
-from ..shared.mongodb.media_items_repository import (
+from ..shared.metadata.albums_repository import AlbumsRepository, UpdatedAlbumFields
+from ..shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
 )

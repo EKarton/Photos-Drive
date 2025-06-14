@@ -6,8 +6,8 @@ from sharded_photos_drive_cli_client.backup.processed_diffs import (
     DiffsProcessor,
     ProcessedDiff,
 )
-from sharded_photos_drive_cli_client.shared.hashes.xxhash import compute_file_hash
-from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocation
+from sharded_photos_drive_cli_client.shared.utils.hashes.xxhash import compute_file_hash
+from sharded_photos_drive_cli_client.shared.metadata.media_items import GpsLocation
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 

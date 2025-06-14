@@ -9,7 +9,7 @@ from sharded_photos_drive_cli_client.cli2.shared.printer import (
     pretty_print_diffs,
     pretty_print_processed_diffs,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.media_items import GpsLocation
+from sharded_photos_drive_cli_client.shared.metadata.media_items import GpsLocation
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 

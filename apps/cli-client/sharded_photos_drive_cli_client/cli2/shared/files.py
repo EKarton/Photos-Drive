@@ -1,6 +1,8 @@
 import os
 
-from ...shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
+from ...shared.blob_store.gphotos.valid_file_extensions import (
+    MEDIA_ITEM_FILE_EXTENSIONS,
+)
 
 
 def get_media_file_paths_from_path(path: str) -> list[str]:

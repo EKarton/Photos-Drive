@@ -4,38 +4,38 @@ from typing import Generator
 from typing_extensions import Annotated
 import typer
 
-from sharded_photos_drive_cli_client.backup.backup_photos import (
+from ...backup.backup_photos import (
     BackupResults,
     PhotosBackup,
 )
-from sharded_photos_drive_cli_client.backup.diffs import Diff
-from sharded_photos_drive_cli_client.backup.processed_diffs import (
+from ...backup.diffs import Diff
+from ...backup.processed_diffs import (
     DiffsProcessor,
     ProcessedDiff,
 )
-from sharded_photos_drive_cli_client.cli2.shared.inputs import (
+from ...cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli2.shared.printer import (
+from ...cli2.shared.printer import (
     pretty_print_processed_diffs,
 )
-from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.cli2.shared.typer import (
+from ...cli2.shared.config import build_config_from_options
+from ...cli2.shared.logging import setup_logging
+from ...cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.diff.get_diffs import DiffResults, FolderSyncDiff
-from sharded_photos_drive_cli_client.shared.config.config import Config
-from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+from ...diff.get_diffs import DiffResults, FolderSyncDiff
+from ...shared.config.config import Config
+from ...shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
+from ...shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from ...shared.metadata.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
+from ...shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
 

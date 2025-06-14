@@ -6,7 +6,7 @@ import mongomock
 from pymongo import MongoClient
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
     BYTES_512MB,
     MongoDbClientsRepository,
     MongoDbTransactionsContext,
@@ -14,7 +14,7 @@ from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
 from sharded_photos_drive_cli_client.shared.config.config import (
     AddMongoDbConfigRequest,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.testing import (
+from sharded_photos_drive_cli_client.shared.metadata.testing import (
     create_mock_mongo_client,
 )
 

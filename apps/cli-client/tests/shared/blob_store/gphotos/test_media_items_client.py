@@ -9,8 +9,10 @@ from google.auth.transport.requests import AuthorizedSession
 from google.auth.transport import DEFAULT_RETRYABLE_STATUS_CODES
 from google.oauth2.credentials import Credentials
 
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
-from sharded_photos_drive_cli_client.shared.gphotos.media_items import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.client import (
+    GPhotosClientV2,
+)
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.media_items import (
     UploadedPhotosToGPhotosResult,
     MediaItem,
     VideoProcessingStatus,
@@ -773,7 +775,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             upload_token = client.media_items().upload_photo_in_chunks(
-                photo_file_path="./tests/shared/gphotos/resources/small-image.jpg",
+                photo_file_path="./tests/shared/blob_store/gphotos/resources/small-image.jpg",
                 file_name="small-image.jpg",
             )
 
@@ -844,7 +846,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
                 "bob@gmail.com", AuthorizedSession(MOCK_CREDENTIALS)
             )
             received_upload_token = client.media_items().upload_photo_in_chunks(
-                photo_file_path="./tests/shared/gphotos/resources/small-image.jpg",
+                photo_file_path="./tests/shared/blob_store/gphotos/resources/small-image.jpg",
                 file_name="small-image.jpg",
             )
 
@@ -931,7 +933,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             )
 
             received_upload_token = client.media_items().upload_photo_in_chunks(
-                photo_file_path="./tests/shared/gphotos/resources/small-image.jpg",
+                photo_file_path="./tests/shared/blob_store/gphotos/resources/small-image.jpg",
                 file_name="small-image.jpg",
             )
 
@@ -976,7 +978,7 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
             )
 
             received_upload_token = client.media_items().upload_photo_in_chunks(
-                photo_file_path="./tests/shared/gphotos/resources/small-image.jpg",
+                photo_file_path="./tests/shared/blob_store/gphotos/resources/small-image.jpg",
                 file_name="small-image.jpg",
             )
 
@@ -1005,6 +1007,6 @@ class GPhotosMediaItemClientTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "Failed to get upload token"):
                 client.media_items().upload_photo_in_chunks(
-                    photo_file_path="./tests/shared/gphotos/resources/small-image.jpg",
+                    photo_file_path="./tests/shared/blob_store/gphotos/resources/small-image.jpg",
                     file_name="small-image.jpg",
                 )

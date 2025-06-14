@@ -4,7 +4,7 @@ import logging
 from bson.objectid import ObjectId
 import concurrent
 
-from ..shared.gphotos.clients_repository import GPhotosClientsRepository
+from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
 
 logger = logging.getLogger(__name__)
 

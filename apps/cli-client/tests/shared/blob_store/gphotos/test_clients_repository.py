@@ -5,10 +5,12 @@ from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosClientV2
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.client import (
+    GPhotosClientV2,
+)
 from sharded_photos_drive_cli_client.shared.config.config import (
     AddGPhotosConfigRequest,
 )

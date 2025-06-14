@@ -1,7 +1,9 @@
 import unittest
 
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosStorageQuota
-from sharded_photos_drive_cli_client.shared.gphotos.testing import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.client import (
+    GPhotosStorageQuota,
+)
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
     FakeGPhotosClient,
 )

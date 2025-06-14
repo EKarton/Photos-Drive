@@ -6,16 +6,18 @@ from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 from google.auth.transport import Request
 
-from sharded_photos_drive_cli_client.shared.gphotos.client import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.client import (
     GPhotosClientV2,
     ListenableCredentials,
     TokenRefreshCallback,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.client import GPhotosStorageQuota
-from sharded_photos_drive_cli_client.shared.gphotos.albums_client import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.client import (
+    GPhotosStorageQuota,
+)
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.albums_client import (
     GPhotosAlbumsClient,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.media_items_client import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.media_items_client import (
     GPhotosMediaItemsClient,
 )
 

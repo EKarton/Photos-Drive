@@ -21,10 +21,10 @@ from sharded_photos_drive_cli_client.shared.config.config_from_file import (
 from sharded_photos_drive_cli_client.shared.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
 

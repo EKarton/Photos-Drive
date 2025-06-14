@@ -5,21 +5,21 @@ from collections import deque
 import logging
 from bson.objectid import ObjectId
 
-from ..shared.mongodb.albums_pruner import AlbumsPruner
+from ..shared.metadata.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
-from ..shared.mongodb.albums import Album
-from ..shared.mongodb.albums_repository import (
+from ..shared.metadata.albums import Album
+from ..shared.metadata.albums_repository import (
     AlbumsRepository,
     UpdatedAlbumFields,
 )
-from ..shared.mongodb.media_items_repository import (
+from ..shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
 )
-from ..shared.mongodb.media_items_repository import CreateMediaItemRequest
-from ..shared.mongodb.clients_repository import MongoDbClientsRepository
-from ..shared.mongodb.clients_repository import MongoDbTransactionsContext
-from ..shared.gphotos.clients_repository import GPhotosClientsRepository
+from ..shared.metadata.media_items_repository import CreateMediaItemRequest
+from ..shared.metadata.mongodb.clients_repository import MongoDbClientsRepository
+from ..shared.metadata.mongodb.clients_repository import MongoDbTransactionsContext
+from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
 
 from .processed_diffs import ProcessedDiff
 from .gphotos_uploader import GPhotosMediaItemParallelUploaderImpl

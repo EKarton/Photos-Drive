@@ -11,10 +11,10 @@ from sharded_photos_drive_cli_client.cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from sharded_photos_drive_cli_client.shared.config.config import Config
-from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
     BYTES_512MB,
 )
 

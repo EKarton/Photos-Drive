@@ -7,7 +7,7 @@ from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 from bson.objectid import ObjectId
 
-from ..config.config import Config
+from ...config.config import Config
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 from typing import Dict, override
 from bson.objectid import ObjectId
 
-from ..mongodb.album_id import AlbumId
+from ..metadata.album_id import AlbumId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,

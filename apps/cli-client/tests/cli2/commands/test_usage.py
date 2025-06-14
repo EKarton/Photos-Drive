@@ -7,22 +7,22 @@ from pymongo import MongoClient
 from typer.testing import CliRunner
 
 from sharded_photos_drive_cli_client.cli2.app import build_app
-from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing.fake_client import (
     FakeGPhotosClient,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.testing import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.metadata.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 

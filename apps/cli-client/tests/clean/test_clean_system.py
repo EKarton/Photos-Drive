@@ -8,28 +8,32 @@ from sharded_photos_drive_cli_client.clean.clean_system import (
     SystemCleaner,
 )
 from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.testing.fake_client import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing.fake_client import (
     FakeGPhotosClient,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.testing import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
-from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
-    UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
-    MongoDbClientsRepository,
-)
-from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
-    CreateMediaItemRequest,
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.testing.mock_mongo_client import (
+from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
+from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
+    UpdatedAlbumFields,
+)
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
+    MongoDbClientsRepository,
+)
+from sharded_photos_drive_cli_client.shared.metadata.media_items_repository import (
+    CreateMediaItemRequest,
+)
+from sharded_photos_drive_cli_client.shared.metadata.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 

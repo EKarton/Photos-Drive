@@ -1,7 +1,7 @@
 import unittest
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.gphotos.testing import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
     FakeGPhotosClient,
 )
@@ -10,7 +10,7 @@ from sharded_photos_drive_cli_client.backup.gphotos_uploader import (
     GPhotosMediaItemUploaderImpl,
     UploadRequest,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.clients_repository import (
+from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

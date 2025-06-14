@@ -5,13 +5,13 @@ import logging
 import os
 from typing import cast
 
-from ..shared.mongodb.album_id import AlbumId
-from ..shared.hashes.xxhash import compute_file_hash
-from ..shared.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
+from ..shared.metadata.album_id import AlbumId
+from ..shared.utils.hashes.xxhash import compute_file_hash
+from ..shared.blob_store.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 from ..shared.config.config import Config
-from ..shared.mongodb.albums import Album
-from ..shared.mongodb.albums_repository import AlbumsRepository
-from ..shared.mongodb.media_items_repository import (
+from ..shared.metadata.albums import Album
+from ..shared.metadata.albums_repository import AlbumsRepository
+from ..shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
 )

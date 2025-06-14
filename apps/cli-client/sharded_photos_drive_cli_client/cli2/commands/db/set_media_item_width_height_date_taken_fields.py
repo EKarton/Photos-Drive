@@ -6,34 +6,36 @@ from typing_extensions import Annotated
 import typer
 from exiftool import ExifToolHelper
 
-from sharded_photos_drive_cli_client.cli2.shared.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli2.shared.inputs import (
+from ....shared.metadata.mongodb.media_items_repository_impl import (
+    MediaItemsRepositoryImpl,
+)
+from ....cli2.shared.config import build_config_from_options
+from ....cli2.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.cli2.shared.typer import (
+from ....cli2.shared.logging import setup_logging
+from ....cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.shared.dimensions.cv2_video_dimensions import (
+from ....shared.utils.dimensions.cv2_video_dimensions import (
     get_width_height_of_video,
 )
-from sharded_photos_drive_cli_client.shared.dimensions.pillow_image_dimensions import (
+from ....shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
-from sharded_photos_drive_cli_client.shared.gphotos.valid_file_extensions import (
+from ....shared.blob_store.gphotos.valid_file_extensions import (
     IMAGE_FILE_EXTENSIONS,
     VIDEO_FILE_EXTENSIONS,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.album_id import AlbumId
-from sharded_photos_drive_cli_client.shared.mongodb.albums_repository import (
+from ....shared.metadata.album_id import AlbumId
+from ....shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.clients_repository import (
+from ....shared.metadata.mongodb.clients_repository import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.mongodb.media_items_repository import (
+from ....shared.metadata.media_items_repository import (
     FindMediaItemRequest,
-    MediaItemsRepositoryImpl,
     UpdateMediaItemRequest,
 )
 
