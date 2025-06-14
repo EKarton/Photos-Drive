@@ -35,14 +35,7 @@ There are two types of databases in the system:
 Stores credentials and configuration details for metadata databases and photo storage accounts. Refer to [this guide](./docs/database_schema.md) for more info on their schemas.
 
 * **Root Album table**
-  Contains exactly one row, which points to the root album location:
-
-  ```json
-  {
-    "client_id": "<ObjectId>",  // The ID of the metadata database that contains the root album
-    "object_id": "<ObjectId>"   // The ID of an album object in the metadata database's Albums table
-  }
-  ```
+  Contains exactly one row, which points to the root album location.
 
 * **Google Photos Config table**
   Stores credentials for Google Photos accounts
