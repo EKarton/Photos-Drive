@@ -37,7 +37,7 @@ jobs:
         id: docker-metadata
         uses: docker/metadata-action@v5
         with:
-          images: ekarton/sharded-photos-drive-webapi
+          images: ekarton/photos-drive-webapi
           tags: |
             type=raw,value=latest
             type=raw,value=${{ env.TIMESTAMP_TAG }}
@@ -60,4 +60,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: "docker.io/ekarton/sharded-photos-drive-webapi:latest"
+          images: "docker.io/ekarton/photos-drive-webapi:latest"
