@@ -20,9 +20,9 @@ This is the web api app used to serve content to the web ui.
 
 ## Running them locally with Docker
 
-1. To build the app, run `docker build -t Photos-Drive-Web-Api .`
+1. To build the app, run `docker build -t photos-Drive-Web-Api .`
 
-2. To run the app, run `docker run -p 8080:3000 Photos-Drive-Web-Api`
+2. To run the app, run `docker run -p 8080:3000 photos-Drive-Web-Api`
 
 ## Running lints and tests
 
