@@ -2,12 +2,12 @@
 
 import { MongoClient, ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { UpdateGPhotosConfigRequest } from '../../../src/services/config/ConfigStore';
+import { UpdateGPhotosConfigRequest } from '../../../src/services/config_store/ConfigStore';
 import {
   ConfigStoreFromMongoDb,
   DatabaseCollections,
   DatabaseName
-} from '../../../src/services/config/ConfigStoreFromMongoDb';
+} from '../../../src/services/config_store/ConfigStoreFromMongoDb';
 
 describe('ConfigStoreFromMongoDb', () => {
   let mongoServer: MongoMemoryServer;

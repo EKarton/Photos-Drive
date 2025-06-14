@@ -1,5 +1,5 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
-import { ConfigStore } from '../../config/ConfigStore';
+import { ConfigStore } from '../../config_store/ConfigStore';
 
 /** Represents a repository of all MongoDB clients. */
 export interface MongoDbClientsRepository {

@@ -3,11 +3,11 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { UpdateGPhotosConfigRequest } from '../../../src/services/config/ConfigStore';
+import { UpdateGPhotosConfigRequest } from '../../../src/services/config_store/ConfigStore';
 import {
   ConfigStoreFromFile,
   SectionTypes
-} from '../../../src/services/config/ConfigStoreFromFile';
+} from '../../../src/services/config_store/ConfigStoreFromFile';
 
 describe('ConfigStoreFromFile', () => {
   let tempConfigPath: string;

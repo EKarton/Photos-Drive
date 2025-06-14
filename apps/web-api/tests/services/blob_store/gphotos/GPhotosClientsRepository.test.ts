@@ -5,7 +5,7 @@ import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
 } from '../../../../src/services/blob_store/gphotos/GPhotosClientsRepository';
-import { ConfigStore } from '../../../../src/services/config/ConfigStore';
+import { ConfigStore } from '../../../../src/services/config_store/ConfigStore';
 
 const gPhotosCredentials1: GPhotosCredentials = {
   token: 'token1',

@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { ConfigStore } from '../../../../src/services/config/ConfigStore';
+import { ConfigStore } from '../../../../src/services/config_store/ConfigStore';
 import {
   MongoDbClientNotFoundError,
   MongoDbClientsRepositoryImpl
