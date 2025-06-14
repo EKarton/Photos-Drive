@@ -4,26 +4,26 @@ from bson import Binary
 import unittest
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_repository_impl import (
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.album_id import (
+from photos_drive.shared.metadata.album_id import (
     AlbumId,
     album_id_to_string,
 )
-from sharded_photos_drive_cli_client.shared.metadata.media_item_id import MediaItemId
-from sharded_photos_drive_cli_client.shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     CreateMediaItemRequest,
     UpdateMediaItemRequest,
 )
-from sharded_photos_drive_cli_client.shared.metadata.media_items import (
+from photos_drive.shared.metadata.media_items import (
     GpsLocation,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

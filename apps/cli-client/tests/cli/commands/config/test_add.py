@@ -8,13 +8,13 @@ from bson import ObjectId
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from sharded_photos_drive_cli_client.cli.shared.inputs import (
+from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
 )
-from sharded_photos_drive_cli_client.cli.app import build_app
-from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing.mock_mongo_client import (
+from photos_drive.cli.app import build_app
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 

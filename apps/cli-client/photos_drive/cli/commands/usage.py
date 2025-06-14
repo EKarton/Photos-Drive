@@ -4,17 +4,17 @@ from typing_extensions import Annotated
 import typer
 from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.clean.clean_system import TRASH_ALBUM_TITLE
-from sharded_photos_drive_cli_client.cli.shared.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.cli.shared.typer import (
+from photos_drive.clean.clean_system import TRASH_ALBUM_TITLE
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.shared.config.config import Config
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
+from photos_drive.shared.config.config import Config
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     BYTES_512MB,
 )
 

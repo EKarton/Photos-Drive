@@ -3,7 +3,7 @@ import tempfile
 import os
 import xxhash
 
-from sharded_photos_drive_cli_client.shared.utils.hashes.xxhash import compute_file_hash
+from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
 
 
 class TestComputeFileHash(unittest.TestCase):

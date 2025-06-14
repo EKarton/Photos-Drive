@@ -1,6 +1,6 @@
 from pyfakefs.fake_filesystem_unittest import TestCase
 
-from sharded_photos_drive_cli_client.cli.shared.files import (
+from photos_drive.cli.shared.files import (
     get_media_file_paths_from_path,
 )
 

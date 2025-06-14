@@ -3,19 +3,19 @@ from bson.objectid import ObjectId
 from collections import defaultdict
 from typing import Any, Dict, Mapping, cast
 
-from sharded_photos_drive_cli_client.shared.metadata.album_id import (
+from photos_drive.shared.metadata.album_id import (
     AlbumId,
     album_id_to_string,
     parse_string_to_album_id,
 )
-from sharded_photos_drive_cli_client.shared.metadata.albums import Album
-from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
+from photos_drive.shared.metadata.albums import Album
+from photos_drive.shared.metadata.albums_repository import (
     AlbumsRepository,
     UpdateAlbumRequest,
     UpdatedAlbumFields,
     logger,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 

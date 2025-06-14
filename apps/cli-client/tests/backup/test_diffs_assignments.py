@@ -3,9 +3,9 @@ import unittest
 from unittest.mock import MagicMock
 from bson import ObjectId
 
-from sharded_photos_drive_cli_client.backup.diffs_assignments import DiffsAssigner
-from sharded_photos_drive_cli_client.backup.processed_diffs import ProcessedDiff
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
+from photos_drive.backup.diffs_assignments import DiffsAssigner
+from photos_drive.backup.processed_diffs import ProcessedDiff
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

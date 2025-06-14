@@ -3,13 +3,13 @@ import unittest
 from typing import cast
 from unittest.mock import Mock
 
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
-from sharded_photos_drive_cli_client.shared.metadata.transactions_context import (
+from photos_drive.shared.metadata.transactions_context import (
     TransactionsContext,
 )
 

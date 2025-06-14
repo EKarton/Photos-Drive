@@ -1,11 +1,11 @@
-# Sharded-Photos-Drive-CLI-Client
+# Photos-Drive-CLI-Client
 
-![PyPI - Version](https://img.shields.io/pypi/v/sharded_photos_drive_cli_client)
+![PyPI - Version](https://img.shields.io/pypi/v/photos_drive)
 ![check-code-coverage](https://img.shields.io/badge/code--coverage-99-brightgreen)
 
 ## Description
 
-The Sharded-Photos-Drive-CLI-Client is the cli client for Sharded Photos Drive. This CLI helps set up your infrastructure, syncs, adds, and delete your pictures and videos from your machine to Sharded Photos Drive.
+The Photos-Drive-CLI-Client is the cli client for Photos Drive. This CLI helps set up your infrastructure, syncs, adds, and delete your pictures and videos from your machine to Photos Drive.
 
 This CLI will never delete content from your machine - it should only mirror the content from your machine to the cloud.
 
@@ -15,10 +15,10 @@ This CLI will never delete content from your machine - it should only mirror the
   - [Installation](#installation)
   - [Setting up your infrastructure](#setting-up-your-infrastructure)
   - [Syncing your photos / videos](#syncing-your-photos--videos)
-  - [Adding custom content](#adding-custom-content-to-sharded-photos-drive)
-  - [Deleting custom content](#deleting-content-to-sharded-photos-drive)
-  - [Cleaning](#cleaning-trailing-sharded-photos-drive)
-  - [Deleting everything](#deleting-all-content-in-sharded-photos-drive)
+  - [Adding custom content](#adding-custom-content-to-photos-drive)
+  - [Deleting custom content](#deleting-content-to-photos-drive)
+  - [Cleaning](#cleaning-trailing-photos-drive)
+  - [Deleting everything](#deleting-all-content-in-photos-drive)
 - [Getting Started to Contribute](#getting-started-to-contribute)
 - [Usage](#usage)
 - [Credits](#credits)
@@ -34,7 +34,7 @@ This CLI will never delete content from your machine - it should only mirror the
 2. Second, install this Python package by running:
 
    ```bash
-   pip3 install sharded_photos_drive_cli_client
+   pip3 install photos_drive
    ```
 
 ### Setting up your infrastructure
@@ -44,7 +44,7 @@ This CLI will never delete content from your machine - it should only mirror the
    1. A connection string to your MongoDB database (follow [this doc](./docs/create_mongodb_connection_string.md) for step-by-step instructions).
    2. Your Google Account's client ID and client secrets (follow [this doc](./docs/create_google_client_id.md) for step-by-step instructions).
 
-2. Next, to set up your infrastructure by running `sharded_photos_drive_cli_client config init`.
+2. Next, to set up your infrastructure by running `photos_drive config init`.
 
 3. It will ask you information on what the command will do.
 
@@ -96,7 +96,7 @@ This CLI will never delete content from your machine - it should only mirror the
 2. To sync your photos / videos to the system, run:
 
    ```bash
-   sharded_photos_drive_cli sync --local_dir_path . --config_file config.conf
+   photos_drive_cli sync --local_dir_path . --config_file config.conf
    ```
 
 3. It will then ask you to confirm if these are the contents that you want to upload to the system. Type in `yes`:
@@ -110,7 +110,7 @@ This CLI will never delete content from your machine - it should only mirror the
 5. If you want to sync your photos/videos in a particular path in the system, you can specify the `--remote_albums_path` field, like:
 
    ```bash
-   sharded_photos_drive_cli sync --local_dir_path ./Archives --remote_albums_path Archives  --config_file config.conf
+   photos_drive_cli sync --local_dir_path ./Archives --remote_albums_path Archives  --config_file config.conf
    ```
 
    It will compare all contents under the local directory `./Archives` to all content under the albums path `Archives`.
@@ -118,14 +118,14 @@ This CLI will never delete content from your machine - it should only mirror the
 6. You can also upload photos / videos in parallel with the `--parallelize_uploads` flag, like:
 
    ```bash
-   sharded_photos_drive_cli sync --local_dir_path . --config_file config.conf --parallelize_uploads
+   photos_drive_cli sync --local_dir_path . --config_file config.conf --parallelize_uploads
    ```
 
    though it is experimental right now.
 
-### Adding custom content to Sharded Photos Drive
+### Adding custom content to Photos Drive
 
-1. Suppose your Sharded Photos Drive has the following content:
+1. Suppose your Photos Drive has the following content:
 
    ```bash
    root
@@ -151,7 +151,7 @@ This CLI will never delete content from your machine - it should only mirror the
 2. You can run:
 
    ```bash
-   sharded_photos_drive_cli add ./Current --config_file my-config.conf
+   photos_drive_cli add ./Current --config_file my-config.conf
    ```
 
    and your system will add all contents under `./Current` without deleting any existing content in your system.
@@ -173,7 +173,7 @@ This CLI will never delete content from your machine - it should only mirror the
        └── Dog.jpg
    ```
 
-### Deleting content to Sharded Photos Drive
+### Deleting content to Photos Drive
 
 1. Similarly, if your system has this content:
 
@@ -193,7 +193,7 @@ This CLI will never delete content from your machine - it should only mirror the
 2. If you want to delete the `Archives/Random.jpg` picture, you can run:
 
    ```bash
-   sharded_photos_drive_cli delete Archives/Random.jpg --config_file my-config.conf
+   photos_drive_cli delete Archives/Random.jpg --config_file my-config.conf
    ```
 
    and the photo `Archives/Random.jpg` will be deleted from the system.
@@ -201,7 +201,7 @@ This CLI will never delete content from your machine - it should only mirror the
 3. Similarly, if you want to delete everything under the `Archives/Photos` album, you can run:
 
    ```bash
-   sharded_photos_drive_cli delete Archives/Photos --config_file my-config.conf
+   photos_drive_cli delete Archives/Photos --config_file my-config.conf
    ```
 
    and the system will have these new contents:
@@ -212,7 +212,7 @@ This CLI will never delete content from your machine - it should only mirror the
        └── Random.jpg
    ```
 
-### Cleaning trailing Sharded Photos Drive
+### Cleaning trailing Photos Drive
 
 In case any of the `sync`, `add`, or `delete` commands fail, there are data that can be cleaned up. Moreover, when a photo / video is deleted, due to the limitations of the Google Photos API, it will remain in your Google Photos account.
 
@@ -221,7 +221,7 @@ Hence, the `clean` script is provided to clean up the system.
 Running:
 
 ```bash
-sharded_photos_drive_cli clean --config_file config.conf
+photos_drive_cli clean --config_file config.conf
 ```
 
 will:
@@ -230,12 +230,12 @@ will:
 2. Delete all albums from the metadata database that is not being used
 3. Move photos / videos in Google Photos that are not used to a special album called `To delete` where you can manually delete the content in your Google Photos account.
 
-### Deleting all content in Sharded Photos Drive
+### Deleting all content in Photos Drive
 
 In case you want to delete everything, you can run:
 
 ```bash
-sharded_photos_drive_cli teardown --config_file config.conf
+photos_drive_cli teardown --config_file config.conf
 ```
 
 It will delete all photos / videos from your system, and move all photos / videos in your Google Photo accounts to their `To delete` albums.
@@ -290,11 +290,11 @@ It will delete all photos / videos from your system, and move all photos / video
 
    2. Then, create a pull request with the new version number.
 
-   3. Once the pull request is submitted, go to <https://github.com/EKarton/Sharded-Photos-Drive/actions/workflows/publish-cli-client.yaml>, click on the `Run workflow`, ensure that it's on the `main` branch, and click on `Run workflow`:
+   3. Once the pull request is submitted, go to <https://github.com/EKarton/photos-drive/actions/workflows/publish-cli-client.yaml>, click on the `Run workflow`, ensure that it's on the `main` branch, and click on `Run workflow`:
 
       ![Screenshot of publish workflow](docs/images/publish-package/publish-cli-client-screenshot.png)
 
-   4. Once the action is complete, it will publish a new version of the app on <https://pypi.org/project/sharded_photos_drive_cli_client/>.
+   4. Once the action is complete, it will publish a new version of the app on <https://pypi.org/project/photos_drive_cli_client/>.
 
 ## Usage
 

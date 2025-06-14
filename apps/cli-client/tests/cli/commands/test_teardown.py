@@ -6,33 +6,33 @@ from unittest.mock import patch
 from typer.testing import CliRunner
 from bson import ObjectId
 
-from sharded_photos_drive_cli_client.cli.app import build_app
-from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
+from photos_drive.cli.app import build_app
+from photos_drive.shared.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing.fake_client import (
+from photos_drive.shared.blob_store.gphotos.testing.fake_client import (
     FakeGPhotosClient,
 )
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing import (
+from photos_drive.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_repository_impl import (
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
+from photos_drive.shared.metadata.albums_repository import (
     UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.media_items_repository import (
     CreateMediaItemRequest,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing.mock_mongo_client import (
+from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 

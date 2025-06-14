@@ -1,7 +1,7 @@
 import logging
 from types import TracebackType
 
-from sharded_photos_drive_cli_client.shared.metadata.clients_repository import (
+from photos_drive.shared.metadata.clients_repository import (
     ClientsRepository,
 )
 

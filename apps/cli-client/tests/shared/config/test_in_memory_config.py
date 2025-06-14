@@ -3,14 +3,14 @@ from bson import ObjectId
 from unittest.mock import MagicMock
 from google.oauth2.credentials import Credentials
 
-from sharded_photos_drive_cli_client.shared.config.config import (
+from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )
-from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
+from photos_drive.shared.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.metadata.album_id import AlbumId
 
 
 class TestInMemoryConfig(unittest.TestCase):

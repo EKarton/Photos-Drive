@@ -2,27 +2,27 @@ from datetime import datetime, timezone
 import unittest
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing import (
+from photos_drive.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
     FakeGPhotosClient,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_repository_impl import (
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.albums_pruner import AlbumsPruner
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
+from photos_drive.shared.metadata.albums_repository import (
     UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.media_items_repository import (
     CreateMediaItemRequest,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

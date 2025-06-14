@@ -3,13 +3,13 @@ import unittest
 from unittest.mock import Mock, patch
 from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.cli.shared.inputs import (
+from photos_drive.cli.shared.inputs import (
     prompt_user_for_mongodb_connection_string,
     prompt_user_for_non_empty_input_string,
     prompt_user_for_non_empty_password,
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing.mock_mongo_client import (
+from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 

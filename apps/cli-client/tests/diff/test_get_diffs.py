@@ -2,34 +2,34 @@ from datetime import datetime, timezone
 from pyfakefs.fake_filesystem_unittest import TestCase
 from bson.objectid import ObjectId
 
-from sharded_photos_drive_cli_client.diff.get_diffs import (
+from photos_drive.diff.get_diffs import (
     DiffResults,
     FolderSyncDiff,
     LocalFile,
     RemoteFile,
 )
-from sharded_photos_drive_cli_client.shared.config.inmemory_config import InMemoryConfig
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.testing import (
+from photos_drive.shared.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
     FakeGPhotosClient,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_repository_impl import (
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.utils.hashes.xxhash import compute_file_hash
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
+from photos_drive.shared.metadata.albums_repository import (
     UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.media_items_repository import (
     CreateMediaItemRequest,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
 

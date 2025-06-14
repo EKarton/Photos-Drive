@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 import typer
 from google.oauth2.credentials import Credentials
 
-from sharded_photos_drive_cli_client.cli.shared.inputs import (
+from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
     prompt_user_for_gphotos_credentials,
@@ -12,12 +12,12 @@ from sharded_photos_drive_cli_client.cli.shared.inputs import (
     prompt_user_for_non_empty_input_string,
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli.shared.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.cli.shared.typer import (
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.shared.config.config import (
+from photos_drive.shared.config.config import (
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
 )

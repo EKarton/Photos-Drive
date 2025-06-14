@@ -1,5 +1,5 @@
 from typing import cast
-from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.album_id import AlbumId
 from .media_items_repository import MediaItemsRepository
 from .albums_repository import AlbumsRepository, UpdatedAlbumFields
 

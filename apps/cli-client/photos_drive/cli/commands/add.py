@@ -2,31 +2,33 @@ import logging
 from typing_extensions import Annotated
 import typer
 
-from sharded_photos_drive_cli_client.backup.backup_photos import PhotosBackup
-from sharded_photos_drive_cli_client.backup.diffs import Diff
-from sharded_photos_drive_cli_client.backup.processed_diffs import DiffsProcessor
-from sharded_photos_drive_cli_client.cli.shared.inputs import (
+from photos_drive.backup.backup_photos import PhotosBackup
+from photos_drive.backup.diffs import Diff
+from photos_drive.backup.processed_diffs import DiffsProcessor
+from photos_drive.cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from sharded_photos_drive_cli_client.cli.shared.printer import pretty_print_diffs
-from sharded_photos_drive_cli_client.cli.shared.files import (
+from photos_drive.cli.shared.printer import (
+    pretty_print_processed_diffs,
+)
+from photos_drive.cli.shared.files import (
     get_media_file_paths_from_path,
 )
-from sharded_photos_drive_cli_client.cli.shared.config import build_config_from_options
-from sharded_photos_drive_cli_client.cli.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.cli.shared.typer import (
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_repository_impl import (
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
 
@@ -37,7 +39,7 @@ config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 
 
 @app.command()
-def delete(
+def add(
     path: str,
     config_file: Annotated[
         str | None,
@@ -63,6 +65,13 @@ def delete(
             help="Whether to show all logging debug statements or not",
         ),
     ] = False,
+    parallelize_uploads: Annotated[
+        bool,
+        typer.Option(
+            "--parallelize-uploads",
+            help="Whether to parallelize uploads or not",
+        ),
+    ] = False,
 ):
     setup_logging(verbose)
 
@@ -71,7 +80,8 @@ def delete(
         + f" path: {path}\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
-        + f" verbose={verbose}"
+        + f" verbose={verbose}\n"
+        + f" parallelize_uploads={parallelize_uploads}"
     )
 
     # Set up the repos
@@ -83,21 +93,21 @@ def delete(
 
     # Get the diffs
     diffs = [
-        Diff(modifier="-", file_path=path)
+        Diff(modifier="+", file_path=path)
         for path in get_media_file_paths_from_path(path)
     ]
-
-    # Confirm if diffs are correct by the user
-    pretty_print_diffs(diffs)
-    if not prompt_user_for_yes_no_answer("Is this correct? (Y/N): "):
-        print("Operation cancelled.")
-        return
 
     # Process the diffs with metadata
     diff_processor = DiffsProcessor()
     processed_diffs = diff_processor.process_raw_diffs(diffs)
     for processed_diff in processed_diffs:
         logger.debug(f"Processed diff: {processed_diff}")
+
+    # Confirm if diffs are correct by the user
+    pretty_print_processed_diffs(processed_diffs)
+    if not prompt_user_for_yes_no_answer("Is this correct? (Y/N): "):
+        print("Operation cancelled.")
+        return
 
     # Process the diffs
     backup_service = PhotosBackup(
@@ -106,11 +116,12 @@ def delete(
         media_items_repo,
         gphoto_clients_repo,
         mongodb_clients_repo,
+        parallelize_uploads,
     )
     backup_results = backup_service.backup(processed_diffs)
     logger.debug(f"Backup results: {backup_results}")
 
-    print(f"Deleted {len(diffs)} items.")
+    print(f"Added {len(diffs)} items.")
     print(f"Items added: {backup_results.num_media_items_added}")
     print(f"Items deleted: {backup_results.num_media_items_deleted}")
     print(f"Albums created: {backup_results.num_albums_created}")

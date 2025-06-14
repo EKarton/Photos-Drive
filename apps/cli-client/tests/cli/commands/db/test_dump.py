@@ -5,7 +5,7 @@ from unittest.mock import patch
 from unittest import mock
 from typer.testing import CliRunner
 
-from sharded_photos_drive_cli_client.cli.app import build_app
+from photos_drive.cli.app import build_app
 
 
 class TestDbDump(unittest.TestCase):

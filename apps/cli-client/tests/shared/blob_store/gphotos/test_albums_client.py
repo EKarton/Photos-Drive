@@ -5,10 +5,10 @@ from dacite import from_dict
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.client import (
+from photos_drive.shared.blob_store.gphotos.client import (
     GPhotosClientV2,
 )
-from sharded_photos_drive_cli_client.shared.blob_store.gphotos.albums import Album
+from photos_drive.shared.blob_store.gphotos.albums import Album
 
 MOCK_CREDENTIALS = Credentials(
     token="token123",

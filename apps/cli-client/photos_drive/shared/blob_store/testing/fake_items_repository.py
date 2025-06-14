@@ -3,7 +3,7 @@ import uuid
 from dacite import from_dict
 from typing import Optional
 
-from sharded_photos_drive_cli_client.shared.utils.synchronized import synchronized
+from photos_drive.shared.utils.synchronized import synchronized
 
 from ..albums import Album
 from ..media_items import UploadedPhotosToGPhotosResult, MediaItem

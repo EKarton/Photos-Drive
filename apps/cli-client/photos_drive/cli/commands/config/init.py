@@ -4,27 +4,27 @@ from typing_extensions import Annotated
 import typer
 from pymongo import MongoClient
 
-from sharded_photos_drive_cli_client.cli.shared.inputs import (
+from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,
     prompt_user_for_gphotos_credentials,
     prompt_user_for_mongodb_connection_string,
 )
-from sharded_photos_drive_cli_client.cli.shared.logging import setup_logging
-from sharded_photos_drive_cli_client.shared.config.config import (
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     Config,
 )
-from sharded_photos_drive_cli_client.shared.config.config_from_file import (
+from photos_drive.shared.config.config_from_file import (
     ConfigFromFile,
 )
-from sharded_photos_drive_cli_client.shared.config.config_from_mongodb import (
+from photos_drive.shared.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 
