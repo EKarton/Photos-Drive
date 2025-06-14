@@ -31,7 +31,7 @@ from ....shared.metadata.album_id import AlbumId
 from ....shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from ....shared.metadata.mongodb.clients_repository import (
+from ....shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 from ....shared.metadata.media_items_repository import (

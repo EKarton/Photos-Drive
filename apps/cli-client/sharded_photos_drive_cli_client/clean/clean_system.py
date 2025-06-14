@@ -4,9 +4,10 @@ from bson.objectid import ObjectId
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
-from ..shared.metadata.mongodb.clients_repository import (
+from ..shared.metadata.transactions_context import TransactionsContext
+
+from ..shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
-    MongoDbTransactionsContext,
 )
 from ..shared.metadata.albums_pruner import AlbumsPruner
 from ..shared.blob_store.gphotos.albums import Album as GAlbum
@@ -386,7 +387,7 @@ class SystemCleaner:
             root_album_id, self.__albums_repo, self.__media_items_repo
         )
         for album_id in empty_leaf_album_ids:
-            with MongoDbTransactionsContext(self.__mongodb_clients_repo):
+            with TransactionsContext(self.__mongodb_clients_repo):
                 total_albums_pruned += pruner.prune_album(album_id)
 
         logger.info("Finished pruning albums")

@@ -17,8 +17,10 @@ from ..shared.metadata.media_items_repository import (
     MediaItemsRepository,
 )
 from ..shared.metadata.media_items_repository import CreateMediaItemRequest
-from ..shared.metadata.mongodb.clients_repository import MongoDbClientsRepository
-from ..shared.metadata.mongodb.clients_repository import MongoDbTransactionsContext
+from ..shared.metadata.clients_repository import (
+    ClientsRepository,
+)
+from ..shared.metadata.transactions_context import TransactionsContext
 from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
 
 from .processed_diffs import ProcessedDiff
@@ -66,7 +68,7 @@ class PhotosBackup:
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
         gphotos_client_repo: GPhotosClientsRepository,
-        mongodb_clients_repo: MongoDbClientsRepository,
+        clients_repo: ClientsRepository,
         parallelize_uploads: bool = False,
     ):
         self.__config = config
@@ -84,7 +86,7 @@ class PhotosBackup:
             else GPhotosMediaItemUploaderImpl(gphotos_client_repo)
         )
 
-        self.__mongodb_clients_repo = mongodb_clients_repo
+        self.__clients_repo = clients_repo
 
     def backup(self, diffs: list[ProcessedDiff]) -> BackupResults:
         """Backs up a list of media items based on a list of diffs.
@@ -178,7 +180,7 @@ class PhotosBackup:
         # Step 7: Delete albums with no child albums and no media items
         total_num_albums_deleted = 0
         for album_id in total_album_ids_to_prune:
-            with MongoDbTransactionsContext(self.__mongodb_clients_repo):
+            with TransactionsContext(self.__clients_repo):
                 logger.debug(f"Pruning {album_id}")
                 total_num_albums_deleted += self.__albums_pruner.prune_album(album_id)
 
@@ -251,7 +253,7 @@ class PhotosBackup:
                 child_album = self.__albums_repo.get_album_by_id(child_album_id)
                 child_album_name_to_album[cast(str, child_album.name)] = child_album
 
-            with MongoDbTransactionsContext(self.__mongodb_clients_repo):
+            with TransactionsContext(self.__clients_repo):
                 created_child_album_ids = []
                 for child_diff_node in cur_diffs_tree_node.child_nodes:
                     if child_diff_node.album_name not in child_album_name_to_album:

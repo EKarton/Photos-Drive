@@ -14,7 +14,7 @@ from sharded_photos_drive_cli_client.shared.config.config import Config
 from sharded_photos_drive_cli_client.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
     BYTES_512MB,
 )
 

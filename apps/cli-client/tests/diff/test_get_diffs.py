@@ -20,7 +20,7 @@ from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_reposit
     MediaItemsRepositoryImpl,
 )
 from sharded_photos_drive_cli_client.shared.utils.hashes.xxhash import compute_file_hash
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (

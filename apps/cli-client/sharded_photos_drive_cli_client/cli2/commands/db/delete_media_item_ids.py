@@ -7,7 +7,7 @@ from sharded_photos_drive_cli_client.cli2.shared.logging import setup_logging
 from sharded_photos_drive_cli_client.cli2.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 

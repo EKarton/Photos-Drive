@@ -20,7 +20,7 @@ from ...shared.metadata.mongodb.albums_repository_impl import (
 from ...shared.metadata.albums_repository import (
     UpdatedAlbumFields,
 )
-from ...shared.metadata.mongodb.clients_repository import (
+from ...shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 

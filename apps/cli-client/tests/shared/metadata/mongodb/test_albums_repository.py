@@ -11,7 +11,7 @@ from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
     UpdatedAlbumFields,
 )
 from sharded_photos_drive_cli_client.shared.metadata.album_id import AlbumId
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 from sharded_photos_drive_cli_client.shared.metadata.mongodb.testing import (

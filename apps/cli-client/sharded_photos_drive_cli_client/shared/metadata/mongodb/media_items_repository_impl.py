@@ -10,7 +10,7 @@ from sharded_photos_drive_cli_client.shared.metadata.album_id import (
     album_id_to_string,
     parse_string_to_album_id,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 from sharded_photos_drive_cli_client.shared.metadata.media_item_id import MediaItemId

@@ -26,7 +26,7 @@ from sharded_photos_drive_cli_client.shared.metadata.mongodb.media_items_reposit
 from sharded_photos_drive_cli_client.shared.metadata.albums_repository import (
     UpdatedAlbumFields,
 )
-from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository import (
+from sharded_photos_drive_cli_client.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 from sharded_photos_drive_cli_client.shared.metadata.media_items_repository import (

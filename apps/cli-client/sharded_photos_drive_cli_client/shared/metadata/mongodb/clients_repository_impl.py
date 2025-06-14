@@ -1,11 +1,14 @@
 import logging
-from types import TracebackType
 from typing import Dict
 from pymongo.mongo_client import MongoClient
 from pymongo.client_session import ClientSession
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 from bson.objectid import ObjectId
+
+from sharded_photos_drive_cli_client.shared.metadata.clients_repository import (
+    ClientsRepository,
+)
 
 from ...config.config import Config
 
@@ -14,7 +17,7 @@ logger = logging.getLogger(__name__)
 BYTES_512MB = 536870912
 
 
-class MongoDbClientsRepository:
+class MongoDbClientsRepository(ClientsRepository):
     def __init__(self) -> None:
         self.__id_to_client: Dict[str, MongoClient] = {}
         self.__client_id_to_session: dict[ObjectId, ClientSession] = {}
@@ -80,12 +83,6 @@ class MongoDbClientsRepository:
         return self.__id_to_client[str_id]
 
     def find_id_of_client_with_most_space(self) -> ObjectId:
-        """
-        Returns the client ID with the most amount of space.
-
-        Returns:
-            ObjectId: the client ID with the most amount of space.
-        """
         best_client_id = None
         most_unused_space = float("-inf")
 
@@ -122,14 +119,6 @@ class MongoDbClientsRepository:
         return [(ObjectId(id), client) for id, client in self.__id_to_client.items()]
 
     def start_transactions(self):
-        '''
-        Starts a transaction.
-
-        Database transactions are only saved if commit_and_end_transactions() is called.
-
-        A call to abort_and_end_transactions() will abort and roll back all
-        transactions.
-        '''
         if self.__transaction_in_progress:
             raise ValueError("Transaction already in progress")
 
@@ -154,10 +143,6 @@ class MongoDbClientsRepository:
         return self.__client_id_to_session.get(client_id, None)
 
     def commit_and_end_transactions(self):
-        '''
-        Commits the transactions and ends the session.
-        Note: it must call start_transactions() first before calling this method.
-        '''
         if not self.__transaction_in_progress:
             raise ValueError("Transaction not in progress")
 
@@ -171,10 +156,6 @@ class MongoDbClientsRepository:
         self.__transaction_in_progress = False
 
     def abort_and_end_transactions(self):
-        '''
-        Aborts the transactions and ends the session.
-        Note: it must call start_transactions() first before calling this method.
-        '''
         if not self.__transaction_in_progress:
             raise ValueError("Transaction not in progress")
 
@@ -186,25 +167,3 @@ class MongoDbClientsRepository:
 
         self.__client_id_to_session.clear()
         self.__transaction_in_progress = False
-
-
-class MongoDbTransactionsContext:
-    def __init__(self, repo: MongoDbClientsRepository):
-        self.__repo = repo
-
-    def __enter__(self):
-        self.__repo.start_transactions()
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ):
-        if exc_type:
-            logger.error(f"Aborting transaction due to error: {exc_value}")
-            self.__repo.abort_and_end_transactions()
-            logger.error("Transaction aborted")
-        else:
-            self.__repo.commit_and_end_transactions()
-            logger.debug("Commited transactions")
