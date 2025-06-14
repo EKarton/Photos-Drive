@@ -54,7 +54,7 @@ describe('MediaItemsRepositoryImpl', () => {
 
     beforeEach(async () => {
       // Set up the database and collection
-      const db = mongoClient.db('sharded_google_photos');
+      const db = mongoClient.db('photos_drive');
       await db.collection('media_items').deleteMany({});
       await db.collection('media_items').insertOne({
         _id: new ObjectId('507f1f77bcf86cd799439011'),
@@ -92,7 +92,7 @@ describe('MediaItemsRepositoryImpl', () => {
 
     it('should return the media item correctly when width, height, and date_time is not set', async () => {
       // Set up the database and collection
-      const db = mongoClient.db('sharded_google_photos');
+      const db = mongoClient.db('photos_drive');
       await db.collection('media_items').deleteMany({});
       await db.collection('media_items').insertOne({
         _id: new ObjectId('507f1f77bcf86cd799439011'),
@@ -146,7 +146,7 @@ describe('MediaItemsRepositoryImpl', () => {
 
     beforeEach(async () => {
       // Clear and repopulate collection for each test
-      const db = mongoClient.db('sharded_google_photos');
+      const db = mongoClient.db('photos_drive');
       await db.collection('media_items').deleteMany({});
       await db.collection('media_items').insertMany([
         {
@@ -225,7 +225,7 @@ describe('MediaItemsRepositoryImpl', () => {
     };
 
     beforeEach(async () => {
-      const db = mongoClient.db('sharded_google_photos');
+      const db = mongoClient.db('photos_drive');
       await db.collection('media_items').deleteMany({});
       await db.collection('media_items').insertMany([
         {

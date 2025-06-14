@@ -7,7 +7,7 @@ import {
   UpdateGPhotosConfigRequest
 } from './ConfigStore';
 
-export const DatabaseName = 'sharded_google_photos';
+export const DatabaseName = 'photos_drive';
 
 /** Possible collections in the database */
 export enum DatabaseCollections {
