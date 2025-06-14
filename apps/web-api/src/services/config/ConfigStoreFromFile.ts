@@ -6,11 +6,11 @@ import * as ini from 'ini';
 import { GPhotosCredentials } from '../blob_store/gphotos/GPhotosClient';
 import { AlbumId } from '../metadata_store/Albums';
 import {
+  ConfigStore as ConfigStore,
   GPhotosConfig,
   MongoDbConfig,
-  UpdateGPhotosConfigRequest,
-  Vault
-} from './VaultStore';
+  UpdateGPhotosConfigRequest
+} from './ConfigStore';
 
 /** The valid section types in the config */
 export enum SectionTypes {
@@ -23,7 +23,7 @@ export enum SectionTypes {
 type INIParseResult = Record<string, Record<string, string | number | boolean>>;
 
 /** Implementation of {@code Vault} read from a file. */
-export class VaultStoreFromFile implements Vault {
+export class ConfigStoreFromFile implements ConfigStore {
   private _configFilePath: string;
   private _config: INIParseResult;
 

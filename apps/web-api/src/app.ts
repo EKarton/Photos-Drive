@@ -11,6 +11,9 @@ import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
 import mediaItemsRouter from './routes/media_items';
 import { GPhotosClientsRepository } from './services/blob_store/gphotos/GPhotosClientsRepository';
+import { ConfigStore } from './services/config/ConfigStore';
+import { ConfigStoreFromFile } from './services/config/ConfigStoreFromFile';
+import { ConfigStoreFromMongoDb } from './services/config/ConfigStoreFromMongoDb';
 import { AlbumsRepository } from './services/metadata_store/AlbumsRepository';
 import { MediaItemsRepository } from './services/metadata_store/MediaItemsRepository';
 import { AlbumsRepositoryImpl } from './services/metadata_store/mongodb/AlbumsRepositoryImpl';
@@ -19,16 +22,13 @@ import {
   MongoDbClientsRepository,
   MongoDbClientsRepositoryImpl
 } from './services/metadata_store/mongodb/MongoDbClientsRepository';
-import { Vault } from './services/vault/VaultStore';
-import { VaultStoreFromFile } from './services/vault/VaultStoreFromFile';
-import { VaultStoreFromMongoDb } from './services/vault/VaultStoreFromMongoDb';
 import logger from './utils/logger';
 
 export class App {
   private app: Application;
   private appConfig: AppConfig;
 
-  private config?: Vault;
+  private config?: ConfigStore;
   private mongoDbClientsRepository?: MongoDbClientsRepository;
   private gPhotosClientsRepository?: GPhotosClientsRepository;
   private albumsRepository?: AlbumsRepository;
@@ -41,9 +41,9 @@ export class App {
 
   async run() {
     if (this.appConfig.vaultFilePath) {
-      this.config = new VaultStoreFromFile(this.appConfig.vaultFilePath);
+      this.config = new ConfigStoreFromFile(this.appConfig.vaultFilePath);
     } else if (this.appConfig.vaultMongoDb) {
-      this.config = new VaultStoreFromMongoDb(
+      this.config = new ConfigStoreFromMongoDb(
         new MongoClient(this.appConfig.vaultMongoDb)
       );
     } else {

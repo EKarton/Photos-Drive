@@ -1,5 +1,5 @@
 import logger from '../../../utils/logger';
-import { Vault } from '../../vault/VaultStore';
+import { ConfigStore } from '../../config/ConfigStore';
 import { GPhotosClient } from './GPhotosClient';
 
 /** Stores all of the GPhotoClients in the repository. */
@@ -11,7 +11,7 @@ export class GPhotosClientsRepository {
    * @param vault The config.
    * @returns An instance of {@code GPhotosClientsRepository}.
    */
-  static async buildFromVault(vault: Vault): Promise<GPhotosClientsRepository> {
+  static async buildFromVault(vault: ConfigStore): Promise<GPhotosClientsRepository> {
     const repo = new GPhotosClientsRepository();
 
     const configs = await vault.getGPhotosConfigs();
