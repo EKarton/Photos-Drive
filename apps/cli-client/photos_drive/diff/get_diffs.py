@@ -22,12 +22,12 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class RemoteFile:
     '''
-    Represents a file in the Sharded Photos Drive system.
+    Represents a file in the Photos Drive system.
 
     Attributes:
         key: The unique key of the remote file. It should contain the
             remote file path + its hash code
-        remote_relative_file_path: The relative file path stored in the Sharded
+        remote_relative_file_path: The relative file path stored in the
             Photos Drive system. This path should allow the CLI to delete the
             photo if needed.
     '''
@@ -61,7 +61,7 @@ class DiffResults:
 class FolderSyncDiff:
     '''
     A class responsible for returning the difference between the contents of a
-    folder and the contents in the Sharded Photos Drive.
+    folder and the contents in the Photos Drive.
     '''
 
     def __init__(

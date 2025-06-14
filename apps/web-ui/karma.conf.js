@@ -24,10 +24,7 @@ module.exports = function (config) {
       suppressAll: true, // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(
-        __dirname,
-        './coverage/sharded-photos-drive-web-ui',
-      ),
+      dir: require('path').join(__dirname, './coverage/photos-drive-web-ui'),
       subdir: '.',
       reporters: [{ type: 'html' }, { type: 'lcov' }, { type: 'text-summary' }],
       check: {

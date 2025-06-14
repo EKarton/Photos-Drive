@@ -199,7 +199,7 @@ def __backup_diffs_to_system(
                 f"Elapsed time: {overall_results.total_elapsed_time:.6f} seconds"
             )
 
-            print("Run sharded_photos_drive clean to fix errors")
+            print("Run photos_drive_cli clean to fix errors")
             raise e
 
     logger.debug(f"Backup results: {overall_results}")

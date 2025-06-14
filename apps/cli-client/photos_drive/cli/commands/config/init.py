@@ -104,7 +104,7 @@ def init(
 
     # Step 5: Tell user how to add more MongoDB accounts / Google Photo accounts
     print(
-        "Congratulations! You have set up a basic version of sharded_google_photos!\n"
+        "Congratulations! You have set up a basic version of Photos Drive!\n"
         + "\n"
         + "You can always add more MongoDB accounts by:\n"
         + " 1. Create a new MongoDB account\n"
@@ -132,7 +132,7 @@ def init(
 def __prompt_welcome():
     print(
         "Welcome!\n"
-        + "Before you get started with sharded_google_photos, you need the following:\n"
+        + "Before you get started with photos_drive_cli, you need the following:\n"
         + "\n  1. A place to store your config files (MongoDB or in a config file).\n"
         + "\n  2. A place to store your photo metadata (MongoDB).\n"
         + "\n  3. A place to store your photos (Google Photos account).\n"
@@ -224,16 +224,16 @@ def __get_non_empty_name_for_gphotos() -> str:
 
 
 def get_config_add_gphotos_config_file_cli():
-    return "sharded_google_photos config add gphotos --config-file <file-path>"
+    return "photos_drive_cli config add gphotos --config-file <file-path>"
 
 
 def get_config_add_mongodb_config_file_cli():
-    return "sharded_google_photos config add mongodb --config-file <file-path>"
+    return "photos_drive_cli config add mongodb --config-file <file-path>"
 
 
 def get_config_add_gphotos_config_mongodb_cli():
-    return "sharded_google_photos config add gphotos --config-mongodb <file-path>"
+    return "photos_drive_cli config add gphotos --config-mongodb <file-path>"
 
 
 def get_config_add_mongodb_config_mongodb_cli():
-    return "sharded_google_photos config add mongodb --config-mongodb <file-path>"
+    return "photos_drive_cli config add mongodb --config-mongodb <file-path>"
