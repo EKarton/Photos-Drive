@@ -391,7 +391,7 @@ describe('MediaViewerComponent', () => {
 
     expect(mockNavigator.share).toHaveBeenCalledWith({
       title: 'dog.png',
-      text: 'Photo from Sharded Photos Drive',
+      text: 'Photo from Photos Drive',
       url: 'http://www.google.com/photos/1=w200-h300',
     });
   });
@@ -423,7 +423,7 @@ describe('MediaViewerComponent', () => {
 
     expect(mockNavigator.share).toHaveBeenCalledWith({
       title: 'dog.mp4',
-      text: 'Photo from Sharded Photos Drive',
+      text: 'Photo from Photos Drive',
       url: 'http://www.google.com/videos/1=dv',
     });
   });
