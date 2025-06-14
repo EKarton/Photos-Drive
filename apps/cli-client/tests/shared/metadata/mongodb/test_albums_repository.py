@@ -32,7 +32,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
     def test_get_album_by_id(self):
         # Prepare test data
         album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
-        self.mock_client["sharded_google_photos"]["albums"].insert_one(
+        self.mock_client["photos_drive"]["albums"].insert_one(
             {
                 "_id": album_id.object_id,
                 "name": "Test Album",
@@ -70,7 +70,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         # Arrange: Prepare test data
         album_id_1 = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
         album_id_2 = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1c"))
-        self.mock_client["sharded_google_photos"]["albums"].insert_one(
+        self.mock_client["photos_drive"]["albums"].insert_one(
             {
                 "_id": album_id_1.object_id,
                 "name": "Archives",
@@ -80,7 +80,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 ],
             }
         )
-        self.mock_client["sharded_google_photos"]["albums"].insert_one(
+        self.mock_client["photos_drive"]["albums"].insert_one(
             {
                 "_id": album_id_2.object_id,
                 "name": "Photos",
@@ -132,7 +132,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.assertEqual(album.child_album_ids, child_album_ids)
 
         # Check if the album was actually inserted into the mock database
-        inserted_album = self.mock_client["sharded_google_photos"]["albums"].find_one(
+        inserted_album = self.mock_client["photos_drive"]["albums"].find_one(
             {"_id": album.id.object_id}
         )
         self.assertIsNotNone(inserted_album)
@@ -146,7 +146,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         ]
 
         for album_id in album_ids:
-            self.mock_client["sharded_google_photos"]["albums"].insert_one(
+            self.mock_client["photos_drive"]["albums"].insert_one(
                 {
                     "_id": album_id.object_id,
                     "name": f"Test Album {album_id.object_id}",
@@ -161,7 +161,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         # Assert
         for album_id in album_ids:
             self.assertIsNone(
-                self.mock_client["sharded_google_photos"]["albums"].find_one(
+                self.mock_client["photos_drive"]["albums"].find_one(
                     {"_id": album_id.object_id}
                 )
             )
@@ -175,7 +175,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
             MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
         )
 
-        self.mock_client["sharded_google_photos"]["albums"].insert_one(
+        self.mock_client["photos_drive"]["albums"].insert_one(
             {
                 "_id": existing_album_id.object_id,
                 "name": "Existing Album",
@@ -195,7 +195,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         album_id_2 = AlbumId(mongo_client_id_2, ObjectId("5f50c31e8a7d4b1c9c9b0b1d"))
         mock_client_2 = create_mock_mongo_client()
         self.mongo_clients_repo.add_mongodb_client(mongo_client_id_2, mock_client_2)
-        self.mock_client["sharded_google_photos"]["albums"].insert_one(
+        self.mock_client["photos_drive"]["albums"].insert_one(
             {
                 "_id": album_id_1.object_id,
                 "name": "Album 1",
@@ -203,7 +203,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "child_album_ids": [],
             }
         )
-        mock_client_2["sharded_google_photos"]["albums"].insert_one(
+        mock_client_2["photos_drive"]["albums"].insert_one(
             {
                 "_id": album_id_2.object_id,
                 "name": "Album 2",
@@ -217,12 +217,12 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
 
         # Assert
         self.assertIsNone(
-            self.mock_client["sharded_google_photos"]["albums"].find_one(
+            self.mock_client["photos_drive"]["albums"].find_one(
                 {"_id": album_id_1.object_id}
             )
         )
         self.assertIsNone(
-            mock_client_2["sharded_google_photos"]["albums"].find_one(
+            mock_client_2["photos_drive"]["albums"].find_one(
                 {"_id": album_id_2.object_id}
             )
         )
@@ -230,7 +230,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
     def test_delete_album__with_valid_id(self):
         # Prepare test data
         album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
-        self.mock_client["sharded_google_photos"]["albums"].insert_one(
+        self.mock_client["photos_drive"]["albums"].insert_one(
             {"_id": album_id.object_id, "name": "Test Album"}
         )
 
@@ -238,7 +238,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.repo.delete_album(album_id)
 
         # Assert
-        deleted_album = self.mock_client["sharded_google_photos"]["albums"].find_one(
+        deleted_album = self.mock_client["photos_drive"]["albums"].find_one(
             {"_id": album_id.object_id}
         )
         self.assertIsNone(deleted_album)
@@ -254,7 +254,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
     def test_update_album__with_new_fields(self):
         # Prepare test data
         album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
-        self.mock_client["sharded_google_photos"]["albums"].insert_one(
+        self.mock_client["photos_drive"]["albums"].insert_one(
             {
                 "_id": album_id.object_id,
                 "name": "Old Name",
@@ -282,7 +282,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         # Assert
         updated_album = cast(
             Dict,
-            self.mock_client["sharded_google_photos"]["albums"].find_one(
+            self.mock_client["photos_drive"]["albums"].find_one(
                 {"_id": album_id.object_id}
             ),
         )

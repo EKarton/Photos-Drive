@@ -29,7 +29,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
         self.mock_client.close()
 
     def test_get_mongodb_configs(self):
-        doc = self.mock_client["sharded_google_photos"]["mongodb_configs"].insert_one(
+        doc = self.mock_client["photos_drive"]["mongodb_configs"].insert_one(
             {
                 "name": "bob@gmail.com",
                 "read_write_connection_string": "mongodb://localhost:27017",
@@ -69,7 +69,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
 
         inserted_doc = cast(
             Mapping,
-            self.mock_client["sharded_google_photos"]["mongodb_configs"].find_one(
+            self.mock_client["photos_drive"]["mongodb_configs"].find_one(
                 {"_id": result.id}
             ),
         )
@@ -86,7 +86,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
 
     def test_update_mongodb_config(self):
         config_id = ObjectId()
-        self.mock_client["sharded_google_photos"]["mongodb_configs"].insert_one(
+        self.mock_client["photos_drive"]["mongodb_configs"].insert_one(
             {
                 "_id": config_id,
                 "name": "Original Name",
@@ -105,7 +105,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
 
         updated_doc = cast(
             Mapping,
-            self.mock_client["sharded_google_photos"]["mongodb_configs"].find_one(
+            self.mock_client["photos_drive"]["mongodb_configs"].find_one(
                 {"_id": config_id}
             ),
         )
@@ -191,7 +191,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
         )
 
     def test_get_gphotos_config(self):
-        doc = self.mock_client["sharded_google_photos"]["gphotos_configs"].insert_one(
+        doc = self.mock_client["photos_drive"]["gphotos_configs"].insert_one(
             {
                 "name": "bob@gmail.com",
                 "read_write_credentials": {
@@ -238,7 +238,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
         )
 
     def test_update_gphotos_config(self):
-        doc = self.mock_client["sharded_google_photos"]["gphotos_configs"].insert_one(
+        doc = self.mock_client["photos_drive"]["gphotos_configs"].insert_one(
             {
                 "name": "bob@gmail.com",
                 "read_write_credentials": {
@@ -280,7 +280,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
 
         new_doc = cast(
             Mapping,
-            self.mock_client["sharded_google_photos"]["gphotos_configs"].find_one(
+            self.mock_client["photos_drive"]["gphotos_configs"].find_one(
                 {"_id": doc.inserted_id}
             ),
         )
@@ -332,7 +332,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
             self.config.update_gphotos_config(update_request)
 
     def test_get_root_album_id(self):
-        self.mock_client["sharded_google_photos"]["root_album"].insert_one(
+        self.mock_client["photos_drive"]["root_album"].insert_one(
             {
                 "client_id": ObjectId("5f50c31e8a7d4b1c9c9b0b1c"),
                 "object_id": ObjectId("5f50c31e8a7d4b1c9c9b0b1d"),
@@ -357,7 +357,7 @@ class TestConfigFromMongoDb(unittest.TestCase):
         self.config.set_root_album_id(new_album_id)
 
         inserted_doc = cast(
-            Dict, self.mock_client["sharded_google_photos"]["root_album"].find_one()
+            Dict, self.mock_client["photos_drive"]["root_album"].find_one()
         )
         self.assertIsNotNone(inserted_doc)
         self.assertEqual(str(inserted_doc["client_id"]), "5f50c31e8a7d4b1c9c9b0b1e")

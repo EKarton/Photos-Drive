@@ -33,7 +33,7 @@ class ConfigFromMongoDb(Config):
 
     @override
     def get_mongodb_configs(self) -> list[MongoDbConfig]:
-        collection = self.__mongodb_client["sharded_google_photos"]["mongodb_configs"]
+        collection = self.__mongodb_client["photos_drive"]["mongodb_configs"]
         configs = []
         for document in collection.find({}):
             config = MongoDbConfig(
@@ -48,7 +48,7 @@ class ConfigFromMongoDb(Config):
 
     @override
     def add_mongodb_config(self, request: AddMongoDbConfigRequest) -> MongoDbConfig:
-        collection = self.__mongodb_client["sharded_google_photos"]["mongodb_configs"]
+        collection = self.__mongodb_client["photos_drive"]["mongodb_configs"]
         result = collection.insert_one(
             {
                 "name": request.name,
@@ -82,7 +82,7 @@ class ConfigFromMongoDb(Config):
                 'read_only_connection_string'
             ] = request.new_read_only_connection_string
 
-        collection = self.__mongodb_client["sharded_google_photos"]["mongodb_configs"]
+        collection = self.__mongodb_client["photos_drive"]["mongodb_configs"]
         result = collection.update_one(
             filter=filter_query, update=set_query, upsert=False
         )
@@ -92,7 +92,7 @@ class ConfigFromMongoDb(Config):
 
     @override
     def get_gphotos_configs(self) -> list[GPhotosConfig]:
-        collection = self.__mongodb_client["sharded_google_photos"]["gphotos_configs"]
+        collection = self.__mongodb_client["photos_drive"]["gphotos_configs"]
         configs = []
         for document in collection.find({}):
             id = document["_id"]
@@ -121,7 +121,7 @@ class ConfigFromMongoDb(Config):
 
     @override
     def add_gphotos_config(self, request: AddGPhotosConfigRequest) -> GPhotosConfig:
-        collection = self.__mongodb_client["sharded_google_photos"]["gphotos_configs"]
+        collection = self.__mongodb_client["photos_drive"]["gphotos_configs"]
         result = collection.insert_one(
             {
                 "name": request.name,
@@ -175,7 +175,7 @@ class ConfigFromMongoDb(Config):
                 "client_secret": request.new_read_only_credentials.client_secret,
             }
 
-        collection = self.__mongodb_client["sharded_google_photos"]["gphotos_configs"]
+        collection = self.__mongodb_client["photos_drive"]["gphotos_configs"]
         result = collection.update_one(
             filter=filter_query, update=set_query, upsert=False
         )
@@ -185,7 +185,7 @@ class ConfigFromMongoDb(Config):
 
     @override
     def get_root_album_id(self) -> AlbumId:
-        doc = self.__mongodb_client["sharded_google_photos"]["root_album"].find_one({})
+        doc = self.__mongodb_client["photos_drive"]["root_album"].find_one({})
 
         if doc is None:
             raise ValueError("No root album ID!")
@@ -201,6 +201,6 @@ class ConfigFromMongoDb(Config):
                 "object_id": album_id.object_id,
             }
         }
-        self.__mongodb_client["sharded_google_photos"]["root_album"].update_one(
+        self.__mongodb_client["photos_drive"]["root_album"].update_one(
             filter=filter_query, update=set_query, upsert=True
         )

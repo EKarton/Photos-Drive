@@ -87,7 +87,7 @@ class MongoDbClientsRepository(ClientsRepository):
         most_unused_space = float("-inf")
 
         for id, client in self.__id_to_client.items():
-            db = client["sharded_google_photos"]
+            db = client["photos_drive"]
             db_stats = db.command({'dbStats': 1, 'freeStorage': 1})
             raw_total_free_storage = db_stats["totalFreeStorageSize"]
 

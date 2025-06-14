@@ -46,7 +46,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         )
         raw_item = cast(
             dict,
-            client["sharded_google_photos"]["media_items"].find_one(
+            client["photos_drive"]["media_items"].find_one(
                 filter={"_id": id.object_id}, session=session
             ),
         )
@@ -62,7 +62,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            for doc in client["sharded_google_photos"]["media_items"].find(
+            for doc in client["photos_drive"]["media_items"].find(
                 filter={}, session=session
             ):
                 raw_item = cast(dict, doc)
@@ -95,7 +95,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            for raw_item in client['sharded_google_photos']['media_items'].find(
+            for raw_item in client['photos_drive']['media_items'].find(
                 filter=mongo_filter, session=session
             ):
                 media_items.append(
@@ -110,7 +110,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            total += client['sharded_google_photos']['media_items'].count_documents(
+            total += client['photos_drive']['media_items'].count_documents(
                 filter={'album_id': album_id_to_string(album_id)}, session=session
             )
 
@@ -140,7 +140,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 "coordinates": [request.location.longitude, request.location.latitude],
             }
 
-        insert_result = client["sharded_google_photos"]["media_items"].insert_one(
+        insert_result = client["photos_drive"]["media_items"].insert_one(
             document=data_object, session=session
         )
 
@@ -214,7 +214,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            result = client["sharded_google_photos"]["media_items"].bulk_write(
+            result = client["photos_drive"]["media_items"].bulk_write(
                 requests=operations, session=session
             )
 
@@ -229,7 +229,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         session = self._mongodb_clients_repository.get_session_for_client_id(
             id.client_id
         )
-        result = client["sharded_google_photos"]["media_items"].delete_one(
+        result = client["photos_drive"]["media_items"].delete_one(
             {"_id": id.object_id}, session=session
         )
 
@@ -249,7 +249,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id
             )
-            result = client["sharded_google_photos"]["media_items"].delete_many(
+            result = client["photos_drive"]["media_items"].delete_many(
                 filter={"_id": {"$in": object_ids}}, session=session
             )
 

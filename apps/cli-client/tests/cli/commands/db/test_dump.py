@@ -73,7 +73,7 @@ class TestDbDump(unittest.TestCase):
                 "--uri",
                 "mongodb://localhost:27017",
                 "--db",
-                "sharded_google_photos",
+                "photos_drive",
                 "--out",
                 os.path.join(self.tempDir.name, "mongodb_111111111111111111111111"),
             ],

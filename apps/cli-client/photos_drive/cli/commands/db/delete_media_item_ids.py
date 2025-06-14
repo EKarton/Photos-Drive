@@ -58,9 +58,9 @@ def delete_media_item_ids(
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
 
     for _, client in mongodb_clients_repo.get_all_clients():
-        for obj in client['sharded_google_photos']['albums'].find({}):
+        for obj in client['photos_drive']['albums'].find({}):
             filter_obj = {"_id": obj["_id"]}
             update_obj = {"$unset": {"media_item_ids": 1}}
-            client['sharded_google_photos']['albums'].update_one(
+            client['photos_drive']['albums'].update_one(
                 filter=filter_obj, update=update_obj
             )

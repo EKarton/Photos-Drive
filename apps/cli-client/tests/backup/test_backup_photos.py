@@ -152,8 +152,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         bird_gitem = next(filter(lambda x: x.filename == 'bird.png', gitems_2))
 
         # Test assert: check the folders are made
-        albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
-        albums_2 = list(mongodb_client_2['sharded_google_photos']['albums'].find({}))
+        albums_1 = list(mongodb_client_1['photos_drive']['albums'].find({}))
+        albums_2 = list(mongodb_client_2['photos_drive']['albums'].find({}))
 
         self.assertEqual(len(albums_1), 5)
         self.assertEqual(len(albums_2), 0)
@@ -196,10 +196,10 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         # Test assert: check the media items in the db are made
         mitems_1 = list(
-            mongodb_client_1['sharded_google_photos']['media_items'].find({})
+            mongodb_client_1['photos_drive']['media_items'].find({})
         )
         mitems_2 = list(
-            mongodb_client_2['sharded_google_photos']['media_items'].find({})
+            mongodb_client_2['photos_drive']['media_items'].find({})
         )
         self.assertEqual(len(mitems_1), 4)
         self.assertEqual(len(mitems_2), 0)
@@ -344,7 +344,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         # Test assert: Check that there are two media items
         mitems_1 = list(
-            mongodb_client_1['sharded_google_photos']['media_items'].find({})
+            mongodb_client_1['photos_drive']['media_items'].find({})
         )
         self.assertEqual(len(mitems_1), 2)
 
@@ -360,7 +360,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         self.assertEqual(dog_mitem['album_id'], album_id_to_string(album_2010.id))
 
         # Test assert: Check that no new albums have been made
-        albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
+        albums_1 = list(mongodb_client_1['photos_drive']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
 
     @parametrize_use_parallel_uploads
@@ -489,14 +489,14 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         # Test assert: Check that there is dog.png but no cat.png media item in the db
         mitems_1 = list(
-            mongodb_client_1['sharded_google_photos']['media_items'].find({})
+            mongodb_client_1['photos_drive']['media_items'].find({})
         )
         self.assertEqual(
             list(filter(lambda x: x['file_name'] == 'cat.png', mitems_1)), []
         )
 
         # Test assert: Check that no new albums have been made
-        albums_1 = list(mongodb_client_1['sharded_google_photos']['albums'].find({}))
+        albums_1 = list(mongodb_client_1['photos_drive']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
 
     @parametrize_use_parallel_uploads
