@@ -35,6 +35,7 @@ export type ListMediaItemsResponse = {
 /** A class that stores the media items from the database. */
 export interface MediaItemsRepository {
   getMediaItemById(id: MediaItemId): Promise<MediaItem>;
+  getNumMediaItemsInAlbum(albumId: AlbumId): Promise<number>;
   getMediaItemsInAlbum(albumId: AlbumId): Promise<MediaItem[]>;
   listMediaItemsInAlbum(
     req: ListMediaItemsRequest

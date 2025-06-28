@@ -34,7 +34,7 @@ export type ListAlbumsResponse = {
 /** A class that stores the albums from the database. */
 export interface AlbumsRepository {
   getAlbumById(id: AlbumId): Promise<Album>;
-
+  getNumAlbumsInAlbum(id: AlbumId): Promise<number>;
   listAlbums(req: ListAlbumsRequest): Promise<ListAlbumsResponse>;
 }
 

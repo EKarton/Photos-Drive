@@ -105,6 +105,10 @@ describe('Albums Router', () => {
         albums: [MOCK_ALBUM],
         nextPageToken: undefined
       });
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
+        MOCK_MEDIA_ITEMS.length
+      );
 
       const app = express();
       app.use(
@@ -127,6 +131,8 @@ describe('Albums Router', () => {
             albumName: 'Photos',
             parentAlbumId: 'albumClient1:albumObject0',
             childAlbumIds: ['albumClient1:albumObject2'],
+            numChildAlbums: 1,
+            numMediaItems: MOCK_MEDIA_ITEMS.length,
             mediaItemIds: []
           }
         ],
@@ -151,6 +157,10 @@ describe('Albums Router', () => {
         albums: [MOCK_ALBUM],
         nextPageToken: 'nextToken'
       });
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
+        MOCK_MEDIA_ITEMS.length
+      );
 
       const app = express();
       app.use(
@@ -175,6 +185,8 @@ describe('Albums Router', () => {
             albumName: 'Photos',
             parentAlbumId: 'albumClient1:albumObject0',
             childAlbumIds: ['albumClient1:albumObject2'],
+            numChildAlbums: 1,
+            numMediaItems: MOCK_MEDIA_ITEMS.length,
             mediaItemIds: []
           }
         ],
@@ -224,8 +236,12 @@ describe('Albums Router', () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
       mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM);
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
       mockMediaItemsRepository.getMediaItemsInAlbum.mockResolvedValue(
         MOCK_MEDIA_ITEMS
+      );
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
+        MOCK_MEDIA_ITEMS.length
       );
       const app = express();
       app.use(
@@ -246,6 +262,8 @@ describe('Albums Router', () => {
         albumName: 'Photos',
         parentAlbumId: 'albumClient1:albumObject0',
         childAlbumIds: ['albumClient1:albumObject2'],
+        numChildAlbums: 1,
+        numMediaItems: MOCK_MEDIA_ITEMS.length,
         mediaItemIds: ['albumClient1:mediaItem1', 'albumClient1:mediaItem2']
       });
     });
@@ -257,8 +275,12 @@ describe('Albums Router', () => {
         ...MOCK_ALBUM,
         parent_album_id: undefined
       });
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
       mockMediaItemsRepository.getMediaItemsInAlbum.mockResolvedValue(
         MOCK_MEDIA_ITEMS
+      );
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
+        MOCK_MEDIA_ITEMS.length
       );
       const app = express();
       app.use(
@@ -279,6 +301,8 @@ describe('Albums Router', () => {
         albumName: 'Photos',
         parentAlbumId: null,
         childAlbumIds: ['albumClient1:albumObject2'],
+        numChildAlbums: 1,
+        numMediaItems: MOCK_MEDIA_ITEMS.length,
         mediaItemIds: ['albumClient1:mediaItem1', 'albumClient1:mediaItem2']
       });
     });
