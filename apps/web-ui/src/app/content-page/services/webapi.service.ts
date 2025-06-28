@@ -50,33 +50,33 @@ export interface MediaItem {
 
 export type MediaItemDetailsApiResponse = MediaItem;
 
-export enum ListMediaItemsInAlbumSortByFields {
+export enum ListMediaItemsSortByFields {
   ID = 'id',
 }
 
-export enum ListMediaItemsInAlbumSortDirection {
+export enum ListMediaItemsSortDirection {
   ASCENDING = 'asc',
   DESCENDING = 'desc',
 }
 
-export interface ListMediaItemsInAlbumSortBy {
-  field: ListMediaItemsInAlbumSortByFields;
-  direction: ListMediaItemsInAlbumSortDirection;
+export interface ListMediaItemsSortBy {
+  field: ListMediaItemsSortByFields;
+  direction: ListMediaItemsSortDirection;
 }
 
-export interface ListMediaItemsInAlbumRequest {
-  albumId: string;
+export interface ListMediaItemsRequest {
+  albumId?: string;
   pageSize?: number;
   pageToken?: string;
-  sortBy?: ListMediaItemsInAlbumSortBy;
+  sortBy?: ListMediaItemsSortBy;
 }
 
-interface RawListMediaItemsInAlbumResponse {
+interface RawListMediaItemsResponse {
   mediaItems: RawMediaItem[];
   nextPageToken?: string;
 }
 
-export interface ListMediaItemsInAlbumResponse {
+export interface ListMediaItemsResponse {
   mediaItems: MediaItem[];
   nextPageToken?: string;
 }
@@ -233,11 +233,14 @@ export class WebApiService {
   /** Lists all the media items in a paginated way. */
   listMediaItems(
     accessToken: string,
-    request: ListMediaItemsInAlbumRequest,
-  ): Observable<Result<ListMediaItemsInAlbumResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/albums/${request.albumId}/media-items`;
+    request: ListMediaItemsRequest,
+  ): Observable<Result<ListMediaItemsResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/media-items`;
 
     let params = new HttpParams();
+    if (request.albumId) {
+      params = params.set('albumId', request.albumId);
+    }
     if (request.pageSize) {
       params = params.set('pageSize', request.pageSize);
     }
@@ -250,7 +253,7 @@ export class WebApiService {
     }
 
     return this.httpClient
-      .get<RawListMediaItemsInAlbumResponse>(url, {
+      .get<RawListMediaItemsResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

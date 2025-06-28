@@ -11,7 +11,7 @@ import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
 import {
   Album,
-  ListMediaItemsInAlbumResponse,
+  ListMediaItemsResponse,
   WebApiService,
 } from '../services/webapi.service';
 import { albumsState } from '../store/albums';
@@ -61,7 +61,7 @@ const ALBUM_DETAILS_2011: Album = {
   numMediaItems: 0,
 };
 
-const PAGE_1: ListMediaItemsInAlbumResponse = {
+const PAGE_1: ListMediaItemsResponse = {
   mediaItems: [
     {
       id: 'photos1',

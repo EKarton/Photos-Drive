@@ -10,10 +10,10 @@ import { toSuccess } from '../../../shared/results/results';
 import {
   AlbumDetailsApiResponse,
   GPhotosMediaItemDetailsApiResponse,
-  ListMediaItemsInAlbumRequest,
-  ListMediaItemsInAlbumResponse,
-  ListMediaItemsInAlbumSortByFields,
-  ListMediaItemsInAlbumSortDirection,
+  ListMediaItemsRequest,
+  ListMediaItemsResponse,
+  ListMediaItemsSortByFields,
+  ListMediaItemsSortDirection,
   WebApiService,
 } from '../webapi.service';
 
@@ -145,10 +145,9 @@ describe('WebApiService', () => {
 
   describe('listMediaItems', () => {
     const accessToken = 'fake-token';
-    const albumId = 'album123';
 
     it('should make a GET request to fetch media items with basic request', () => {
-      const request: ListMediaItemsInAlbumRequest = { albumId };
+      const request: ListMediaItemsRequest = {};
       const mockResponse = {
         mediaItems: [
           {
@@ -166,7 +165,7 @@ describe('WebApiService', () => {
 
       service.listMediaItems(accessToken, request).subscribe((response) => {
         expect(response).toEqual(
-          toSuccess<ListMediaItemsInAlbumResponse>({
+          toSuccess<ListMediaItemsResponse>({
             mediaItems: [
               {
                 id: '1',
@@ -185,7 +184,7 @@ describe('WebApiService', () => {
       });
 
       const req = httpMock.expectOne(
-        `${environment.webApiEndpoint}/api/v1/albums/${albumId}/media-items`,
+        `${environment.webApiEndpoint}/api/v1/media-items`,
       );
 
       expect(req.request.method).toBe('GET');
@@ -198,13 +197,13 @@ describe('WebApiService', () => {
     });
 
     it('should include query params when provided', () => {
-      const request: ListMediaItemsInAlbumRequest = {
-        albumId,
+      const request: ListMediaItemsRequest = {
+        albumId: 'album123',
         pageSize: 10,
         pageToken: 'page123',
         sortBy: {
-          field: ListMediaItemsInAlbumSortByFields.ID,
-          direction: ListMediaItemsInAlbumSortDirection.DESCENDING,
+          field: ListMediaItemsSortByFields.ID,
+          direction: ListMediaItemsSortDirection.DESCENDING,
         },
       };
 
@@ -216,8 +215,8 @@ describe('WebApiService', () => {
 
       const req = httpMock.expectOne((req) => {
         return (
-          req.url ===
-            `${environment.webApiEndpoint}/api/v1/albums/${albumId}/media-items` &&
+          req.url === `${environment.webApiEndpoint}/api/v1/media-items` &&
+          req.params.get('albumId') === 'album123' &&
           req.params.get('pageSize') === '10' &&
           req.params.get('pageToken') === 'page123' &&
           req.params.get('sortBy') === 'id' &&
