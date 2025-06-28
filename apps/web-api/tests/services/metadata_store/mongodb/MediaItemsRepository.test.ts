@@ -364,7 +364,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image1.jpg',
             gphotos_client_id: 'gphotos_client_1',
             gphotos_media_item_id: 'media_item_1',
@@ -375,7 +375,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image3.jpg',
             gphotos_client_id: 'gphotos_client_3',
             gphotos_media_item_id: 'media_item_3',
@@ -385,7 +385,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId2,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image5.jpg',
             gphotos_client_id: 'gphotos_client_5',
             gphotos_media_item_id: 'media_item_5',
@@ -395,7 +395,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image2.jpg',
             gphotos_client_id: 'gphotos_client_2',
             gphotos_media_item_id: 'media_item_2',
@@ -405,7 +405,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image4.jpg',
             gphotos_client_id: 'gphotos_client_4',
             gphotos_media_item_id: 'media_item_4',
@@ -434,7 +434,7 @@ describe('MediaItemsRepositoryImpl', () => {
           {
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
             album_id: albumId2,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image5.jpg',
             gphotos_client_id: 'gphotos_client_5',
             gphotos_media_item_id: 'media_item_5',
@@ -476,7 +476,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image1.jpg',
             gphotos_client_id: 'gphotos_client_1',
             gphotos_media_item_id: 'media_item_1',
@@ -505,7 +505,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image3.jpg',
             gphotos_client_id: 'gphotos_client_3',
             gphotos_media_item_id: 'media_item_3',
@@ -533,7 +533,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image4.jpg',
             gphotos_client_id: 'gphotos_client_4',
             gphotos_media_item_id: 'media_item_4',
@@ -576,7 +576,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image4.jpg',
             gphotos_client_id: 'gphotos_client_4',
             gphotos_media_item_id: 'media_item_4',
@@ -586,7 +586,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image2.jpg',
             gphotos_client_id: 'gphotos_client_2',
             gphotos_media_item_id: 'media_item_2',
@@ -596,7 +596,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image3.jpg',
             gphotos_client_id: 'gphotos_client_3',
             gphotos_media_item_id: 'media_item_3',
@@ -606,7 +606,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date('2024-05-04T07:00:00.000Z'),
+            date_taken: new Date(2024, 4, 4),
             file_name: 'image1.jpg',
             gphotos_client_id: 'gphotos_client_1',
             gphotos_media_item_id: 'media_item_1',
