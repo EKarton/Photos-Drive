@@ -13,7 +13,8 @@ const ALBUM_API_RESPONSE_ROOT: Album = {
   id: 'album1',
   albumName: '',
   childAlbumIds: ['album2'],
-  mediaItemIds: [],
+  numChildAlbums: 1,
+  numMediaItems: 0,
 };
 
 const ALBUM_API_RESPONSE_ARCHIVES: Album = {
@@ -21,7 +22,8 @@ const ALBUM_API_RESPONSE_ARCHIVES: Album = {
   albumName: 'Archives',
   parentAlbumId: 'album1',
   childAlbumIds: ['album3'],
-  mediaItemIds: [],
+  numChildAlbums: 1,
+  numMediaItems: 0,
 };
 
 const ALBUM_API_RESPONSE_PHOTOS: Album = {
@@ -29,7 +31,8 @@ const ALBUM_API_RESPONSE_PHOTOS: Album = {
   albumName: 'Photos',
   parentAlbumId: 'album2',
   childAlbumIds: [],
-  mediaItemIds: [],
+  numChildAlbums: 0,
+  numMediaItems: 0,
 };
 
 describe('BreadcrumbsComponent', () => {

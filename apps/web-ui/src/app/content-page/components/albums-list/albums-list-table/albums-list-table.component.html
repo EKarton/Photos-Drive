@@ -50,8 +50,8 @@
               </div>
             </td>
             <td>
-              @let mediaItemsCount = album.data!.mediaItemIds.length;
-              @let childAlbumsCount = album.data!.childAlbumIds.length;
+              @let mediaItemsCount = album.data!.numMediaItems;
+              @let childAlbumsCount = album.data!.numChildAlbums;
 
               @if (mediaItemsCount > 0 && childAlbumsCount > 0) {
                 {{ mediaItemsCount }}

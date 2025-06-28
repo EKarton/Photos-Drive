@@ -122,7 +122,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## Deployment
 
-- If you are deploying to Netlify, refer to the docs [here](./docs/deploying_to_netlify.md)
+- If you are deploying to Netlify, refer to the [docs](./docs/deploying_to_netlify.md)
 
 ## Usage
 

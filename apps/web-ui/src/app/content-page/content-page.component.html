@@ -9,22 +9,19 @@
   } @else if (album | hasFailed) {
     <span>Error: {{ album.error!.message }}</span>
   } @else {
-    @if (album.data!.childAlbumIds.length > 0) {
+    @if (album.data!.numChildAlbums > 0) {
       <app-content-albums-list [albumId]="albumId()" />
 
-      @if (album.data!.mediaItemIds.length > 0) {
+      @if (album.data!.numMediaItems > 0) {
         <div class="divider"></div>
       }
     }
 
-    @if (album.data!.mediaItemIds.length > 0) {
+    @if (album.data!.numMediaItems > 0) {
       <app-content-images-section [albumId]="albumId()" />
     }
 
-    @if (
-      album.data!.childAlbumIds.length === 0 &&
-      album.data!.mediaItemIds.length === 0
-    ) {
+    @if (album.data!.numChildAlbums === 0 && album.data!.numMediaItems === 0) {
       <div class="flex items-center justify-center flex-grow p-8">
         <div>
           <img

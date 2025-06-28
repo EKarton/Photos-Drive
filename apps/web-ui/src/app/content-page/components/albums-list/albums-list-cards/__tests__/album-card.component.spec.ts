@@ -14,7 +14,8 @@ const ALBUM_DETAILS_1: Album = {
   albumName: '2010',
   parentAlbumId: 'album1',
   childAlbumIds: [],
-  mediaItemIds: ['photos1'],
+  numChildAlbums: 0,
+  numMediaItems: 1,
 };
 
 const ALBUM_DETAILS_2: Album = {
@@ -22,7 +23,8 @@ const ALBUM_DETAILS_2: Album = {
   albumName: '2011',
   parentAlbumId: 'album1',
   childAlbumIds: [],
-  mediaItemIds: ['photos2'],
+  numChildAlbums: 0,
+  numMediaItems: 1,
 };
 
 const ALBUM_DETAILS_3: Album = {
@@ -30,7 +32,8 @@ const ALBUM_DETAILS_3: Album = {
   albumName: '2012',
   parentAlbumId: 'album1',
   childAlbumIds: [],
-  mediaItemIds: ['photos3'],
+  numChildAlbums: 0,
+  numMediaItems: 1,
 };
 
 describe('AlbumsListCardsComponent', () => {

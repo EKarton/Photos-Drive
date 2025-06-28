@@ -21,7 +21,8 @@ const ALBUM_DETAILS_ROOT: Album = {
   id: 'album1',
   albumName: '',
   childAlbumIds: ['album2'],
-  mediaItemIds: [],
+  numChildAlbums: 1,
+  numMediaItems: 0,
 };
 
 const ALBUM_DETAILS_ARCHIVES: Album = {
@@ -29,7 +30,8 @@ const ALBUM_DETAILS_ARCHIVES: Album = {
   albumName: 'Archives',
   parentAlbumId: 'album1',
   childAlbumIds: ['album3'],
-  mediaItemIds: [],
+  numChildAlbums: 1,
+  numMediaItems: 0,
 };
 
 const ALBUM_DETAILS_PHOTOS: Album = {
@@ -37,7 +39,8 @@ const ALBUM_DETAILS_PHOTOS: Album = {
   albumName: 'Photos',
   parentAlbumId: 'album2',
   childAlbumIds: ['album4', 'album5'],
-  mediaItemIds: ['photos1', 'photos2'],
+  numChildAlbums: 2,
+  numMediaItems: 2,
 };
 
 const ALBUM_DETAILS_2010: Album = {
@@ -45,7 +48,8 @@ const ALBUM_DETAILS_2010: Album = {
   albumName: '2010',
   parentAlbumId: 'album3',
   childAlbumIds: [],
-  mediaItemIds: [],
+  numChildAlbums: 0,
+  numMediaItems: 0,
 };
 
 const ALBUM_DETAILS_2011: Album = {
@@ -53,7 +57,8 @@ const ALBUM_DETAILS_2011: Album = {
   albumName: '2011',
   parentAlbumId: 'album3',
   childAlbumIds: [],
-  mediaItemIds: [],
+  numChildAlbums: 0,
+  numMediaItems: 0,
 };
 
 const PAGE_1: ListMediaItemsInAlbumResponse = {
@@ -187,7 +192,8 @@ describe('ContentPageComponent', () => {
               albumName: '2010',
               parentAlbumId: 'album2',
               childAlbumIds: [],
-              mediaItemIds: [],
+              numChildAlbums: 0,
+              numMediaItems: 0,
             }),
           ),
       },

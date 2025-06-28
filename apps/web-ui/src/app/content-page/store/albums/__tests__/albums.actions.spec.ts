@@ -18,7 +18,8 @@ describe('Album Actions', () => {
       albumName: 'Test Album',
       parentAlbumId: undefined,
       childAlbumIds: [],
-      mediaItemIds: [],
+      numChildAlbums: 0,
+      numMediaItems: 0,
     });
     const action = fromActions.loadAlbumDetailsResult({ albumId, result });
 
