@@ -20,7 +20,7 @@ export interface SortBy {
 
 /** Request params for {@code MediaItemsRepository.listMediaItems} */
 export interface ListMediaItemsRequest {
-  albumId: AlbumId;
+  albumId?: AlbumId;
   pageSize: number;
   pageToken?: string;
   sortBy: SortBy;
@@ -37,9 +37,7 @@ export interface MediaItemsRepository {
   getMediaItemById(id: MediaItemId): Promise<MediaItem>;
   getNumMediaItemsInAlbum(albumId: AlbumId): Promise<number>;
   getMediaItemsInAlbum(albumId: AlbumId): Promise<MediaItem[]>;
-  listMediaItemsInAlbum(
-    req: ListMediaItemsRequest
-  ): Promise<ListMediaItemsResponse>;
+  listMediaItems(req: ListMediaItemsRequest): Promise<ListMediaItemsResponse>;
 }
 
 /** Represents an error for when an album is not found. */

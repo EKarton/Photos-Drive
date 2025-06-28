@@ -413,7 +413,7 @@ describe('Albums Router', () => {
     it('should return 200 with default pageSize and no sort when query params are missing', async () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockMediaItemsRepository.listMediaItemsInAlbum.mockResolvedValue({
+      mockMediaItemsRepository.listMediaItems.mockResolvedValue({
         mediaItems: MOCK_MEDIA_ITEMS,
         nextPageToken: undefined
       });
@@ -463,9 +463,7 @@ describe('Albums Router', () => {
         ],
         nextPageToken: undefined
       });
-      expect(
-        mockMediaItemsRepository.listMediaItemsInAlbum
-      ).toHaveBeenCalledWith({
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
         albumId: {
           clientId: 'albumClient1',
           objectId: 'albumObject1'
@@ -482,7 +480,7 @@ describe('Albums Router', () => {
     it('should return 200 with pageToken, sortBy=id, and sortDir=asc', async () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockMediaItemsRepository.listMediaItemsInAlbum.mockResolvedValue({
+      mockMediaItemsRepository.listMediaItems.mockResolvedValue({
         mediaItems: [],
         nextPageToken: 'next-token'
       });
@@ -507,9 +505,7 @@ describe('Albums Router', () => {
         mediaItems: [],
         nextPageToken: 'next-token'
       });
-      expect(
-        mockMediaItemsRepository.listMediaItemsInAlbum
-      ).toHaveBeenCalledWith({
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
         albumId: {
           clientId: 'albumClient1',
           objectId: 'albumObject1'
@@ -526,7 +522,7 @@ describe('Albums Router', () => {
     it('should return 200 with pageToken, sortBy=id, and sortDir=desc', async () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockMediaItemsRepository.listMediaItemsInAlbum.mockResolvedValue({
+      mockMediaItemsRepository.listMediaItems.mockResolvedValue({
         mediaItems: [],
         nextPageToken: 'next-token'
       });
@@ -551,9 +547,7 @@ describe('Albums Router', () => {
         mediaItems: [],
         nextPageToken: 'next-token'
       });
-      expect(
-        mockMediaItemsRepository.listMediaItemsInAlbum
-      ).toHaveBeenCalledWith({
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
         albumId: {
           clientId: 'albumClient1',
           objectId: 'albumObject1'
@@ -570,7 +564,7 @@ describe('Albums Router', () => {
     it('should return 500 when an unexpected error is thrown', async () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockMediaItemsRepository.listMediaItemsInAlbum.mockRejectedValue(
+      mockMediaItemsRepository.listMediaItems.mockRejectedValue(
         new Error('Something went wrong')
       );
 

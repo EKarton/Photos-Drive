@@ -91,31 +91,34 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
     return items.flat();
   }
 
-  async listMediaItemsInAlbum(
+  async listMediaItems(
     req: ListMediaItemsRequest
   ): Promise<ListMediaItemsResponse> {
     const clientIdToMongoClient = new Map(this.mongoDbRepository.listClients());
-    const clientIdToPageToken = new Map(
+    const clientIdToMediaItemId = new Map(
       req.pageToken?.split(',').map((pageToken) => {
         const mediaItemId = convertStringToMediaItemId(pageToken);
-        return [mediaItemId.clientId, new ObjectId(mediaItemId.objectId)];
+        return [mediaItemId.clientId, mediaItemId];
       })
     );
 
-    const pages: ListMediaItemsResponse[] = await Promise.all(
-      Array.from(clientIdToMongoClient).map(async ([clientId, mongoClient]) => {
-        logger.debug(`Album ID: ${albumIdToString(req.albumId)}`);
-        const filterObj: Filter<MongoDbDocument> = {
-          album_id: albumIdToString(req.albumId)
-        };
+    const overFetchSize = req.pageSize * 2;
 
-        const lastSeenId = clientIdToPageToken.get(clientId);
-        if (lastSeenId) {
+    const mediaItems: MediaItem[][] = await Promise.all(
+      Array.from(clientIdToMongoClient).map(async ([clientId, mongoClient]) => {
+        const filterObj: Filter<MongoDbDocument> = {};
+
+        if (req.albumId) {
+          filterObj['album_id'] = albumIdToString(req.albumId);
+        }
+
+        const lastSeenMediaItemId = clientIdToMediaItemId.get(clientId);
+        if (lastSeenMediaItemId) {
           if (req.sortBy.field === SortByField.ID) {
             filterObj['_id'] =
               req.sortBy.direction === SortByDirection.ASCENDING
-                ? { $gt: lastSeenId }
-                : { $lt: lastSeenId };
+                ? { $gt: new ObjectId(lastSeenMediaItemId.objectId) }
+                : { $lt: new ObjectId(lastSeenMediaItemId.objectId) };
           }
         }
 
@@ -136,7 +139,7 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
           .collection('media_items')
           .find(filterObj)
           .sort(sortObj)
-          .limit(req.pageSize)
+          .limit(overFetchSize)
           .toArray();
 
         const mediaItems = rawDocs.map((rawDoc) => {
@@ -147,32 +150,41 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
           return this.convertMongoDbDocToMediaItemInstance(mediaItemId, rawDoc);
         });
 
-        logger.debug(`Num MediaItems: ${mediaItems.length}`);
-
-        return {
-          mediaItems,
-          nextPageToken:
-            mediaItems.length > 0
-              ? mediaIdToString(mediaItems[mediaItems.length - 1].id)
-              : undefined
-        };
+        return mediaItems;
       })
     );
 
-    const sortedMediaItems = pages
-      .map((page) => page.mediaItems)
+    const sortedMediaItems = mediaItems
       .flat()
       .sort((a: MediaItem, b: MediaItem) => {
         return sortMediaItem(a, b, req.sortBy);
-      });
+      })
+      .slice(0, req.pageSize);
+
+    const clientIdToLastMediaItemId = new Map<string, MediaItemId>();
+    for (let i = sortedMediaItems.length - 1; i >= 0; i--) {
+      const album = sortedMediaItems.at(i);
+      const clientId = album!.id.clientId;
+
+      if (!clientIdToLastMediaItemId.has(clientId)) {
+        clientIdToLastMediaItemId.set(clientId, album!.id);
+      }
+    }
+
+    for (const [clientId, albumId] of clientIdToMediaItemId) {
+      if (!clientIdToLastMediaItemId.has(clientId)) {
+        clientIdToLastMediaItemId.set(clientId, albumId);
+      }
+    }
+
+    const nextPageToken =
+      Array.from(clientIdToLastMediaItemId.values())
+        .map(albumIdToString)
+        .join(',') || undefined;
 
     return {
       mediaItems: sortedMediaItems,
-      nextPageToken:
-        pages
-          .map((page) => page.nextPageToken)
-          .filter((nextToken) => nextToken)
-          .join(',') || undefined
+      nextPageToken: sortedMediaItems.length > 0 ? nextPageToken : undefined
     };
   }
 
