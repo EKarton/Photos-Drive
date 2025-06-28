@@ -139,6 +139,68 @@ describe('AlbumsRepositoryImpl', () => {
     });
   });
 
+  describe('getNumAlbumsInAlbum', () => {
+    beforeEach(async () => {
+      /**
+       * Structure:
+       * client1:
+       *   - parent album: client1:parent1
+       *   - 2 child albums with parent_album_id = client1:parent1
+       * client2:
+       *   - 1 child album with parent_album_id = client1:parent1
+       */
+      await mongoClient1
+        .db('photos_drive')
+        .collection('albums')
+        .insertMany([
+          {
+            _id: new ObjectId('507f1f77bcf86cd799439050'),
+            name: 'Child 1',
+            parent_album_id: 'client1:parent1',
+            child_album_ids: []
+          },
+          {
+            _id: new ObjectId('507f1f77bcf86cd799439051'),
+            name: 'Child 2',
+            parent_album_id: 'client1:parent1',
+            child_album_ids: []
+          }
+        ]);
+
+      await mongoClient2
+        .db('photos_drive')
+        .collection('albums')
+        .insertOne({
+          _id: new ObjectId('507f1f77bcf86cd799439052'),
+          name: 'Child 3',
+          parent_album_id: 'client1:parent1',
+          child_album_ids: []
+        });
+    });
+
+    it('should return the correct number of child albums across clients', async () => {
+      const parentAlbumId: AlbumId = {
+        clientId: 'client1',
+        objectId: 'parent1'
+      };
+
+      const result = await albumsRepo.getNumAlbumsInAlbum(parentAlbumId);
+
+      expect(result).toBe(3); // 2 from client1 + 1 from client2
+    });
+
+    it('should return 0 when no albums have the specified parent_album_id', async () => {
+      const parentAlbumId: AlbumId = {
+        clientId: 'client1',
+        objectId: 'nonexistent'
+      };
+
+      const result = await albumsRepo.getNumAlbumsInAlbum(parentAlbumId);
+
+      expect(result).toBe(0);
+    });
+  });
+
   describe('listAlbums', () => {
     beforeEach(async () => {
       /**

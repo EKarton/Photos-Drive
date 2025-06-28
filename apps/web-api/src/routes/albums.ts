@@ -60,8 +60,28 @@ export default async function (
         }
       });
 
+      const [mediaItemCounts, childAlbumCounts] = await Promise.all([
+        Promise.all(
+          response.albums.map((album) =>
+            mediaItemsRepo.getNumMediaItemsInAlbum(album.id)
+          )
+        ),
+        Promise.all(
+          response.albums.map((album) =>
+            albumsRepo.getNumAlbumsInAlbum(album.id)
+          )
+        )
+      ]);
+
       return res.status(200).json({
-        albums: response.albums.map((album) => serializeAlbum(album, [])),
+        albums: response.albums.map((album, i) =>
+          serializeAlbum(
+            album,
+            childAlbumCounts.at(i)!,
+            mediaItemCounts.at(i)!,
+            []
+          )
+        ),
         nextPageToken: response.nextPageToken
           ? encodeURIComponent(response.nextPageToken)
           : undefined
@@ -86,12 +106,19 @@ export default async function (
     wrap(async (req: Request, res: Response) => {
       try {
         const albumId = convertStringToAlbumId(req.params.albumId);
-        const [album, mediaItems] = await Promise.all([
-          albumsRepo.getAlbumById(albumId),
-          mediaItemsRepo.getMediaItemsInAlbum(albumId)
-        ]);
+        const [album, numChildAlbums, numMediaItems, mediaItems] =
+          await Promise.all([
+            albumsRepo.getAlbumById(albumId),
+            albumsRepo.getNumAlbumsInAlbum(albumId),
+            mediaItemsRepo.getNumMediaItemsInAlbum(albumId),
+            mediaItemsRepo.getMediaItemsInAlbum(albumId)
+          ]);
 
-        return res.status(200).json(serializeAlbum(album, mediaItems));
+        return res
+          .status(200)
+          .json(
+            serializeAlbum(album, numChildAlbums, numMediaItems, mediaItems)
+          );
       } catch (error) {
         if (error instanceof MongoDbClientNotFoundError) {
           return res.status(404).json({ error: 'Album not found' });
@@ -154,7 +181,12 @@ export default async function (
   return router;
 }
 
-function serializeAlbum(album: Album, mediaItems: MediaItem[]): object {
+function serializeAlbum(
+  album: Album,
+  numChildAlbums: number,
+  numMediaItems: number,
+  mediaItems: MediaItem[]
+): object {
   return {
     id: `${album.id.clientId}:${album.id.objectId}`,
     albumName: album.name,
@@ -164,6 +196,8 @@ function serializeAlbum(album: Album, mediaItems: MediaItem[]): object {
     childAlbumIds: album.child_album_ids.map((id: AlbumId) =>
       albumIdToString(id)
     ),
+    numChildAlbums,
+    numMediaItems,
     mediaItemIds: mediaItems.map((mediaItem) => mediaIdToString(mediaItem.id))
   };
 }

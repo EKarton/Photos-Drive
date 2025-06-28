@@ -1,3 +1,4 @@
+import { sum } from 'lodash';
 import {
   Filter,
   Document as MongoDbDocument,
@@ -44,6 +45,23 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
     }
 
     return this.convertMongoDbDocToMediaItemInstance(id, rawDocs);
+  }
+
+  async getNumMediaItemsInAlbum(albumId: AlbumId): Promise<number> {
+    const counts = await Promise.all(
+      this.mongoDbRepository.listClients().map(async ([_, mongoDbClient]) => {
+        const numDocs = await mongoDbClient
+          .db('photos_drive')
+          .collection('media_items')
+          .countDocuments({
+            album_id: `${albumId.clientId}:${albumId.objectId}`
+          });
+
+        return numDocs;
+      })
+    );
+
+    return sum(counts);
   }
 
   async getMediaItemsInAlbum(albumId: AlbumId): Promise<MediaItem[]> {

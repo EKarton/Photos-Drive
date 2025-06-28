@@ -1,3 +1,4 @@
+import { sum } from 'lodash';
 import {
   Filter,
   Document as MongoDbDocument,
@@ -43,6 +44,23 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
     }
 
     return this.convertMongoDbDocumentToAlbumInstance(id, rawDocs);
+  }
+
+  async getNumAlbumsInAlbum(id: AlbumId): Promise<number> {
+    const counts = await Promise.all(
+      this.mongoDbRepository.listClients().map(async ([_, mongoDbClient]) => {
+        const numDocs = await mongoDbClient
+          .db('photos_drive')
+          .collection('albums')
+          .countDocuments({
+            parent_album_id: albumIdToString(id)
+          });
+
+        return numDocs;
+      })
+    );
+
+    return sum(counts);
   }
 
   async listAlbums(req: ListAlbumsRequest): Promise<ListAlbumsResponse> {

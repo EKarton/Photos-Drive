@@ -142,6 +142,66 @@ describe('MediaItemsRepositoryImpl', () => {
     });
   });
 
+  describe('getNumMediaItemsInAlbum', () => {
+    const albumId: AlbumId = {
+      clientId: 'albumClient1',
+      objectId: 'albumObject1'
+    };
+
+    beforeEach(async () => {
+      const db = mongoClient.db('photos_drive');
+      await db.collection('media_items').deleteMany({});
+      await db.collection('media_items').insertMany([
+        {
+          _id: new ObjectId(),
+          file_name: 'image1.jpg',
+          gphotos_client_id: 'client_a',
+          gphotos_media_item_id: 'media_1',
+          album_id: `${albumId.clientId}:${albumId.objectId}`
+        },
+        {
+          _id: new ObjectId(),
+          file_name: 'image2.jpg',
+          gphotos_client_id: 'client_a',
+          gphotos_media_item_id: 'media_2',
+          album_id: `${albumId.clientId}:${albumId.objectId}`
+        }
+      ]);
+    });
+
+    it('returns correct count from a single client', async () => {
+      mockMongoDbClientsRepository.listClients.mockReturnValue([
+        ['client1', mongoClient]
+      ]);
+
+      const count = await mediaItemsRepo.getNumMediaItemsInAlbum(albumId);
+      expect(count).toBe(2);
+    });
+
+    it('aggregates count from multiple clients', async () => {
+      mockMongoDbClientsRepository.listClients.mockReturnValue([
+        ['client1', mongoClient],
+        ['client2', mongoClient]
+      ]);
+
+      const count = await mediaItemsRepo.getNumMediaItemsInAlbum(albumId);
+      expect(count).toBe(4); // 2 per client, same DB
+    });
+
+    it('returns 0 when no media items exist', async () => {
+      await mongoClient
+        .db('photos_drive')
+        .collection('media_items')
+        .deleteMany({});
+      mockMongoDbClientsRepository.listClients.mockReturnValue([
+        ['client1', mongoClient]
+      ]);
+
+      const count = await mediaItemsRepo.getNumMediaItemsInAlbum(albumId);
+      expect(count).toBe(0);
+    });
+  });
+
   describe('getMediaItemsInAlbum', () => {
     const albumId: AlbumId = {
       clientId: '407f1f77bcf86cd799439001',
