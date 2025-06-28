@@ -58,6 +58,44 @@ export class MongoDbClientsRepositoryImpl implements MongoDbClientsRepository {
   }
 }
 
+/** In-memory implementation of MongoDbClientsRepository for testing. */
+export class InMemoryMongoDbClientsRepository
+  implements MongoDbClientsRepository
+{
+  private clients: Map<string, MongoClient>;
+
+  constructor(initialClients?: [string, MongoClient][]) {
+    this.clients = new Map(initialClients);
+  }
+
+  getClientFromId(clientId: string): MongoClient {
+    const client = this.clients.get(clientId);
+    if (!client) {
+      throw new MongoDbClientNotFoundError(clientId);
+    }
+    return client;
+  }
+
+  listClients(): [string, MongoClient][] {
+    return Array.from(this.clients.entries());
+  }
+
+  /** Adds or replaces a client in memory. */
+  setClient(clientId: string, client: MongoClient): void {
+    this.clients.set(clientId, client);
+  }
+
+  /** Removes a client. Useful for testing. */
+  deleteClient(clientId: string): void {
+    this.clients.delete(clientId);
+  }
+
+  /** Clears all clients (for test cleanup). */
+  clear(): void {
+    this.clients.clear();
+  }
+}
+
 /** A class that represents when no MongoDB client could be found. */
 export class MongoDbClientNotFoundError extends Error {
   constructor(id: string) {

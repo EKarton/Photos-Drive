@@ -97,6 +97,128 @@ describe('Albums Router', () => {
     cleanupTestEnvFn();
   });
 
+  describe('GET /api/v1/albums', () => {
+    it('should return 200 with default pageSize and sort when no query params are provided', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.listAlbums.mockResolvedValue({
+        albums: [MOCK_ALBUM],
+        nextPageToken: undefined
+      });
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        albums: [
+          {
+            id: 'albumClient1:albumObject1',
+            albumName: 'Photos',
+            parentAlbumId: 'albumClient1:albumObject0',
+            childAlbumIds: ['albumClient1:albumObject2'],
+            mediaItemIds: []
+          }
+        ],
+        nextPageToken: undefined
+      });
+
+      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
+        parentAlbumId: undefined,
+        pageSize: 25,
+        pageToken: undefined,
+        sortBy: {
+          field: SortByField.ID,
+          direction: SortByDirection.ASCENDING
+        }
+      });
+    });
+
+    it('should return 200 with query parameters pageSize, pageToken, sortBy, sortDir, and parentAlbumId', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.listAlbums.mockResolvedValue({
+        albums: [MOCK_ALBUM],
+        nextPageToken: 'nextToken'
+      });
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get(
+          '/api/v1/albums?pageSize=5&pageToken=abc%2Fdef&sortBy=id&sortDir=desc&parentAlbumId=albumClient1:albumObject0'
+        )
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        albums: [
+          {
+            id: 'albumClient1:albumObject1',
+            albumName: 'Photos',
+            parentAlbumId: 'albumClient1:albumObject0',
+            childAlbumIds: ['albumClient1:albumObject2'],
+            mediaItemIds: []
+          }
+        ],
+        nextPageToken: 'nextToken'
+      });
+
+      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
+        parentAlbumId: {
+          clientId: 'albumClient1',
+          objectId: 'albumObject0'
+        },
+        pageSize: 5,
+        pageToken: 'abc/def',
+        sortBy: {
+          field: SortByField.ID,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+    });
+
+    it('should return 500 when albumsRepo.listAlbums throws unexpected error', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.listAlbums.mockRejectedValue(
+        new Error('Unexpected error')
+      );
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(500);
+    });
+  });
+
   describe('GET api/v1/albums/:albumId', () => {
     it('should return 200 with correct body response, given correct parameters', async () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();

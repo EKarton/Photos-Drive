@@ -3,19 +3,25 @@ import { Request, Response, Router } from 'express';
 import { verifyAuthentication } from '../middlewares/authentication';
 import { verifyAuthorization } from '../middlewares/authorization';
 import {
+  Album,
   AlbumId,
   albumIdToString,
   convertStringToAlbumId
 } from '../services/metadata_store/Albums';
 import {
   AlbumNotFoundError,
-  AlbumsRepository
-} from '../services/metadata_store/AlbumsRepository';
-import { mediaIdToString } from '../services/metadata_store/MediaItems';
-import {
-  MediaItemsRepository,
+  AlbumsRepository,
   SortByDirection,
   SortByField
+} from '../services/metadata_store/AlbumsRepository';
+import {
+  mediaIdToString,
+  MediaItem
+} from '../services/metadata_store/MediaItems';
+import {
+  SortByDirection as ListMediaItemsSortByDirection,
+  SortByField as ListMediaItemsSortByField,
+  MediaItemsRepository
 } from '../services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
@@ -26,6 +32,42 @@ export default async function (
   mediaItemsRepo: MediaItemsRepository
 ) {
   const router: Router = Router();
+
+  router.get(
+    '/api/v1/albums',
+    await verifyAuthentication(),
+    await verifyAuthorization(),
+    wrap(async (req: Request, res: Response) => {
+      const pageSize = Number(req.query['pageSize']);
+      const pageToken = req.query['pageToken'] as string;
+      const sortBy = req.query['sortBy'];
+      const sortDir = req.query['sortDir'];
+      const parentAlbumId = req.query['parentAlbumId'] as string;
+
+      const response = await albumsRepo.listAlbums({
+        parentAlbumId: parentAlbumId
+          ? convertStringToAlbumId(parentAlbumId)
+          : undefined,
+        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
+        pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
+        sortBy: {
+          field: parseEnumOrElse(SortByField, sortBy, SortByField.ID),
+          direction: parseEnumOrElse(
+            SortByDirection,
+            sortDir,
+            SortByDirection.ASCENDING
+          )
+        }
+      });
+
+      return res.status(200).json({
+        albums: response.albums.map((album) => serializeAlbum(album, [])),
+        nextPageToken: response.nextPageToken
+          ? encodeURIComponent(response.nextPageToken)
+          : undefined
+      });
+    })
+  );
 
   router.get(
     '/api/v1/albums/root',
@@ -49,18 +91,7 @@ export default async function (
           mediaItemsRepo.getMediaItemsInAlbum(albumId)
         ]);
 
-        const response = {
-          id: `${album.id.clientId}:${album.id.objectId}`,
-          albumName: album.name,
-          parentAlbumId: album.parent_album_id
-            ? albumIdToString(album.parent_album_id)
-            : null,
-          childAlbumIds: album.child_album_ids.map((id) => albumIdToString(id)),
-          mediaItemIds: mediaItems.map((mediaItem) =>
-            mediaIdToString(mediaItem.id)
-          )
-        };
-        return res.status(200).json(response);
+        return res.status(200).json(serializeAlbum(album, mediaItems));
       } catch (error) {
         if (error instanceof MongoDbClientNotFoundError) {
           return res.status(404).json({ error: 'Album not found' });
@@ -87,14 +118,18 @@ export default async function (
 
       const response = await mediaItemsRepo.listMediaItemsInAlbum({
         albumId: convertStringToAlbumId(albumId),
-        pageSize: !isNaN(pageSize) ? pageSize : 25,
-        pageToken,
+        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
+        pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
         sortBy: {
-          field: parseEnumOrElse(SortByField, sortBy, SortByField.ID),
+          field: parseEnumOrElse(
+            ListMediaItemsSortByField,
+            sortBy,
+            ListMediaItemsSortByField.ID
+          ),
           direction: parseEnumOrElse(
-            SortByDirection,
+            ListMediaItemsSortByDirection,
             sortDir,
-            SortByDirection.ASCENDING
+            ListMediaItemsSortByDirection.ASCENDING
           )
         }
       });
@@ -110,9 +145,25 @@ export default async function (
           dateTaken: mediaItem.date_taken.toISOString()
         })),
         nextPageToken: response.nextPageToken
+          ? encodeURIComponent(response.nextPageToken)
+          : undefined
       });
     })
   );
 
   return router;
+}
+
+function serializeAlbum(album: Album, mediaItems: MediaItem[]): object {
+  return {
+    id: `${album.id.clientId}:${album.id.objectId}`,
+    albumName: album.name,
+    parentAlbumId: album.parent_album_id
+      ? albumIdToString(album.parent_album_id)
+      : null,
+    childAlbumIds: album.child_album_ids.map((id: AlbumId) =>
+      albumIdToString(id)
+    ),
+    mediaItemIds: mediaItems.map((mediaItem) => mediaIdToString(mediaItem.id))
+  };
 }

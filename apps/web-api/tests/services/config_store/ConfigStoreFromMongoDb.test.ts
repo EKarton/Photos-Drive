@@ -16,15 +16,17 @@ describe('ConfigStoreFromMongoDb', () => {
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-
-    mongoClient = await MongoClient.connect(mongoUri);
+    mongoClient = await MongoClient.connect(mongoServer.getUri());
     vaultStore = new ConfigStoreFromMongoDb(mongoClient);
   });
 
   afterAll(async () => {
-    await mongoClient.close();
-    await mongoServer.stop();
+    if (mongoClient) {
+      await mongoClient.close(true);
+    }
+    if (mongoServer) {
+      await mongoServer.stop({ force: true });
+    }
   });
 
   beforeEach(async () => {
