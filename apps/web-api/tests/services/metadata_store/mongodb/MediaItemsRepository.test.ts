@@ -38,8 +38,12 @@ describe('MediaItemsRepositoryImpl', () => {
   });
 
   afterAll(async () => {
-    await mongoClient.close();
-    await mongoServer.stop();
+    if (mongoClient) {
+      await mongoClient.close(true);
+    }
+    if (mongoServer) {
+      await mongoServer.stop({ force: true });
+    }
   });
 
   describe('getMediaItemById', () => {
