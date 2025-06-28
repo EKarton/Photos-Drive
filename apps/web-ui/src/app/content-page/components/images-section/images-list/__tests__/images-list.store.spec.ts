@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { authState } from '../../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../../shared/results/results';
 import {
-  ListMediaItemsInAlbumResponse,
+  ListMediaItemsResponse,
   MediaItem,
 } from '../../../../services/webapi.service';
 import { WebApiService } from '../../../../services/webapi.service';
@@ -37,7 +37,7 @@ describe('ImagesListStore', () => {
       dateTaken: new Date('2024-05-27T13:17:46.000Z'),
     },
   ];
-  const dummyResponse: ListMediaItemsInAlbumResponse = {
+  const dummyResponse: ListMediaItemsResponse = {
     mediaItems: dummyMediaItems,
     nextPageToken: 'next123',
   };
@@ -77,7 +77,7 @@ describe('ImagesListStore', () => {
 
   it('should reset state on failed initial load', () => {
     mockWebApiService.listMediaItems.and.returnValue(
-      of(toFailure<ListMediaItemsInAlbumResponse>(new Error('API error'))),
+      of(toFailure<ListMediaItemsResponse>(new Error('API error'))),
     );
 
     store.loadInitialPage({ albumId: dummyAlbumId });
@@ -86,12 +86,12 @@ describe('ImagesListStore', () => {
   });
 
   it('should append media items on load more', () => {
-    const firstPage: ListMediaItemsInAlbumResponse = {
+    const firstPage: ListMediaItemsResponse = {
       mediaItems: dummyMediaItems,
       nextPageToken: 'next123',
     };
 
-    const secondPage: ListMediaItemsInAlbumResponse = {
+    const secondPage: ListMediaItemsResponse = {
       mediaItems: [
         {
           id: '3',
@@ -120,7 +120,7 @@ describe('ImagesListStore', () => {
   });
 
   it('should handle errors when loading more media items fail', () => {
-    const firstPage: ListMediaItemsInAlbumResponse = {
+    const firstPage: ListMediaItemsResponse = {
       mediaItems: dummyMediaItems,
       nextPageToken: 'next123',
     };
@@ -130,7 +130,7 @@ describe('ImagesListStore', () => {
     store.loadInitialPage({ albumId: dummyAlbumId });
 
     mockWebApiService.listMediaItems.and.returnValue(
-      of(toFailure<ListMediaItemsInAlbumResponse>(new Error('API Error'))),
+      of(toFailure<ListMediaItemsResponse>(new Error('API Error'))),
     );
     store.loadMoreMediaItems({});
 
@@ -138,7 +138,7 @@ describe('ImagesListStore', () => {
   });
 
   it('should not load more if already at end of list', () => {
-    const firstPage: ListMediaItemsInAlbumResponse = {
+    const firstPage: ListMediaItemsResponse = {
       mediaItems: dummyMediaItems,
       nextPageToken: undefined,
     };

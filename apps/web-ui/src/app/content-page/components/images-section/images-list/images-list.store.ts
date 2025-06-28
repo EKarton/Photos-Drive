@@ -10,9 +10,9 @@ import {
   Result,
 } from '../../../../shared/results/results';
 import {
-  ListMediaItemsInAlbumRequest,
-  ListMediaItemsInAlbumResponse,
-  ListMediaItemsInAlbumSortBy,
+  ListMediaItemsRequest,
+  ListMediaItemsResponse,
+  ListMediaItemsSortBy,
   MediaItem,
   WebApiService,
 } from '../../../services/webapi.service';
@@ -34,12 +34,12 @@ export const INITIAL_STATE: ImagesListState = {
 export interface LoadInitialPageRequest {
   albumId: string;
   pageSize?: number;
-  sortBy?: ListMediaItemsInAlbumSortBy;
+  sortBy?: ListMediaItemsSortBy;
 }
 
 export interface LoadMoreMediaItemsRequest {
   pageSize?: number;
-  sortBy?: ListMediaItemsInAlbumSortBy;
+  sortBy?: ListMediaItemsSortBy;
 }
 
 @Injectable()
@@ -60,8 +60,8 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
         request,
         response,
       }: {
-        request: ListMediaItemsInAlbumRequest;
-        response: Result<ListMediaItemsInAlbumResponse>;
+        request: ListMediaItemsRequest;
+        response: Result<ListMediaItemsResponse>;
       },
     ): ImagesListState => {
       if (isPending(response) || hasFailed(response)) {
@@ -86,7 +86,7 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
   private readonly appendMediaItems = this.updater(
     (
       state: ImagesListState,
-      response: Result<ListMediaItemsInAlbumResponse>,
+      response: Result<ListMediaItemsResponse>,
     ): ImagesListState => {
       if (isPending(response) || hasFailed(response)) {
         return { ...state };
@@ -107,7 +107,7 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
       switchMap((request) => {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
-            const apiRequest: ListMediaItemsInAlbumRequest = {
+            const apiRequest: ListMediaItemsRequest = {
               albumId: request.albumId!,
               pageSize: request.pageSize,
               sortBy: request.sortBy,
@@ -137,7 +137,7 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
 
           return this.store.select(authState.selectAuthToken).pipe(
             switchMap((accessToken) => {
-              const apiRequest: ListMediaItemsInAlbumRequest = {
+              const apiRequest: ListMediaItemsRequest = {
                 albumId: state.albumId!,
                 pageSize: request.pageSize,
                 sortBy: request.sortBy,

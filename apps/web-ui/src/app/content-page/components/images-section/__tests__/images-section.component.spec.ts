@@ -7,14 +7,14 @@ import { WINDOW } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
 import {
-  ListMediaItemsInAlbumResponse,
+  ListMediaItemsResponse,
   WebApiService,
 } from '../../../services/webapi.service';
 import { albumsState } from '../../../store/albums';
 import { mediaViewerState } from '../../../store/media-viewer';
 import { ImagesSectionComponent } from '../images-section.component';
 
-const PAGE_1: ListMediaItemsInAlbumResponse = {
+const PAGE_1: ListMediaItemsResponse = {
   mediaItems: [
     {
       id: 'photos1',

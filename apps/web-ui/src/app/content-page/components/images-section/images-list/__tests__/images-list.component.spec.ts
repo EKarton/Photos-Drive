@@ -9,13 +9,13 @@ import { MockResizeObserverFactory } from '../../../../../shared/resize-observer
 import { toSuccess } from '../../../../../shared/results/results';
 import {
   GPhotosMediaItem,
-  ListMediaItemsInAlbumResponse,
+  ListMediaItemsResponse,
   WebApiService,
 } from '../../../../services/webapi.service';
 import { mediaViewerState } from '../../../../store/media-viewer';
 import { ImagesListComponent } from '../images-list.component';
 
-const PAGE_1: ListMediaItemsInAlbumResponse = {
+const PAGE_1: ListMediaItemsResponse = {
   mediaItems: [
     {
       id: 'photos1',
@@ -39,7 +39,7 @@ const PAGE_1: ListMediaItemsInAlbumResponse = {
   nextPageToken: '123456789',
 };
 
-const PAGE_2: ListMediaItemsInAlbumResponse = {
+const PAGE_2: ListMediaItemsResponse = {
   mediaItems: [
     {
       id: 'photos3',
