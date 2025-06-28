@@ -405,7 +405,7 @@ describe('AlbumsRepositoryImpl', () => {
       });
     });
 
-    it('should return albums and page token correctly given parent album "Photos" and pageSize=1 and last album ID for client 1', async () => {
+    it('should return next album and page token correctly given parent album "Photos" and pageSize=1 and last album ID for client 1', async () => {
       const res = await albumsRepo.listAlbums({
         parentAlbumId: {
           clientId: 'client1',
@@ -436,7 +436,7 @@ describe('AlbumsRepositoryImpl', () => {
       });
     });
 
-    it('should return albums correctly given parent album "Photos" and pageSize=1 and sortDir=Descending and last album ID for client 1', async () => {
+    it('should return last album given parent album "Photos" and pageSize=1 and sortDir=Descending and last album ID for client 1', async () => {
       const res = await albumsRepo.listAlbums({
         parentAlbumId: {
           clientId: 'client1',

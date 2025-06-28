@@ -82,13 +82,13 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
           filterObj['parent_album_id'] = albumIdToString(req.parentAlbumId);
         }
 
-        const lastSeenId = clientIdToAlbumId.get(clientId)?.objectId;
-        if (lastSeenId) {
+        const lastSeenMediaItemId = clientIdToAlbumId.get(clientId)?.objectId;
+        if (lastSeenMediaItemId) {
           if (req.sortBy.field === SortByField.ID) {
             filterObj['_id'] =
               req.sortBy.direction === SortByDirection.ASCENDING
-                ? { $gt: new ObjectId(lastSeenId) }
-                : { $lt: new ObjectId(lastSeenId) };
+                ? { $gt: new ObjectId(lastSeenMediaItemId) }
+                : { $lt: new ObjectId(lastSeenMediaItemId) };
           }
         }
 

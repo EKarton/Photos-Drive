@@ -143,7 +143,7 @@ export default async function (
       const sortBy = req.query['sortBy'];
       const sortDir = req.query['sortDir'];
 
-      const response = await mediaItemsRepo.listMediaItemsInAlbum({
+      const response = await mediaItemsRepo.listMediaItems({
         albumId: convertStringToAlbumId(albumId),
         pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
