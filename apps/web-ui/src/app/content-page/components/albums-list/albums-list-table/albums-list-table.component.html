@@ -17,14 +17,14 @@
             ></td>
           </tr>
         } @else if (album | hasFailed) {
-          <tr class="hover:bg-base-300">
+          <tr>
             <th colspan="2">
               <span data-testid="albums-error">Error: {{ album.error! }}</span>
             </th>
           </tr>
         } @else {
           <tr
-            class="hover:bg-base-300"
+            class="hover:bg-base-300 cursor-pointer hover:underline"
             data-testid="album-row"
             [routerLink]="['/content', album.data!.id]"
           >
