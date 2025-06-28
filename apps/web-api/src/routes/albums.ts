@@ -14,12 +14,7 @@ import {
   SortByDirection,
   SortByField
 } from '../services/metadata_store/AlbumsRepository';
-import { mediaIdToString } from '../services/metadata_store/MediaItems';
-import {
-  SortByDirection as ListMediaItemsSortByDirection,
-  SortByField as ListMediaItemsSortByField,
-  MediaItemsRepository
-} from '../services/metadata_store/MediaItemsRepository';
+import { MediaItemsRepository } from '../services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
 
@@ -117,52 +112,6 @@ export default async function (
 
         throw error;
       }
-    })
-  );
-
-  router.get(
-    '/api/v1/albums/:albumId/media-items',
-    await verifyAuthentication(),
-    await verifyAuthorization(),
-    wrap(async (req: Request, res: Response) => {
-      const albumId = req.params.albumId;
-      const pageSize = Number(req.query['pageSize']);
-      const pageToken = req.query['pageToken'] as string;
-      const sortBy = req.query['sortBy'];
-      const sortDir = req.query['sortDir'];
-
-      const response = await mediaItemsRepo.listMediaItems({
-        albumId: convertStringToAlbumId(albumId),
-        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
-        pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
-        sortBy: {
-          field: parseEnumOrElse(
-            ListMediaItemsSortByField,
-            sortBy,
-            ListMediaItemsSortByField.ID
-          ),
-          direction: parseEnumOrElse(
-            ListMediaItemsSortByDirection,
-            sortDir,
-            ListMediaItemsSortByDirection.ASCENDING
-          )
-        }
-      });
-      return res.status(200).json({
-        mediaItems: response.mediaItems.map((mediaItem) => ({
-          id: mediaIdToString(mediaItem.id),
-          fileName: mediaItem.file_name,
-          location: mediaItem.location,
-          gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`,
-          albumId: albumIdToString(mediaItem.album_id),
-          width: mediaItem.width,
-          height: mediaItem.height,
-          dateTaken: mediaItem.date_taken.toISOString()
-        })),
-        nextPageToken: response.nextPageToken
-          ? encodeURIComponent(response.nextPageToken)
-          : undefined
-      });
     })
   );
 
