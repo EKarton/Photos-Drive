@@ -36,7 +36,6 @@ export type ListMediaItemsResponse = {
 export interface MediaItemsRepository {
   getMediaItemById(id: MediaItemId): Promise<MediaItem>;
   getNumMediaItemsInAlbum(albumId: AlbumId): Promise<number>;
-  getMediaItemsInAlbum(albumId: AlbumId): Promise<MediaItem[]>;
   listMediaItems(req: ListMediaItemsRequest): Promise<ListMediaItemsResponse>;
 }
 

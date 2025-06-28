@@ -14,10 +14,7 @@ import {
   SortByDirection,
   SortByField
 } from '../services/metadata_store/AlbumsRepository';
-import {
-  mediaIdToString,
-  MediaItem
-} from '../services/metadata_store/MediaItems';
+import { mediaIdToString } from '../services/metadata_store/MediaItems';
 import {
   SortByDirection as ListMediaItemsSortByDirection,
   SortByField as ListMediaItemsSortByField,
@@ -75,12 +72,7 @@ export default async function (
 
       return res.status(200).json({
         albums: response.albums.map((album, i) =>
-          serializeAlbum(
-            album,
-            childAlbumCounts.at(i)!,
-            mediaItemCounts.at(i)!,
-            []
-          )
+          serializeAlbum(album, childAlbumCounts.at(i)!, mediaItemCounts.at(i)!)
         ),
         nextPageToken: response.nextPageToken
           ? encodeURIComponent(response.nextPageToken)
@@ -106,19 +98,15 @@ export default async function (
     wrap(async (req: Request, res: Response) => {
       try {
         const albumId = convertStringToAlbumId(req.params.albumId);
-        const [album, numChildAlbums, numMediaItems, mediaItems] =
-          await Promise.all([
-            albumsRepo.getAlbumById(albumId),
-            albumsRepo.getNumAlbumsInAlbum(albumId),
-            mediaItemsRepo.getNumMediaItemsInAlbum(albumId),
-            mediaItemsRepo.getMediaItemsInAlbum(albumId)
-          ]);
+        const [album, numChildAlbums, numMediaItems] = await Promise.all([
+          albumsRepo.getAlbumById(albumId),
+          albumsRepo.getNumAlbumsInAlbum(albumId),
+          mediaItemsRepo.getNumMediaItemsInAlbum(albumId)
+        ]);
 
         return res
           .status(200)
-          .json(
-            serializeAlbum(album, numChildAlbums, numMediaItems, mediaItems)
-          );
+          .json(serializeAlbum(album, numChildAlbums, numMediaItems));
       } catch (error) {
         if (error instanceof MongoDbClientNotFoundError) {
           return res.status(404).json({ error: 'Album not found' });
@@ -184,8 +172,7 @@ export default async function (
 function serializeAlbum(
   album: Album,
   numChildAlbums: number,
-  numMediaItems: number,
-  mediaItems: MediaItem[]
+  numMediaItems: number
 ): object {
   return {
     id: `${album.id.clientId}:${album.id.objectId}`,
@@ -197,7 +184,6 @@ function serializeAlbum(
       albumIdToString(id)
     ),
     numChildAlbums,
-    numMediaItems,
-    mediaItemIds: mediaItems.map((mediaItem) => mediaIdToString(mediaItem.id))
+    numMediaItems
   };
 }

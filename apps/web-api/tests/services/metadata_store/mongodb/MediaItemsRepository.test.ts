@@ -205,68 +205,6 @@ describe('MediaItemsRepositoryImpl', () => {
     });
   });
 
-  describe('getMediaItemsInAlbum', () => {
-    const albumId: AlbumId = {
-      clientId: '407f1f77bcf86cd799439001',
-      objectId: '407f1f77bcf86cd799439002'
-    };
-
-    beforeEach(async () => {
-      await mongoClient1
-        .db('photos_drive')
-        .collection('media_items')
-        .insertMany([
-          {
-            _id: new ObjectId('507f1f77bcf86cd799439011'),
-            file_name: 'image1.jpg',
-            gphotos_client_id: 'gphotos_client_1',
-            gphotos_media_item_id: 'media_item_1',
-            album_id: `${albumId.clientId}:${albumId.objectId}`,
-            location: {
-              coordinates: [40.0, -70.0]
-            },
-            width: 1000,
-            height: 2000,
-            date_taken: new Date(2024, 4, 4)
-          },
-          {
-            _id: new ObjectId('507f1f77bcf86cd799439012'),
-            file_name: 'image2.jpg',
-            gphotos_client_id: 'gphotos_client_2',
-            gphotos_media_item_id: 'media_item_2',
-            album_id: `${albumId.clientId}:${albumId.objectId}`,
-            width: 1000,
-            height: 2000,
-            date_taken: new Date(2024, 4, 4)
-          }
-        ]);
-      await mongoClient2
-        .db('photos_drive')
-        .collection('media_items')
-        .insertMany([
-          {
-            _id: new ObjectId('507f1f77bcf86cd799439011'),
-            file_name: 'image3.jpg',
-            gphotos_client_id: 'gphotos_client_3',
-            gphotos_media_item_id: 'media_item_3',
-            album_id: `${albumId.clientId}:${albumId.objectId}`,
-            width: 10,
-            height: 20,
-            date_taken: new Date(2024, 4, 4)
-          }
-        ]);
-    });
-
-    it('should return all media items in the album across clients', async () => {
-      const results = await mediaItemsRepo.getMediaItemsInAlbum(albumId);
-
-      expect(results).toHaveLength(3);
-
-      const fileNames = results.map((item) => item.file_name).sort();
-      expect(fileNames).toEqual(['image1.jpg', 'image2.jpg', 'image3.jpg']);
-    });
-  });
-
   describe('listMediaItems', () => {
     const albumId1: AlbumId = {
       clientId: '407f1f77bcf86cd799439001',
