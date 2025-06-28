@@ -25,7 +25,7 @@ describe('AlbumsRepositoryImpl', () => {
     albumsRepo = new AlbumsRepositoryImpl(mockMongoDbClientsRepository);
 
     // Set up the database and collection
-    const db = mongoClient.db('sharded_google_photos');
+    const db = mongoClient.db('photos_drive');
     await db.collection('albums').insertOne({
       _id: new ObjectId('507f1f77bcf86cd799439010'),
       name: 'Test Album',

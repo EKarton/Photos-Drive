@@ -79,11 +79,11 @@ def teardown(
     # Delete all albums from DB except for the root album
     for id, client in mongodb_clients_repo.get_all_clients():
         if root_album_id.client_id == id:
-            client["sharded_google_photos"]["albums"].delete_many(
+            client["photos_drive"]["albums"].delete_many(
                 {"_id": {"$ne": root_album_id.object_id}}
             )
         else:
-            client["sharded_google_photos"]["albums"].delete_many({})
+            client["photos_drive"]["albums"].delete_many({})
 
     # Update the root album to not have any child elements
     albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
@@ -94,7 +94,7 @@ def teardown(
 
     # Delete all media items from the DB
     for _, client in mongodb_clients_repo.get_all_clients():
-        client["sharded_google_photos"]["media_items"].delete_many({})
+        client["photos_drive"]["media_items"].delete_many({})
 
     # Put all the photos that Google Photos has uploaded into a folder
     # called 'To delete'

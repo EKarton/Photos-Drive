@@ -14,7 +14,7 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
   async getAlbumById(id: AlbumId): Promise<Album> {
     const mongoDbClient = this.mongoDbRepository.getClientFromId(id.clientId);
     const rawDocs = await mongoDbClient
-      .db('sharded_google_photos')
+      .db('photos_drive')
       .collection('albums')
       .findOne({ _id: new ObjectId(id.objectId) });
 

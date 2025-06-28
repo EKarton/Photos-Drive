@@ -86,7 +86,7 @@ def dump_mongodb(mongodb_connection_string: str, folder_path: str):
             "--uri",
             mongodb_connection_string,
             "--db",
-            'sharded_google_photos',
+            'photos_drive',
             "--out",
             folder_path,
         ],

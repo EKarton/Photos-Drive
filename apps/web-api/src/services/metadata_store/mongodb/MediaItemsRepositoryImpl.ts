@@ -35,7 +35,7 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
   async getMediaItemById(id: MediaItemId): Promise<MediaItem> {
     const mongoDbClient = this.mongoDbRepository.getClientFromId(id.clientId);
     const rawDocs = await mongoDbClient
-      .db('sharded_google_photos')
+      .db('photos_drive')
       .collection('media_items')
       .findOne({ _id: new ObjectId(id.objectId) });
 
@@ -52,7 +52,7 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
         .listClients()
         .map(async ([clientId, mongoDbClient]) => {
           const rawDocs = await mongoDbClient
-            .db('sharded_google_photos')
+            .db('photos_drive')
             .collection('media_items')
             .find({ album_id: `${albumId.clientId}:${albumId.objectId}` })
             .toArray();
@@ -114,7 +114,7 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
         logger.debug(`Limit size: ${req.pageSize}`);
 
         const rawDocs = await mongoClient
-          .db('sharded_google_photos')
+          .db('photos_drive')
           .collection('media_items')
           .find(filterObj)
           .sort(sortObj)

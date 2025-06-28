@@ -60,7 +60,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
 
         # Insert a mock media item into the mock database
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "_id": media_item_id.object_id,
                 "file_name": "test_image.jpg",
@@ -99,7 +99,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         fake_file_hash = os.urandom(16)
 
         # Insert a mock media item into the mock database
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image.jpg",
                 "file_hash": Binary(fake_file_hash),
@@ -130,7 +130,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
     def test_find_media_items(self):
         # Insert mock media items from different albums into the mock database
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -143,7 +143,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "date_taken": MOCK_DATE_TAKEN,
             }
         )
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image_1.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -156,7 +156,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "date_taken": MOCK_DATE_TAKEN,
             }
         )
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image_2.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -192,7 +192,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id_2, mongodb_client_2)
         repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
-        mongodb_client_1["sharded_google_photos"]["media_items"].insert_one(
+        mongodb_client_1["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -205,7 +205,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "date_taken": MOCK_DATE_TAKEN,
             }
         )
-        mongodb_client_2["sharded_google_photos"]["media_items"].insert_one(
+        mongodb_client_2["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image_1.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -218,7 +218,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "date_taken": MOCK_DATE_TAKEN,
             }
         )
-        mongodb_client_2["sharded_google_photos"]["media_items"].insert_one(
+        mongodb_client_2["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image_2.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -247,7 +247,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
     def test_get_num_media_items_in_album(self):
         # Insert mock media items from different albums into the mock database
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -260,7 +260,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "date_taken": MOCK_DATE_TAKEN,
             }
         )
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image_1.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -273,7 +273,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "date_taken": MOCK_DATE_TAKEN,
             }
         )
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image_2.jpg",
                 "file_hash": Binary(os.urandom(16)),
@@ -518,7 +518,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
     def test_delete_media_item(self):
         # Insert a mock media item into the mock database
         media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "_id": media_item_id.object_id,
                 "file_name": "to_delete.jpg",
@@ -536,9 +536,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.repo.delete_media_item(media_item_id)
 
         # Assert that the media item has been deleted
-        deleted_media = self.mongodb_client["sharded_google_photos"][
-            "media_items"
-        ].find_one({"_id": media_item_id.object_id})
+        deleted_media = self.mongodb_client["photos_drive"]["media_items"].find_one(
+            {"_id": media_item_id.object_id}
+        )
         self.assertIsNone(deleted_media)
 
     def test_delete_media_item_not_found(self):
@@ -557,7 +557,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         # Insert mock media items into the mock database
         for mid in ids_to_delete:
-            self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+            self.mongodb_client["photos_drive"]["media_items"].insert_one(
                 {
                     "_id": mid.object_id,
                     "file_name": f"delete_me_{mid.object_id}.jpg",
@@ -576,9 +576,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         # Assert that all items have been deleted
         for mid in ids_to_delete:
-            deleted_media = self.mongodb_client["sharded_google_photos"][
-                "media_items"
-            ].find_one({"_id": mid.object_id})
+            deleted_media = self.mongodb_client["photos_drive"]["media_items"].find_one(
+                {"_id": mid.object_id}
+            )
             self.assertIsNone(deleted_media)
 
     def test_delete_many_media_items_partial_failure(self):
@@ -590,7 +590,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         # Insert one mock item into the database but not the other
         existing_mid = ids_to_delete[0]
 
-        self.mongodb_client["sharded_google_photos"]["media_items"].insert_one(
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "_id": existing_mid.object_id,
                 "file_name": f"existing_{existing_mid.object_id}.jpg",

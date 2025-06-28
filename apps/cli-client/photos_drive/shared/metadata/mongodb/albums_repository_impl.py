@@ -40,7 +40,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         )
         raw_item = cast(
             dict,
-            client["sharded_google_photos"]["albums"].find_one(
+            client["photos_drive"]["albums"].find_one(
                 {"_id": id.object_id}, session=session
             ),
         )
@@ -56,7 +56,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            for doc in client["sharded_google_photos"]["albums"].find(
+            for doc in client["photos_drive"]["albums"].find(
                 filter={}, session=session
             ):
                 raw_item = cast(dict, doc)
@@ -77,7 +77,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             client_id,
         )
 
-        result = client["sharded_google_photos"]["albums"].insert_one(
+        result = client["photos_drive"]["albums"].insert_one(
             document={
                 "name": album_name,
                 "parent_album_id": (
@@ -104,7 +104,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         session = self._mongodb_clients_repository.get_session_for_client_id(
             id.client_id,
         )
-        result = client["sharded_google_photos"]["albums"].delete_one(
+        result = client["photos_drive"]["albums"].delete_one(
             filter={"_id": id.object_id},
             session=session,
         )
@@ -125,7 +125,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            result = client["sharded_google_photos"]["albums"].delete_many(
+            result = client["photos_drive"]["albums"].delete_many(
                 filter={"_id": {"$in": object_ids}},
                 session=session,
             )
@@ -160,7 +160,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         session = self._mongodb_clients_repository.get_session_for_client_id(
             album_id.client_id,
         )
-        result = client["sharded_google_photos"]["albums"].update_one(
+        result = client["photos_drive"]["albums"].update_one(
             filter=filter_query, update=set_query, upsert=False, session=session
         )
 
@@ -202,7 +202,7 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            result = client["sharded_google_photos"]["albums"].bulk_write(
+            result = client["photos_drive"]["albums"].bulk_write(
                 requests=operations, session=session
             )
 

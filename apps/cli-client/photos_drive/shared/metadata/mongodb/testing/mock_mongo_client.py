@@ -18,7 +18,7 @@ def create_mock_mongo_client(
         mongomock.MongoClient: A fake MongoDB client
     '''
     mock_client: mongomock.MongoClient = mongomock.MongoClient()
-    mock_client["sharded_google_photos"].command = Mock(  # type: ignore
+    mock_client["photos_drive"].command = Mock(  # type: ignore
         return_value={
             "totalFreeStorageSize": total_free_storage_size,
             "storageSize": storage_size,

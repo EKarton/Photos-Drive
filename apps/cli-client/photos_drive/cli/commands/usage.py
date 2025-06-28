@@ -79,7 +79,7 @@ def __get_mongodb_accounts_table(config: Config) -> PrettyTable:
     ]
     for mongodb_config in config.get_mongodb_configs():
         client: MongoClient = MongoClient(mongodb_config.read_write_connection_string)
-        db = client["sharded_google_photos"]
+        db = client["photos_drive"]
         db_stats = db.command({"dbStats": 1, 'freeStorage': 1})
         raw_total_free_storage = db_stats["totalFreeStorageSize"]
         usage = db_stats["storageSize"]
