@@ -106,9 +106,7 @@ describe('Albums Router', () => {
         nextPageToken: undefined
       });
       mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
-      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
-        MOCK_MEDIA_ITEMS.length
-      );
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
 
       const app = express();
       app.use(
@@ -132,8 +130,7 @@ describe('Albums Router', () => {
             parentAlbumId: 'albumClient1:albumObject0',
             childAlbumIds: ['albumClient1:albumObject2'],
             numChildAlbums: 1,
-            numMediaItems: MOCK_MEDIA_ITEMS.length,
-            mediaItemIds: []
+            numMediaItems: 2
           }
         ],
         nextPageToken: undefined
@@ -158,9 +155,7 @@ describe('Albums Router', () => {
         nextPageToken: 'nextToken'
       });
       mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
-      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
-        MOCK_MEDIA_ITEMS.length
-      );
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
 
       const app = express();
       app.use(
@@ -186,8 +181,7 @@ describe('Albums Router', () => {
             parentAlbumId: 'albumClient1:albumObject0',
             childAlbumIds: ['albumClient1:albumObject2'],
             numChildAlbums: 1,
-            numMediaItems: MOCK_MEDIA_ITEMS.length,
-            mediaItemIds: []
+            numMediaItems: 2
           }
         ],
         nextPageToken: 'nextToken'
@@ -237,12 +231,7 @@ describe('Albums Router', () => {
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
       mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM);
       mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
-      mockMediaItemsRepository.getMediaItemsInAlbum.mockResolvedValue(
-        MOCK_MEDIA_ITEMS
-      );
-      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
-        MOCK_MEDIA_ITEMS.length
-      );
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
       const app = express();
       app.use(
         await albumsRouter(
@@ -263,8 +252,7 @@ describe('Albums Router', () => {
         parentAlbumId: 'albumClient1:albumObject0',
         childAlbumIds: ['albumClient1:albumObject2'],
         numChildAlbums: 1,
-        numMediaItems: MOCK_MEDIA_ITEMS.length,
-        mediaItemIds: ['albumClient1:mediaItem1', 'albumClient1:mediaItem2']
+        numMediaItems: 2
       });
     });
 
@@ -276,12 +264,7 @@ describe('Albums Router', () => {
         parent_album_id: undefined
       });
       mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
-      mockMediaItemsRepository.getMediaItemsInAlbum.mockResolvedValue(
-        MOCK_MEDIA_ITEMS
-      );
-      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(
-        MOCK_MEDIA_ITEMS.length
-      );
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
       const app = express();
       app.use(
         await albumsRouter(
@@ -302,8 +285,7 @@ describe('Albums Router', () => {
         parentAlbumId: null,
         childAlbumIds: ['albumClient1:albumObject2'],
         numChildAlbums: 1,
-        numMediaItems: MOCK_MEDIA_ITEMS.length,
-        mediaItemIds: ['albumClient1:mediaItem1', 'albumClient1:mediaItem2']
+        numMediaItems: 2
       });
     });
 
@@ -386,9 +368,6 @@ describe('Albums Router', () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
       mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM);
-      mockMediaItemsRepository.getMediaItemsInAlbum.mockResolvedValue(
-        MOCK_MEDIA_ITEMS
-      );
       const app = express();
       app.use(
         await albumsRouter(

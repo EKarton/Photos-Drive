@@ -64,33 +64,6 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
     return sum(counts);
   }
 
-  async getMediaItemsInAlbum(albumId: AlbumId): Promise<MediaItem[]> {
-    const items = await Promise.all(
-      this.mongoDbRepository
-        .listClients()
-        .map(async ([clientId, mongoDbClient]) => {
-          const rawDocs = await mongoDbClient
-            .db('photos_drive')
-            .collection('media_items')
-            .find({ album_id: `${albumId.clientId}:${albumId.objectId}` })
-            .toArray();
-
-          return rawDocs.map((rawDoc) => {
-            const mediaItemId: MediaItemId = {
-              clientId: clientId,
-              objectId: rawDoc['_id'].toString()
-            };
-            return this.convertMongoDbDocToMediaItemInstance(
-              mediaItemId,
-              rawDoc
-            );
-          });
-        })
-    );
-
-    return items.flat();
-  }
-
   async listMediaItems(
     req: ListMediaItemsRequest
   ): Promise<ListMediaItemsResponse> {
