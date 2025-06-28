@@ -1,20 +1,60 @@
 import { wrap } from 'async-middleware';
-import { Router } from 'express';
+import { Request, Response, Router } from 'express';
 import { verifyAuthentication } from '../middlewares/authentication';
 import { verifyAuthorization } from '../middlewares/authorization';
-import { albumIdToString } from '../services/metadata_store/Albums';
+import {
+  albumIdToString,
+  convertStringToAlbumId
+} from '../services/metadata_store/Albums';
 import {
   mediaIdToString,
+  MediaItem,
   MediaItemId
 } from '../services/metadata_store/MediaItems';
 import {
   MediaItemNotFoundError,
-  MediaItemsRepository
+  MediaItemsRepository,
+  SortByDirection,
+  SortByField
 } from '../services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
+import parseEnumOrElse from '../utils/parseEnumOrElse';
 
 export default async function (mediaItemsRepo: MediaItemsRepository) {
   const router: Router = Router();
+
+  router.get(
+    '/api/v1/media-items',
+    await verifyAuthentication(),
+    await verifyAuthorization(),
+    wrap(async (req: Request, res: Response) => {
+      const albumId = req.query['albumId'] as string;
+      const pageSize = Number(req.query['pageSize']);
+      const pageToken = req.query['pageToken'] as string;
+      const sortBy = req.query['sortBy'];
+      const sortDir = req.query['sortDir'];
+
+      const response = await mediaItemsRepo.listMediaItems({
+        albumId: albumId ? convertStringToAlbumId(albumId) : undefined,
+        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
+        pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
+        sortBy: {
+          field: parseEnumOrElse(SortByField, sortBy, SortByField.ID),
+          direction: parseEnumOrElse(
+            SortByDirection,
+            sortDir,
+            SortByDirection.ASCENDING
+          )
+        }
+      });
+      return res.status(200).json({
+        mediaItems: response.mediaItems.map(serializeMediaItem),
+        nextPageToken: response.nextPageToken
+          ? encodeURIComponent(response.nextPageToken)
+          : undefined
+      });
+    })
+  );
 
   router.get(
     '/api/v1/media-items/:id',
@@ -30,25 +70,13 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
 
       try {
         const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId);
-        const response = {
-          id: mediaIdToString(mediaItem.id),
-          fileName: mediaItem.file_name,
-          location: mediaItem.location,
-          gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`,
-          albumId: albumIdToString(mediaItem.album_id),
-          width: mediaItem.width,
-          height: mediaItem.height,
-          dateTaken: mediaItem.date_taken.toISOString()
-        };
-
-        return res.status(200).json(response);
+        return res.status(200).json(serializeMediaItem(mediaItem));
       } catch (error) {
-        if (error instanceof MongoDbClientNotFoundError) {
-          return res.status(404).json({
-            error: 'Media item not found'
-          });
-        }
-        if (error instanceof MediaItemNotFoundError) {
+        const isNotFound =
+          error instanceof MongoDbClientNotFoundError ||
+          error instanceof MediaItemNotFoundError;
+
+        if (isNotFound) {
           return res.status(404).json({
             error: 'Media item not found'
           });
@@ -60,4 +88,17 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
   );
 
   return router;
+}
+
+function serializeMediaItem(mediaItem: MediaItem): object {
+  return {
+    id: mediaIdToString(mediaItem.id),
+    fileName: mediaItem.file_name,
+    location: mediaItem.location,
+    gPhotosMediaItemId: `${mediaItem.gphotos_client_id}:${mediaItem.gphotos_media_item_id}`,
+    albumId: albumIdToString(mediaItem.album_id),
+    width: mediaItem.width,
+    height: mediaItem.height,
+    dateTaken: mediaItem.date_taken.toISOString()
+  };
 }
