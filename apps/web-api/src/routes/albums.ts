@@ -49,7 +49,7 @@ export default async function (
         parentAlbumId: parentAlbumId
           ? convertStringToAlbumId(parentAlbumId)
           : undefined,
-        pageSize: !isNaN(pageSize) ? pageSize : 25,
+        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
         sortBy: {
           field: parseEnumOrElse(SortByField, sortBy, SortByField.ID),
@@ -119,7 +119,7 @@ export default async function (
 
       const response = await mediaItemsRepo.listMediaItemsInAlbum({
         albumId: convertStringToAlbumId(albumId),
-        pageSize: !isNaN(pageSize) ? pageSize : 25,
+        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
         sortBy: {
           field: parseEnumOrElse(
