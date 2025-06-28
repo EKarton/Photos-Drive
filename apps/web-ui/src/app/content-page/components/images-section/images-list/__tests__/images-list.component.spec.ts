@@ -7,11 +7,9 @@ import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { MockResizeObserverFactory } from '../../../../../shared/resize-observer-factory/__mocks__/MockResizeObserverFactory';
 import { toSuccess } from '../../../../../shared/results/results';
-import {
-  GPhotosMediaItem,
-  ListMediaItemsResponse,
-  WebApiService,
-} from '../../../../services/webapi.service';
+import { GPhotosMediaItem } from '../../../../services/types/gphoto-media-item';
+import { ListMediaItemsResponse } from '../../../../services/types/list-media-items';
+import { WebApiService } from '../../../../services/webapi.service';
 import { mediaViewerState } from '../../../../store/media-viewer';
 import { ImagesListComponent } from '../images-list.component';
 

@@ -5,181 +5,17 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Result } from '../../shared/results/results';
 import { toResult } from '../../shared/results/rxjs/toResult';
-
-/** Represents an album. */
-export interface Album {
-  id: string;
-  albumName: string;
-  parentAlbumId?: string;
-  childAlbumIds: string[];
-  numMediaItems: number;
-  numChildAlbums: number;
-}
-
-/** Represents the api response returned from {@code getAlbum()} */
-export type AlbumDetailsApiResponse = Album;
-
-export interface MediaItemLocation {
-  latitude: number;
-  longitude: number;
-}
-
-interface RawMediaItem {
-  id: string;
-  fileName: string;
-  hashCode: string;
-  location?: MediaItemLocation;
-  gPhotosMediaItemId: string;
-  width: number;
-  height: number;
-  dateTaken: string;
-}
-
-type RawMediaItemDetailsApiResponse = RawMediaItem;
-
-export interface MediaItem {
-  id: string;
-  fileName: string;
-  hashCode: string;
-  location?: MediaItemLocation;
-  gPhotosMediaItemId: string;
-  width: number;
-  height: number;
-  dateTaken: Date;
-}
-
-export type MediaItemDetailsApiResponse = MediaItem;
-
-export enum ListMediaItemsSortByFields {
-  ID = 'id',
-}
-
-export enum ListMediaItemsSortDirection {
-  ASCENDING = 'asc',
-  DESCENDING = 'desc',
-}
-
-export interface ListMediaItemsSortBy {
-  field: ListMediaItemsSortByFields;
-  direction: ListMediaItemsSortDirection;
-}
-
-export interface ListMediaItemsRequest {
-  albumId?: string;
-  pageSize?: number;
-  pageToken?: string;
-  sortBy?: ListMediaItemsSortBy;
-}
-
-interface RawListMediaItemsResponse {
-  mediaItems: RawMediaItem[];
-  nextPageToken?: string;
-}
-
-export interface ListMediaItemsResponse {
-  mediaItems: MediaItem[];
-  nextPageToken?: string;
-}
-
-/**
- * Represents the status of an HTTP request.
- * Follows the data model at:
- * https://developers.google.com/photos/library/reference/rest/v1/Status.
- */
-export interface Status {
-  /** A developer-facing error message in English. */
-  message: string;
-  /** A list of messages that carry error details. Each tuple contains two strings. */
-  details?: [string, string][];
-  /** The status code, corresponding to an enum value of google.rpc.Code. */
-  code?: number;
-}
-
-/**
- * Represents photo metadata for a media item.
- * Follows the data model at:
- * https://developers.google.com/photos/library/reference/rest/v1/mediaItems#photo.
- */
-export interface GPhotosPhotoMetadata {
-  /** Brand of the camera with which the photo was taken. */
-  cameraMake?: string;
-  /** Model of the camera with which the photo was taken. */
-  cameraModel?: string;
-  /** Focal length of the camera lens used. */
-  focalLength?: number;
-  /** Aperture f number of the camera lens used. */
-  apertureFNumber?: number;
-  /** ISO equivalent value of the camera. */
-  isoEquivalent?: number;
-  /** Exposure time of the camera aperture when the photo was taken (e.g., "3.5s"). */
-  exposureTime?: string;
-}
-
-/**
- * Processing status of a video being uploaded to Google Photos.
- * Follows the data model at:
- * https://developers.google.com/photos/library/reference/rest/v1/mediaItems#videoprocessingstatus.
- */
-export enum GPhotosVideoProcessingStatus {
-  UNSPECIFIED = 'UNSPECIFIED',
-  PROCESSING = 'PROCESSING',
-  READY = 'READY',
-  FAILED = 'FAILED',
-}
-
-/**
- * Metadata specific to a video.
- * Follows the data model at:
- * https://developers.google.com/photos/library/reference/rest/v1/mediaItems#video.
- */
-export interface GPhotosVideoMetadata {
-  /** Brand of the camera with which the video was taken. */
-  cameraMake?: string;
-  /** Model of the camera with which the video was taken. */
-  cameraModel?: string;
-  /** Frame rate of the video. */
-  fps?: number;
-  /** Processing status of the video. */
-  status?: GPhotosVideoProcessingStatus;
-}
-
-/**
- * Represents the metadata of a media item.
- * Follows the data model at:
- * https://developers.google.com/photos/library/reference/rest/v1/mediaItems#mediametadata.
- */
-export interface GPhotosMediaMetadata {
-  /**
-   * Time when the media item was first created (not when it was uploaded to Google Photos).
-   * A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution.
-   */
-  creationTime?: string;
-  /** Original width (in pixels) of the media item. May be null if unavailable. */
-  width?: string;
-  /** Original height (in pixels) of the media item. May be null if unavailable. */
-  height?: string;
-  /** Photo-specific metadata, if applicable. */
-  photo?: GPhotosPhotoMetadata;
-  /** Video-specific metadata, if applicable. */
-  video?: GPhotosVideoMetadata;
-}
-
-/**
- * Represents a media item in Google Photos.
- * Follows the data model at:
- * https://developers.google.com/photos/library/reference/rest/v1/mediaItems#MediaItem.
- */
-export interface GPhotosMediaItem {
-  /** URL to the media item's bytes. */
-  baseUrl?: string;
-  /** MIME type of the media item. */
-  mimeType: string;
-  /** Metadata related to the media item. */
-  mediaMetadata: GPhotosMediaMetadata;
-}
-
-/** The response of /api/v1/gphotos/:id/media-items/:media-item-id */
-export type GPhotosMediaItemDetailsApiResponse = GPhotosMediaItem;
+import { AlbumDetailsApiResponse } from './types/album';
+import { GPhotosMediaItemDetailsApiResponse } from './types/gphoto-media-item';
+import { ListAlbumsRequest } from './types/list-albums';
+import { ListAlbumsResponse } from './types/list-albums';
+import { ListMediaItemsRequest } from './types/list-media-items';
+import { ListMediaItemsResponse } from './types/list-media-items';
+import { RawListMediaItemsResponse } from './types/list-media-items';
+import { MediaItemDetailsApiResponse } from './types/media-item';
+import { RawMediaItemDetailsApiResponse } from './types/media-item';
+import { RawMediaItem } from './types/media-item';
+import { MediaItem } from './types/media-item';
 
 @Injectable({ providedIn: 'root' })
 export class WebApiService {
@@ -266,6 +102,38 @@ export class WebApiService {
         })),
         toResult(),
       );
+  }
+
+  /** List albums in a paginated way. */
+  listAlbums(
+    accessToken: string,
+    request: ListAlbumsRequest,
+  ): Observable<Result<ListAlbumsResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/albums`;
+
+    let params = new HttpParams();
+    if (request.parentAlbumId) {
+      params = params.set('parentAlbumId', request.parentAlbumId);
+    }
+    if (request.pageSize) {
+      params = params.set('pageSize', request.pageSize);
+    }
+    if (request.pageToken) {
+      params = params.set('pageToken', request.pageToken);
+    }
+    if (request.sortBy) {
+      params = params.set('sortBy', request.sortBy.field);
+      params = params.set('sortDir', request.sortBy.direction);
+    }
+
+    return this.httpClient
+      .get<ListAlbumsResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params,
+      })
+      .pipe(toResult());
   }
 
   private convertRawMediaItemToMediaItem(rawDoc: RawMediaItem): MediaItem {

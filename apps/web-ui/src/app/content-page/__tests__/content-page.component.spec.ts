@@ -9,11 +9,9 @@ import { authState } from '../../auth/store';
 import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
-import {
-  Album,
-  ListMediaItemsResponse,
-  WebApiService,
-} from '../services/webapi.service';
+import { Album } from '../services/types/album';
+import { ListMediaItemsResponse } from '../services/types/list-media-items';
+import { WebApiService } from '../services/webapi.service';
 import { albumsState } from '../store/albums';
 import { mediaViewerState } from '../store/media-viewer';
 

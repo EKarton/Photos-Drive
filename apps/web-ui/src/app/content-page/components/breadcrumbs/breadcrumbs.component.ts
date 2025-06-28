@@ -19,7 +19,7 @@ import { hasSucceed, Result, toPending } from '../../../shared/results/results';
 import { filterOnlySuccess } from '../../../shared/results/rxjs/filterOnlySuccess';
 import { mapResultRxJs } from '../../../shared/results/rxjs/mapResultRxJs';
 import { combineResults } from '../../../shared/results/utils/combineResults';
-import { Album } from '../../services/webapi.service';
+import { Album } from '../../services/types/album';
 import { albumsActions, albumsState } from '../../store/albums';
 
 export interface BreadcrumbItem {

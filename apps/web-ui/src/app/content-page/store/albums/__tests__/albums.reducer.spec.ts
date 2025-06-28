@@ -1,5 +1,5 @@
 import { toSuccess } from '../../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../../../services/webapi.service';
+import { AlbumDetailsApiResponse } from '../../../services/types/album';
 import * as albumsActions from '../albums.actions';
 import { albumsReducer } from '../albums.reducer';
 import { buildInitialState } from '../albums.state';

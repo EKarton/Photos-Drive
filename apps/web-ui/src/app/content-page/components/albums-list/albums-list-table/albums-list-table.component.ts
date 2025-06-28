@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
 import { Result } from '../../../../shared/results/results';
-import { Album } from '../../../services/webapi.service';
+import { Album } from '../../../services/types/album';
 
 @Component({
   selector: 'app-content-albums-list-table',

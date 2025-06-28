@@ -5,10 +5,8 @@ import {
   toPending,
   toSuccess,
 } from '../../../../shared/results/results';
-import {
-  Album,
-  AlbumDetailsApiResponse,
-} from '../../../services/webapi.service';
+import { AlbumDetailsApiResponse } from '../../../services/types/album';
+import { Album } from '../../../services/types/album';
 import {
   AlbumsState,
   buildInitialState,
