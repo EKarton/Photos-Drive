@@ -1,6 +1,5 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
-import _ from 'lodash';
 import { verifyAuthentication } from '../middlewares/authentication';
 import { verifyAuthorization } from '../middlewares/authorization';
 import {
