@@ -12,7 +12,8 @@ export interface Album {
   albumName: string;
   parentAlbumId?: string;
   childAlbumIds: string[];
-  mediaItemIds: string[];
+  numMediaItems: number;
+  numChildAlbums: number;
 }
 
 /** Represents the api response returned from {@code getAlbum()} */

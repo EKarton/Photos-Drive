@@ -14,7 +14,8 @@ const ALBUM_API_RESPONSE_PHOTOS: Album = {
   albumName: 'Photos',
   parentAlbumId: 'album2',
   childAlbumIds: ['album4', 'album5'],
-  mediaItemIds: [],
+  numChildAlbums: 2,
+  numMediaItems: 0,
 };
 
 const ALBUM_API_RESPONSE_2010: Album = {
@@ -22,7 +23,8 @@ const ALBUM_API_RESPONSE_2010: Album = {
   albumName: '2010',
   parentAlbumId: 'album3',
   childAlbumIds: [],
-  mediaItemIds: [],
+  numChildAlbums: 0,
+  numMediaItems: 0,
 };
 
 const ALBUM_API_RESPONSE_2011: Album = {
@@ -30,7 +32,8 @@ const ALBUM_API_RESPONSE_2011: Album = {
   albumName: '2011',
   parentAlbumId: 'album3',
   childAlbumIds: [],
-  mediaItemIds: [],
+  numChildAlbums: 0,
+  numMediaItems: 0,
 };
 
 describe('AlbumsListComponent', () => {

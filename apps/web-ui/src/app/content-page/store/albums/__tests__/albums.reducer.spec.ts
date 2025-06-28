@@ -29,7 +29,8 @@ describe('Albums Reducer', () => {
       id: albumId,
       albumName: 'Test Album',
       childAlbumIds: [],
-      mediaItemIds: [],
+      numChildAlbums: 0,
+      numMediaItems: 0,
     });
     const action = albumsActions.loadAlbumDetailsResult({
       albumId,

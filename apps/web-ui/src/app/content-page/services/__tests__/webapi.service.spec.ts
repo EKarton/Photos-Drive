@@ -45,7 +45,8 @@ describe('WebApiService', () => {
         id: albumId,
         albumName: 'Test Album',
         childAlbumIds: [],
-        mediaItemIds: ['media1', 'media2'],
+        numChildAlbums: 0,
+        numMediaItems: 2,
       };
 
       service.getAlbum('authToken123', albumId).subscribe((response) => {
