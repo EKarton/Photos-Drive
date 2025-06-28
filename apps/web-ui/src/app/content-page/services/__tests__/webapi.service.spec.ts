@@ -9,7 +9,12 @@ import { environment } from '../../../../environments/environment';
 import { toSuccess } from '../../../shared/results/results';
 import { AlbumDetailsApiResponse } from '../types/album';
 import { GPhotosMediaItemDetailsApiResponse } from '../types/gphoto-media-item';
-import { ListMediaItemsResponse } from '../types/list-media-items';
+import { ListAlbumsRequest, ListAlbumsResponse } from '../types/list-albums';
+import {
+  ListAlbumsSortByFields,
+  ListAlbumsSortDirection,
+  ListMediaItemsResponse,
+} from '../types/list-media-items';
 import { ListMediaItemsRequest } from '../types/list-media-items';
 import { ListMediaItemsSortDirection } from '../types/list-media-items';
 import { ListMediaItemsSortByFields } from '../types/list-media-items';
@@ -219,6 +224,81 @@ describe('WebApiService', () => {
           req.params.get('pageToken') === 'page123' &&
           req.params.get('sortBy') === 'id' &&
           req.params.get('sortDir') === 'desc'
+        );
+      });
+
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('listAlbums', () => {
+    const accessToken = 'fake-token';
+
+    it('should make a GET request to fetch albums with no query params', () => {
+      const request = {};
+      const mockResponse: ListAlbumsResponse = {
+        albums: [],
+        nextPageToken: undefined,
+      };
+
+      service.listAlbums(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(toSuccess(mockResponse));
+      });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/api/v1/albums`,
+      );
+
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+      expect(req.request.params.keys()).toEqual([]);
+
+      req.flush(mockResponse);
+    });
+
+    it('should include query params when provided', () => {
+      const request: ListAlbumsRequest = {
+        parentAlbumId: 'parent123',
+        pageSize: 5,
+        pageToken: 'page456',
+        sortBy: {
+          field: ListAlbumsSortByFields.ID,
+          direction: ListAlbumsSortDirection.ASCENDING,
+        },
+      };
+
+      const mockResponse = {
+        albums: [
+          {
+            id: 'a1',
+            albumName: 'A',
+            childAlbumIds: [],
+            numChildAlbums: 0,
+            numMediaItems: 1,
+          },
+        ],
+        nextPageToken: 'next789',
+      };
+
+      service.listAlbums(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(toSuccess(mockResponse));
+      });
+
+      const req = httpMock.expectOne((req) => {
+        return (
+          req.url === `${environment.webApiEndpoint}/api/v1/albums` &&
+          req.params.get('parentAlbumId') === 'parent123' &&
+          req.params.get('pageSize') === '5' &&
+          req.params.get('pageToken') === 'page456' &&
+          req.params.get('sortBy') === 'id' &&
+          req.params.get('sortDir') === 'asc'
         );
       });
 

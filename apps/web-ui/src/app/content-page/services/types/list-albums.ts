@@ -18,5 +18,5 @@ export interface ListAlbumsSortBy {
 
 export interface ListAlbumsResponse {
   albums: Album[];
-  nextPageToken: string;
+  nextPageToken?: string;
 }
