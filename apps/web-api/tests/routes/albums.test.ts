@@ -463,9 +463,7 @@ describe('Albums Router', () => {
         ],
         nextPageToken: undefined
       });
-      expect(
-        mockMediaItemsRepository.listMediaItems
-      ).toHaveBeenCalledWith({
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
         albumId: {
           clientId: 'albumClient1',
           objectId: 'albumObject1'
@@ -507,9 +505,7 @@ describe('Albums Router', () => {
         mediaItems: [],
         nextPageToken: 'next-token'
       });
-      expect(
-        mockMediaItemsRepository.listMediaItems
-      ).toHaveBeenCalledWith({
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
         albumId: {
           clientId: 'albumClient1',
           objectId: 'albumObject1'
@@ -551,9 +547,7 @@ describe('Albums Router', () => {
         mediaItems: [],
         nextPageToken: 'next-token'
       });
-      expect(
-        mockMediaItemsRepository.listMediaItems
-      ).toHaveBeenCalledWith({
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
         albumId: {
           clientId: 'albumClient1',
           objectId: 'albumObject1'
