@@ -38,15 +38,9 @@
   </label>
 </div>
 <div class="mb-4xl">
-  @if (album() | isPending) {
-    <span data-testid="albums-list-spinner">Loading...</span>
-  } @else if (album() | hasFailed) {
-    <span>Error: {{ album().error!.message }}</span>
+  @if (isTableViewChecked) {
+    <app-content-albums-list-table [albums]="childAlbums()" />
   } @else {
-    @if (isTableViewChecked) {
-      <app-content-albums-list-table [albums]="childAlbums()" />
-    } @else {
-      <app-content-albums-list-cards [albums]="childAlbums()" />
-    }
+    <app-content-albums-list-cards [albums]="childAlbums()" />
   }
 </div>
