@@ -21,7 +21,7 @@ describe('Album Actions', () => {
       numChildAlbums: 0,
       numMediaItems: 0,
     });
-    const action = fromActions.loadAlbumDetailsResult({ albumId, result });
+    const action = fromActions.addAlbumResult({ albumId, result });
 
     expect(action.type).toBe(
       '[Albums] Saves results of getting details of an album',

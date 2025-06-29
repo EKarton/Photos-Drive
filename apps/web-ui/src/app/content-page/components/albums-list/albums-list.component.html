@@ -39,8 +39,8 @@
 </div>
 <div class="mb-4xl">
   @if (isTableViewChecked) {
-    <app-content-albums-list-table [albums]="childAlbums()" />
+    <app-content-albums-list-table [albumId]="albumId()" />
   } @else {
-    <app-content-albums-list-cards [albums]="childAlbums()" />
+    <!-- <app-content-albums-list-cards [albumId]="albumId()" /> -->
   }
 </div>

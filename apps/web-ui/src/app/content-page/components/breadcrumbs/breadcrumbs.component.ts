@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   inject,
@@ -11,14 +12,13 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map, Observable, of, Subscription, switchMap } from 'rxjs';
+import { filter, map, Observable, of, Subscription, switchMap } from 'rxjs';
 
 import { HasFailedPipe } from '../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
 import { hasSucceed, Result, toPending } from '../../../shared/results/results';
 import { filterOnlySuccess } from '../../../shared/results/rxjs/filterOnlySuccess';
-import { mapResultRxJs } from '../../../shared/results/rxjs/mapResultRxJs';
-import { combineResults } from '../../../shared/results/utils/combineResults';
+import { mapResult } from '../../../shared/results/utils/mapResult';
 import { Album } from '../../services/types/album';
 import { albumsActions, albumsState } from '../../store/albums';
 
@@ -29,9 +29,11 @@ export interface BreadcrumbItem {
 }
 
 @Component({
+  standalone: true,
   selector: 'app-content-page-breadcrumbs',
   imports: [CommonModule, RouterModule, IsPendingPipe, HasFailedPipe],
   templateUrl: './breadcrumbs.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BreadcrumbsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
@@ -46,16 +48,17 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     this.albumId,
   ).pipe(switchMap((albumId) => this.getParentAlbums(albumId)));
 
-  readonly breadcrumbItems$: Observable<Result<BreadcrumbItem[]>> =
+  readonly breadcrumbItems$: Observable<Result<BreadcrumbItem>[]> =
     this.albums$.pipe(
-      map((albumsResults) => combineResults(albumsResults, (albums) => albums)),
-      mapResultRxJs((albums: Album[]) => {
-        return albums.map((album) => ({
-          id: album.id,
-          text: album.albumName || 'Home',
-          routerLink: `/content/${album.id}`,
-        }));
-      }),
+      map((albumsResults) =>
+        albumsResults.map((albumResult) =>
+          mapResult(albumResult, (album) => ({
+            id: album.id,
+            text: album.albumName || 'Home',
+            routerLink: `/content/${album.id}`,
+          })),
+        ),
+      ),
     );
 
   private getParentAlbums(albumId: string): Observable<Result<Album>[]> {
@@ -86,14 +89,16 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.add(
-      this.breadcrumbItems$.pipe(filterOnlySuccess()).subscribe(() => {
-        setTimeout(() => {
-          const el = this.breadcrumbContainer?.nativeElement;
-          if (el) {
-            el.scrollLeft = el.scrollWidth;
-          }
-        }, 0);
-      }),
+      this.breadcrumbItems$
+        .pipe(filter((breadcrumbItems) => breadcrumbItems.every(hasSucceed)))
+        .subscribe(() => {
+          setTimeout(() => {
+            const el = this.breadcrumbContainer?.nativeElement;
+            if (el) {
+              el.scrollLeft = el.scrollWidth;
+            }
+          }, 0);
+        }),
     );
 
     this.subscriptions.add(

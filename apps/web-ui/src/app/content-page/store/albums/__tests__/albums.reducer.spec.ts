@@ -32,7 +32,7 @@ describe('Albums Reducer', () => {
       numChildAlbums: 0,
       numMediaItems: 0,
     });
-    const action = albumsActions.loadAlbumDetailsResult({
+    const action = albumsActions.addAlbumResult({
       albumId,
       result,
     });

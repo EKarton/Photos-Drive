@@ -54,7 +54,7 @@ describe('AlbumsEffects', () => {
 
     effects.loadAlbumDetails$.subscribe((action) => {
       expect(action).toEqual(
-        albumsActions.loadAlbumDetailsResult({
+        albumsActions.addAlbumResult({
           albumId: '123',
           result: toSuccess(albumDetails),
         }),
@@ -71,7 +71,7 @@ describe('AlbumsEffects', () => {
 
     effects.loadAlbumDetails$.subscribe((action) => {
       expect(action).toEqual(
-        albumsActions.loadAlbumDetailsResult({
+        albumsActions.addAlbumResult({
           albumId: '123',
           result: toFailure(error),
         }),

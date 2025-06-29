@@ -3,27 +3,36 @@ import { ComponentStore } from '@ngrx/component-store';
 import { Store } from '@ngrx/store';
 import { EMPTY, switchMap, tap, withLatestFrom } from 'rxjs';
 
-import { authState } from '../../../auth/store';
-import { hasFailed, isPending, Result } from '../../../shared/results/results';
-import { Album } from '../../services/types/album';
+import { authState } from '../../../../auth/store';
+import {
+  hasFailed,
+  hasSucceed,
+  isPending,
+  Result,
+  toFailure,
+  toPending,
+  toSuccess,
+} from '../../../../shared/results/results';
+import { Album } from '../../../services/types/album';
 import {
   ListAlbumsRequest,
   ListAlbumsResponse,
   ListAlbumsSortBy,
-} from '../../services/types/list-albums';
-import { WebApiService } from '../../services/webapi.service';
+} from '../../../services/types/list-albums';
+import { WebApiService } from '../../../services/webapi.service';
+import { addAlbum } from '../../../store/albums/albums.actions';
 
-export interface AlbumsListState {
+export interface AlbumsListCardsState {
   albumId?: string;
-  albums: Album[];
+  albumsResult: Result<Album[]>;
   nextPageToken?: string;
   sortBy?: ListAlbumsSortBy;
   isAtEndOfList: boolean;
 }
 
-export const INITIAL_STATE: AlbumsListState = {
+export const INITIAL_STATE: AlbumsListCardsState = {
   albumId: undefined,
-  albums: [],
+  albumsResult: toPending(),
   nextPageToken: undefined,
   sortBy: undefined,
   isAtEndOfList: false,
@@ -40,7 +49,7 @@ export interface LoadMoreAlbumsRequest {
 }
 
 @Injectable()
-export class AlbumsListStore extends ComponentStore<AlbumsListState> {
+export class AlbumsListCardsStore extends ComponentStore<AlbumsListCardsState> {
   private webApiService = inject(WebApiService);
   private store = inject(Store);
 
@@ -48,15 +57,15 @@ export class AlbumsListStore extends ComponentStore<AlbumsListState> {
     super(INITIAL_STATE);
   }
 
-  readonly albums = this.selectSignal((state) => state.albums);
+  readonly albumsResult = this.selectSignal((state) => state.albumsResult);
 
   private readonly clearState = this.updater(
-    (): AlbumsListState => INITIAL_STATE,
+    (): AlbumsListCardsState => ({ ...INITIAL_STATE }),
   );
 
   private readonly setNewPage = this.updater(
     (
-      _: AlbumsListState,
+      _: AlbumsListCardsState,
       {
         request,
         response,
@@ -64,11 +73,19 @@ export class AlbumsListStore extends ComponentStore<AlbumsListState> {
         request: ListAlbumsRequest;
         response: Result<ListAlbumsResponse>;
       },
-    ): AlbumsListState => {
-      if (isPending(response) || hasFailed(response)) {
+    ): AlbumsListCardsState => {
+      if (isPending(response)) {
         return {
           albumId: request.parentAlbumId,
-          albums: [],
+          albumsResult: toPending(),
+          nextPageToken: undefined,
+          sortBy: request.sortBy,
+          isAtEndOfList: false,
+        };
+      } else if (hasFailed(response)) {
+        return {
+          albumId: request.parentAlbumId,
+          albumsResult: toFailure(response.error!),
           nextPageToken: undefined,
           sortBy: request.sortBy,
           isAtEndOfList: false,
@@ -77,7 +94,7 @@ export class AlbumsListStore extends ComponentStore<AlbumsListState> {
         const newPage = response.data!;
         return {
           albumId: request.parentAlbumId,
-          albums: newPage.albums,
+          albumsResult: toSuccess(newPage.albums),
           nextPageToken: newPage.nextPageToken,
           isAtEndOfList: newPage.nextPageToken === undefined,
         };
@@ -87,22 +104,30 @@ export class AlbumsListStore extends ComponentStore<AlbumsListState> {
 
   private readonly appendAlbums = this.updater(
     (
-      state: AlbumsListState,
+      state: AlbumsListCardsState,
       response: Result<ListAlbumsResponse>,
-    ): AlbumsListState => {
+    ): AlbumsListCardsState => {
       if (isPending(response) || hasFailed(response)) {
         return { ...state };
       } else {
         const newPage = response.data!;
         return {
           ...state,
-          albums: state.albums.concat(...newPage.albums),
+          albumsResult: hasSucceed(state.albumsResult)
+            ? toSuccess(state.albumsResult.data!.concat(...newPage.albums))
+            : toSuccess(newPage.albums),
           nextPageToken: newPage.nextPageToken,
           isAtEndOfList: newPage.nextPageToken === undefined,
         };
       }
     },
   );
+
+  private saveAlbumsToStore(response: ListAlbumsResponse) {
+    response.albums.forEach((album) =>
+      this.store.dispatch(addAlbum({ album })),
+    );
+  }
 
   readonly loadInitialPage = this.effect<LoadInitialPageRequest>((request$) =>
     request$.pipe(
@@ -117,13 +142,15 @@ export class AlbumsListStore extends ComponentStore<AlbumsListState> {
               sortBy: request.sortBy,
               pageToken: undefined,
             };
-            return this.webApiService
-              .listAlbums(accessToken, apiRequest)
-              .pipe(
-                tap((response) =>
-                  this.setNewPage({ request: apiRequest, response }),
-                ),
-              );
+            return this.webApiService.listAlbums(accessToken, apiRequest).pipe(
+              tap((response) => {
+                this.setNewPage({ request: apiRequest, response });
+
+                if (hasSucceed(response)) {
+                  this.saveAlbumsToStore(response.data!);
+                }
+              }),
+            );
           }),
         );
       }),
@@ -146,9 +173,14 @@ export class AlbumsListStore extends ComponentStore<AlbumsListState> {
               sortBy: state.sortBy,
               pageToken: state.nextPageToken,
             };
-            return this.webApiService
-              .listAlbums(accessToken, apiRequest)
-              .pipe(tap((response) => this.appendAlbums(response)));
+            return this.webApiService.listAlbums(accessToken, apiRequest).pipe(
+              tap((response) => {
+                this.appendAlbums(response);
+                if (hasSucceed(response)) {
+                  this.saveAlbumsToStore(response.data!);
+                }
+              }),
+            );
           }),
         );
       }),
