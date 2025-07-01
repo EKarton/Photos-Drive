@@ -8,7 +8,7 @@
     </thead>
     <tbody>
       @if (childAlbumsResult() | isPending) {
-        @for (i of [1, 2, 3]; track i) {
+        @for (i of currentPageSize() | range; track i) {
           <tr data-testid="loading-row">
             <td>
               <div class="skeleton w-auto h-8"></div>
@@ -20,7 +20,7 @@
         }
       } @else if (childAlbumsResult() | hasFailed) {
         <tr>
-          <td colspan="2" class="flex justify-center items-center p-4">
+          <td colspan="2">
             <div>Error: {{ childAlbumsResult().error! }}</div>
           </td>
         </tr>
@@ -74,4 +74,94 @@
       }
     </tbody>
   </table>
+
+  <div class="flex flex-wrap justify-end">
+    <!-- Pagination Controls -->
+    <div class="flex items-center gap-4 text-sm">
+      <!-- Page size selector -->
+      <div class="flex items-center gap-2 mt-4 mb-4">
+        <span class="whitespace-nowrap">Rows per page:</span>
+        <select
+          class="select"
+          [value]="currentPageSize()"
+          (change)="onPageSizeChange($event)"
+        >
+          @for (pageSize of pageSizeOptions; track pageSize) {
+            <option [value]="pageSize">{{ pageSize }}</option>
+          }
+        </select>
+      </div>
+
+      <span class="whitespage-nowrap">Page {{ pageNumber() }}</span>
+
+      <div>
+        <!-- First Page -->
+        <button
+          class="btn btn-ghost btn-circle"
+          (click)="goToFirstPage()"
+          aria-label="First page"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
+            />
+          </svg>
+        </button>
+
+        <!-- Previous Page -->
+        <button
+          class="btn btn-ghost btn-circle"
+          (click)="goToPreviousPage()"
+          aria-label="Previous page"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 19.5 8.25 12l7.5-7.5"
+            />
+          </svg>
+        </button>
+
+        <!-- Next Page -->
+        <button
+          class="btn btn-ghost btn-circle"
+          [disabled]="!hasNextPage()"
+          (click)="goToNextPage()"
+          aria-label="Next page"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m8.25 4.5 7.5 7.5-7.5 7.5"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

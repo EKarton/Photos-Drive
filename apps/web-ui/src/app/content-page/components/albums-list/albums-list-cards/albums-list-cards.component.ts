@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, input, Signal } from '@angular/core';
+import { Component, effect, inject, input, Signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe';
@@ -20,6 +20,14 @@ export class AlbumsListCardsComponent {
 
   private readonly albumsListTableStore = inject(AlbumsListCardsStore);
 
-  readonly childAlbumsResult: Signal<Result<Album[]>> =
+  readonly albumsResult: Signal<Result<Album[]>> =
     this.albumsListTableStore.albumsResult;
+
+  constructor() {
+    effect(() => {
+      this.albumsListTableStore.loadAlbums({
+        albumId: this.albumId(),
+      });
+    });
+  }
 }

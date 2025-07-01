@@ -1,8 +1,12 @@
-@if (childAlbumsResult() | isPending) {
-} @else if (childAlbumsResult() | hasFailed) {
+@if (albumsResult() | isPending) {
+  <div data-testid="album-skeleton" class="skeleton w-32 h-16 rounded-md"></div>
+} @else if (albumsResult() | hasFailed) {
+  <span data-testid="albums-error">
+    Error: {{ albumsResult().error!.message }}
+  </span>
 } @else {
   <div class="flex flex-wrap gap-4">
-    @for (album of childAlbumsResult().data!; track album) {
+    @for (album of albumsResult().data!; track album) {
       <div
         data-testid="album"
         class="flex items-center gap-2 border border-opacity-50 rounded-md pl-5 pr-6 pt-3 pb-3 hover:bg-base-300 cursor-pointer hover:underline"
