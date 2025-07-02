@@ -41,9 +41,7 @@ describe('Album Actions', () => {
     };
     const action = fromActions.addAlbum({ album });
 
-    expect(action.type).toBe(
-      '[Albums] Saves results of getting details of an album',
-    );
+    expect(action.type).toBe('[Albums] Add an album to the store');
     expect(action.album).toBe(album);
   });
 });
