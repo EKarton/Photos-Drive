@@ -7,8 +7,10 @@ import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
 import { AlbumDetailsApiResponse } from '../../../services/types/album';
 import { WebApiService } from '../../../services/webapi.service';
+import { albumsState } from '..';
 import * as albumsActions from '../albums.actions';
 import { AlbumsEffects } from '../albums.effects';
+import { buildInitialState } from '../albums.state';
 
 describe('AlbumsEffects', () => {
   let effects: AlbumsEffects;
@@ -30,6 +32,10 @@ describe('AlbumsEffects', () => {
             {
               selector: authState.selectAuthToken,
               value: 'mockAccessToken123',
+            },
+            {
+              selector: albumsState.selectAlbumsState,
+              value: buildInitialState(),
             },
           ],
         }),
