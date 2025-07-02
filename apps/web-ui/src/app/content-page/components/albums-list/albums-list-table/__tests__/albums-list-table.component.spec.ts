@@ -108,26 +108,26 @@ describe('AlbumsListTableComponent', () => {
         if (!request.pageToken) {
           return of(
             toSuccess<ListAlbumsResponse>({
-              albums: [
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-              ],
+              albums: Array.from(
+                { length: request.pageSize || 5 },
+                (_, i): Album => ({
+                  ...ALBUM_DETAILS,
+                  id: `${i}.1`,
+                }),
+              ),
               nextPageToken: 'page2',
             }),
           );
         } else if (request.pageToken === 'page2') {
           return of(
             toSuccess<ListAlbumsResponse>({
-              albums: [
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-                ALBUM_DETAILS,
-              ],
+              albums: Array.from(
+                { length: request.pageSize || 5 },
+                (_, i): Album => ({
+                  ...ALBUM_DETAILS,
+                  id: `${i}.2`,
+                }),
+              ),
               nextPageToken: 'page3',
             }),
           );
@@ -220,7 +220,10 @@ describe('AlbumsListTableComponent', () => {
           toSuccess<ListAlbumsResponse>({
             albums: Array.from(
               { length: request.pageSize || 5 },
-              () => ALBUM_DETAILS,
+              (_, i): Album => ({
+                ...ALBUM_DETAILS,
+                id: `${i}.1`,
+              }),
             ),
           }),
         );
