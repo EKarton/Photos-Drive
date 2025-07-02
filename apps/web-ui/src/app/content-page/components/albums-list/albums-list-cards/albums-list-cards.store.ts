@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { Store } from '@ngrx/store';
-import { delay, EMPTY, expand, switchMap, tap } from 'rxjs';
+import { EMPTY, expand, switchMap, tap } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import {
@@ -35,7 +35,6 @@ export interface LoadAlbumsRequest {
 }
 
 export const DEFAULT_PAGE_SIZE = 50;
-export const PAGINATION_DELAY = 150;
 
 @Injectable()
 export class AlbumsListCardsStore extends ComponentStore<AlbumsListCardsState> {
@@ -79,9 +78,10 @@ export class AlbumsListCardsStore extends ComponentStore<AlbumsListCardsState> {
                   pageToken: response.data?.nextPageToken,
                 };
 
-                return this.webApiService
-                  .listAlbums(accessToken, newApiRequest)
-                  .pipe(delay(PAGINATION_DELAY));
+                return this.webApiService.listAlbums(
+                  accessToken,
+                  newApiRequest,
+                );
               }),
               tap((response: Result<ListAlbumsResponse>) => {
                 this.addResponse(response);

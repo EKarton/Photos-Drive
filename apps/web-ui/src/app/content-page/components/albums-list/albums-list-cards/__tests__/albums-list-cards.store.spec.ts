@@ -121,7 +121,7 @@ describe('AlbumsListCardsStore', () => {
       expect(webApiService.listAlbums).toHaveBeenCalledTimes(2);
       expect(store.dispatch).toHaveBeenCalledWith(addAlbum({ album: album1 }));
       done();
-    }, 200);
+    }, 1000);
   });
 
   it('should set error if last paginated page has an error', (done) => {

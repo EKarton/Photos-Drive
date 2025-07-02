@@ -132,7 +132,7 @@ describe('ContentPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.skeleton')).toBeTruthy();
   });
 
-  it('should show albums and photos given data has been loaded', () => {
+  it('should show albums and photos given data has been loaded', async () => {
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
     mockWebApiService.listAlbums.and.returnValue(
       of(
@@ -156,6 +156,7 @@ describe('ContentPageComponent', () => {
     });
     store.refreshState();
     fixture.detectChanges();
+    await fixture.whenStable();
 
     // Assert that the breadcrumbs render correctly
     const breadcrumbLinks = fixture.nativeElement.querySelectorAll(
@@ -179,7 +180,7 @@ describe('ContentPageComponent', () => {
     expect(mediaItemImages.length).toEqual(2);
   });
 
-  it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', () => {
+  it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', async () => {
     mockWebApiService.listMediaItems.and.returnValue(
       of(
         toSuccess({
@@ -217,6 +218,7 @@ describe('ContentPageComponent', () => {
     });
     store.refreshState();
     fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain(
       'There are no albums and no photos in this album.',

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
@@ -55,9 +56,10 @@ describe('BreadcrumbsComponent', () => {
     }).compileComponents();
 
     store = TestBed.inject(MockStore);
+    spyOn(store, 'dispatch');
   });
 
-  it('should render component when data is already present', () => {
+  it('should render component when data is already present', fakeAsync(() => {
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -71,6 +73,7 @@ describe('BreadcrumbsComponent', () => {
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
     fixture.detectChanges();
+    tick();
 
     // Assert component renders
     const component = fixture.componentInstance;
@@ -84,18 +87,18 @@ describe('BreadcrumbsComponent', () => {
     expect(links[0].textContent).toEqual('Home');
     expect(links[1].textContent).toEqual('Archives');
     expect(links[2].textContent).toEqual('Photos');
-  });
+  }));
 
-  it('should render spinner when data is not loaded yet', () => {
+  it('should render spinner when data is not loaded yet', fakeAsync(() => {
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
     fixture.detectChanges();
+    tick();
 
     expect(fixture.nativeElement.querySelector('.skeleton')).toBeTruthy();
-  });
+  }));
 
-  it('should dispatch events correctly when data is not loaded yet', () => {
-    spyOn(store, 'dispatch');
+  it('should dispatch events correctly when data is not loaded yet', fakeAsync(() => {
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -109,10 +112,11 @@ describe('BreadcrumbsComponent', () => {
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
     fixture.detectChanges();
+    tick();
 
     expect(store.dispatch).toHaveBeenCalledWith(
       albumsActions.loadAlbumDetails({ albumId: 'album1' }),
     );
     expect(fixture.nativeElement.querySelector('.skeleton')).toBeTruthy();
-  });
+  }));
 });

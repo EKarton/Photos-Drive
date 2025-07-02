@@ -10,7 +10,6 @@ import { Album } from '../../../services/types/album';
 import {
   AlbumsState,
   buildInitialState,
-  FEATURE_KEY,
   selectAlbumDetailsById,
 } from '../albums.state';
 
@@ -27,7 +26,7 @@ describe('Albums State', () => {
         idToDetails: ImmutableMap(),
       };
 
-      const result = selectAlbumDetailsById('123')({ [FEATURE_KEY]: state });
+      const result = selectAlbumDetailsById('123').projector(state);
 
       expect(result).toEqual(toPending());
     });
@@ -47,7 +46,7 @@ describe('Albums State', () => {
         ),
       };
 
-      const result = selectAlbumDetailsById('123')({ [FEATURE_KEY]: state });
+      const result = selectAlbumDetailsById('123').projector(state);
 
       expect(result).toEqual(albumDetailsResult);
     });
