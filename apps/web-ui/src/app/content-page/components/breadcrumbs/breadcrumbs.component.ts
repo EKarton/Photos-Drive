@@ -85,16 +85,16 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // this.subscriptions.add(
-    //   this.breadcrumbItems$.pipe(filterOnlySuccess()).subscribe(() => {
-    //     setTimeout(() => {
-    //       const el = this.breadcrumbContainer?.nativeElement;
-    //       if (el) {
-    //         el.scrollLeft = el.scrollWidth;
-    //       }
-    //     }, 0);
-    //   }),
-    // );
+    this.subscriptions.add(
+      this.breadcrumbItems$.pipe(filterOnlySuccess()).subscribe(() => {
+        setTimeout(() => {
+          const el = this.breadcrumbContainer?.nativeElement;
+          if (el) {
+            el.scrollLeft = el.scrollWidth;
+          }
+        }, 0);
+      }),
+    );
 
     this.subscriptions.add(
       this.albums$
