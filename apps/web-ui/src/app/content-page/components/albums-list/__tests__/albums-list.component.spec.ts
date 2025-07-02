@@ -14,9 +14,27 @@ import { ListAlbumsResponse } from '../../../services/types/list-albums';
 import { WebApiService } from '../../../services/webapi.service';
 import { AlbumsListComponent } from '../albums-list.component';
 
-const ALBUM: Album = {
+const ALBUM_1: Album = {
   id: 'album1',
   albumName: 'Test Album',
+  parentAlbumId: 'parent-id',
+  childAlbumIds: [],
+  numChildAlbums: 0,
+  numMediaItems: 1,
+};
+
+const ALBUM_2: Album = {
+  id: 'album2',
+  albumName: 'Test Album 2',
+  parentAlbumId: 'parent-id',
+  childAlbumIds: [],
+  numChildAlbums: 0,
+  numMediaItems: 1,
+};
+
+const ALBUM_3: Album = {
+  id: 'album3',
+  albumName: 'Test Album 3',
   parentAlbumId: 'parent-id',
   childAlbumIds: [],
   numChildAlbums: 0,
@@ -80,7 +98,7 @@ describe('AlbumsListComponent', () => {
     mockWebApiService.listAlbums.and.returnValue(
       of(
         toSuccess<ListAlbumsResponse>({
-          albums: [ALBUM, ALBUM],
+          albums: [ALBUM_1, ALBUM_2],
           nextPageToken: undefined,
         }),
       ),
@@ -105,7 +123,7 @@ describe('AlbumsListComponent', () => {
     mockWebApiService.listAlbums.and.returnValue(
       of(
         toSuccess<ListAlbumsResponse>({
-          albums: [ALBUM, ALBUM, ALBUM],
+          albums: [ALBUM_1, ALBUM_2, ALBUM_3],
           nextPageToken: undefined,
         }),
       ),

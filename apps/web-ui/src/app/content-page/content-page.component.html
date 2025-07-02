@@ -22,7 +22,10 @@
     }
 
     @if (album.data!.numChildAlbums === 0 && album.data!.numMediaItems === 0) {
-      <div class="flex items-center justify-center flex-grow p-8">
+      <div
+        class="flex items-center justify-center flex-grow p-8"
+        data-testid="no-content-message"
+      >
         <div>
           <img
             src="/assets/content-page/empty-album.jpeg"

@@ -227,8 +227,8 @@ describe('ContentPageComponent', () => {
     tick(0);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain(
-      'There are no albums and no photos in this album.',
-    );
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="no-content-message"]'),
+    ).toBeTruthy();
   }));
 });
