@@ -1,5 +1,5 @@
 import { toSuccess } from '../../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../../../services/types/album';
+import { Album, AlbumDetailsApiResponse } from '../../../services/types/album';
 import * as fromActions from '../albums.actions';
 
 describe('Album Actions', () => {
@@ -28,5 +28,22 @@ describe('Album Actions', () => {
     );
     expect(action.albumId).toBe(albumId);
     expect(action.result).toEqual(result);
+  });
+
+  it('should create addAlbum action', () => {
+    const album: Album = {
+      id: '123',
+      albumName: 'Test Album',
+      parentAlbumId: undefined,
+      childAlbumIds: [],
+      numChildAlbums: 0,
+      numMediaItems: 0,
+    };
+    const action = fromActions.addAlbum({ album });
+
+    expect(action.type).toBe(
+      '[Albums] Saves results of getting details of an album',
+    );
+    expect(action.album).toBe(album);
   });
 });
