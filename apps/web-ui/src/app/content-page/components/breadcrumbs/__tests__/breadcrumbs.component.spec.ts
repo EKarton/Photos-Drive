@@ -73,7 +73,8 @@ describe('BreadcrumbsComponent', () => {
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
     fixture.detectChanges();
-    tick();
+    tick(0);
+    fixture.detectChanges();
 
     // Assert component renders
     const component = fixture.componentInstance;
@@ -92,8 +93,8 @@ describe('BreadcrumbsComponent', () => {
   it('should render spinner when data is not loaded yet', fakeAsync(() => {
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
+    tick(0);
     fixture.detectChanges();
-    tick();
 
     expect(fixture.nativeElement.querySelector('.skeleton')).toBeTruthy();
   }));
@@ -111,8 +112,8 @@ describe('BreadcrumbsComponent', () => {
 
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
+    tick(0);
     fixture.detectChanges();
-    tick();
 
     expect(store.dispatch).toHaveBeenCalledWith(
       albumsActions.loadAlbumDetails({ albumId: 'album1' }),

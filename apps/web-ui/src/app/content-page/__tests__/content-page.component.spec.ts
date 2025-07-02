@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -132,7 +137,7 @@ describe('ContentPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.skeleton')).toBeTruthy();
   });
 
-  it('should show albums and photos given data has been loaded', async () => {
+  it('should show albums and photos given data has been loaded', fakeAsync(() => {
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
     mockWebApiService.listAlbums.and.returnValue(
       of(
@@ -155,8 +160,8 @@ describe('ContentPageComponent', () => {
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
     store.refreshState();
+    tick(0);
     fixture.detectChanges();
-    await fixture.whenStable();
 
     // Assert that the breadcrumbs render correctly
     const breadcrumbLinks = fixture.nativeElement.querySelectorAll(
@@ -178,9 +183,9 @@ describe('ContentPageComponent', () => {
     // Assert that the images rendered correctly
     const mediaItemImages = fixture.nativeElement.querySelectorAll('app-image');
     expect(mediaItemImages.length).toEqual(2);
-  });
+  }));
 
-  it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', async () => {
+  it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', fakeAsync(() => {
     mockWebApiService.listMediaItems.and.returnValue(
       of(
         toSuccess({
@@ -217,11 +222,11 @@ describe('ContentPageComponent', () => {
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
     store.refreshState();
+    tick(0);
     fixture.detectChanges();
-    await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain(
       'There are no albums and no photos in this album.',
     );
-  });
+  }));
 });
