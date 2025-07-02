@@ -1,7 +1,11 @@
 <div class="mb-4 flex items-center justify-between">
   <h1 class="text-2xl font-bold">Albums</h1>
   <label class="toggle text-base-content">
-    <input type="checkbox" [(ngModel)]="isTableViewChecked" />
+    <input
+      type="checkbox"
+      [(ngModel)]="isTableViewChecked"
+      data-testid="table-view-checkbox"
+    />
     <svg
       aria-label="enabled"
       xmlns="http://www.w3.org/2000/svg"

@@ -45,7 +45,7 @@ export class AlbumsListTableComponent {
 
   private readonly albumsListTableStore = inject(AlbumsListTableStore);
 
-  readonly childAlbumsResult: Signal<Result<Album[]>> = computed(() => {
+  readonly albumsResult: Signal<Result<Album[]>> = computed(() => {
     const currentPageResult = this.albumsListTableStore.currentPage();
     return mapResult(currentPageResult, (currentPage) => currentPage.albums);
   });
@@ -53,12 +53,12 @@ export class AlbumsListTableComponent {
   readonly pageNumber: Signal<number> = this.albumsListTableStore.pageNumber;
 
   readonly hasNextPage: Signal<boolean> = computed(() => {
-    const currentPageResult = this.albumsListTableStore.currentPage();
-    if (!hasSucceed(currentPageResult)) {
+    const albumsResult = this.albumsListTableStore.currentPage();
+    if (!hasSucceed(albumsResult)) {
       return false;
     }
 
-    return currentPageResult.data?.nextPageToken !== undefined;
+    return albumsResult.data?.nextPageToken !== undefined;
   });
 
   readonly pageSizeOptions = [5, 10, 15];

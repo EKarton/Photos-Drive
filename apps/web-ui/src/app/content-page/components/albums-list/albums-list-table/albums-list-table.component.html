@@ -7,9 +7,9 @@
       </tr>
     </thead>
     <tbody>
-      @if (childAlbumsResult() | isPending) {
+      @if (albumsResult() | isPending) {
         @for (i of currentPageSize() | range; track i) {
-          <tr data-testid="loading-row">
+          <tr data-testid="table-row-skeleton">
             <td>
               <div class="skeleton w-auto h-8"></div>
             </td>
@@ -18,17 +18,17 @@
             </td>
           </tr>
         }
-      } @else if (childAlbumsResult() | hasFailed) {
-        <tr>
+      } @else if (albumsResult() | hasFailed) {
+        <tr data-testid="table-row-error">
           <td colspan="2">
-            <div>Error: {{ childAlbumsResult().error! }}</div>
+            <div>Error: {{ albumsResult().error! }}</div>
           </td>
         </tr>
       } @else {
-        @for (album of childAlbumsResult().data!; track album) {
+        @for (album of albumsResult().data!; track album.id) {
           <tr
             class="hover:bg-base-300 cursor-pointer hover:underline"
-            data-testid="album-row"
+            data-testid="table-row-album"
             [routerLink]="['/content', album.id]"
           >
             <td>
@@ -98,6 +98,7 @@
         <!-- First Page -->
         <button
           class="btn btn-ghost btn-circle"
+          data-testid="go-to-first-page-button"
           (click)="goToFirstPage()"
           aria-label="First page"
         >
@@ -120,6 +121,7 @@
         <!-- Previous Page -->
         <button
           class="btn btn-ghost btn-circle"
+          data-testid="go-to-previous-page-button"
           (click)="goToPreviousPage()"
           aria-label="Previous page"
         >
@@ -142,6 +144,7 @@
         <!-- Next Page -->
         <button
           class="btn btn-ghost btn-circle"
+          data-testid="go-to-next-page-button"
           [disabled]="!hasNextPage()"
           (click)="goToNextPage()"
           aria-label="Next page"
