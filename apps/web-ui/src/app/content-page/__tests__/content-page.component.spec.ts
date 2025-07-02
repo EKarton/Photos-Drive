@@ -160,6 +160,7 @@ describe('ContentPageComponent', () => {
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
     store.refreshState();
+    fixture.detectChanges();
     tick(0);
     fixture.detectChanges();
 
@@ -222,6 +223,7 @@ describe('ContentPageComponent', () => {
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
     store.refreshState();
+    fixture.detectChanges();
     tick(0);
     fixture.detectChanges();
 
