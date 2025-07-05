@@ -9,22 +9,15 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { Pipe, PipeTransform } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+import { RangePipe } from '../../../../shared/pipes/range.pipe';
 import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
 import { hasSucceed, Result } from '../../../../shared/results/results';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
 import { Album } from '../../../services/types/album';
 import { AlbumsListTableStore } from './albums-list-table.store';
-
-@Pipe({ name: 'range' })
-export class RangePipe implements PipeTransform {
-  transform(value: number): number[] {
-    return Array.from({ length: value }, (_, i) => i + 1);
-  }
-}
 
 @Component({
   standalone: true,

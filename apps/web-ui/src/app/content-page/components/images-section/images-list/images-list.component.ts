@@ -42,12 +42,12 @@ export interface Image {
   providers: [ImagesListStore],
 })
 export class ImagesListComponent implements AfterViewInit, OnDestroy {
+  readonly albumId = input.required<string>();
+
   private readonly resizeObserverFactory = inject(
     RESIZE_OBSERVER_FACTORY_TOKEN,
   );
-  readonly componentStore = inject(ImagesListStore);
-
-  readonly albumId = input.required<string>();
+  private readonly componentStore = inject(ImagesListStore);
 
   @ViewChild(NgxMasonryComponent) ngxMasonryComponent?: NgxMasonryComponent;
   @ViewChild('masonryContainer') masonryContainer?: ElementRef;

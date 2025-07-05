@@ -34,10 +34,10 @@ export interface BreadcrumbItem {
   templateUrl: './breadcrumbs.component.html',
 })
 export class BreadcrumbsComponent implements OnInit, OnDestroy {
+  readonly albumId = input.required<string>();
+
   private readonly store = inject(Store);
   private readonly subscriptions = new Subscription();
-
-  readonly albumId = input.required<string>();
 
   @ViewChild('breadcrumbContainer')
   breadcrumbContainer?: ElementRef<HTMLDivElement>;
