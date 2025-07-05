@@ -19,7 +19,7 @@ import { HasSucceededPipe } from '../../../shared/results/pipes/has-succeeded.pi
 import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
 import { Result } from '../../../shared/results/results';
 import { combineResults2 } from '../../../shared/results/utils/combineResults2';
-import { GPhotosMediaItem } from '../../services/webapi.service';
+import { GPhotosMediaItem } from '../../services/GPhotosPhotoMetadata';
 import { mediaViewerActions, mediaViewerState } from '../../store/media-viewer';
 import { MediaViewerStore } from './media-viewer.store';
 

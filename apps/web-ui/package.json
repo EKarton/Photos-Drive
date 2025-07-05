@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage",
     "lint": "ng lint && npx stylelint 'src/**/*.scss'",
-    "lint:fix": "ng lint --fix",
+    "lint:fix": "ng lint --fix && npx stylelint 'src/**/*.scss' --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\""
   },
   "private": true,

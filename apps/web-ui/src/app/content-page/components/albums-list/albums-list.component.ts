@@ -16,7 +16,7 @@ import { HasFailedPipe } from '../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
 import { Result, toPending } from '../../../shared/results/results';
 import { filterOnlySuccess } from '../../../shared/results/rxjs/filterOnlySuccess';
-import { Album } from '../../services/webapi.service';
+import { Album } from '../../services/albums';
 import { albumsActions, albumsState } from '../../store/albums';
 import { AlbumsListCardsComponent } from './albums-list-cards/albums-list-cards.component';
 import { AlbumsListTableComponent } from './albums-list-table/albums-list-table.component';

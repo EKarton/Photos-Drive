@@ -9,13 +9,11 @@ import {
   isPending,
   Result,
 } from '../../../../shared/results/results';
-import {
-  ListMediaItemsRequest,
-  ListMediaItemsResponse,
-  ListMediaItemsSortBy,
-  MediaItem,
-  WebApiService,
-} from '../../../services/webapi.service';
+import { ListMediaItemsResponse } from '../../../services/list-media-items';
+import { ListMediaItemsRequest } from '../../../services/list-media-items';
+import { ListMediaItemsSortBy } from '../../../services/list-media-items';
+import { MediaItem } from '../../../services/media-items';
+import { WebApiService } from '../../../services/webapi.service';
 
 export interface ImagesListState {
   albumId?: string;

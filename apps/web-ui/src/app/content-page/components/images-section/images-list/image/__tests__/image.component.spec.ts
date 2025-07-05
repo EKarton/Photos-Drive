@@ -6,11 +6,9 @@ import { of } from 'rxjs';
 import { WINDOW } from '../../../../../../app.tokens';
 import { authState } from '../../../../../../auth/store';
 import { toPending, toSuccess } from '../../../../../../shared/results/results';
-import {
-  GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
-  WebApiService,
-} from '../../../../../services/webapi.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../../../services/GPhotosPhotoMetadata';
+import { GPhotosMediaItem } from '../../../../../services/GPhotosPhotoMetadata';
+import { WebApiService } from '../../../../../services/webapi.service';
 import {
   mediaViewerActions,
   mediaViewerState,

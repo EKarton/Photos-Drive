@@ -4,11 +4,9 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../../../shared/results/results';
-import {
-  GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
-  WebApiService,
-} from '../../../../../services/webapi.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../../../services/GPhotosPhotoMetadata';
+import { GPhotosMediaItem } from '../../../../../services/GPhotosPhotoMetadata';
+import { WebApiService } from '../../../../../services/webapi.service';
 import { ImageStore, INITIAL_STATE } from '../image.store';
 
 describe('ImageStore', () => {
