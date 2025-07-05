@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map, Observable, Subscription, switchMap } from 'rxjs';
 
 import { HasFailedPipe } from '../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../shared/results/pipes/is-pending.pipe';
-import { Result, toPending } from '../shared/results/results';
+import { Result } from '../shared/results/results';
 import { AlbumsListComponent } from './components/albums-list/albums-list.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -39,18 +38,12 @@ export class ContentPageComponent implements OnInit, OnDestroy {
   readonly albumId$ = this.route.paramMap.pipe(
     map((params) => params.get('albumId')!),
   );
-  readonly albumId: Signal<string> = toSignal(this.albumId$, {
-    initialValue: 'root',
-  });
 
   readonly albumResult$: Observable<Result<Album>> = this.albumId$.pipe(
     switchMap((albumId) =>
       this.store.select(albumsState.selectAlbumDetailsById(albumId)),
     ),
   );
-  readonly albumResult: Signal<Result<Album>> = toSignal(this.albumResult$, {
-    initialValue: toPending<Album>(),
-  });
 
   ngOnInit() {
     this.subscription.add(
