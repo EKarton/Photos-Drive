@@ -3,7 +3,6 @@ export interface Album {
   id: string;
   albumName: string;
   parentAlbumId?: string;
-  childAlbumIds: string[];
   numMediaItems: number;
   numChildAlbums: number;
 }

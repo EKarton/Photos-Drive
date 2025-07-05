@@ -14,7 +14,6 @@ const ALBUM_API_RESPONSE_2010: Album = {
   id: 'album4',
   albumName: '2010',
   parentAlbumId: 'album3',
-  childAlbumIds: [],
   numChildAlbums: 0,
   numMediaItems: 0,
 };
@@ -23,7 +22,6 @@ const ALBUM_API_RESPONSE_2011: Album = {
   id: 'album5',
   albumName: '2011',
   parentAlbumId: 'album3',
-  childAlbumIds: [],
   numChildAlbums: 0,
   numMediaItems: 0,
 };
