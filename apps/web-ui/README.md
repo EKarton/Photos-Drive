@@ -75,13 +75,13 @@ This will compile your project and store the build artifacts in the `dist/` dire
 To check for code styles, run
 
 ```bash
-npm run lint && npx stylelint 'src/**/*.scss'
+npm run test
 ```
 
 To automatically fix errors in code styles, run:
 
 ```bash
-npm run lint:fix && npx stylelint 'src/**/*.scss' --fix
+npm run lint:fix
 ```
 
 ### Running unit tests
@@ -89,7 +89,7 @@ npm run lint:fix && npx stylelint 'src/**/*.scss' --fix
 To run all unit tests, run:
 
 ```bash
-ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage
+npm run test
 ```
 
 It will check for code coverage, which you can see from the `./coverage` directory.

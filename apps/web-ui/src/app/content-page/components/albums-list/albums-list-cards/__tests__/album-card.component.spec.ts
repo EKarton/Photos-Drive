@@ -6,7 +6,7 @@ import {
   toPending,
   toSuccess,
 } from '../../../../../shared/results/results';
-import { Album } from '../../../../services/albums';
+import { Album } from '../../../../services/types/album';
 import { AlbumsListCardsComponent } from '../albums-list-cards.component';
 
 const ALBUM_DETAILS_1: Album = {

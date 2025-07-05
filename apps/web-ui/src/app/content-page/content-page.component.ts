@@ -13,7 +13,7 @@ import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.compo
 import { HeaderComponent } from './components/header/header.component';
 import { ImagesSectionComponent } from './components/images-section/images-section.component';
 import { MediaViewerComponent } from './components/media-viewer/media-viewer.component';
-import { Album } from './services/albums';
+import { Album } from './services/types/album';
 import { albumsActions, albumsState } from './store/albums';
 
 @Component({

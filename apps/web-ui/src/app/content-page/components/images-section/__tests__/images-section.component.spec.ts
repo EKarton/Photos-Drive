@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { WINDOW } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
-import { ListMediaItemsResponse } from '../../../services/list-media-items';
+import { ListMediaItemsResponse } from '../../../services/types/list-media-items';
 import { WebApiService } from '../../../services/webapi.service';
 import { albumsState } from '../../../store/albums';
 import { mediaViewerState } from '../../../store/media-viewer';

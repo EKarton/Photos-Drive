@@ -5,8 +5,8 @@ import { switchMap, tap } from 'rxjs/operators';
 
 import { authState } from '../../../../../auth/store';
 import { Result, toPending } from '../../../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../../../services/GPhotosPhotoMetadata';
-import { GPhotosMediaItem } from '../../../../services/GPhotosPhotoMetadata';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../../services/types/gphotos-media-item';
+import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
 import { WebApiService } from '../../../../services/webapi.service';
 
 /** State definition for {@code ImageStore}. */

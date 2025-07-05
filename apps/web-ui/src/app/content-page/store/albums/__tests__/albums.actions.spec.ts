@@ -1,5 +1,5 @@
 import { toSuccess } from '../../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../../../services/albums';
+import { AlbumDetailsApiResponse } from '../../../services/types/album';
 import * as fromActions from '../albums.actions';
 
 describe('Album Actions', () => {

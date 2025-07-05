@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { Map as ImmutableMap } from 'immutable';
 
 import { Result, toPending } from '../../../shared/results/results';
-import { Album } from '../../services/albums';
+import { Album } from '../../services/types/album';
 
 /** The type defs of this NgRx store. */
 export interface AlbumsState {

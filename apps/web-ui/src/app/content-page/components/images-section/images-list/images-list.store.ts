@@ -9,10 +9,10 @@ import {
   isPending,
   Result,
 } from '../../../../shared/results/results';
-import { ListMediaItemsResponse } from '../../../services/list-media-items';
-import { ListMediaItemsRequest } from '../../../services/list-media-items';
-import { ListMediaItemsSortBy } from '../../../services/list-media-items';
-import { MediaItem } from '../../../services/media-items';
+import { ListMediaItemsResponse } from '../../../services/types/list-media-items';
+import { ListMediaItemsRequest } from '../../../services/types/list-media-items';
+import { ListMediaItemsSortBy } from '../../../services/types/list-media-items';
+import { MediaItem } from '../../../services/types/media-item';
 import { WebApiService } from '../../../services/webapi.service';
 
 export interface ImagesListState {

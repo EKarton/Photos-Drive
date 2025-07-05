@@ -13,7 +13,7 @@ import { WINDOW } from '../../../../../app.tokens';
 import { HasFailedPipe } from '../../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../../shared/results/pipes/is-pending.pipe';
 import { mapResult } from '../../../../../shared/results/utils/mapResult';
-import { GPhotosMediaItem } from '../../../../services/GPhotosPhotoMetadata';
+import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageStore } from './image.store';
 
