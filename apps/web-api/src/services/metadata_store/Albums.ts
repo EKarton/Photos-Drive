@@ -35,7 +35,4 @@ export type Album = {
 
   /** The parent album ID, if it exists. */
   parent_album_id?: AlbumId;
-
-  /** The child album IDs. */
-  child_album_ids: AlbumId[];
 };
