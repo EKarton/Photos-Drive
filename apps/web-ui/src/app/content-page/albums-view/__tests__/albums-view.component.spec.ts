@@ -5,16 +5,16 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
 import { of } from 'rxjs';
 
-import { authState } from '../../auth/store';
-import { toSuccess } from '../../shared/results/results';
-import { themeState } from '../../themes/store';
-import { ContentPageComponent } from '../content-page.component';
-import { Album } from '../services/types/album';
-import { ListAlbumsResponse } from '../services/types/list-albums';
-import { ListMediaItemsResponse } from '../services/types/list-media-items';
-import { WebApiService } from '../services/webapi.service';
-import { albumsState } from '../store/albums';
-import { mediaViewerState } from '../store/media-viewer';
+import { authState } from '../../../auth/store';
+import { toSuccess } from '../../../shared/results/results';
+import { themeState } from '../../../themes/store';
+import { Album } from '../../services/types/album';
+import { ListAlbumsResponse } from '../../services/types/list-albums';
+import { ListMediaItemsResponse } from '../../services/types/list-media-items';
+import { WebApiService } from '../../services/webapi.service';
+import { albumsState } from '../../store/albums';
+import { mediaViewerState } from '../../store/media-viewer';
+import { AlbumsViewComponent } from '../albums-view.component';
 
 const ALBUM_DETAILS_ROOT: Album = {
   id: 'album1',
@@ -78,8 +78,9 @@ const PAGE_1: ListMediaItemsResponse = {
   ],
 };
 
-describe('ContentPageComponent', () => {
-  let fixture: ComponentFixture<ContentPageComponent>;
+describe('AlbumsViewComponent', () => {
+  let component: AlbumsViewComponent;
+  let fixture: ComponentFixture<AlbumsViewComponent>;
   let store: MockStore;
   let mockWebApiService: jasmine.SpyObj<WebApiService>;
 
@@ -90,7 +91,7 @@ describe('ContentPageComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [ContentPageComponent],
+      imports: [AlbumsViewComponent],
       providers: [
         provideMockStore({
           initialState: {
@@ -114,10 +115,16 @@ describe('ContentPageComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ContentPageComponent);
+    fixture = TestBed.createComponent(AlbumsViewComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
 
     store = TestBed.inject(MockStore);
+  });
+
+  it('should show loading state given nothing is loaded yet', () => {
+    expect(component).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.skeleton')).toBeTruthy();
   });
 
   it('should show albums and photos given data has been loaded', () => {
@@ -165,5 +172,48 @@ describe('ContentPageComponent', () => {
     // Assert that the images rendered correctly
     const mediaItemImages = fixture.nativeElement.querySelectorAll('app-image');
     expect(mediaItemImages.length).toEqual(2);
+  });
+
+  it('should show "There are no albums and no photos in this album." when there are no child albums and no media items in the current album', () => {
+    mockWebApiService.listMediaItems.and.returnValue(
+      of(
+        toSuccess({
+          mediaItems: [],
+        }),
+      ),
+    );
+    mockWebApiService.listAlbums.and.returnValue(
+      of(
+        toSuccess<ListAlbumsResponse>({
+          albums: [],
+        }),
+      ),
+    );
+    store.setState({
+      [albumsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap()
+          .set('album1', toSuccess(ALBUM_DETAILS_ROOT))
+          .set('album2', toSuccess(ALBUM_DETAILS_ARCHIVES))
+          .set(
+            'album3',
+            toSuccess({
+              id: 'album3',
+              albumName: '2010',
+              parentAlbumId: 'album2',
+              numChildAlbums: 0,
+              numMediaItems: 0,
+            }),
+          ),
+      },
+      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+      [themeState.FEATURE_KEY]: themeState.initialState,
+      [authState.FEATURE_KEY]: authState.buildInitialState(),
+    });
+    store.refreshState();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'There are no albums and no photos in this album.',
+    );
   });
 });
