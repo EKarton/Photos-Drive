@@ -35,7 +35,6 @@ describe('Albums State', () => {
       const albumDetailsResult = toSuccess<AlbumDetailsApiResponse>({
         id: '123',
         albumName: 'Test Album',
-        childAlbumIds: [],
         numChildAlbums: 0,
         numMediaItems: 0,
       });

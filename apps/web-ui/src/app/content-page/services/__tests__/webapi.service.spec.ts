@@ -48,7 +48,6 @@ describe('WebApiService', () => {
       const mockResponse: AlbumDetailsApiResponse = {
         id: albumId,
         albumName: 'Test Album',
-        childAlbumIds: [],
         numChildAlbums: 0,
         numMediaItems: 2,
       };
@@ -280,7 +279,6 @@ describe('WebApiService', () => {
           {
             id: 'a1',
             albumName: 'A',
-            childAlbumIds: [],
             numChildAlbums: 0,
             numMediaItems: 1,
           },

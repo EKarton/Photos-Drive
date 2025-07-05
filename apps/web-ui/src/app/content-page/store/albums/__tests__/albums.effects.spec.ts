@@ -46,7 +46,6 @@ describe('AlbumsEffects', () => {
     const albumDetails = {
       id: '123',
       albumName: 'Test Album',
-      childAlbumIds: [],
       numChildAlbums: 0,
       numMediaItems: 0,
     };

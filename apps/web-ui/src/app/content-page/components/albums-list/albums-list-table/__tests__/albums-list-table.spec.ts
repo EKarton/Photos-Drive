@@ -23,7 +23,6 @@ describe('AlbumsListTableStore', () => {
       {
         id: 'album-1',
         albumName: 'Vacation 2024',
-        childAlbumIds: [],
         numMediaItems: 0,
         numChildAlbums: 0,
       },

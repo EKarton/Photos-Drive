@@ -12,7 +12,6 @@ import { BreadcrumbsComponent } from '../breadcrumbs.component';
 const ALBUM_API_RESPONSE_ROOT: Album = {
   id: 'album1',
   albumName: '',
-  childAlbumIds: ['album2'],
   numChildAlbums: 1,
   numMediaItems: 0,
 };
@@ -21,7 +20,6 @@ const ALBUM_API_RESPONSE_ARCHIVES: Album = {
   id: 'album2',
   albumName: 'Archives',
   parentAlbumId: 'album1',
-  childAlbumIds: ['album3'],
   numChildAlbums: 1,
   numMediaItems: 0,
 };
@@ -30,7 +28,6 @@ const ALBUM_API_RESPONSE_PHOTOS: Album = {
   id: 'album3',
   albumName: 'Photos',
   parentAlbumId: 'album2',
-  childAlbumIds: [],
   numChildAlbums: 0,
   numMediaItems: 0,
 };

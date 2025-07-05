@@ -28,7 +28,6 @@ describe('Albums Reducer', () => {
     const result = toSuccess<AlbumDetailsApiResponse>({
       id: albumId,
       albumName: 'Test Album',
-      childAlbumIds: [],
       numChildAlbums: 0,
       numMediaItems: 0,
     });
@@ -48,7 +47,6 @@ describe('Albums Reducer', () => {
     const album: Album = {
       id: albumId,
       albumName: 'Test Album',
-      childAlbumIds: [],
       numChildAlbums: 0,
       numMediaItems: 0,
     };

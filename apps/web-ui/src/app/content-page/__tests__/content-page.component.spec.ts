@@ -19,7 +19,6 @@ import { mediaViewerState } from '../store/media-viewer';
 const ALBUM_DETAILS_ROOT: Album = {
   id: 'album1',
   albumName: '',
-  childAlbumIds: ['album2'],
   numChildAlbums: 1,
   numMediaItems: 0,
 };
@@ -28,7 +27,6 @@ const ALBUM_DETAILS_ARCHIVES: Album = {
   id: 'album2',
   albumName: 'Archives',
   parentAlbumId: 'album1',
-  childAlbumIds: ['album3'],
   numChildAlbums: 1,
   numMediaItems: 0,
 };
@@ -37,7 +35,6 @@ const ALBUM_DETAILS_PHOTOS: Album = {
   id: 'album3',
   albumName: 'Photos',
   parentAlbumId: 'album2',
-  childAlbumIds: ['album4', 'album5'],
   numChildAlbums: 2,
   numMediaItems: 2,
 };
@@ -46,7 +43,6 @@ const ALBUM_DETAILS_2010: Album = {
   id: 'album4',
   albumName: '2010',
   parentAlbumId: 'album3',
-  childAlbumIds: [],
   numChildAlbums: 0,
   numMediaItems: 0,
 };
@@ -55,7 +51,6 @@ const ALBUM_DETAILS_2011: Album = {
   id: 'album5',
   albumName: '2011',
   parentAlbumId: 'album3',
-  childAlbumIds: [],
   numChildAlbums: 0,
   numMediaItems: 0,
 };
@@ -205,7 +200,6 @@ describe('ContentPageComponent', () => {
               id: 'album3',
               albumName: '2010',
               parentAlbumId: 'album2',
-              childAlbumIds: [],
               numChildAlbums: 0,
               numMediaItems: 0,
             }),
