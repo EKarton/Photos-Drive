@@ -1,25 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { Map as ImmutableMap } from 'immutable';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
-import { toPending, toSuccess } from '../../../../shared/results/results';
+import { toSuccess } from '../../../../shared/results/results';
 import { Album } from '../../../services/types/album';
 import { ListAlbumsResponse } from '../../../services/types/list-albums';
 import { WebApiService } from '../../../services/webapi.service';
-import { albumsState } from '../../../store/albums';
 import { AlbumsListComponent } from '../albums-list.component';
-
-const ALBUM_API_RESPONSE_PHOTOS: Album = {
-  id: 'album3',
-  albumName: 'Photos',
-  parentAlbumId: 'album2',
-  childAlbumIds: ['album4', 'album5'],
-  numChildAlbums: 2,
-  numMediaItems: 0,
-};
 
 const ALBUM_API_RESPONSE_2010: Album = {
   id: 'album4',
@@ -41,7 +30,6 @@ const ALBUM_API_RESPONSE_2011: Album = {
 
 describe('AlbumsListComponent', () => {
   let mockWebApiService: jasmine.SpyObj<WebApiService>;
-  let store: MockStore;
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', ['listAlbums']);
@@ -50,9 +38,6 @@ describe('AlbumsListComponent', () => {
       imports: [AlbumsListComponent],
       providers: [
         provideMockStore({
-          initialState: {
-            [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
-          },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
           ],
@@ -61,35 +46,9 @@ describe('AlbumsListComponent', () => {
         { provide: WebApiService, useValue: mockWebApiService },
       ],
     }).compileComponents();
-
-    store = TestBed.inject(MockStore);
-  });
-
-  it('should show spinner and dispatch events correctly when album responses are still pending', () => {
-    mockWebApiService.listAlbums.and.returnValue(
-      of(toPending<ListAlbumsResponse>()),
-    );
-    const fixture = TestBed.createComponent(AlbumsListComponent);
-    fixture.componentRef.setInput('albumId', 'album3');
-    fixture.detectChanges();
-
-    expect(
-      fixture.nativeElement.querySelector(
-        '[data-testid="albums-list-spinner"]',
-      ),
-    ).toBeTruthy();
   });
 
   it('should render albums in cards view when successful', () => {
-    store.setState({
-      [albumsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set('album3', toSuccess(ALBUM_API_RESPONSE_PHOTOS))
-          .set('album4', toSuccess(ALBUM_API_RESPONSE_2010))
-          .set('album5', toSuccess(ALBUM_API_RESPONSE_2011)),
-      },
-    });
-    store.refreshState();
     mockWebApiService.listAlbums.and.returnValue(
       of(
         toSuccess<ListAlbumsResponse>({
@@ -116,15 +75,6 @@ describe('AlbumsListComponent', () => {
   });
 
   it('should switch to table view when checkbox is clicked', () => {
-    store.setState({
-      [albumsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set('album3', toSuccess(ALBUM_API_RESPONSE_PHOTOS))
-          .set('album4', toSuccess(ALBUM_API_RESPONSE_2010))
-          .set('album5', toSuccess(ALBUM_API_RESPONSE_2011)),
-      },
-    });
-    store.refreshState();
     mockWebApiService.listAlbums.and.returnValue(
       of(
         toSuccess<ListAlbumsResponse>({

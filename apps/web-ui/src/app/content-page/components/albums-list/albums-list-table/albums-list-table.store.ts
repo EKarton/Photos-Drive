@@ -121,9 +121,9 @@ export class AlbumsListTableStore extends ComponentStore<AlbumsListTableState> {
                   currentPage: response,
                 });
 
-                // if (hasSucceed(response)) {
-                //   this.saveAlbumsToStore(response.data!);
-                // }
+                if (hasSucceed(response)) {
+                  this.saveAlbumsToStore(response.data!);
+                }
               }),
             );
           }),
@@ -162,9 +162,9 @@ export class AlbumsListTableStore extends ComponentStore<AlbumsListTableState> {
                   currentPage: response,
                 });
 
-                // if (hasSucceed(response)) {
-                //   this.saveAlbumsToStore(response.data!);
-                // }
+                if (hasSucceed(response)) {
+                  this.saveAlbumsToStore(response.data!);
+                }
               }),
             );
           }),
@@ -206,9 +206,9 @@ export class AlbumsListTableStore extends ComponentStore<AlbumsListTableState> {
                   currentPage: response,
                 });
 
-                // if (hasSucceed(response)) {
-                //   this.saveAlbumsToStore(response.data!);
-                // }
+                if (hasSucceed(response)) {
+                  this.saveAlbumsToStore(response.data!);
+                }
               }),
             );
           }),
