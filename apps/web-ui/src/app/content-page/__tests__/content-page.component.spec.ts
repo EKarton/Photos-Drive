@@ -10,6 +10,7 @@ import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
 import { Album } from '../services/types/album';
+import { ListAlbumsResponse } from '../services/types/list-albums';
 import { ListMediaItemsResponse } from '../services/types/list-media-items';
 import { WebApiService } from '../services/webapi.service';
 import { albumsState } from '../store/albums';
@@ -91,6 +92,7 @@ describe('ContentPageComponent', () => {
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
       'listMediaItems',
+      'listAlbums',
     ]);
 
     await TestBed.configureTestingModule({
@@ -132,6 +134,13 @@ describe('ContentPageComponent', () => {
 
   it('should show albums and photos given data has been loaded', () => {
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
+    mockWebApiService.listAlbums.and.returnValue(
+      of(
+        toSuccess<ListAlbumsResponse>({
+          albums: [ALBUM_DETAILS_2010, ALBUM_DETAILS_2011],
+        }),
+      ),
+    );
     store.setState({
       [albumsState.FEATURE_KEY]: {
         idToDetails: ImmutableMap()
@@ -175,6 +184,13 @@ describe('ContentPageComponent', () => {
       of(
         toSuccess({
           mediaItems: [],
+        }),
+      ),
+    );
+    mockWebApiService.listAlbums.and.returnValue(
+      of(
+        toSuccess<ListAlbumsResponse>({
+          albums: [],
         }),
       ),
     );

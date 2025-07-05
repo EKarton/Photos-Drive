@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
 import { Result } from '../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../../services/types/album';
+import { Album, AlbumDetailsApiResponse } from '../../services/types/album';
 
 /** An action that fetches the details of an album. */
 export const loadAlbumDetails = createAction(
@@ -13,4 +13,10 @@ export const loadAlbumDetails = createAction(
 export const loadAlbumDetailsResult = createAction(
   '[Albums] Saves results of getting details of an album',
   props<{ albumId: string; result: Result<AlbumDetailsApiResponse> }>(),
+);
+
+/** An action that adds an album to the store */
+export const addAlbum = createAction(
+  '[Albums] Adds an album to the store',
+  props<{ album: Album }>(),
 );

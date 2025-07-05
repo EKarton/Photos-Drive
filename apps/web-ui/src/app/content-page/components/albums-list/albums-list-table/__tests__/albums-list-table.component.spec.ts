@@ -84,7 +84,7 @@ describe('AlbumsListTableComponent', () => {
     fixture.detectChanges();
 
     const subAlbums = fixture.nativeElement.querySelectorAll(
-      '[data-testid="album-row"]',
+      '[data-testid="table-row-album"]',
     );
     expect(subAlbums.length).toEqual(3);
   });
