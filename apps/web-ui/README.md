@@ -75,7 +75,7 @@ This will compile your project and store the build artifacts in the `dist/` dire
 To check for code styles, run
 
 ```bash
-npm run test
+npm run lint
 ```
 
 To automatically fix errors in code styles, run:
