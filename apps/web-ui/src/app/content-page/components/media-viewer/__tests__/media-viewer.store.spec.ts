@@ -4,10 +4,10 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../../services/GPhotosPhotoMetadata';
-import { GPhotosMediaItem } from '../../../services/GPhotosPhotoMetadata';
-import { MediaItemDetailsApiResponse } from '../../../services/media-items';
-import { MediaItem } from '../../../services/media-items';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../services/types/gphotos-media-item';
+import { GPhotosMediaItem } from '../../../services/types/gphotos-media-item';
+import { MediaItemDetailsApiResponse } from '../../../services/types/media-item';
+import { MediaItem } from '../../../services/types/media-item';
 import { WebApiService } from '../../../services/webapi.service';
 import { INITIAL_STATE, MediaViewerStore } from '../media-viewer.store';
 

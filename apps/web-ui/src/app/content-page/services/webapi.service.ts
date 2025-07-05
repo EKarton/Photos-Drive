@@ -5,19 +5,20 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Result } from '../../shared/results/results';
 import { toResult } from '../../shared/results/rxjs/toResult';
-import { AlbumDetailsApiResponse } from './albums';
-import { GPhotosMediaItemDetailsApiResponse } from './GPhotosPhotoMetadata';
+import { AlbumDetailsApiResponse } from './types/album';
+import { GPhotosMediaItemDetailsApiResponse } from './types/gphotos-media-item';
+import { ListAlbumsRequest, ListAlbumsResponse } from './types/list-albums';
 import {
   ListMediaItemsRequest,
   ListMediaItemsResponse,
   RawListMediaItemsResponse,
-} from './list-media-items';
+} from './types/list-media-items';
 import {
   MediaItem,
   MediaItemDetailsApiResponse,
   RawMediaItemDetailsApiResponse,
-} from './media-items';
-import { RawMediaItem } from './media-items';
+} from './types/media-item';
+import { RawMediaItem } from './types/media-item';
 
 @Injectable({ providedIn: 'root' })
 export class WebApiService {
@@ -104,6 +105,38 @@ export class WebApiService {
         })),
         toResult(),
       );
+  }
+
+  /** List albums in a paginated way. */
+  listAlbums(
+    accessToken: string,
+    request: ListAlbumsRequest,
+  ): Observable<Result<ListAlbumsResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/albums`;
+
+    let params = new HttpParams();
+    if (request.parentAlbumId) {
+      params = params.set('parentAlbumId', request.parentAlbumId);
+    }
+    if (request.pageSize) {
+      params = params.set('pageSize', request.pageSize);
+    }
+    if (request.pageToken) {
+      params = params.set('pageToken', request.pageToken);
+    }
+    if (request.sortBy) {
+      params = params.set('sortBy', request.sortBy.field);
+      params = params.set('sortDir', request.sortBy.direction);
+    }
+
+    return this.httpClient
+      .get<ListAlbumsResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params,
+      })
+      .pipe(toResult());
   }
 
   private convertRawMediaItemToMediaItem(rawDoc: RawMediaItem): MediaItem {
