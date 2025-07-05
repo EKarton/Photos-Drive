@@ -6,7 +6,7 @@ import {
   toPending,
   toSuccess,
 } from '../../../../../shared/results/results';
-import { Album } from '../../../../services/webapi.service';
+import { Album } from '../../../../services/albums';
 import { AlbumsListTableComponent } from '../albums-list-table.component';
 
 const ALBUM_DETAILS_1: Album = {

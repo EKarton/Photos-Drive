@@ -5,7 +5,7 @@ import { Map as ImmutableMap } from 'immutable';
 
 import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
-import { Album } from '../../../services/webapi.service';
+import { Album } from '../../../services/albums';
 import { albumsState } from '../../../store/albums';
 import { AlbumsListComponent } from '../albums-list.component';
 

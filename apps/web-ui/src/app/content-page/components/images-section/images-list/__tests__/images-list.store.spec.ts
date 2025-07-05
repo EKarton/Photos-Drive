@@ -4,10 +4,8 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../../shared/results/results';
-import {
-  ListMediaItemsResponse,
-  MediaItem,
-} from '../../../../services/webapi.service';
+import { ListMediaItemsResponse } from '../../../../services/list-media-items';
+import { MediaItem } from '../../../../services/media-items';
 import { WebApiService } from '../../../../services/webapi.service';
 import { ImagesListStore } from '../images-list.store';
 

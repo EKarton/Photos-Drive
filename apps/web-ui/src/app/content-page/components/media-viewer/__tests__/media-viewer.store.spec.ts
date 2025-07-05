@@ -4,13 +4,11 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
-import {
-  GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
-  MediaItem,
-  MediaItemDetailsApiResponse,
-  WebApiService,
-} from '../../../services/webapi.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../services/GPhotosPhotoMetadata';
+import { GPhotosMediaItem } from '../../../services/GPhotosPhotoMetadata';
+import { MediaItemDetailsApiResponse } from '../../../services/media-items';
+import { MediaItem } from '../../../services/media-items';
+import { WebApiService } from '../../../services/webapi.service';
 import { INITIAL_STATE, MediaViewerStore } from '../media-viewer.store';
 
 describe('MediaViewerStore', () => {

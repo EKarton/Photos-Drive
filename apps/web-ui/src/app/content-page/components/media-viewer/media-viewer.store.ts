@@ -6,13 +6,11 @@ import { switchMap, tap } from 'rxjs/operators';
 import { authState } from '../../../auth/store';
 import { Result, toPending } from '../../../shared/results/results';
 import { switchMapResultToResultRxJs } from '../../../shared/results/rxjs/switchMapResultToResultRxJs';
-import {
-  GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
-  MediaItem,
-  MediaItemDetailsApiResponse,
-  WebApiService,
-} from '../../services/webapi.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../services/GPhotosPhotoMetadata';
+import { GPhotosMediaItem } from '../../services/GPhotosPhotoMetadata';
+import { MediaItemDetailsApiResponse } from '../../services/media-items';
+import { MediaItem } from '../../services/media-items';
+import { WebApiService } from '../../services/webapi.service';
 
 /** The state definition for {@code MediaViewerStore} */
 export interface MediaViewerState {

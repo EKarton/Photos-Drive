@@ -5,13 +5,11 @@ import { of } from 'rxjs';
 import { NAVIGATOR } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { toPending, toSuccess } from '../../../../shared/results/results';
-import {
-  GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
-  MediaItem,
-  MediaItemDetailsApiResponse,
-  WebApiService,
-} from '../../../services/webapi.service';
+import { GPhotosMediaItemDetailsApiResponse } from '../../../services/GPhotosPhotoMetadata';
+import { GPhotosMediaItem } from '../../../services/GPhotosPhotoMetadata';
+import { MediaItemDetailsApiResponse } from '../../../services/media-items';
+import { MediaItem } from '../../../services/media-items';
+import { WebApiService } from '../../../services/webapi.service';
 import {
   mediaViewerActions,
   mediaViewerState,

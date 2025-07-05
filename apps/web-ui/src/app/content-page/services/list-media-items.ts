@@ -1,0 +1,32 @@
+import { MediaItem, RawMediaItem } from './media-items';
+
+export enum ListMediaItemsSortByFields {
+  ID = 'id',
+}
+
+export enum ListMediaItemsSortDirection {
+  ASCENDING = 'asc',
+  DESCENDING = 'desc',
+}
+
+export interface ListMediaItemsSortBy {
+  field: ListMediaItemsSortByFields;
+  direction: ListMediaItemsSortDirection;
+}
+
+export interface ListMediaItemsRequest {
+  albumId?: string;
+  pageSize?: number;
+  pageToken?: string;
+  sortBy?: ListMediaItemsSortBy;
+}
+
+export interface RawListMediaItemsResponse {
+  mediaItems: RawMediaItem[];
+  nextPageToken?: string;
+}
+
+export interface ListMediaItemsResponse {
+  mediaItems: MediaItem[];
+  nextPageToken?: string;
+}

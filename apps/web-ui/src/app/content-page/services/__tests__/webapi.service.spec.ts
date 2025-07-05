@@ -7,15 +7,13 @@ import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../../environments/environment';
 import { toSuccess } from '../../../shared/results/results';
-import {
-  AlbumDetailsApiResponse,
-  GPhotosMediaItemDetailsApiResponse,
-  ListMediaItemsRequest,
-  ListMediaItemsResponse,
-  ListMediaItemsSortByFields,
-  ListMediaItemsSortDirection,
-  WebApiService,
-} from '../webapi.service';
+import { AlbumDetailsApiResponse } from '../albums';
+import { GPhotosMediaItemDetailsApiResponse } from '../GPhotosPhotoMetadata';
+import { ListMediaItemsResponse } from '../list-media-items';
+import { ListMediaItemsRequest } from '../list-media-items';
+import { ListMediaItemsSortDirection } from '../list-media-items';
+import { ListMediaItemsSortByFields } from '../list-media-items';
+import { WebApiService } from '../webapi.service';
 
 describe('WebApiService', () => {
   let service: WebApiService;
