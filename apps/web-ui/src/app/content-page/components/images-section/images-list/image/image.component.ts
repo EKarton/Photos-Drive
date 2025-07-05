@@ -32,15 +32,15 @@ export interface ImageData {
   providers: [ImageStore],
 })
 export class ImageComponent {
-  private readonly store = inject(Store);
-  private readonly imageStore = inject(ImageStore);
-  private readonly window = inject(WINDOW);
-
   readonly mediaItemId = input.required<string>();
   readonly gPhotosMediaItemId = input.required<string>();
   readonly fileName = input.required<string>();
   readonly width = input.required<number>();
   readonly height = input.required<number>();
+
+  private readonly store = inject(Store);
+  private readonly imageStore = inject(ImageStore);
+  private readonly window = inject(WINDOW);
 
   private readonly isInViewport = signal(false);
 
