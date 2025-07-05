@@ -1,19 +1,16 @@
-<div class="flex flex-wrap gap-4">
-  @for (album of albums(); track album) {
-    @if (album | isPending) {
-      <div
-        data-testid="album-skeleton"
-        class="skeleton w-32 h-16 rounded-md"
-      ></div>
-    } @else if (album | hasFailed) {
-      <span data-testid="albums-error">
-        Error: {{ album.error!.message }}
-      </span>
-    } @else {
+@if (albumsResult() | isPending) {
+  <div data-testid="album-skeleton" class="skeleton w-32 h-16 rounded-md"></div>
+} @else if (albumsResult() | hasFailed) {
+  <span data-testid="albums-error">
+    Error: {{ albumsResult().error!.message }}
+  </span>
+} @else {
+  <div class="flex flex-wrap gap-4">
+    @for (album of albumsResult().data!; track album.id) {
       <div
         data-testid="album"
-        class="flex items-center gap-2 border border-opacity-50 rounded-md pl-5 pr-6 pt-3 pb-3"
-        [routerLink]="['/content', album.data!.id]"
+        class="flex items-center gap-2 border border-opacity-50 rounded-md pl-5 pr-6 pt-3 pb-3 hover:bg-base-300 cursor-pointer hover:underline"
+        [routerLink]="['/content', album.id]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -31,9 +28,9 @@
         </svg>
 
         <div data-testid="album-card-name" class="text-sm">
-          {{ album.data!.albumName }}
+          {{ album.albumName }}
         </div>
       </div>
     }
-  }
-</div>
+  </div>
+}

@@ -1,5 +1,6 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 
+import { toSuccess } from '../../../shared/results/results';
 import * as albumsActions from './albums.actions';
 import { buildInitialState, FEATURE_KEY } from './albums.state';
 
@@ -11,6 +12,13 @@ export const albumsReducer = createReducer(
     return {
       ...state,
       idToDetails: state.idToDetails.set(albumId, result),
+    };
+  }),
+
+  on(albumsActions.addAlbum, (state, { album }) => {
+    return {
+      ...state,
+      idToDetails: state.idToDetails.set(album.id, toSuccess(album)),
     };
   }),
 );
