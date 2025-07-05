@@ -30,13 +30,7 @@ const MOCK_ALBUM: Album = {
   parent_album_id: {
     clientId: 'albumClient1',
     objectId: 'albumObject0'
-  },
-  child_album_ids: [
-    {
-      clientId: 'albumClient1',
-      objectId: 'albumObject2'
-    }
-  ]
+  }
 };
 
 describe('Albums Router', () => {
@@ -84,12 +78,10 @@ describe('Albums Router', () => {
             id: 'albumClient1:albumObject1',
             albumName: 'Photos',
             parentAlbumId: 'albumClient1:albumObject0',
-            childAlbumIds: ['albumClient1:albumObject2'],
             numChildAlbums: 1,
             numMediaItems: 2
           }
-        ],
-        nextPageToken: undefined
+        ]
       });
 
       expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
@@ -135,7 +127,6 @@ describe('Albums Router', () => {
             id: 'albumClient1:albumObject1',
             albumName: 'Photos',
             parentAlbumId: 'albumClient1:albumObject0',
-            childAlbumIds: ['albumClient1:albumObject2'],
             numChildAlbums: 1,
             numMediaItems: 2
           }
@@ -206,7 +197,6 @@ describe('Albums Router', () => {
         id: 'albumClient1:albumObject1',
         albumName: 'Photos',
         parentAlbumId: 'albumClient1:albumObject0',
-        childAlbumIds: ['albumClient1:albumObject2'],
         numChildAlbums: 1,
         numMediaItems: 2
       });
@@ -239,7 +229,6 @@ describe('Albums Router', () => {
         id: 'albumClient1:albumObject1',
         albumName: 'Photos',
         parentAlbumId: null,
-        childAlbumIds: ['albumClient1:albumObject2'],
         numChildAlbums: 1,
         numMediaItems: 2
       });
@@ -274,7 +263,10 @@ describe('Albums Router', () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
       mockAlbumsRepository.getAlbumById.mockRejectedValue(
-        new AlbumNotFoundError(MOCK_ALBUM.child_album_ids[0])
+        new AlbumNotFoundError({
+          clientId: 'albumClient1',
+          objectId: 'albumObject2'
+        })
       );
       const app = express();
       app.use(

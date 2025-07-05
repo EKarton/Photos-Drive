@@ -69,8 +69,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439010'),
           name: 'Test Album',
-          parent_album_id: null,
-          child_album_ids: ['client2:507f1f77bcf86cd799439011']
+          parent_album_id: null
         });
 
       await mongoClient2
@@ -79,8 +78,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439011'),
           name: 'Test Album',
-          parent_album_id: 'client1:507f1f77bcf86cd799439010',
-          child_album_ids: ['client1:987654321098', 'client1:111111111111']
+          parent_album_id: 'client1:507f1f77bcf86cd799439010'
         });
     });
 
@@ -98,11 +96,7 @@ describe('AlbumsRepositoryImpl', () => {
         parent_album_id: {
           clientId: 'client1',
           objectId: '507f1f77bcf86cd799439010'
-        },
-        child_album_ids: [
-          { clientId: 'client1', objectId: '987654321098' },
-          { clientId: 'client1', objectId: '111111111111' }
-        ]
+        }
       });
     });
 
@@ -117,10 +111,7 @@ describe('AlbumsRepositoryImpl', () => {
       expect(result).toEqual({
         id: albumId,
         name: 'Test Album',
-        parent_album_id: undefined,
-        child_album_ids: [
-          { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' }
-        ]
+        parent_album_id: undefined
       });
     });
 
@@ -156,14 +147,12 @@ describe('AlbumsRepositoryImpl', () => {
           {
             _id: new ObjectId('507f1f77bcf86cd799439050'),
             name: 'Child 1',
-            parent_album_id: 'client1:parent1',
-            child_album_ids: []
+            parent_album_id: 'client1:parent1'
           },
           {
             _id: new ObjectId('507f1f77bcf86cd799439051'),
             name: 'Child 2',
-            parent_album_id: 'client1:parent1',
-            child_album_ids: []
+            parent_album_id: 'client1:parent1'
           }
         ]);
 
@@ -173,8 +162,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439052'),
           name: 'Child 3',
-          parent_album_id: 'client1:parent1',
-          child_album_ids: []
+          parent_album_id: 'client1:parent1'
         });
     });
 
@@ -219,8 +207,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439010'),
           name: 'Archives',
-          parent_album_id: '',
-          child_album_ids: ['client2:507f1f77bcf86cd799439011']
+          parent_album_id: ''
         });
       await mongoClient2
         .db('photos_drive')
@@ -228,13 +215,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439011'),
           name: 'Photos',
-          parent_album_id: 'client1:507f1f77bcf86cd799439010',
-          child_album_ids: [
-            'client1:507f1f77bcf86cd799439012',
-            'client2:507f1f77bcf86cd799439013',
-            'client1:507f1f77bcf86cd799439014',
-            'client2:507f1f77bcf86cd799439015'
-          ]
+          parent_album_id: 'client1:507f1f77bcf86cd799439010'
         });
       await mongoClient1
         .db('photos_drive')
@@ -242,8 +223,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439012'),
           name: '2010',
-          parent_album_id: 'client1:507f1f77bcf86cd799439011',
-          child_album_ids: []
+          parent_album_id: 'client1:507f1f77bcf86cd799439011'
         });
       await mongoClient2
         .db('photos_drive')
@@ -251,8 +231,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439013'),
           name: '2011',
-          parent_album_id: 'client1:507f1f77bcf86cd799439011',
-          child_album_ids: []
+          parent_album_id: 'client1:507f1f77bcf86cd799439011'
         });
       await mongoClient1
         .db('photos_drive')
@@ -260,8 +239,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439014'),
           name: '2012',
-          parent_album_id: 'client1:507f1f77bcf86cd799439011',
-          child_album_ids: []
+          parent_album_id: 'client1:507f1f77bcf86cd799439011'
         });
       await mongoClient2
         .db('photos_drive')
@@ -269,8 +247,7 @@ describe('AlbumsRepositoryImpl', () => {
         .insertOne({
           _id: new ObjectId('507f1f77bcf86cd799439015'),
           name: '2014',
-          parent_album_id: 'client1:507f1f77bcf86cd799439011',
-          child_album_ids: []
+          parent_album_id: 'client1:507f1f77bcf86cd799439011'
         });
     });
 
@@ -288,10 +265,7 @@ describe('AlbumsRepositoryImpl', () => {
           {
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             name: 'Archives',
-            parent_album_id: undefined,
-            child_album_ids: [
-              { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' }
-            ]
+            parent_album_id: undefined
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439010'
@@ -335,13 +309,7 @@ describe('AlbumsRepositoryImpl', () => {
             parent_album_id: {
               clientId: 'client1',
               objectId: '507f1f77bcf86cd799439010'
-            },
-            child_album_ids: [
-              { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-              { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
-              { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
-              { clientId: 'client2', objectId: '507f1f77bcf86cd799439015' }
-            ]
+            }
           }
         ],
         nextPageToken: 'client2:507f1f77bcf86cd799439011'
@@ -364,7 +332,6 @@ describe('AlbumsRepositoryImpl', () => {
       expect(res).toEqual({
         albums: [
           {
-            child_album_ids: [],
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
             name: '2010',
             parent_album_id: {
@@ -373,7 +340,6 @@ describe('AlbumsRepositoryImpl', () => {
             }
           },
           {
-            child_album_ids: [],
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
             name: '2012',
             parent_album_id: {
@@ -382,7 +348,6 @@ describe('AlbumsRepositoryImpl', () => {
             }
           },
           {
-            child_album_ids: [],
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
             name: '2011',
             parent_album_id: {
@@ -391,7 +356,6 @@ describe('AlbumsRepositoryImpl', () => {
             }
           },
           {
-            child_album_ids: [],
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439015' },
             name: '2014',
             parent_album_id: {
@@ -422,7 +386,6 @@ describe('AlbumsRepositoryImpl', () => {
       expect(res).toEqual({
         albums: [
           {
-            child_album_ids: [],
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
             name: '2011',
             parent_album_id: {
@@ -453,7 +416,6 @@ describe('AlbumsRepositoryImpl', () => {
       expect(res).toEqual({
         albums: [
           {
-            child_album_ids: [],
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439015' },
             name: '2014',
             parent_album_id: {
@@ -503,7 +465,6 @@ describe('AlbumsRepositoryImpl', () => {
       expect(res).toEqual({
         albums: [
           {
-            child_album_ids: [],
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439015' },
             name: '2014',
             parent_album_id: {
@@ -512,7 +473,6 @@ describe('AlbumsRepositoryImpl', () => {
             }
           },
           {
-            child_album_ids: [],
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
             name: '2011',
             parent_album_id: {
@@ -521,7 +481,6 @@ describe('AlbumsRepositoryImpl', () => {
             }
           },
           {
-            child_album_ids: [],
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
             name: '2012',
             parent_album_id: {
@@ -530,7 +489,6 @@ describe('AlbumsRepositoryImpl', () => {
             }
           },
           {
-            child_album_ids: [],
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
             name: '2010',
             parent_album_id: {
@@ -596,8 +554,7 @@ describe('sortAlbum', () => {
     return {
       id: { clientId, objectId },
       name: '',
-      parent_album_id: undefined,
-      child_album_ids: []
+      parent_album_id: undefined
     };
   }
 });

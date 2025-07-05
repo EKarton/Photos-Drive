@@ -129,9 +129,6 @@ function serializeAlbum(
     parentAlbumId: album.parent_album_id
       ? albumIdToString(album.parent_album_id)
       : null,
-    childAlbumIds: album.child_album_ids.map((id: AlbumId) =>
-      albumIdToString(id)
-    ),
     numChildAlbums,
     numMediaItems
   };

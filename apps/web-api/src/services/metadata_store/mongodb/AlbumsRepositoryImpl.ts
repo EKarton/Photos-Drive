@@ -169,10 +169,7 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
       name: doc['name'],
       parent_album_id: doc['parent_album_id']
         ? convertStringToAlbumId(doc['parent_album_id'])
-        : undefined,
-      child_album_ids: doc['child_album_ids'].map((albumId: string) => {
-        return convertStringToAlbumId(albumId);
-      })
+        : undefined
     };
   }
 }
