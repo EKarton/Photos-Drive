@@ -1,5 +1,4 @@
-import { TestBed } from '@angular/core/testing';
-import { fakeAsync, tick } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
@@ -13,7 +12,6 @@ import { BreadcrumbsComponent } from '../breadcrumbs.component';
 const ALBUM_API_RESPONSE_ROOT: Album = {
   id: 'album1',
   albumName: '',
-  childAlbumIds: ['album2'],
   numChildAlbums: 1,
   numMediaItems: 0,
 };
@@ -22,7 +20,6 @@ const ALBUM_API_RESPONSE_ARCHIVES: Album = {
   id: 'album2',
   albumName: 'Archives',
   parentAlbumId: 'album1',
-  childAlbumIds: ['album3'],
   numChildAlbums: 1,
   numMediaItems: 0,
 };
@@ -31,7 +28,6 @@ const ALBUM_API_RESPONSE_PHOTOS: Album = {
   id: 'album3',
   albumName: 'Photos',
   parentAlbumId: 'album2',
-  childAlbumIds: [],
   numChildAlbums: 0,
   numMediaItems: 0,
 };
@@ -93,6 +89,7 @@ describe('BreadcrumbsComponent', () => {
   it('should render spinner when data is not loaded yet', fakeAsync(() => {
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
+    fixture.detectChanges();
     tick(0);
     fixture.detectChanges();
 
@@ -112,6 +109,7 @@ describe('BreadcrumbsComponent', () => {
 
     const fixture = TestBed.createComponent(BreadcrumbsComponent);
     fixture.componentRef.setInput('albumId', 'album3');
+    fixture.detectChanges();
     tick(0);
     fixture.detectChanges();
 

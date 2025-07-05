@@ -21,7 +21,6 @@ const ALBUM_DETAILS: Album = {
   id: 'album1',
   albumName: '2010',
   parentAlbumId: 'album1',
-  childAlbumIds: [],
   numChildAlbums: 0,
   numMediaItems: 1,
 };

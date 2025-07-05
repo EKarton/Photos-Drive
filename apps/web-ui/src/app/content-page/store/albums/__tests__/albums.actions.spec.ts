@@ -17,7 +17,6 @@ describe('Album Actions', () => {
       id: albumId,
       albumName: 'Test Album',
       parentAlbumId: undefined,
-      childAlbumIds: [],
       numChildAlbums: 0,
       numMediaItems: 0,
     });
@@ -35,7 +34,6 @@ describe('Album Actions', () => {
       id: '123',
       albumName: 'Test Album',
       parentAlbumId: undefined,
-      childAlbumIds: [],
       numChildAlbums: 0,
       numMediaItems: 0,
     };

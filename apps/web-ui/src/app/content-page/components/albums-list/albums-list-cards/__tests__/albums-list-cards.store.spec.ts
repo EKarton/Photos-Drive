@@ -26,7 +26,6 @@ describe('AlbumsListCardsStore', () => {
   const album1: Album = {
     id: '1',
     albumName: 'First Album',
-    childAlbumIds: [],
     numMediaItems: 5,
     numChildAlbums: 0,
   };
@@ -34,7 +33,6 @@ describe('AlbumsListCardsStore', () => {
   const album2: Album = {
     id: '2',
     albumName: 'Second Album',
-    childAlbumIds: [],
     numMediaItems: 2,
     numChildAlbums: 1,
   };
