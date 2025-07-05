@@ -48,7 +48,7 @@
     <span>Error: {{ album().error!.message }}</span>
   } @else {
     @if (isTableViewChecked) {
-      <app-content-albums-list-table [albums]="childAlbums()" />
+      <app-content-albums-list-table [albumId]="albumId()" />
     } @else {
       <app-content-albums-list-cards [albumId]="albumId()" />
     }

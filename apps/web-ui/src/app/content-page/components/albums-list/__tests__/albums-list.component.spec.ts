@@ -114,4 +114,42 @@ describe('AlbumsListComponent', () => {
     expect(names[0].textContent).toContain('2010');
     expect(names[1].textContent).toContain('2011');
   });
+
+  it('should switch to table view when checkbox is clicked', () => {
+    store.setState({
+      [albumsState.FEATURE_KEY]: {
+        idToDetails: ImmutableMap()
+          .set('album3', toSuccess(ALBUM_API_RESPONSE_PHOTOS))
+          .set('album4', toSuccess(ALBUM_API_RESPONSE_2010))
+          .set('album5', toSuccess(ALBUM_API_RESPONSE_2011)),
+      },
+    });
+    store.refreshState();
+    mockWebApiService.listAlbums.and.returnValue(
+      of(
+        toSuccess<ListAlbumsResponse>({
+          albums: [ALBUM_API_RESPONSE_2010, ALBUM_API_RESPONSE_2011],
+          nextPageToken: undefined,
+        }),
+      ),
+    );
+
+    const fixture = TestBed.createComponent(AlbumsListComponent);
+    fixture.componentRef.setInput('albumId', 'album3');
+    fixture.detectChanges();
+
+    // Click toggle to switch to table view
+    const toggle = fixture.nativeElement.querySelector(
+      '[data-testid="table-view-checkbox"]',
+    );
+    toggle.click();
+    fixture.detectChanges();
+
+    const tableRows = fixture.nativeElement.querySelectorAll(
+      '[data-testid="table-row-album"]',
+    );
+    expect(tableRows.length).toBe(2);
+    expect(tableRows[0].textContent).toContain('2010');
+    expect(tableRows[1].textContent).toContain('2011');
+  });
 });
