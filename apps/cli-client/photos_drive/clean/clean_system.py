@@ -28,23 +28,6 @@ TRASH_ALBUM_TITLE = 'To delete'
 
 
 @dataclass(frozen=True)
-class CleanupResults:
-    """
-    Stores the results of the cleanup.
-
-    Attributes:
-        num_media_items_deleted (int): The number of media items deleted.
-        num_albums_deleted (int): The number of albums deleted.
-        num_gmedia_items_moved_to_trash (int): The number of Google media items moved
-            to trash
-    """
-
-    num_media_items_deleted: int
-    num_albums_deleted: int
-    num_gmedia_items_moved_to_trash: int
-
-
-@dataclass(frozen=True)
 class GPhotosMediaItemKey:
     """
     Represents the key of a media item in Google Photos.
@@ -62,6 +45,30 @@ class GPhotosMediaItemKey:
     object_id: str
 
 
+@dataclass(frozen=True)
+class ItemsToDelete:
+    album_ids_to_delete: set[AlbumId]
+    media_item_ids_to_delete: set[MediaItemId]
+    gphotos_media_item_ids_to_delete: set[GPhotosMediaItemKey]
+
+
+@dataclass(frozen=True)
+class CleanupResults:
+    """
+    Stores the results of the cleanup.
+
+    Attributes:
+        num_media_items_deleted (int): The number of media items deleted.
+        num_albums_deleted (int): The number of albums deleted.
+        num_gmedia_items_moved_to_trash (int): The number of Google media items moved
+            to trash
+    """
+
+    num_media_items_deleted: int
+    num_albums_deleted: int
+    num_gmedia_items_moved_to_trash: int
+
+
 class SystemCleaner:
     def __init__(
         self,
@@ -77,7 +84,7 @@ class SystemCleaner:
         self.__gphotos_clients_repo = gphotos_clients_repo
         self.__mongodb_clients_repo = mongodb_clients_repo
 
-    def clean(self) -> CleanupResults:
+    def find_item_to_delete(self) -> ItemsToDelete:
         # Step 1: Find all albums
         all_album_ids = self.__find_all_albums()
         logger.info(f'Found {len(all_album_ids)} albums')
@@ -102,28 +109,48 @@ class SystemCleaner:
 
         # Step 5: Delete all unlinked albums
         album_ids_to_delete = all_album_ids - album_ids_to_keep
-        logger.info(f'Deleting {len(album_ids_to_delete)} albums.')
-        self.__albums_repo.delete_many_albums(list(album_ids_to_delete))
-
-        # Step 6: Delete all unlinked media items
         media_item_ids_to_delete = all_media_item_ids - media_item_ids_to_keep
-        logger.info(f'Deleting {len(media_item_ids_to_delete)} media items.')
-        self.__media_items_repo.delete_many_media_items(list(media_item_ids_to_delete))
-
-        # Step 7: Delete all unlinked gphoto media items
         gphoto_media_item_ids_to_delete = (
             all_gphoto_media_item_ids - gmedia_item_ids_to_keep
         )
-        logger.info(f'Trashing {len(gphoto_media_item_ids_to_delete)} photos')
-        self.__move_gmedia_items_to_trash(list(gphoto_media_item_ids_to_delete))
+
+        return ItemsToDelete(
+            album_ids_to_delete,
+            media_item_ids_to_delete,
+            gphoto_media_item_ids_to_delete,
+        )
+
+    def delete_items(self, items_to_delete: ItemsToDelete):
+        logger.info(f'Deleting {len(items_to_delete.album_ids_to_delete)} albums.')
+        self.__albums_repo.delete_many_albums(list(items_to_delete.album_ids_to_delete))
+
+        # Step 6: Delete all unlinked media items
+
+        logger.info(
+            f'Deleting {len(items_to_delete.media_item_ids_to_delete)} media items.'
+        )
+        self.__media_items_repo.delete_many_media_items(
+            list(items_to_delete.media_item_ids_to_delete)
+        )
+
+        # Step 7: Delete all unlinked gphoto media items
+        logger.info(
+            f'Trashing {len(items_to_delete.gphotos_media_item_ids_to_delete)} photos'
+        )
+        self.__move_gmedia_items_to_trash(
+            list(items_to_delete.gphotos_media_item_ids_to_delete)
+        )
 
         # Step 8: Prune all the leaf albums in the tree
         num_albums_pruned = self.__prune_albums()
 
         return CleanupResults(
-            num_media_items_deleted=len(media_item_ids_to_delete),
-            num_albums_deleted=len(album_ids_to_delete) + num_albums_pruned,
-            num_gmedia_items_moved_to_trash=len(gphoto_media_item_ids_to_delete),
+            num_media_items_deleted=len(items_to_delete.media_item_ids_to_delete),
+            num_albums_deleted=len(items_to_delete.album_ids_to_delete)
+            + num_albums_pruned,
+            num_gmedia_items_moved_to_trash=len(
+                items_to_delete.gphotos_media_item_ids_to_delete
+            ),
         )
 
     def __find_all_albums(self) -> set[AlbumId]:

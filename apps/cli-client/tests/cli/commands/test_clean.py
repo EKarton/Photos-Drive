@@ -141,7 +141,9 @@ class TestCleanCli(unittest.TestCase):
     def test_clean(self):
         runner = CliRunner()
         app = build_app()
-        result = runner.invoke(app, ["clean", "--config-file", self.temp_file_path])
+        result = runner.invoke(
+            app, ["clean", "--config-file", self.temp_file_path], input="Yes\n"
+        )
 
         # Assert: check output
         self.assertEqual(result.exit_code, 0)

@@ -1,3 +1,4 @@
+from photos_drive.clean.clean_system import ItemsToDelete
 from prettytable import HRuleStyle, PrettyTable, VRuleStyle
 from termcolor import colored
 from typing import Literal
@@ -84,3 +85,46 @@ def pretty_print_diffs(backup_diffs: list[Diff]):
     print(f'Number of media items to add: {total_additions}')
     print(f'Number of media items to delete: {total_deletions}')
     print('')
+
+
+def pretty_print_items_to_delete(items_to_delete: ItemsToDelete):
+    table = PrettyTable()
+    table.field_names = ["Type", "Client ID", "Object ID"]
+
+    for album_id in items_to_delete.album_ids_to_delete:
+        table.add_row(
+            [
+                colored('Album', "red"),
+                colored(album_id.client_id, "red"),
+                colored(album_id.object_id, 'red'),
+            ]
+        )
+
+    for media_item_id in items_to_delete.media_item_ids_to_delete:
+        table.add_row(
+            [
+                colored('Media Item', "red"),
+                colored(media_item_id.client_id, "red"),
+                colored(media_item_id.object_id, 'red'),
+            ]
+        )
+
+    for gphotos_media_item_id in items_to_delete.gphotos_media_item_ids_to_delete:
+        table.add_row(
+            [
+                colored('GPhotos Media Item', "red"),
+                colored(gphotos_media_item_id.client_id, "red"),
+                colored(gphotos_media_item_id.object_id, 'red'),
+            ]
+        )
+
+    print("============================================================")
+    print("Deletions")
+    print("============================================================")
+    print(table)
+    print("Albums to delete:", len(items_to_delete.album_ids_to_delete))
+    print("Media Items to delete:", len(items_to_delete.media_item_ids_to_delete))
+    print(
+        "GPhotos Media Items to delete:",
+        len(items_to_delete.gphotos_media_item_ids_to_delete),
+    )
