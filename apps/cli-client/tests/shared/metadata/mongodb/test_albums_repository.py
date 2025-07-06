@@ -10,7 +10,7 @@ from photos_drive.shared.metadata.albums_repository import (
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.album_id import AlbumId, album_id_to_string
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
@@ -37,9 +37,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "_id": album_id.object_id,
                 "name": "Test Album",
                 "parent_album_id": '5f50c31e8a7d4b1c9c9b0b1c:5f50c31e8a7d4b1c9c9b0b1d',
-                "child_album_ids": [
-                    "5f50c31e8a7d4b1c9c9b0b1e:5f50c31e8a7d4b1c9c9b0b1f"
-                ],
             }
         )
 
@@ -56,15 +53,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 ObjectId("5f50c31e8a7d4b1c9c9b0b1d"),
             ),
         )
-        self.assertEqual(
-            album.child_album_ids,
-            [
-                AlbumId(
-                    ObjectId("5f50c31e8a7d4b1c9c9b0b1e"),
-                    ObjectId("5f50c31e8a7d4b1c9c9b0b1f"),
-                )
-            ],
-        )
 
     def test_get_all_albums(self):
         # Arrange: Prepare test data
@@ -75,9 +63,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "_id": album_id_1.object_id,
                 "name": "Archives",
                 "parent_album_id": None,
-                "child_album_ids": [
-                    "5f50c31e8a7d4b1c9c9b0b1a:5f50c31e8a7d4b1c9c9b0b1c"
-                ],
             }
         )
         self.mock_client["photos_drive"]["albums"].insert_one(
@@ -85,7 +70,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "_id": album_id_2.object_id,
                 "name": "Photos",
                 "parent_album_id": f"5f50c31e8a7d4b1c9c9b0b1a:{album_id_1.object_id}",
-                "child_album_ids": [],
             }
         )
 
@@ -97,12 +81,10 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.assertEqual(albums[0].name, "Archives")
         self.assertEqual(albums[0].id, album_id_1)
         self.assertEqual(albums[0].parent_album_id, None)
-        self.assertEqual(albums[0].child_album_ids, [album_id_2])
 
         self.assertEqual(albums[1].name, "Photos")
         self.assertEqual(albums[1].id, album_id_2)
         self.assertEqual(albums[1].parent_album_id, album_id_1)
-        self.assertEqual(albums[1].child_album_ids, [])
 
     def test_get_album_by_id__unknown_album_id(self):
         album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
@@ -116,20 +98,13 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         parent_album_id = AlbumId(
             ObjectId("5f50c31e8a7d4b1c9c9b0b1c"), ObjectId("5f50c31e8a7d4b1c9c9b0b1d")
         )
-        child_album_ids = [
-            AlbumId(
-                ObjectId("5f50c31e8a7d4b1c9c9b0b1e"),
-                ObjectId("5f50c31e8a7d4b1c9c9b0b1f"),
-            )
-        ]
 
         # Test
-        album = self.repo.create_album(album_name, parent_album_id, child_album_ids)
+        album = self.repo.create_album(album_name, parent_album_id)
 
         # Assert
         self.assertEqual(album.name, album_name)
         self.assertEqual(album.parent_album_id, parent_album_id)
-        self.assertEqual(album.child_album_ids, child_album_ids)
 
         # Check if the album was actually inserted into the mock database
         inserted_album = self.mock_client["photos_drive"]["albums"].find_one(
@@ -151,7 +126,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                     "_id": album_id.object_id,
                     "name": f"Test Album {album_id.object_id}",
                     "parent_album_id": None,
-                    "child_album_ids": [],
                 }
             )
 
@@ -180,7 +154,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "_id": existing_album_id.object_id,
                 "name": "Existing Album",
                 "parent_album_id": None,
-                "child_album_ids": [],
             }
         )
 
@@ -200,7 +173,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "_id": album_id_1.object_id,
                 "name": "Album 1",
                 "parent_album_id": None,
-                "child_album_ids": [],
             }
         )
         mock_client_2["photos_drive"]["albums"].insert_one(
@@ -208,7 +180,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "_id": album_id_2.object_id,
                 "name": "Album 2",
                 "parent_album_id": None,
-                "child_album_ids": [],
             }
         )
 
@@ -259,7 +230,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 "_id": album_id.object_id,
                 "name": "Old Name",
                 "parent_album_id": "5f50c31e8a7d4b1c9c9b0b1c:5f50c31e8a7d4b1c9c9b0b1d",
-                "child_album_ids": [],
             }
         )
         updated_fields = UpdatedAlbumFields(
@@ -268,12 +238,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 ObjectId("5f50c31e8a7d4b1c9c9b0b1e"),
                 ObjectId("5f50c31e8a7d4b1c9c9b0b1f"),
             ),
-            new_child_album_ids=[
-                AlbumId(
-                    ObjectId("5f50c31e8a7d4b1c9c9b0b20"),
-                    ObjectId("5f50c31e8a7d4b1c9c9b0b21"),
-                )
-            ],
         )
 
         # Test
@@ -291,28 +255,23 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
             updated_album["parent_album_id"],
             "5f50c31e8a7d4b1c9c9b0b1e:5f50c31e8a7d4b1c9c9b0b1f",
         )
-        self.assertEqual(
-            updated_album["child_album_ids"],
-            ["5f50c31e8a7d4b1c9c9b0b20:5f50c31e8a7d4b1c9c9b0b21"],
-        )
 
     def test_update_album__with_unknown_album_id__throws_error(self):
         album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
         updated_fields = UpdatedAlbumFields(
             new_name="New Name",
             new_parent_album_id=AlbumId(ObjectId(), ObjectId()),
-            new_child_album_ids=[AlbumId(ObjectId(), ObjectId())],
         )
 
         with self.assertRaisesRegex(ValueError, "Unable to update album .*"):
             self.repo.update_album(album_id, updated_fields)
 
     def test_update_albums__with_new_fields(self):
-        album_2010 = self.repo.create_album('2010', None, [])
-        album_2011 = self.repo.create_album('2011', None, [])
-        album_2012 = self.repo.create_album('2012', None, [])
-        album_2013 = self.repo.create_album('2013', None, [])
-        photo_album = self.repo.create_album('Photos', None, [])
+        album_2010 = self.repo.create_album('2010', None)
+        album_2011 = self.repo.create_album('2011', None)
+        album_2012 = self.repo.create_album('2012', None)
+        album_2013 = self.repo.create_album('2013', None)
+        photo_album = self.repo.create_album('Photos', None)
 
         requests = [
             UpdateAlbumRequest(album_2010.id, new_parent_album_id=photo_album.id),
@@ -334,3 +293,69 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.assertEqual(
             self.repo.get_album_by_id(album_2013.id).parent_album_id, photo_album.id
         )
+
+    def test_find_child_albums(self):
+        parent_album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1a"))
+        child_album_id_1 = AlbumId(
+            MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b")
+        )
+        child_album_id_2 = AlbumId(
+            MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
+        )
+
+        self.mock_client["photos_drive"]["albums"].insert_many(
+            [
+                {
+                    "_id": parent_album_id.object_id,
+                    "name": "Parent Album",
+                    "parent_album_id": None,
+                },
+                {
+                    "_id": child_album_id_1.object_id,
+                    "name": "Child 1",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+                {
+                    "_id": child_album_id_2.object_id,
+                    "name": "Child 2",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+            ]
+        )
+
+        children = self.repo.find_child_albums(parent_album_id)
+
+        self.assertEqual(len(children), 2)
+        self.assertCountEqual(
+            [child.id for child in children],
+            [child_album_id_1, child_album_id_2],
+        )
+        self.assertTrue(
+            all(child.parent_album_id == parent_album_id for child in children)
+        )
+
+    def test_count_child_albums(self):
+        parent_album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1a"))
+        self.mock_client["photos_drive"]["albums"].insert_many(
+            [
+                {
+                    "_id": ObjectId(),
+                    "name": "Child 1",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+                {
+                    "_id": ObjectId(),
+                    "name": "Child 2",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+                {
+                    "_id": ObjectId(),
+                    "name": "Unrelated",
+                    "parent_album_id": None,
+                },
+            ]
+        )
+
+        count = self.repo.count_child_albums(parent_album_id)
+
+        self.assertEqual(count, 2)

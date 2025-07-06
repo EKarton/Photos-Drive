@@ -1,6 +1,5 @@
 from datetime import datetime
 import unittest
-
 from bson import ObjectId
 
 from photos_drive.clean.clean_system import (
@@ -24,9 +23,6 @@ from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
 from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.albums_repository import (
-    UpdatedAlbumFields,
-)
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
@@ -63,18 +59,15 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        root_album = albums_repo.create_album('', None, [])
+        root_album = albums_repo.create_album('', None)
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
 
         # Test setup 3: Attach 'Archives' in root album but others not
-        archives_album = albums_repo.create_album('Archives', root_album.id, [])
-        albums_repo.create_album('Photos', None, [])
-        albums_repo.create_album('2010', None, [])
-        albums_repo.create_album('2011', None, [])
-        albums_repo.update_album(
-            root_album.id, UpdatedAlbumFields(new_child_album_ids=[archives_album.id])
-        )
+        archives_album = albums_repo.create_album('Archives', root_album.id)
+        albums_repo.create_album('Photos', None)
+        albums_repo.create_album('2010', None)
+        albums_repo.create_album('2011', None)
 
         # Test setup 4: Add an image to Archives
         dog_upload_token = gphotos_client.media_items().upload_photo(
@@ -120,9 +113,7 @@ class SystemCleanerTests(unittest.TestCase):
         albums = albums_repo.get_all_albums()
         self.assertEqual(len(albums), 2)
         self.assertEqual(albums[0].id, root_album.id)
-        self.assertEqual(albums[0].child_album_ids, [archives_album.id])
         self.assertEqual(albums[1].id, archives_album.id)
-        self.assertEqual(albums[1].child_album_ids, [])
 
         # Assert: check that there is only one photo: dog.png
         gmedia_items = gphotos_client.media_items().search_for_media_items()
@@ -141,15 +132,12 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        root_album = albums_repo.create_album('', None, [])
+        root_album = albums_repo.create_album('', None)
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
 
         # Test setup 3: Attach 'Archives' in root album but others not
-        archives_album = albums_repo.create_album('Archives', root_album.id, [])
-        albums_repo.update_album(
-            root_album.id, UpdatedAlbumFields(new_child_album_ids=[archives_album.id])
-        )
+        archives_album = albums_repo.create_album('Archives', root_album.id)
 
         # Test setup 4: Add two images, with dog.png attached to Archives
         dog_upload_token = gphotos_client.media_items().upload_photo(
@@ -221,9 +209,7 @@ class SystemCleanerTests(unittest.TestCase):
         albums = albums_repo.get_all_albums()
         self.assertEqual(len(albums), 2)
         self.assertEqual(albums[0].id, root_album.id)
-        self.assertEqual(albums[0].child_album_ids, [archives_album.id])
         self.assertEqual(albums[1].id, archives_album.id)
-        self.assertEqual(albums[1].child_album_ids, [])
 
         # Assert: check that there is one photo in trash
         gmedia_items = gphotos_client.media_items().search_for_media_items(
@@ -244,15 +230,12 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        root_album = albums_repo.create_album('', None, [])
+        root_album = albums_repo.create_album('', None)
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
 
         # Test setup 3: Attach 'Archives' in root album but others not
-        archives_album = albums_repo.create_album('Archives', root_album.id, [])
-        albums_repo.update_album(
-            root_album.id, UpdatedAlbumFields(new_child_album_ids=[archives_album.id])
-        )
+        archives_album = albums_repo.create_album('Archives', root_album.id)
 
         # Test setup 4: Add two images, with dog.png attached to Archives
         # and the other not attached to anything
@@ -322,9 +305,7 @@ class SystemCleanerTests(unittest.TestCase):
         albums = albums_repo.get_all_albums()
         self.assertEqual(len(albums), 2)
         self.assertEqual(albums[0].id, root_album.id)
-        self.assertEqual(albums[0].child_album_ids, [archives_album.id])
         self.assertEqual(albums[1].id, archives_album.id)
-        self.assertEqual(albums[1].child_album_ids, [])
 
         # Assert: check that there is one photo in trash
         trash_album = next(
@@ -351,26 +332,14 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        root_album = albums_repo.create_album('', None, [])
+        root_album = albums_repo.create_album('', None)
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
 
         # Test setup 3: Set up albums
-        archives_album = albums_repo.create_album('Archives', root_album.id, [])
-        photos_album = albums_repo.create_album('Photos', archives_album.id, [])
-        album_2010 = albums_repo.create_album('2010', photos_album.id, [])
-        albums_repo.update_album(
-            root_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
-        )
-        albums_repo.update_album(
-            archives_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[photos_album.id]),
-        )
-        albums_repo.update_album(
-            photos_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[album_2010.id]),
-        )
+        archives_album = albums_repo.create_album('Archives', root_album.id)
+        photos_album = albums_repo.create_album('Photos', archives_album.id)
+        albums_repo.create_album('2010', photos_album.id)
 
         # Act: clean the system
         cleaner = SystemCleaner(
@@ -391,7 +360,6 @@ class SystemCleanerTests(unittest.TestCase):
         albums = albums_repo.get_all_albums()
         self.assertEqual(len(albums), 1)
         self.assertEqual(albums[0].id, root_album.id)
-        self.assertEqual(albums[0].child_album_ids, [])
 
     def test_clean_deletes_media_items_with_false_album_id(
         self,
@@ -407,18 +375,10 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        root_album = albums_repo.create_album('', None, [])
+        root_album = albums_repo.create_album('', None)
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
-        archives_album = albums_repo.create_album(
-            'Archives',
-            root_album.id,
-            [AlbumId(ObjectId(), ObjectId())],
-        )
-        albums_repo.update_album(
-            root_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
-        )
+        albums_repo.create_album('Archives', root_album.id)
 
         # Test setup 3: Add a new photo to gphotos
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -464,7 +424,6 @@ class SystemCleanerTests(unittest.TestCase):
         albums = albums_repo.get_all_albums()
         self.assertEqual(len(albums), 1)
         self.assertEqual(albums[0].id, root_album.id)
-        self.assertEqual(albums[0].child_album_ids, [])
 
     def test_clean_fixes_albums_with_false_gmedia_item_ids(self):
         # Test setup 1: Build the wrapper objects
@@ -478,18 +437,10 @@ class SystemCleanerTests(unittest.TestCase):
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album and archives album
-        root_album = albums_repo.create_album('', None, [])
+        root_album = albums_repo.create_album('', None)
         config = InMemoryConfig()
         config.set_root_album_id(root_album.id)
-        archives_album = albums_repo.create_album(
-            'Archives',
-            root_album.id,
-            [],
-        )
-        albums_repo.update_album(
-            root_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[archives_album.id]),
-        )
+        archives_album = albums_repo.create_album('Archives', root_album.id)
 
         # Test setup 3: Add a new photo to gphotos
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -550,9 +501,7 @@ class SystemCleanerTests(unittest.TestCase):
         albums = albums_repo.get_all_albums()
         self.assertEqual(len(albums), 2)
         self.assertEqual(albums[0].id, root_album.id)
-        self.assertEqual(albums[0].child_album_ids, [archives_album.id])
         self.assertEqual(albums[1].id, archives_album.id)
-        self.assertEqual(albums[1].child_album_ids, [])
 
         # Assert: check on the meda items
         media_items = media_items_repo.get_all_media_items()

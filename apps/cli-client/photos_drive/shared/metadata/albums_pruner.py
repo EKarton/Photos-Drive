@@ -1,7 +1,7 @@
 from typing import cast
 from photos_drive.shared.metadata.album_id import AlbumId
 from .media_items_repository import MediaItemsRepository
-from .albums_repository import AlbumsRepository, UpdatedAlbumFields
+from .albums_repository import AlbumsRepository
 
 
 class AlbumsPruner:
@@ -42,13 +42,13 @@ class AlbumsPruner:
             int: The number of albums that have been deleted.
         '''
         albums_to_delete: set[AlbumId] = set()
-        prev_album_id_deleted = None
         cur_album_id = album_id
         cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
 
         while True:
             cur_album = self.__albums_repo.get_album_by_id(cur_album_id)
-            child_album_ids_set = set(cur_album.child_album_ids)
+            child_albums = self.__albums_repo.find_child_albums(cur_album_id)
+            child_album_ids_set = set([child_album.id for child_album in child_albums])
             if len(child_album_ids_set - albums_to_delete) > 0:
                 break
 
@@ -61,20 +61,7 @@ class AlbumsPruner:
             parent_album_id = cast(AlbumId, cur_album.parent_album_id)
             albums_to_delete.add(cur_album_id)
 
-            prev_album_id_deleted = cur_album_id
             cur_album_id = parent_album_id
-
-        new_child_album_ids = [
-            child_album_id
-            for child_album_id in cur_album.child_album_ids
-            if child_album_id != prev_album_id_deleted
-        ]
-
-        if new_child_album_ids != cur_album.child_album_ids:
-            self.__albums_repo.update_album(
-                cur_album_id,
-                UpdatedAlbumFields(new_child_album_ids=new_child_album_ids),
-            )
 
         self.__albums_repo.delete_many_albums(list(albums_to_delete))
 

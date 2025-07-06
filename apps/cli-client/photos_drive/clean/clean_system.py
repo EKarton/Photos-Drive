@@ -16,7 +16,7 @@ from ..shared.metadata.album_id import AlbumId
 from ..shared.metadata.media_item_id import MediaItemId
 from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
 from ..shared.config.config import Config
-from ..shared.metadata.albums_repository import AlbumsRepository, UpdatedAlbumFields
+from ..shared.metadata.albums_repository import AlbumsRepository
 from ..shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
@@ -92,9 +92,7 @@ class SystemCleaner:
 
         # Step 4: Find all the content that we want to keep
         album_ids_to_keep, media_item_ids_to_keep, gmedia_item_ids_to_keep = (
-            self.__find_content_to_keep(
-                all_album_ids, all_media_item_ids, all_gphoto_media_item_ids
-            )
+            self.__find_content_to_keep(all_media_item_ids, all_gphoto_media_item_ids)
         )
         logger.info(
             f'Keeping {len(album_ids_to_keep)} albums, '
@@ -177,7 +175,6 @@ class SystemCleaner:
 
     def __find_content_to_keep(
         self,
-        all_album_ids: set[AlbumId],
         all_media_item_ids: set[MediaItemId],
         all_gphoto_media_item_ids: set[GPhotosMediaItemKey],
     ) -> tuple[set[AlbumId], set[MediaItemId], set[GPhotosMediaItemKey]]:
@@ -202,12 +199,6 @@ class SystemCleaner:
             for media_item in self.__media_items_repo.find_media_items(
                 FindMediaItemRequest(album_id=album_id)
             ):
-                if media_item.id not in all_media_item_ids:
-                    logger.debug(
-                        f'Removing gemdia item {media_item.id} from {album.id}'
-                    )
-                    continue
-
                 gphotos_media_item_id = GPhotosMediaItemKey(
                     media_item.gphotos_client_id,
                     media_item.gphotos_media_item_id,
@@ -223,34 +214,11 @@ class SystemCleaner:
                 gmedia_ids_to_keep.append(gphotos_media_item_id)
 
             # Process child albums
-            child_album_ids_to_keep: list[AlbumId] = []
-            child_album_ids_to_keep_changed = False
-            for child_album_id in album.child_album_ids:
-                if child_album_id not in all_album_ids:
-                    logger.debug(
-                        f'Removing child album id {child_album_id} from {album.id}'
-                    )
-                    child_album_ids_to_keep_changed = True
-                    continue
+            child_album_ids_to_keep = [
+                child_album.id
+                for child_album in self.__albums_repo.find_child_albums(album.id)
+            ]
 
-                child_album_ids_to_keep.append(child_album_id)
-
-            # Update the album if any changes were detected.
-            if child_album_ids_to_keep_changed:
-                logger.debug(f'Modifying {album.id}')
-                logger.debug(media_ids_to_keep)
-                logger.debug(child_album_ids_to_keep)
-
-                self.__albums_repo.update_album(
-                    album_id,
-                    UpdatedAlbumFields(
-                        new_child_album_ids=(
-                            child_album_ids_to_keep
-                            if child_album_ids_to_keep_changed
-                            else None
-                        ),
-                    ),
-                )
             # Return data for merging and the next BFS frontier.
             return (
                 media_ids_to_keep,
@@ -349,7 +317,11 @@ class SystemCleaner:
     def __prune_albums(self) -> int:
         def process_album(album_id: AlbumId) -> tuple[list[AlbumId], Optional[AlbumId]]:
             album = self.__albums_repo.get_album_by_id(album_id)
-            child_album_ids = album.child_album_ids
+
+            child_album_ids = [
+                child_album.id
+                for child_album in self.__albums_repo.find_child_albums(album.id)
+            ]
             num_media_item_ids = self.__media_items_repo.get_num_media_items_in_album(
                 album_id
             )

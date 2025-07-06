@@ -266,20 +266,6 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 latitude=float(raw_item["location"]["coordinates"][1]),
             )
 
-        file_hash = None
-        if 'file_hash' in raw_item and raw_item['file_hash']:
-            file_hash = bytes(raw_item["file_hash"])
-        else:
-            file_hash = b''
-
-        width = 0
-        if 'width' in raw_item and raw_item['width']:
-            width = raw_item['width']
-
-        height = 0
-        if 'height' in raw_item and raw_item['height']:
-            height = raw_item['height']
-
         date_taken = None
         if 'date_taken' in raw_item and raw_item['date_taken']:
             date_taken = cast(datetime, raw_item['date_taken'])
@@ -289,12 +275,12 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         return MediaItem(
             id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
             file_name=raw_item["file_name"],
-            file_hash=file_hash,
+            file_hash=bytes(raw_item["file_hash"]),
             location=location,
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],
             album_id=parse_string_to_album_id(raw_item['album_id']),
-            width=width,
-            height=height,
+            width=raw_item['width'],
+            height=raw_item['height'],
             date_taken=date_taken,
         )
