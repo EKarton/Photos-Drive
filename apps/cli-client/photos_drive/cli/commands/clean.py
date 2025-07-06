@@ -1,5 +1,7 @@
 import logging
 from typing_extensions import Annotated
+from photos_drive.cli.shared.inputs import prompt_user_for_yes_no_answer
+from photos_drive.cli.shared.printer import pretty_print_items_to_delete
 import typer
 
 from photos_drive.clean.clean_system import SystemCleaner
@@ -78,7 +80,13 @@ def clean(
         gphoto_clients_repo,
         mongodb_clients_repo,
     )
-    cleanup_results = cleaner.clean()
+    items_to_delete = cleaner.find_item_to_delete()
+    pretty_print_items_to_delete(items_to_delete)
+    if not prompt_user_for_yes_no_answer("Is this correct? (Y/N): "):
+        print("Operation cancelled.")
+        return
+
+    cleanup_results = cleaner.delete_items(items_to_delete)
 
     typer.echo("Cleanup success!")
     typer.echo(

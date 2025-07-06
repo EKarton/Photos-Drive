@@ -4,6 +4,7 @@ from bson import ObjectId
 
 from photos_drive.clean.clean_system import (
     TRASH_ALBUM_TITLE,
+    GPhotosMediaItemKey,
     SystemCleaner,
 )
 from photos_drive.shared.config.inmemory_config import InMemoryConfig
@@ -65,9 +66,9 @@ class SystemCleanerTests(unittest.TestCase):
 
         # Test setup 3: Attach 'Archives' in root album but others not
         archives_album = albums_repo.create_album('Archives', root_album.id)
-        albums_repo.create_album('Photos', None)
-        albums_repo.create_album('2010', None)
-        albums_repo.create_album('2011', None)
+        photos_album = albums_repo.create_album('Photos', None)
+        album_2010 = albums_repo.create_album('2010', None)
+        album_2011 = albums_repo.create_album('2011', None)
 
         # Test setup 4: Add an image to Archives
         dog_upload_token = gphotos_client.media_items().upload_photo(
@@ -102,7 +103,16 @@ class SystemCleanerTests(unittest.TestCase):
             gphotos_clients_repo,
             mongodb_clients_repo,
         )
-        clean_results = cleaner.clean()
+        items_to_delete = cleaner.find_item_to_delete()
+        clean_results = cleaner.delete_items(items_to_delete)
+
+        # Assert: check on the items to be deleted
+        self.assertSetEqual(
+            items_to_delete.album_ids_to_delete,
+            set([photos_album.id, album_2010.id, album_2011.id]),
+        )
+        self.assertSetEqual(items_to_delete.media_item_ids_to_delete, set())
+        self.assertSetEqual(items_to_delete.gphotos_media_item_ids_to_delete, set())
 
         # Assert: check on clean results
         self.assertEqual(clean_results.num_albums_deleted, 3)
@@ -171,7 +181,7 @@ class SystemCleanerTests(unittest.TestCase):
                 [cat_upload_token]
             )
         )
-        media_items_repo.create_media_item(
+        cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -198,7 +208,27 @@ class SystemCleanerTests(unittest.TestCase):
             gphotos_clients_repo,
             mongodb_clients_repo,
         )
-        clean_results = cleaner.clean()
+        items_to_delete = cleaner.find_item_to_delete()
+        clean_results = cleaner.delete_items(cleaner.find_item_to_delete())
+
+        # Assert: check on items to be deleted
+        self.assertSetEqual(items_to_delete.album_ids_to_delete, set())
+        self.assertSetEqual(
+            items_to_delete.media_item_ids_to_delete, set([cat_media_item.id])
+        )
+        self.assertSetEqual(
+            items_to_delete.gphotos_media_item_ids_to_delete,
+            set(
+                [
+                    GPhotosMediaItemKey(
+                        client_id=ObjectId(gphotos_client_id),
+                        object_id=cat_media_items_results.newMediaItemResults[
+                            0
+                        ].mediaItem.id,
+                    )
+                ]
+            ),
+        )
 
         # Assert: check on clean results
         self.assertEqual(clean_results.num_albums_deleted, 0)
@@ -270,7 +300,7 @@ class SystemCleanerTests(unittest.TestCase):
                 [cat_upload_token]
             )
         )
-        media_items_repo.create_media_item(
+        cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -294,7 +324,27 @@ class SystemCleanerTests(unittest.TestCase):
             gphotos_clients_repo,
             mongodb_clients_repo,
         )
-        clean_results = cleaner.clean()
+        items_to_delete = cleaner.find_item_to_delete()
+        clean_results = cleaner.delete_items(items_to_delete)
+
+        # Assert: check on items to be deleted
+        self.assertSetEqual(items_to_delete.album_ids_to_delete, set())
+        self.assertSetEqual(
+            items_to_delete.media_item_ids_to_delete, set([cat_media_item.id])
+        )
+        self.assertSetEqual(
+            items_to_delete.gphotos_media_item_ids_to_delete,
+            set(
+                [
+                    GPhotosMediaItemKey(
+                        client_id=ObjectId(gphotos_client_id),
+                        object_id=cat_media_items_results.newMediaItemResults[
+                            0
+                        ].mediaItem.id,
+                    )
+                ]
+            ),
+        )
 
         # Assert: check on clean results
         self.assertEqual(clean_results.num_albums_deleted, 0)
@@ -349,7 +399,13 @@ class SystemCleanerTests(unittest.TestCase):
             gphotos_clients_repo,
             mongodb_clients_repo,
         )
-        clean_results = cleaner.clean()
+        items_to_delete = cleaner.find_item_to_delete()
+        clean_results = cleaner.delete_items(cleaner.find_item_to_delete())
+
+        # Assert: check on items to delete
+        self.assertSetEqual(items_to_delete.album_ids_to_delete, set())
+        self.assertSetEqual(items_to_delete.media_item_ids_to_delete, set())
+        self.assertSetEqual(items_to_delete.gphotos_media_item_ids_to_delete, set())
 
         # Assert: check on clean results
         self.assertEqual(clean_results.num_albums_deleted, 3)
@@ -389,7 +445,7 @@ class SystemCleanerTests(unittest.TestCase):
                 [cat_upload_token]
             )
         )
-        media_items_repo.create_media_item(
+        media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
@@ -413,7 +469,28 @@ class SystemCleanerTests(unittest.TestCase):
             gphotos_clients_repo,
             mongodb_clients_repo,
         )
-        clean_results = cleaner.clean()
+        items_to_delete = cleaner.find_item_to_delete()
+        clean_results = cleaner.delete_items(cleaner.find_item_to_delete())
+
+        # Assert: check on items to delete
+        self.assertSetEqual(items_to_delete.album_ids_to_delete, set())
+        self.assertSetEqual(
+            items_to_delete.media_item_ids_to_delete,
+            set([media_item.id]),
+        )
+        self.assertSetEqual(
+            items_to_delete.gphotos_media_item_ids_to_delete,
+            set(
+                [
+                    GPhotosMediaItemKey(
+                        client_id=ObjectId(gphotos_client_id),
+                        object_id=cat_media_items_results.newMediaItemResults[
+                            0
+                        ].mediaItem.id,
+                    )
+                ]
+            ),
+        )
 
         # Assert: check on clean results
         self.assertEqual(clean_results.num_albums_deleted, 1)
@@ -468,7 +545,7 @@ class SystemCleanerTests(unittest.TestCase):
         )
 
         # Test setup 4: Add a new photo to DB but not to gphotos
-        media_items_repo.create_media_item(
+        false_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 file_hash=MOCK_FILE_HASH,
@@ -490,7 +567,16 @@ class SystemCleanerTests(unittest.TestCase):
             gphotos_clients_repo,
             mongodb_clients_repo,
         )
-        clean_results = cleaner.clean()
+        items_to_delete = cleaner.find_item_to_delete()
+        clean_results = cleaner.delete_items(cleaner.find_item_to_delete())
+
+        # Assert: check on items to delete
+        self.assertSetEqual(items_to_delete.album_ids_to_delete, set())
+        self.assertSetEqual(
+            items_to_delete.media_item_ids_to_delete,
+            set([false_media_item.id]),
+        )
+        self.assertSetEqual(items_to_delete.gphotos_media_item_ids_to_delete, set())
 
         # Assert: check on clean results
         self.assertEqual(clean_results.num_albums_deleted, 0)
