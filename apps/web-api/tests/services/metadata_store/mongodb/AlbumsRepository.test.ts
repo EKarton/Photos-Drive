@@ -369,7 +369,7 @@ describe('AlbumsRepositoryImpl', () => {
       });
     });
 
-    it('should return next album and page token correctly given parent album "Photos" and pageSize=1 and last album ID for client 1', async () => {
+    it('should return next album and page token correctly given parent album "Photos" and pageSize=1 and sortBy=id and last album ID for client 1', async () => {
       const res = await albumsRepo.listAlbums({
         parentAlbumId: {
           clientId: 'client1',
@@ -399,7 +399,7 @@ describe('AlbumsRepositoryImpl', () => {
       });
     });
 
-    it('should return last album given parent album "Photos" and pageSize=1 and sortDir=Descending and last album ID for client 1', async () => {
+    it('should return last album given parent album "Photos" and pageSize=1 and sortBy=id and sortDir=Descending and last album ID for client 1', async () => {
       const res = await albumsRepo.listAlbums({
         parentAlbumId: {
           clientId: 'client1',
@@ -409,6 +409,66 @@ describe('AlbumsRepositoryImpl', () => {
         pageToken: 'client1:507f1f77bcf86cd799439014',
         sortBy: {
           field: SortByField.ID,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        albums: [
+          {
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439015' },
+            name: '2014',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          }
+        ],
+        nextPageToken:
+          'client2:507f1f77bcf86cd799439015,client1:507f1f77bcf86cd799439014'
+      });
+    });
+
+    it('should return next album and page token correctly given parent album "Photos" and pageSize=1 and sortBy=name and last album ID for client 1', async () => {
+      const res = await albumsRepo.listAlbums({
+        parentAlbumId: {
+          clientId: 'client1',
+          objectId: '507f1f77bcf86cd799439011'
+        },
+        pageSize: 1,
+        pageToken: 'client1:507f1f77bcf86cd799439014',
+        sortBy: {
+          field: SortByField.NAME,
+          direction: SortByDirection.ASCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        albums: [
+          {
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
+            name: '2011',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          }
+        ],
+        nextPageToken:
+          'client2:507f1f77bcf86cd799439013,client1:507f1f77bcf86cd799439014'
+      });
+    });
+
+    it('should return last album given parent album "Photos" and pageSize=1 and sortBy=name and sortDir=Descending and last album ID for client 1', async () => {
+      const res = await albumsRepo.listAlbums({
+        parentAlbumId: {
+          clientId: 'client1',
+          objectId: '507f1f77bcf86cd799439011'
+        },
+        pageSize: 1,
+        pageToken: 'client1:507f1f77bcf86cd799439014',
+        sortBy: {
+          field: SortByField.NAME,
           direction: SortByDirection.DESCENDING
         }
       });
@@ -449,7 +509,7 @@ describe('AlbumsRepositoryImpl', () => {
       });
     });
 
-    it('should return albums in reverse order given parent album "Photos" and pageSize=10 and sortOrder = descending', async () => {
+    it('should return albums in reverse order given sortBy=id and sortOrder = descending', async () => {
       const res = await albumsRepo.listAlbums({
         parentAlbumId: {
           clientId: 'client1',
@@ -501,59 +561,208 @@ describe('AlbumsRepositoryImpl', () => {
           'client1:507f1f77bcf86cd799439012,client2:507f1f77bcf86cd799439013'
       });
     });
+
+    it('should return albums in order given sortBy=name and sortOrder=ascending', async () => {
+      const res = await albumsRepo.listAlbums({
+        parentAlbumId: {
+          clientId: 'client1',
+          objectId: '507f1f77bcf86cd799439011'
+        },
+        pageSize: 10,
+        sortBy: {
+          field: SortByField.NAME,
+          direction: SortByDirection.ASCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        albums: [
+          {
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
+            name: '2010',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          },
+          {
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
+            name: '2011',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          },
+          {
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
+            name: '2012',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          },
+          {
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439015' },
+            name: '2014',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          }
+        ],
+        nextPageToken:
+          'client2:507f1f77bcf86cd799439015,client1:507f1f77bcf86cd799439014'
+      });
+    });
+
+    it('should return albums in order given sortBy=name and sortOrder=descending', async () => {
+      const res = await albumsRepo.listAlbums({
+        parentAlbumId: {
+          clientId: 'client1',
+          objectId: '507f1f77bcf86cd799439011'
+        },
+        pageSize: 10,
+        sortBy: {
+          field: SortByField.NAME,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        albums: [
+          {
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439015' },
+            name: '2014',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          },
+          {
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
+            name: '2012',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          },
+          {
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
+            name: '2011',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          },
+          {
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
+            name: '2010',
+            parent_album_id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            }
+          }
+        ],
+        nextPageToken:
+          'client1:507f1f77bcf86cd799439012,client2:507f1f77bcf86cd799439013'
+      });
+    });
   });
 });
 
 describe('sortAlbum', () => {
-  const albumA = makeAlbum('client1', 'aaa111');
-  const albumB = makeAlbum('client2', 'bbb222');
+  describe('when sort field is by ID', () => {
+    const albumA = makeAlbum('client1', 'aaa111', '2010');
+    const albumB = makeAlbum('client2', 'bbb222', '2011');
 
-  const ascendingSortBy: SortBy = {
-    field: SortByField.ID,
-    direction: SortByDirection.ASCENDING
-  };
+    const ascendingSortBy: SortBy = {
+      field: SortByField.ID,
+      direction: SortByDirection.ASCENDING
+    };
 
-  const descendingSortBy: SortBy = {
-    field: SortByField.ID,
-    direction: SortByDirection.DESCENDING
-  };
+    const descendingSortBy: SortBy = {
+      field: SortByField.ID,
+      direction: SortByDirection.DESCENDING
+    };
 
-  it('should return -1 when a < b (ascending)', () => {
-    const result = sortAlbum(albumA, albumB, ascendingSortBy);
+    it('should return -1 when a < b (ascending)', () => {
+      const result = sortAlbum(albumA, albumB, ascendingSortBy);
 
-    expect(result).toBe(-1);
+      expect(result).toBe(-1);
+    });
+
+    it('should return 1 when a > b (ascending)', () => {
+      const result = sortAlbum(albumB, albumA, ascendingSortBy);
+
+      expect(result).toBe(1);
+    });
+
+    it('should return -1 when a > b (descending)', () => {
+      const result = sortAlbum(albumB, albumA, descendingSortBy);
+
+      expect(result).toBe(-1);
+    });
+
+    it('should return 1 when a < b (descending)', () => {
+      const result = sortAlbum(albumA, albumB, descendingSortBy);
+
+      expect(result).toBe(1);
+    });
+
+    it('should treat equal IDs as 1 or -1 (never 0)', () => {
+      const albumC = makeAlbum('client1', 'aaa111', '2010');
+
+      const result = sortAlbum(albumA, albumC, ascendingSortBy);
+
+      expect([1, -1]).toContain(result);
+    });
   });
 
-  it('should return 1 when a > b (ascending)', () => {
-    const result = sortAlbum(albumB, albumA, ascendingSortBy);
+  describe('when sort field is by NAME', () => {
+    const albumA = makeAlbum('client1', 'abc123', 'Alpha');
+    const albumB = makeAlbum('client1', 'def456', 'Beta');
 
-    expect(result).toBe(1);
+    const ascendingSortBy: SortBy = {
+      field: SortByField.NAME,
+      direction: SortByDirection.ASCENDING
+    };
+
+    const descendingSortBy: SortBy = {
+      field: SortByField.NAME,
+      direction: SortByDirection.DESCENDING
+    };
+
+    it('should return -1 when a.name < b.name (ascending)', () => {
+      const result = sortAlbum(albumA, albumB, ascendingSortBy);
+      expect(result).toBe(-1);
+    });
+
+    it('should return 1 when a.name > b.name (ascending)', () => {
+      const result = sortAlbum(albumB, albumA, ascendingSortBy);
+      expect(result).toBe(1);
+    });
+
+    it('should return -1 when a.name > b.name (descending)', () => {
+      const result = sortAlbum(albumB, albumA, descendingSortBy);
+      expect(result).toBe(-1);
+    });
+
+    it('should return 1 when a.name < b.name (descending)', () => {
+      const result = sortAlbum(albumA, albumB, descendingSortBy);
+      expect(result).toBe(1);
+    });
+
+    it('should treat equal names as 1 or -1 (never 0)', () => {
+      const albumC = makeAlbum('client2', 'xyz789', 'Alpha');
+      const result = sortAlbum(albumA, albumC, ascendingSortBy);
+      expect([1, -1]).toContain(result);
+    });
   });
 
-  it('should return -1 when a > b (descending)', () => {
-    const result = sortAlbum(albumB, albumA, descendingSortBy);
-
-    expect(result).toBe(-1);
-  });
-
-  it('should return 1 when a < b (descending)', () => {
-    const result = sortAlbum(albumA, albumB, descendingSortBy);
-
-    expect(result).toBe(1);
-  });
-
-  it('should treat equal IDs as 1 or -1 (never 0)', () => {
-    const albumC = makeAlbum('client1', 'aaa111');
-
-    const result = sortAlbum(albumA, albumC, ascendingSortBy);
-
-    expect([1, -1]).toContain(result);
-  });
-
-  function makeAlbum(clientId: string, objectId: string): Album {
+  function makeAlbum(clientId: string, objectId: string, name: string): Album {
     return {
       id: { clientId, objectId },
-      name: '',
+      name,
       parent_album_id: undefined
     };
   }

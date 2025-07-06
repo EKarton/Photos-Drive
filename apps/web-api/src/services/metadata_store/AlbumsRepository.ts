@@ -2,7 +2,8 @@ import { Album, AlbumId } from './Albums';
 
 /** List of possible fields to sort by for {@code ListAlbumsRequest} */
 export enum SortByField {
-  ID = 'id'
+  ID = 'id',
+  NAME = 'name'
 }
 
 /** List of possible sort directions for {@code ListAlbumsRequest} */

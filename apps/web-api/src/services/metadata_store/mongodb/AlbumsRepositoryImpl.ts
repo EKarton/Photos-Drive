@@ -82,13 +82,38 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
           filterObj['parent_album_id'] = albumIdToString(req.parentAlbumId);
         }
 
-        const lastSeenMediaItemId = clientIdToAlbumId.get(clientId)?.objectId;
-        if (lastSeenMediaItemId) {
+        const lastSeenAlbumId = clientIdToAlbumId.get(clientId)?.objectId;
+        if (lastSeenAlbumId) {
+          const lastSeenAlbumObjectId = new ObjectId(lastSeenAlbumId);
+
           if (req.sortBy.field === SortByField.ID) {
             filterObj['_id'] =
               req.sortBy.direction === SortByDirection.ASCENDING
-                ? { $gt: new ObjectId(lastSeenMediaItemId) }
-                : { $lt: new ObjectId(lastSeenMediaItemId) };
+                ? { $gt: lastSeenAlbumObjectId }
+                : { $lt: lastSeenAlbumObjectId };
+          } else if (req.sortBy.field === SortByField.NAME) {
+            const lastSeenAlbum = await mongoClient
+              .db('photos_drive')
+              .collection('albums')
+              .findOne({ _id: lastSeenAlbumObjectId });
+            const lastSeenAlbumName = lastSeenAlbum!['name'];
+
+            filterObj['$or'] =
+              req.sortBy.direction === SortByDirection.ASCENDING
+                ? [
+                    { name: { $gt: lastSeenAlbumName } },
+                    {
+                      name: lastSeenAlbumName,
+                      _id: { $gt: lastSeenAlbumObjectId }
+                    }
+                  ]
+                : [
+                    { name: { $lt: lastSeenAlbumName } },
+                    {
+                      name: lastSeenAlbumName,
+                      _id: { $lt: lastSeenAlbumObjectId }
+                    }
+                  ];
           }
         }
 
@@ -98,6 +123,8 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
 
         if (req.sortBy.field === SortByField.ID) {
           sortObj['_id'] = mongoSortDirection;
+        } else if (req.sortBy.field === SortByField.NAME) {
+          sortObj['name'] = mongoSortDirection;
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
@@ -182,6 +209,12 @@ export function sortAlbum(a: Album, b: Album, sortBy: SortBy): number {
         return albumIdToString(a.id) < albumIdToString(b.id) ? -1 : 1;
       } else {
         return albumIdToString(a.id) > albumIdToString(b.id) ? -1 : 1;
+      }
+    case SortByField.NAME:
+      if (sortBy.direction === SortByDirection.ASCENDING) {
+        return a.name < b.name ? -1 : 1;
+      } else {
+        return a.name > b.name ? -1 : 1;
       }
   }
 }
