@@ -1,4 +1,3 @@
-from curses import raw
 import pymongo
 from bson import Binary
 from bson.objectid import ObjectId
