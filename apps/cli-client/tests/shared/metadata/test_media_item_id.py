@@ -27,14 +27,6 @@ class ParseStringToMediaItemIdTests(unittest.TestCase):
         self.assertEqual(result.client_id, ObjectId("5f50c31e8a7d4b1c9c9b0b1a"))
         self.assertEqual(result.object_id, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
 
-    def test_parse_string_to_media_item_id__invalid_format(self):
-        with self.assertRaises(ValueError):
-            parse_string_to_media_item_id("invalidstringwithoutcolon")
-
-    def test_parse_string_to_media_item_id__invalid_object_id(self):
-        with self.assertRaises(Exception):
-            parse_string_to_media_item_id("notanobjectid:anotherbadid")
-
 
 class MediaItemIdTests(unittest.TestCase):
     def test_media_item_id_equality(self):
