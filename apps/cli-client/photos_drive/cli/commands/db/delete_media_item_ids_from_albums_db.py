@@ -18,7 +18,7 @@ config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 
 
 @app.command()
-def delete_media_item_ids(
+def delete_media_item_ids_from_albums_db(
     config_file: Annotated[
         str | None,
         typer.Option(
@@ -47,7 +47,7 @@ def delete_media_item_ids(
     setup_logging(verbose)
 
     logger.debug(
-        "Called db delete-media-item-ids handler with args:\n"
+        "Called db delete-media-item-ids-from-albums-db handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
         + f" verbose={verbose}"
