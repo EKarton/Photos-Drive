@@ -125,7 +125,6 @@ class SystemCleaner:
         self.__albums_repo.delete_many_albums(list(items_to_delete.album_ids_to_delete))
 
         # Step 6: Delete all unlinked media items
-
         logger.info(
             f'Deleting {len(items_to_delete.media_item_ids_to_delete)} media items.'
         )
@@ -349,13 +348,11 @@ class SystemCleaner:
                 child_album.id
                 for child_album in self.__albums_repo.find_child_albums(album.id)
             ]
-            num_media_item_ids = self.__media_items_repo.get_num_media_items_in_album(
+            num_media_items = self.__media_items_repo.get_num_media_items_in_album(
                 album_id
             )
             prune_album_id = (
-                album_id
-                if len(child_album_ids) == 0 and num_media_item_ids == 0
-                else None
+                album_id if len(child_album_ids) == 0 and num_media_items == 0 else None
             )
 
             return child_album_ids, prune_album_id
