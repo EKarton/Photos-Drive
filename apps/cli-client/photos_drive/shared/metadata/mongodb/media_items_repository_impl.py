@@ -1,3 +1,4 @@
+from curses import raw
 import pymongo
 from bson import Binary
 from bson.objectid import ObjectId
@@ -272,6 +273,14 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         else:
             date_taken = datetime(1970, 1, 1)
 
+        width = 0
+        if 'width' in raw_item and raw_item['width']:
+            width = cast(int, raw_item['width'])
+
+        height = 0
+        if 'height' in raw_item and raw_item['height']:
+            height = cast(int, raw_item['height'])
+
         return MediaItem(
             id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
             file_name=raw_item["file_name"],
@@ -280,7 +289,7 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             gphotos_client_id=ObjectId(raw_item["gphotos_client_id"]),
             gphotos_media_item_id=raw_item["gphotos_media_item_id"],
             album_id=parse_string_to_album_id(raw_item['album_id']),
-            width=raw_item['width'],
-            height=raw_item['height'],
+            width=width,
+            height=height,
             date_taken=date_taken,
         )
