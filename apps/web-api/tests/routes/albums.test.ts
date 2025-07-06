@@ -18,7 +18,13 @@ import { setupTestEnv } from './utils/env';
 
 const MOCK_ROOT_ALBUM_ID: AlbumId = {
   clientId: 'albumClient1',
-  objectId: 'albumObject1'
+  objectId: 'albumObject0'
+};
+
+const MOCK_ROOT_ALBUM: Album = {
+  id: MOCK_ROOT_ALBUM_ID,
+  name: 'Archives',
+  parent_album_id: undefined
 };
 
 const MOCK_ALBUM: Album = {
@@ -27,10 +33,7 @@ const MOCK_ALBUM: Album = {
     objectId: 'albumObject1'
   },
   name: 'Photos',
-  parent_album_id: {
-    clientId: 'albumClient1',
-    objectId: 'albumObject0'
-  }
+  parent_album_id: MOCK_ROOT_ALBUM_ID
 };
 
 describe('Albums Router', () => {
@@ -45,6 +48,174 @@ describe('Albums Router', () => {
 
   afterEach(() => {
     cleanupTestEnvFn();
+  });
+
+  describe('GET api/v1/albums/:albumId', () => {
+    it('should return 200 with correct body response, given correct parameters', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM);
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        id: 'albumClient1:albumObject1',
+        albumName: 'Photos',
+        parentAlbumId: 'albumClient1:albumObject0',
+        numChildAlbums: 1,
+        numMediaItems: 2
+      });
+    });
+
+    it('should return 200 with correct body response when requesting for album without parent album ID', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.getAlbumById.mockResolvedValue({
+        ...MOCK_ALBUM,
+        parent_album_id: undefined
+      });
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        id: 'albumClient1:albumObject1',
+        albumName: 'Photos',
+        parentAlbumId: null,
+        numChildAlbums: 1,
+        numMediaItems: 2
+      });
+    });
+
+    it('should return 200 given albumId is set to root', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ROOT_ALBUM);
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/root')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        id: 'albumClient1:albumObject0',
+        albumName: 'Archives',
+        parentAlbumId: null,
+        numChildAlbums: 1,
+        numMediaItems: 2
+      });
+    });
+
+    it(`should return error code, given MongoDbClientNotFoundError thrown from AlbumsRepository`, async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.getAlbumById.mockRejectedValue(
+        new MongoDbClientNotFoundError('albumClient1:albumObject2')
+      );
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toEqual(404);
+      expect(res.body).toEqual({
+        error: 'Album not found'
+      });
+    });
+
+    it(`should return error code, given MongoDbClientNotFoundError thrown from AlbumsRepository`, async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.getAlbumById.mockRejectedValue(
+        new AlbumNotFoundError({
+          clientId: 'albumClient1',
+          objectId: 'albumObject2'
+        })
+      );
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toEqual(404);
+      expect(res.body).toEqual({
+        error: 'Album not found'
+      });
+    });
+
+    it('should return error code, given random error thrown from AlbumsRepository', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.getAlbumById.mockRejectedValue(
+        new Error('Random error')
+      );
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums/albumClient1:albumObject1')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toEqual(500);
+      expect(res.body).toEqual({});
+    });
   });
 
   describe('GET /api/v1/albums', () => {
@@ -148,6 +319,53 @@ describe('Albums Router', () => {
       });
     });
 
+    it('should return 200 with parentAlbumId set to root', async () => {
+      const mockAlbumsRepository = mock<AlbumsRepository>();
+      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      mockAlbumsRepository.listAlbums.mockResolvedValue({
+        albums: [MOCK_ALBUM],
+        nextPageToken: undefined
+      });
+      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
+      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
+
+      const app = express();
+      app.use(
+        await albumsRouter(
+          MOCK_ROOT_ALBUM_ID,
+          mockAlbumsRepository,
+          mockMediaItemsRepository
+        )
+      );
+
+      const res = await request(app)
+        .get('/api/v1/albums?parentAlbumId=root')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        albums: [
+          {
+            id: 'albumClient1:albumObject1',
+            albumName: 'Photos',
+            parentAlbumId: 'albumClient1:albumObject0',
+            numChildAlbums: 1,
+            numMediaItems: 2
+          }
+        ]
+      });
+
+      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
+        parentAlbumId: undefined,
+        pageSize: 25,
+        pageToken: undefined,
+        sortBy: {
+          field: SortByField.ID,
+          direction: SortByDirection.ASCENDING
+        }
+      });
+    });
+
     it('should return 500 when albumsRepo.listAlbums throws unexpected error', async () => {
       const mockAlbumsRepository = mock<AlbumsRepository>();
       const mockMediaItemsRepository = mock<MediaItemsRepository>();
@@ -169,170 +387,6 @@ describe('Albums Router', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(500);
-    });
-  });
-
-  describe('GET api/v1/albums/:albumId', () => {
-    it('should return 200 with correct body response, given correct parameters', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM);
-      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
-      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual({
-        id: 'albumClient1:albumObject1',
-        albumName: 'Photos',
-        parentAlbumId: 'albumClient1:albumObject0',
-        numChildAlbums: 1,
-        numMediaItems: 2
-      });
-    });
-
-    it('should return 200 with correct body response when requesting for album without parent album ID', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockAlbumsRepository.getAlbumById.mockResolvedValue({
-        ...MOCK_ALBUM,
-        parent_album_id: undefined
-      });
-      mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
-      mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual({
-        id: 'albumClient1:albumObject1',
-        albumName: 'Photos',
-        parentAlbumId: null,
-        numChildAlbums: 1,
-        numMediaItems: 2
-      });
-    });
-
-    it(`should return error code, given MongoDbClientNotFoundError thrown from AlbumsRepository`, async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockAlbumsRepository.getAlbumById.mockRejectedValue(
-        new MongoDbClientNotFoundError('albumClient1:albumObject2')
-      );
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toEqual(404);
-      expect(res.body).toEqual({
-        error: 'Album not found'
-      });
-    });
-
-    it(`should return error code, given MongoDbClientNotFoundError thrown from AlbumsRepository`, async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockAlbumsRepository.getAlbumById.mockRejectedValue(
-        new AlbumNotFoundError({
-          clientId: 'albumClient1',
-          objectId: 'albumObject2'
-        })
-      );
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toEqual(404);
-      expect(res.body).toEqual({
-        error: 'Album not found'
-      });
-    });
-
-    it('should return error code, given random error thrown from AlbumsRepository', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockAlbumsRepository.getAlbumById.mockRejectedValue(
-        new Error('Random error')
-      );
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/albumClient1:albumObject1')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toEqual(500);
-      expect(res.body).toEqual({});
-    });
-  });
-
-  describe('GET api/v1/albums/root', () => {
-    it('should return 302', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
-      mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM);
-      const app = express();
-      app.use(
-        await albumsRouter(
-          MOCK_ROOT_ALBUM_ID,
-          mockAlbumsRepository,
-          mockMediaItemsRepository
-        )
-      );
-
-      const res = await request(app)
-        .get('/api/v1/albums/root')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.statusCode).toEqual(302);
-      expect(res.headers['location']).toEqual(
-        '/api/v1/albums/albumClient1:albumObject1'
-      );
     });
   });
 });

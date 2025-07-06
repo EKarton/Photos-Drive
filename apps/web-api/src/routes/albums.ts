@@ -26,6 +26,43 @@ export default async function (
   const router: Router = Router();
 
   router.get(
+    '/api/v1/albums/:albumId',
+    await verifyAuthentication(),
+    await verifyAuthorization(),
+    wrap(async (req: Request, res: Response) => {
+      try {
+        const inputAlbumId = req.params.albumId;
+
+        let albumId: AlbumId;
+        if (inputAlbumId === 'root') {
+          albumId = rootAlbumId;
+        } else {
+          albumId = convertStringToAlbumId(inputAlbumId);
+        }
+
+        const [album, numChildAlbums, numMediaItems] = await Promise.all([
+          albumsRepo.getAlbumById(albumId),
+          albumsRepo.getNumAlbumsInAlbum(albumId),
+          mediaItemsRepo.getNumMediaItemsInAlbum(albumId)
+        ]);
+
+        return res
+          .status(200)
+          .json(serializeAlbum(album, numChildAlbums, numMediaItems));
+      } catch (error) {
+        if (error instanceof MongoDbClientNotFoundError) {
+          return res.status(404).json({ error: 'Album not found' });
+        }
+        if (error instanceof AlbumNotFoundError) {
+          return res.status(404).json({ error: 'Album not found' });
+        }
+
+        throw error;
+      }
+    })
+  );
+
+  router.get(
     '/api/v1/albums',
     await verifyAuthentication(),
     await verifyAuthorization(),
@@ -34,12 +71,19 @@ export default async function (
       const pageToken = req.query['pageToken'] as string;
       const sortBy = req.query['sortBy'];
       const sortDir = req.query['sortDir'];
-      const parentAlbumId = req.query['parentAlbumId'] as string;
+      const rawParentAlbumId = req.query['parentAlbumId'] as string;
+
+      let parentAlbumId: AlbumId | undefined = undefined;
+      if (rawParentAlbumId) {
+        if (rawParentAlbumId === 'root') {
+          parentAlbumId = rootAlbumId;
+        } else {
+          parentAlbumId = convertStringToAlbumId(rawParentAlbumId);
+        }
+      }
 
       const response = await albumsRepo.listAlbums({
-        parentAlbumId: parentAlbumId
-          ? convertStringToAlbumId(parentAlbumId)
-          : undefined,
+        parentAlbumId,
         pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
         sortBy: {
@@ -73,45 +117,6 @@ export default async function (
           ? encodeURIComponent(response.nextPageToken)
           : undefined
       });
-    })
-  );
-
-  router.get(
-    '/api/v1/albums/root',
-    await verifyAuthentication(),
-    await verifyAuthorization(),
-    wrap(async (_, res: Response) => {
-      const rawAlbumId = `${rootAlbumId.clientId}:${rootAlbumId.objectId}`;
-      return res.redirect(`/api/v1/albums/${rawAlbumId}`);
-    })
-  );
-
-  router.get(
-    '/api/v1/albums/:albumId',
-    await verifyAuthentication(),
-    await verifyAuthorization(),
-    wrap(async (req: Request, res: Response) => {
-      try {
-        const albumId = convertStringToAlbumId(req.params.albumId);
-        const [album, numChildAlbums, numMediaItems] = await Promise.all([
-          albumsRepo.getAlbumById(albumId),
-          albumsRepo.getNumAlbumsInAlbum(albumId),
-          mediaItemsRepo.getNumMediaItemsInAlbum(albumId)
-        ]);
-
-        return res
-          .status(200)
-          .json(serializeAlbum(album, numChildAlbums, numMediaItems));
-      } catch (error) {
-        if (error instanceof MongoDbClientNotFoundError) {
-          return res.status(404).json({ error: 'Album not found' });
-        }
-        if (error instanceof AlbumNotFoundError) {
-          return res.status(404).json({ error: 'Album not found' });
-        }
-
-        throw error;
-      }
     })
   );
 
