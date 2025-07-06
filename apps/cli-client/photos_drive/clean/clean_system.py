@@ -92,9 +92,7 @@ class SystemCleaner:
 
         # Step 4: Find all the content that we want to keep
         album_ids_to_keep, media_item_ids_to_keep, gmedia_item_ids_to_keep = (
-            self.__find_content_to_keep(
-                all_album_ids, all_media_item_ids, all_gphoto_media_item_ids
-            )
+            self.__find_content_to_keep(all_media_item_ids, all_gphoto_media_item_ids)
         )
         logger.info(
             f'Keeping {len(album_ids_to_keep)} albums, '
@@ -177,7 +175,6 @@ class SystemCleaner:
 
     def __find_content_to_keep(
         self,
-        all_album_ids: set[AlbumId],
         all_media_item_ids: set[MediaItemId],
         all_gphoto_media_item_ids: set[GPhotosMediaItemKey],
     ) -> tuple[set[AlbumId], set[MediaItemId], set[GPhotosMediaItemKey]]:

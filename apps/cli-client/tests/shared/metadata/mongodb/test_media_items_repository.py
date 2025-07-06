@@ -128,6 +128,38 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].height, 200)
         self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
 
+    def test_get_all_media_items_with_no_date_taken(self):
+        fake_file_hash = os.urandom(16)
+
+        # Insert a mock media item into the mock database
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
+            {
+                "file_name": "test_image.jpg",
+                "file_hash": Binary(fake_file_hash),
+                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
+                "gphotos_client_id": str(self.mongodb_client_id),
+                "gphotos_media_item_id": "gphotos_123",
+                "album_id": album_id_to_string(MOCK_ALBUM_ID),
+                "width": 100,
+                "height": 200,
+            }
+        )
+
+        # Test retrieval
+        media_items = self.repo.get_all_media_items()
+
+        # Assert the retrieved media item matches the inserted data
+        self.assertEqual(len(media_items), 1)
+        self.assertEqual(media_items[0].file_name, "test_image.jpg")
+        self.assertEqual(media_items[0].file_hash, fake_file_hash)
+        self.assertIsNotNone(media_items[0].location)
+        self.assertEqual(media_items[0].location, GpsLocation(56.78, 12.34))
+        self.assertEqual(media_items[0].gphotos_client_id, self.mongodb_client_id)
+        self.assertEqual(media_items[0].gphotos_media_item_id, "gphotos_123")
+        self.assertEqual(media_items[0].width, 100)
+        self.assertEqual(media_items[0].height, 200)
+        self.assertEqual(media_items[0].date_taken, datetime(1970, 1, 1))
+
     def test_find_media_items(self):
         # Insert mock media items from different albums into the mock database
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -514,6 +546,35 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
         self.assertIsNone(new_media_item_1.location)
+
+    def test_update_many_media_items_on_unknown_media_item_id(self):
+        media_item_1 = self.repo.create_media_item(
+            CreateMediaItemRequest(
+                'dog.jpg',
+                MOCK_FILE_HASH,
+                GpsLocation(longitude=12.34, latitude=56.78),
+                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+                gphotos_media_item_id="gphotos_456",
+                album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
+            )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError, "Unable to update all media items: 0 vs 1"
+        ):
+            self.repo.update_many_media_items(
+                [
+                    UpdateMediaItemRequest(
+                        MediaItemId(
+                            media_item_1.id.client_id,
+                            ObjectId('5f50c31e8a7d4b1c9c9b0b12'),
+                        )
+                    )
+                ]
+            )
 
     def test_delete_media_item(self):
         # Insert a mock media item into the mock database
