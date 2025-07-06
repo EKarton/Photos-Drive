@@ -356,7 +356,7 @@ describe('Albums Router', () => {
       });
 
       expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
-        parentAlbumId: undefined,
+        parentAlbumId: MOCK_ROOT_ALBUM_ID,
         pageSize: 25,
         pageToken: undefined,
         sortBy: {
