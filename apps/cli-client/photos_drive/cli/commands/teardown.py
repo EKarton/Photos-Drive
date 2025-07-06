@@ -14,12 +14,6 @@ from ...shared.blob_store.gphotos.client import GPhotosClientV2
 from ...shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from ...shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from ...shared.metadata.albums_repository import (
-    UpdatedAlbumFields,
-)
 from ...shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
@@ -84,13 +78,6 @@ def teardown(
             )
         else:
             client["photos_drive"]["albums"].delete_many({})
-
-    # Update the root album to not have any child elements
-    albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-    albums_repo.update_album(
-        album_id=config.get_root_album_id(),
-        updated_album_fields=UpdatedAlbumFields(new_child_album_ids=[]),
-    )
 
     # Delete all media items from the DB
     for _, client in mongodb_clients_repo.get_all_clients():

@@ -95,12 +95,12 @@ def set_media_item_width_height_date_taken_fields(
         album_id, prev_albums_path = albums_queue.popleft()
         album = albums_repo.get_album_by_id(album_id)
 
-        for child_album_id in album.child_album_ids:
+        for child_album in albums_repo.find_child_albums(album.id):
             if album_id == root_album_id:
-                albums_queue.append((child_album_id, prev_albums_path + ['.']))
+                albums_queue.append((child_album.id, prev_albums_path + ['.']))
             else:
                 albums_queue.append(
-                    (child_album_id, prev_albums_path + [cast(str, album.name)])
+                    (child_album.id, prev_albums_path + [cast(str, album.name)])
                 )
 
         for media_item in media_items_repo.find_media_items(

@@ -142,12 +142,12 @@ class FolderSyncDiff:
 
             # Build new tuples for child albums.
             child_album_tuples = []
-            for child_album_id in album.child_album_ids:
+            for child_album in self.__albums_repo.find_child_albums(album.id):
                 if album_id == base_album_id:
-                    child_album_tuples.append((child_album_id, prev_path.copy()))
+                    child_album_tuples.append((child_album.id, prev_path.copy()))
                 else:
                     child_album_tuples.append(
-                        (child_album_id, prev_path + [cast(str, album.name)])
+                        (child_album.id, prev_path + [cast(str, album.name)])
                     )
 
             return local_found_files, child_album_tuples
@@ -187,8 +187,7 @@ class FolderSyncDiff:
             album_name = album_names_queue.popleft()
 
             new_cur_album = None
-            for child_album_id in cur_album.child_album_ids:
-                child_album = self.__albums_repo.get_album_by_id(child_album_id)
+            for child_album in self.__albums_repo.find_child_albums(cur_album.id):
                 if child_album.name == album_name:
                     new_cur_album = child_album
 

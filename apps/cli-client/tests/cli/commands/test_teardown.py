@@ -23,9 +23,6 @@ from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
 from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from photos_drive.shared.metadata.albums_repository import (
-    UpdatedAlbumFields,
-)
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
@@ -57,21 +54,17 @@ class TestTeardownCli(unittest.TestCase):
         self.media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        self.root_album = self.albums_repo.create_album('', None, [])
+        self.root_album = self.albums_repo.create_album('', None)
         config = InMemoryConfig()
         config.set_root_album_id(self.root_album.id)
 
         # Test setup 3: Attach 'Archives' in root album but others not
         self.archives_album = self.albums_repo.create_album(
-            'Archives', self.root_album.id, []
+            'Archives', self.root_album.id
         )
-        self.albums_repo.create_album('Photos', None, [])
-        self.albums_repo.create_album('2010', None, [])
-        self.albums_repo.create_album('2011', None, [])
-        self.albums_repo.update_album(
-            self.root_album.id,
-            UpdatedAlbumFields(new_child_album_ids=[self.archives_album.id]),
-        )
+        self.albums_repo.create_album('Photos', None)
+        self.albums_repo.create_album('2010', None)
+        self.albums_repo.create_album('2011', None)
 
         # Test setup 4: Add an image to Archives
         dog_upload_token = self.gphotos_client.media_items().upload_photo(

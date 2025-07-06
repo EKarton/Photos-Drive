@@ -134,7 +134,7 @@ class GPhotosMediaItemsClient:
             res = self._get_all_media_items_in_pages(page_token)
             res_body = res.json()
 
-            media_items += res_body.get("mediaItems", [])
+            media_items += res_body.get("mediaItems")
 
             if "nextPageToken" in res_body:
                 page_token = res_body["nextPageToken"]
@@ -193,7 +193,7 @@ class GPhotosMediaItemsClient:
             )
             res_body = res.json()
 
-            media_items += res_body.get("mediaItems", [])
+            media_items += res_body.get("mediaItems")
 
             if "nextPageToken" in res_body:
                 page_token = res_body["nextPageToken"]

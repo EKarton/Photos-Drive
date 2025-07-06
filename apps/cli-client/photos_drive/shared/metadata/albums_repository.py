@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 class UpdatedAlbumFields:
     new_name: Optional[str] = None
     new_parent_album_id: Optional[AlbumId] = None
-    new_child_album_ids: Optional[list[AlbumId]] = None
 
 
 @dataclass(frozen=True)
@@ -27,14 +26,11 @@ class UpdateAlbumRequest:
             if present.
         new_parent_album_id (Optional[AlbumId]): The new parent album ID,
             if present.
-        new_child_album_ids (Optional[list[AlbumId]]): The new child album IDs,
-            if present.
     """
 
     album_id: AlbumId
     new_name: Optional[str] = None
     new_parent_album_id: Optional[AlbumId] = None
-    new_child_album_ids: Optional[list[AlbumId]] = None
 
 
 class AlbumsRepository(ABC):
@@ -71,7 +67,6 @@ class AlbumsRepository(ABC):
         self,
         album_name: str,
         parent_album_id: Optional[AlbumId],
-        child_album_ids: list[AlbumId],
     ) -> Album:
         '''
         Creates an album in a MongoDB client with the most amount of space remaining
@@ -79,7 +74,6 @@ class AlbumsRepository(ABC):
         Args:
             album_name (str): The album name
             parent_album_id (Optional[AlbumId]): The parent album ID
-            child_album_ids list[AlbumId]: A list of child album IDs
 
         Returns:
             Album: An instance of the newly created album.
@@ -127,4 +121,22 @@ class AlbumsRepository(ABC):
 
         Args:
             requests (list[UpdateAlbumRequest]): A list of album update requests.
+        '''
+
+    @abstractmethod
+    def find_child_albums(self, album_id: AlbumId) -> list[Album]:
+        '''
+        Returns a list of child album IDs that are under an album.
+
+        Args:
+            album_id (AlbumId): The album ID
+        '''
+
+    @abstractmethod
+    def count_child_albums(self, album_id: AlbumId) -> int:
+        '''
+        Returns the number of child albums in an album.
+
+        Args:
+            album_id (AlbumId): The album ID
         '''

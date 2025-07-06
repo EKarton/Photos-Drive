@@ -10,7 +10,6 @@ from ..shared.config.config import Config
 from ..shared.metadata.albums import Album
 from ..shared.metadata.albums_repository import (
     AlbumsRepository,
-    UpdatedAlbumFields,
 )
 from ..shared.metadata.media_items_repository import (
     FindMediaItemRequest,
@@ -168,7 +167,10 @@ class PhotosBackup:
                 num_media_items += 1
 
             # Step 5c: Mark album to prune if it's empty
-            if num_media_items == 0 and len(cur_album.child_album_ids) == 0:
+            if (
+                num_media_items == 0
+                and self.__albums_repo.count_child_albums(cur_album.id) == 0
+            ):
                 total_album_ids_to_prune.append(cur_album.id)
 
             for child_diff_tree_node in cur_diffs_tree_node.child_nodes:
@@ -249,36 +251,23 @@ class PhotosBackup:
             cur_diffs_tree_node.album = cur_album
 
             child_album_name_to_album: Dict[str, Album] = {}
-            for child_album_id in cur_album.child_album_ids:
-                child_album = self.__albums_repo.get_album_by_id(child_album_id)
+            for child_album in self.__albums_repo.find_child_albums(cur_album.id):
                 child_album_name_to_album[cast(str, child_album.name)] = child_album
 
             with TransactionsContext(self.__clients_repo):
-                created_child_album_ids = []
                 for child_diff_node in cur_diffs_tree_node.child_nodes:
                     if child_diff_node.album_name not in child_album_name_to_album:
                         new_album = self.__albums_repo.create_album(
                             album_name=child_diff_node.album_name,
                             parent_album_id=cur_album.id,
-                            child_album_ids=[],
                         )
                         num_albums_created += 1
                         child_album_name_to_album[child_diff_node.album_name] = (
                             new_album
                         )
-                        created_child_album_ids.append(new_album.id)
 
                     child_album = child_album_name_to_album[child_diff_node.album_name]
                     queue.append((child_diff_node, child_album))
-
-                if len(created_child_album_ids) > 0:
-                    self.__albums_repo.update_album(
-                        album_id=cur_album.id,
-                        updated_album_fields=UpdatedAlbumFields(
-                            new_child_album_ids=cur_album.child_album_ids
-                            + created_child_album_ids
-                        ),
-                    )
 
         return num_albums_created
 

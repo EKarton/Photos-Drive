@@ -44,7 +44,7 @@ class TestUsageCli(unittest.TestCase):
         self.albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
-        self.root_album = self.albums_repo.create_album('', None, [])
+        self.root_album = self.albums_repo.create_album('', None)
 
         # Test setup 5: build fake config file
         self.temp_file = tempfile.NamedTemporaryFile(delete=False)

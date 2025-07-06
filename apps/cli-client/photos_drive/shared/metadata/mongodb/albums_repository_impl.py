@@ -69,7 +69,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         self,
         album_name: str,
         parent_album_id: AlbumId | None,
-        child_album_ids: list[AlbumId],
     ) -> Album:
         client_id = self._mongodb_clients_repository.find_id_of_client_with_most_space()
         client = self._mongodb_clients_repository.get_client_by_id(client_id)
@@ -85,9 +84,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
                     if parent_album_id is not None
                     else None
                 ),
-                "child_album_ids": [
-                    album_id_to_string(c_id) for c_id in child_album_ids
-                ],
             },
             session=session,
         )
@@ -96,7 +92,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             id=AlbumId(client_id=client_id, object_id=result.inserted_id),
             name=album_name,
             parent_album_id=parent_album_id,
-            child_album_ids=child_album_ids,
         )
 
     def delete_album(self, id: AlbumId):
@@ -143,12 +138,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         if updated_album_fields.new_name is not None:
             set_query["$set"]["name"] = updated_album_fields.new_name
 
-        if updated_album_fields.new_child_album_ids is not None:
-            set_query["$set"]["child_album_ids"] = [
-                album_id_to_string(c_id)
-                for c_id in updated_album_fields.new_child_album_ids
-            ]
-
         if updated_album_fields.new_parent_album_id is not None:
             set_query["$set"]["parent_album_id"] = album_id_to_string(
                 updated_album_fields.new_parent_album_id
@@ -182,11 +171,6 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             if request.new_name is not None:
                 set_query["$set"]["name"] = request.new_name
 
-            if request.new_child_album_ids is not None:
-                set_query["$set"]["child_album_ids"] = [
-                    album_id_to_string(c_id) for c_id in request.new_child_album_ids
-                ]
-
             if request.new_parent_album_id is not None:
                 set_query["$set"]["parent_album_id"] = album_id_to_string(
                     request.new_parent_album_id
@@ -212,6 +196,36 @@ class AlbumsRepositoryImpl(AlbumsRepository):
                     + f"vs {len(operations)}"
                 )
 
+    def find_child_albums(self, album_id: AlbumId) -> list[Album]:
+        mongo_filter = {'parent_album_id': album_id_to_string(album_id)}
+
+        albums = []
+        for client_id, client in self._mongodb_clients_repository.get_all_clients():
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            for raw_item in client['photos_drive']['albums'].find(
+                filter=mongo_filter, session=session
+            ):
+                albums.append(
+                    self.__parse_raw_document_to_album_obj(client_id, raw_item)
+                )
+
+        return albums
+
+    def count_child_albums(self, album_id: AlbumId) -> int:
+        total = 0
+        for client_id, client in self._mongodb_clients_repository.get_all_clients():
+            session = self._mongodb_clients_repository.get_session_for_client_id(
+                client_id,
+            )
+            total += client['photos_drive']['albums'].count_documents(
+                filter={'parent_album_id': album_id_to_string(album_id)},
+                session=session,
+            )
+
+        return total
+
     def __parse_raw_document_to_album_obj(
         self, client_id: ObjectId, raw_item: Mapping[str, Any]
     ) -> Album:
@@ -219,13 +233,8 @@ class AlbumsRepositoryImpl(AlbumsRepository):
         if "parent_album_id" in raw_item and raw_item["parent_album_id"]:
             parent_album_id = parse_string_to_album_id(raw_item["parent_album_id"])
 
-        child_album_ids = []
-        for raw_child_album_id in raw_item["child_album_ids"]:
-            child_album_ids.append(parse_string_to_album_id(raw_child_album_id))
-
         return Album(
             id=AlbumId(client_id, cast(ObjectId, raw_item["_id"])),
             name=str(raw_item["name"]),
             parent_album_id=parent_album_id,
-            child_album_ids=child_album_ids,
         )
