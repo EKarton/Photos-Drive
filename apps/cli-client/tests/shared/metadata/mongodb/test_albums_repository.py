@@ -10,7 +10,7 @@ from photos_drive.shared.metadata.albums_repository import (
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.album_id import AlbumId, album_id_to_string
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
@@ -293,3 +293,69 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.assertEqual(
             self.repo.get_album_by_id(album_2013.id).parent_album_id, photo_album.id
         )
+
+    def test_find_child_albums(self):
+        parent_album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1a"))
+        child_album_id_1 = AlbumId(
+            MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b")
+        )
+        child_album_id_2 = AlbumId(
+            MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
+        )
+
+        self.mock_client["photos_drive"]["albums"].insert_many(
+            [
+                {
+                    "_id": parent_album_id.object_id,
+                    "name": "Parent Album",
+                    "parent_album_id": None,
+                },
+                {
+                    "_id": child_album_id_1.object_id,
+                    "name": "Child 1",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+                {
+                    "_id": child_album_id_2.object_id,
+                    "name": "Child 2",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+            ]
+        )
+
+        children = self.repo.find_child_albums(parent_album_id)
+
+        self.assertEqual(len(children), 2)
+        self.assertCountEqual(
+            [child.id for child in children],
+            [child_album_id_1, child_album_id_2],
+        )
+        self.assertTrue(
+            all(child.parent_album_id == parent_album_id for child in children)
+        )
+
+    def test_count_child_albums(self):
+        parent_album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1a"))
+        self.mock_client["photos_drive"]["albums"].insert_many(
+            [
+                {
+                    "_id": ObjectId(),
+                    "name": "Child 1",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+                {
+                    "_id": ObjectId(),
+                    "name": "Child 2",
+                    "parent_album_id": album_id_to_string(parent_album_id),
+                },
+                {
+                    "_id": ObjectId(),
+                    "name": "Unrelated",
+                    "parent_album_id": None,
+                },
+            ]
+        )
+
+        count = self.repo.count_child_albums(parent_album_id)
+
+        self.assertEqual(count, 2)

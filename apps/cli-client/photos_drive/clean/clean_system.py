@@ -199,12 +199,6 @@ class SystemCleaner:
             for media_item in self.__media_items_repo.find_media_items(
                 FindMediaItemRequest(album_id=album_id)
             ):
-                if media_item.id not in all_media_item_ids:
-                    logger.debug(
-                        f'Removing gemdia item {media_item.id} from {album.id}'
-                    )
-                    continue
-
                 gphotos_media_item_id = GPhotosMediaItemKey(
                     media_item.gphotos_client_id,
                     media_item.gphotos_media_item_id,
