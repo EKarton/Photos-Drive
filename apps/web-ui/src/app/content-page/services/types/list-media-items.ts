@@ -2,6 +2,7 @@ import { MediaItem, RawMediaItem } from './media-item';
 
 export enum ListMediaItemsSortByFields {
   ID = 'id',
+  DATE_TAKEN = 'date-taken',
 }
 
 export enum ListMediaItemsSortDirection {

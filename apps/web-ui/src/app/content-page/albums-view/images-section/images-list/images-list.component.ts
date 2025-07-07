@@ -15,6 +15,7 @@ import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
+import { ListMediaItemsSortBy } from '../../../services/types/list-media-items';
 import { ImageComponent } from './image/image.component';
 import { ImagesListStore } from './images-list.store';
 
@@ -43,6 +44,7 @@ export interface Image {
 })
 export class ImagesListComponent implements AfterViewInit, OnDestroy {
   readonly albumId = input.required<string>();
+  readonly sortBy = input.required<ListMediaItemsSortBy>();
 
   private readonly resizeObserverFactory = inject(
     RESIZE_OBSERVER_FACTORY_TOKEN,
@@ -69,6 +71,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       this.componentStore.loadInitialPage({
         albumId: this.albumId(),
+        sortBy: this.sortBy(),
         pageSize: DEFAULT_PAGE_SIZE,
       });
     });
@@ -115,9 +118,7 @@ export class ImagesListComponent implements AfterViewInit, OnDestroy {
   }
 
   loadMoreMediaItems() {
-    this.componentStore.loadMoreMediaItems({
-      pageSize: DEFAULT_PAGE_SIZE,
-    });
+    this.componentStore.loadMoreMediaItems();
   }
 
   ngOnDestroy(): void {

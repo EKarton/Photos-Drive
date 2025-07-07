@@ -97,26 +97,26 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
                 ? { $gt: lastSeenMediaItemObjectId }
                 : { $lt: lastSeenMediaItemObjectId };
           } else {
-            const lastSeenAlbum = await mongoClient
+            const lastSeenMediaItem = await mongoClient
               .db('photos_drive')
               .collection('media_items')
               .findOne({ _id: lastSeenMediaItemObjectId });
-            const lastSeenMediaItemDateTaken =
-              lastSeenAlbum!['date_taken'] || new Date(1970, 1, 1);
+            const lastSeenDateTaken: Date =
+              lastSeenMediaItem!['date_taken'] ?? new Date(1970, 1, 1);
 
             filterObj['$or'] =
               req.sortBy.direction === SortByDirection.ASCENDING
                 ? [
-                    { date_taken: { $gt: lastSeenMediaItemDateTaken } },
+                    { date_taken: { $gt: lastSeenDateTaken } },
                     {
-                      date_taken: lastSeenMediaItemDateTaken,
+                      date_taken: lastSeenDateTaken,
                       _id: { $gt: lastSeenMediaItemObjectId }
                     }
                   ]
                 : [
-                    { date_taken: { $lt: lastSeenMediaItemDateTaken } },
+                    { date_taken: { $lt: lastSeenDateTaken } },
                     {
-                      date_taken: lastSeenMediaItemDateTaken,
+                      date_taken: lastSeenDateTaken,
                       _id: { $lt: lastSeenMediaItemObjectId }
                     }
                   ];
@@ -130,8 +130,8 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
         if (req.sortBy.field === SortByField.ID) {
           sortObj['_id'] = mongoSortDirection;
         } else {
-          sortObj['_id'] = mongoSortDirection;
           sortObj['date_taken'] = mongoSortDirection;
+          sortObj['_id'] = mongoSortDirection;
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);

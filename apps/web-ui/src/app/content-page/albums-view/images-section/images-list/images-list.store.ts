@@ -20,6 +20,8 @@ export interface ImagesListState {
   mediaItems: MediaItem[];
   nextPageToken?: string;
   isAtEndOfList: boolean;
+  pageSize?: number;
+  sortBy?: ListMediaItemsSortBy;
 }
 
 export const INITIAL_STATE: ImagesListState = {
@@ -27,15 +29,12 @@ export const INITIAL_STATE: ImagesListState = {
   mediaItems: [],
   nextPageToken: undefined,
   isAtEndOfList: false,
+  pageSize: undefined,
+  sortBy: undefined,
 };
 
 export interface LoadInitialPageRequest {
   albumId: string;
-  pageSize?: number;
-  sortBy?: ListMediaItemsSortBy;
-}
-
-export interface LoadMoreMediaItemsRequest {
   pageSize?: number;
   sortBy?: ListMediaItemsSortBy;
 }
@@ -68,6 +67,8 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
           mediaItems: [],
           nextPageToken: undefined,
           isAtEndOfList: false,
+          pageSize: request.pageSize,
+          sortBy: request.sortBy,
         };
       } else {
         const newPage = response.data!;
@@ -76,6 +77,8 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
           mediaItems: newPage.mediaItems,
           nextPageToken: newPage.nextPageToken,
           isAtEndOfList: newPage.nextPageToken === undefined,
+          pageSize: request.pageSize,
+          sortBy: request.sortBy,
         };
       }
     },
@@ -124,29 +127,28 @@ export class ImagesListStore extends ComponentStore<ImagesListState> {
     ),
   );
 
-  readonly loadMoreMediaItems = this.effect<LoadMoreMediaItemsRequest>(
-    (request$) =>
-      request$.pipe(
-        withLatestFrom(this.state$),
-        switchMap(([request, state]) => {
-          if (state.isAtEndOfList) {
-            return EMPTY;
-          }
+  readonly loadMoreMediaItems = this.effect((request$) =>
+    request$.pipe(
+      withLatestFrom(this.state$),
+      switchMap(([, state]) => {
+        if (state.isAtEndOfList) {
+          return EMPTY;
+        }
 
-          return this.store.select(authState.selectAuthToken).pipe(
-            switchMap((accessToken) => {
-              const apiRequest: ListMediaItemsRequest = {
-                albumId: state.albumId!,
-                pageSize: request.pageSize,
-                sortBy: request.sortBy,
-                pageToken: state.nextPageToken,
-              };
-              return this.webApiService
-                .listMediaItems(accessToken, apiRequest)
-                .pipe(tap((response) => this.appendMediaItems(response)));
-            }),
-          );
-        }),
-      ),
+        return this.store.select(authState.selectAuthToken).pipe(
+          switchMap((accessToken) => {
+            const apiRequest: ListMediaItemsRequest = {
+              albumId: state.albumId!,
+              pageSize: state.pageSize,
+              sortBy: state.sortBy,
+              pageToken: state.nextPageToken,
+            };
+            return this.webApiService
+              .listMediaItems(accessToken, apiRequest)
+              .pipe(tap((response) => this.appendMediaItems(response)));
+          }),
+        );
+      }),
+    ),
   );
 }
