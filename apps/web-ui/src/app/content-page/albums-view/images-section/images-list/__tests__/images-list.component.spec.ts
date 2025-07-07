@@ -8,7 +8,11 @@ import { authState } from '../../../../../auth/store';
 import { MockResizeObserverFactory } from '../../../../../shared/resize-observer-factory/__mocks__/MockResizeObserverFactory';
 import { toSuccess } from '../../../../../shared/results/results';
 import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
-import { ListMediaItemsResponse } from '../../../../services/types/list-media-items';
+import {
+  ListMediaItemsResponse,
+  ListMediaItemsSortByFields,
+  ListMediaItemsSortDirection,
+} from '../../../../services/types/list-media-items';
 import { WebApiService } from '../../../../services/webapi.service';
 import { mediaViewerState } from '../../../../store/media-viewer';
 import { ImagesListComponent } from '../images-list.component';
@@ -128,6 +132,10 @@ describe('ImagesListComponent', () => {
   it('should load image skeletons', () => {
     const fixture = TestBed.createComponent(ImagesListComponent);
     fixture.componentRef.setInput('albumId', ['album1']);
+    fixture.componentRef.setInput('sortBy', {
+      field: ListMediaItemsSortByFields.ID,
+      direction: ListMediaItemsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     const elements = fixture.nativeElement.querySelectorAll(
@@ -163,6 +171,10 @@ describe('ImagesListComponent', () => {
         // Render the component
         const fixture = TestBed.createComponent(ImagesListComponent);
         fixture.componentRef.setInput('albumId', ['album1']);
+        fixture.componentRef.setInput('sortBy', {
+          field: ListMediaItemsSortByFields.ID,
+          direction: ListMediaItemsSortDirection.ASCENDING,
+        });
         fixture.detectChanges();
 
         // Simulate a resize event
@@ -206,6 +218,10 @@ describe('ImagesListComponent', () => {
   it('should fetch more images given user has scrolled', () => {
     const fixture = TestBed.createComponent(ImagesListComponent);
     fixture.componentRef.setInput('albumId', ['album1']);
+    fixture.componentRef.setInput('sortBy', {
+      field: ListMediaItemsSortByFields.ID,
+      direction: ListMediaItemsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     fixture.componentInstance.loadMoreMediaItems();

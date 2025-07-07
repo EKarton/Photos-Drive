@@ -109,7 +109,7 @@ describe('ImagesListStore', () => {
     store.loadInitialPage({ albumId: dummyAlbumId });
 
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(secondPage)));
-    store.loadMoreMediaItems({});
+    store.loadMoreMediaItems();
 
     expect(store.mediaItems()).toEqual([
       ...dummyMediaItems,
@@ -130,7 +130,7 @@ describe('ImagesListStore', () => {
     mockWebApiService.listMediaItems.and.returnValue(
       of(toFailure<ListMediaItemsResponse>(new Error('API Error'))),
     );
-    store.loadMoreMediaItems({});
+    store.loadMoreMediaItems();
 
     expect(store.mediaItems()).toEqual([...dummyMediaItems]);
   });
@@ -143,7 +143,7 @@ describe('ImagesListStore', () => {
 
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(firstPage)));
     store.loadInitialPage({ albumId: dummyAlbumId });
-    store.loadMoreMediaItems({});
+    store.loadMoreMediaItems();
 
     expect(mockWebApiService.listMediaItems).toHaveBeenCalledTimes(1);
     expect(store.mediaItems()).toEqual(dummyMediaItems);
