@@ -10,7 +10,11 @@ import {
   toSuccess,
 } from '../../../../../shared/results/results';
 import { Album } from '../../../../services/types/album';
-import { ListAlbumsResponse } from '../../../../services/types/list-albums';
+import {
+  ListAlbumsResponse,
+  ListAlbumsSortByFields,
+  ListAlbumsSortDirection,
+} from '../../../../services/types/list-albums';
 import { WebApiService } from '../../../../services/webapi.service';
 import { AlbumsListCardsComponent } from '../albums-list-cards.component';
 
@@ -67,6 +71,10 @@ describe('AlbumsListCardsComponent', () => {
     );
     const fixture = TestBed.createComponent(AlbumsListCardsComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     const skeleton = fixture.nativeElement.querySelector(
@@ -81,6 +89,10 @@ describe('AlbumsListCardsComponent', () => {
     );
     const fixture = TestBed.createComponent(AlbumsListCardsComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     const error = fixture.nativeElement.querySelector(
@@ -101,6 +113,10 @@ describe('AlbumsListCardsComponent', () => {
 
     const fixture = TestBed.createComponent(AlbumsListCardsComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     const albums = fixture.nativeElement.querySelectorAll(

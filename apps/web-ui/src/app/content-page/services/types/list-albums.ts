@@ -19,6 +19,7 @@ export interface ListAlbumsResponse {
 
 export enum ListAlbumsSortByFields {
   ID = 'id',
+  NAME = 'name',
 }
 
 export enum ListAlbumsSortDirection {

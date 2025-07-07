@@ -17,6 +17,7 @@ import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe'
 import { hasSucceed, Result } from '../../../../shared/results/results';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
 import { Album } from '../../../services/types/album';
+import { ListAlbumsSortBy } from '../../../services/types/list-albums';
 import { AlbumsListTableStore } from './albums-list-table.store';
 
 @Component({
@@ -35,6 +36,7 @@ import { AlbumsListTableStore } from './albums-list-table.store';
 })
 export class AlbumsListTableComponent {
   readonly albumId = input.required<string>();
+  readonly sortBy = input.required<ListAlbumsSortBy>();
 
   private readonly albumsListTableStore = inject(AlbumsListTableStore);
 
@@ -62,6 +64,7 @@ export class AlbumsListTableComponent {
       this.albumsListTableStore.loadInitialPage({
         albumId: this.albumId(),
         pageSize: this.currentPageSize(),
+        sortBy: this.sortBy(),
       });
     });
   }

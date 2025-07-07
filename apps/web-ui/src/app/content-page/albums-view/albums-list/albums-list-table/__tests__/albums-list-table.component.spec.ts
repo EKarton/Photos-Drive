@@ -13,6 +13,8 @@ import { Album } from '../../../../services/types/album';
 import {
   ListAlbumsRequest,
   ListAlbumsResponse,
+  ListAlbumsSortByFields,
+  ListAlbumsSortDirection,
 } from '../../../../services/types/list-albums';
 import { WebApiService } from '../../../../services/webapi.service';
 import { AlbumsListTableComponent } from '../albums-list-table.component';
@@ -54,6 +56,10 @@ describe('AlbumsListTableComponent', () => {
     );
     const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     expect(
@@ -69,6 +75,10 @@ describe('AlbumsListTableComponent', () => {
     );
     const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     expect(
@@ -93,6 +103,10 @@ describe('AlbumsListTableComponent', () => {
     );
     const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     expect(
@@ -142,6 +156,10 @@ describe('AlbumsListTableComponent', () => {
     );
     const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     // Go to next page
@@ -155,7 +173,10 @@ describe('AlbumsListTableComponent', () => {
       parentAlbumId: 'album123',
       pageToken: 'page2',
       pageSize: 5,
-      sortBy: undefined,
+      sortBy: {
+        field: ListAlbumsSortByFields.ID,
+        direction: ListAlbumsSortDirection.ASCENDING,
+      },
     });
     expect(
       fixture.nativeElement.querySelectorAll('[data-testid="table-row-album"]')
@@ -170,7 +191,10 @@ describe('AlbumsListTableComponent', () => {
       parentAlbumId: 'album123',
       pageToken: 'page3',
       pageSize: 5,
-      sortBy: undefined,
+      sortBy: {
+        field: ListAlbumsSortByFields.ID,
+        direction: ListAlbumsSortDirection.ASCENDING,
+      },
     });
     expect(
       fixture.nativeElement.querySelectorAll('[data-testid="table-row-album"]')
@@ -188,7 +212,10 @@ describe('AlbumsListTableComponent', () => {
       parentAlbumId: 'album123',
       pageToken: 'page2',
       pageSize: 5,
-      sortBy: undefined,
+      sortBy: {
+        field: ListAlbumsSortByFields.ID,
+        direction: ListAlbumsSortDirection.ASCENDING,
+      },
     });
     expect(
       fixture.nativeElement.querySelectorAll('[data-testid="table-row-album"]')
@@ -204,7 +231,10 @@ describe('AlbumsListTableComponent', () => {
     expect(mockWebApiService.listAlbums).toHaveBeenCalledWith('auth123', {
       parentAlbumId: 'album123',
       pageSize: 5,
-      sortBy: undefined,
+      sortBy: {
+        field: ListAlbumsSortByFields.ID,
+        direction: ListAlbumsSortDirection.ASCENDING,
+      },
     });
     expect(
       fixture.nativeElement.querySelectorAll('[data-testid="table-row-album"]')
@@ -230,6 +260,10 @@ describe('AlbumsListTableComponent', () => {
     );
     const fixture = TestBed.createComponent(AlbumsListTableComponent);
     fixture.componentRef.setInput('albumId', 'album123');
+    fixture.componentRef.setInput('sortBy', {
+      field: ListAlbumsSortByFields.ID,
+      direction: ListAlbumsSortDirection.ASCENDING,
+    });
     fixture.detectChanges();
 
     // Change the page size to 10
@@ -243,12 +277,18 @@ describe('AlbumsListTableComponent', () => {
     expect(mockWebApiService.listAlbums).toHaveBeenCalledWith('auth123', {
       parentAlbumId: 'album123',
       pageSize: 5,
-      sortBy: undefined,
+      sortBy: {
+        field: ListAlbumsSortByFields.ID,
+        direction: ListAlbumsSortDirection.ASCENDING,
+      },
     });
     expect(mockWebApiService.listAlbums).toHaveBeenCalledWith('auth123', {
       parentAlbumId: 'album123',
       pageSize: 10,
-      sortBy: undefined,
+      sortBy: {
+        field: ListAlbumsSortByFields.ID,
+        direction: ListAlbumsSortDirection.ASCENDING,
+      },
     });
     expect(
       fixture.nativeElement.querySelectorAll('[data-testid="table-row-album"]')

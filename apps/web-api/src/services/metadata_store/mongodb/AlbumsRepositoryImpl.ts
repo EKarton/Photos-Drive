@@ -125,6 +125,7 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
           sortObj['_id'] = mongoSortDirection;
         } else if (req.sortBy.field === SortByField.NAME) {
           sortObj['name'] = mongoSortDirection;
+          sortObj['_id'] = mongoSortDirection;
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
@@ -134,7 +135,7 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
         const rawDocs = await mongoClient
           .db('photos_drive')
           .collection('albums')
-          .find(filterObj)
+          .find(filterObj, { collation: { locale: 'en', strength: 1 } })
           .sort(sortObj)
           .limit(overFetchSize)
           .toArray();
