@@ -3,7 +3,8 @@ import { MediaItem, MediaItemId } from './MediaItems';
 
 /** List of possible fields to sort by for {@code ListMediaItemsRequest} */
 export enum SortByField {
-  ID = 'id'
+  ID = 'id',
+  DATE_TAKEN = 'date-taken'
 }
 
 /** List of possible sort directions for {@code ListMediaItemsRequest} */

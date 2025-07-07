@@ -214,6 +214,10 @@ describe('MediaItemsRepositoryImpl', () => {
       clientId: '407f1f77bcf86cd799439001',
       objectId: '407f1f77bcf86cd799439003'
     };
+    const album3: AlbumId = {
+      clientId: '407f1f77bcf86cd799439001',
+      objectId: '407f1f77bcf86cd799439004'
+    };
 
     beforeEach(async () => {
       // Photos 1, 2, 3, 4 are in Album 1
@@ -230,8 +234,7 @@ describe('MediaItemsRepositoryImpl', () => {
             coordinates: [40.0, -70.0]
           },
           width: 1000,
-          height: 2000,
-          date_taken: new Date(2024, 4, 4)
+          height: 2000
         });
       await mongoClient2
         .db('photos_drive')
@@ -244,7 +247,7 @@ describe('MediaItemsRepositoryImpl', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 10,
           height: 20,
-          date_taken: new Date(2024, 4, 4)
+          date_taken: new Date(2024, 4, 2)
         });
       await mongoClient1
         .db('photos_drive')
@@ -257,7 +260,7 @@ describe('MediaItemsRepositoryImpl', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 1000,
           height: 2000,
-          date_taken: new Date(2024, 4, 4)
+          date_taken: new Date(2024, 4, 3)
         });
       await mongoClient2
         .db('photos_drive')
@@ -285,7 +288,7 @@ describe('MediaItemsRepositoryImpl', () => {
           album_id: `${albumId2.clientId}:${albumId2.objectId}`,
           width: 1,
           height: 2,
-          date_taken: new Date(2024, 4, 4)
+          date_taken: new Date(2024, 4, 5)
         });
     });
 
@@ -302,7 +305,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(1970, 1, 1),
             file_name: 'image1.jpg',
             gphotos_client_id: 'gphotos_client_1',
             gphotos_media_item_id: 'media_item_1',
@@ -313,7 +316,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(2024, 4, 3),
             file_name: 'image3.jpg',
             gphotos_client_id: 'gphotos_client_3',
             gphotos_media_item_id: 'media_item_3',
@@ -323,7 +326,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId2,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(2024, 4, 5),
             file_name: 'image5.jpg',
             gphotos_client_id: 'gphotos_client_5',
             gphotos_media_item_id: 'media_item_5',
@@ -333,7 +336,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(2024, 4, 2),
             file_name: 'image2.jpg',
             gphotos_client_id: 'gphotos_client_2',
             gphotos_media_item_id: 'media_item_2',
@@ -372,7 +375,7 @@ describe('MediaItemsRepositoryImpl', () => {
           {
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
             album_id: albumId2,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(2024, 4, 5),
             file_name: 'image5.jpg',
             gphotos_client_id: 'gphotos_client_5',
             gphotos_media_item_id: 'media_item_5',
@@ -386,10 +389,7 @@ describe('MediaItemsRepositoryImpl', () => {
 
     it('should return response correctly given no media items found', async () => {
       const res = await mediaItemsRepo.listMediaItems({
-        albumId: {
-          clientId: '407f1f77bcf86cd799439001',
-          objectId: '407f1f77bcf86cd799439004'
-        },
+        albumId: album3,
         pageSize: 10,
         sortBy: {
           field: SortByField.ID,
@@ -414,7 +414,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(1970, 1, 1),
             file_name: 'image1.jpg',
             gphotos_client_id: 'gphotos_client_1',
             gphotos_media_item_id: 'media_item_1',
@@ -428,7 +428,7 @@ describe('MediaItemsRepositoryImpl', () => {
       });
     });
 
-    it('should return next media item and page token correctly given album1 and pageSize=1 and the last album ID for client 1', async () => {
+    it('should return next media item and page token correctly given album1 and pageSize=1 and sortBy=id and sortDir=ascending and the last media item ID for client 1', async () => {
       const res = await mediaItemsRepo.listMediaItems({
         albumId: albumId1,
         pageSize: 1,
@@ -443,7 +443,7 @@ describe('MediaItemsRepositoryImpl', () => {
         mediaItems: [
           {
             album_id: albumId1,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(2024, 4, 3),
             file_name: 'image3.jpg',
             gphotos_client_id: 'gphotos_client_3',
             gphotos_media_item_id: 'media_item_3',
@@ -456,13 +456,71 @@ describe('MediaItemsRepositoryImpl', () => {
       });
     });
 
-    it('should return last media item and page token correctly given album1 and pageSize=1 and sortDir=descending and the last album ID for client 1', async () => {
+    it('should return last media item and page token correctly given album1 and pageSize=1 and sortBy=id and sortDir=descending and the last media item ID for client 1', async () => {
       const res = await mediaItemsRepo.listMediaItems({
         albumId: albumId1,
         pageSize: 1,
         pageToken: 'client1:507f1f77bcf86cd799439010',
         sortBy: {
           field: SortByField.ID,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        mediaItems: [
+          {
+            album_id: albumId1,
+            date_taken: new Date(2024, 4, 4),
+            file_name: 'image4.jpg',
+            gphotos_client_id: 'gphotos_client_4',
+            gphotos_media_item_id: 'media_item_4',
+            height: 20,
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
+            width: 10
+          }
+        ],
+        nextPageToken:
+          'client2:507f1f77bcf86cd799439013,client1:507f1f77bcf86cd799439010'
+      });
+    });
+
+    it('should return last media item and page token correctly given album1 and pageSize=1 and sortBy=date-taken and sortDir=ascending and the last media item ID for client 1', async () => {
+      const res = await mediaItemsRepo.listMediaItems({
+        albumId: albumId1,
+        pageSize: 1,
+        pageToken: 'client1:507f1f77bcf86cd799439010',
+        sortBy: {
+          field: SortByField.DATE_TAKEN,
+          direction: SortByDirection.ASCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        mediaItems: [
+          {
+            album_id: albumId1,
+            date_taken: new Date(2024, 4, 2),
+            file_name: 'image2.jpg',
+            gphotos_client_id: 'gphotos_client_2',
+            gphotos_media_item_id: 'media_item_2',
+            height: 20,
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
+            width: 10
+          }
+        ],
+        nextPageToken:
+          'client2:507f1f77bcf86cd799439011,client1:507f1f77bcf86cd799439010'
+      });
+    });
+
+    it('should return last media item and page token correctly given album1 and pageSize=1 and sortBy=date-taken and sortDir=descending and the last media item ID for client 1', async () => {
+      const res = await mediaItemsRepo.listMediaItems({
+        albumId: albumId1,
+        pageSize: 1,
+        pageToken: 'client1:507f1f77bcf86cd799439010',
+        sortBy: {
+          field: SortByField.DATE_TAKEN,
           direction: SortByDirection.DESCENDING
         }
       });
@@ -500,7 +558,7 @@ describe('MediaItemsRepositoryImpl', () => {
       expect(res).toEqual({ mediaItems: [] });
     });
 
-    it('should return media items in reverse order given album1 and pageSize=10 and sortOrder = descending', async () => {
+    it('should return media items in reverse order given album1 and pageSize=10 and sortBy=id and sortOrder=descending', async () => {
       const res = await mediaItemsRepo.listMediaItems({
         albumId: albumId1,
         pageSize: 10,
@@ -524,7 +582,7 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(2024, 4, 2),
             file_name: 'image2.jpg',
             gphotos_client_id: 'gphotos_client_2',
             gphotos_media_item_id: 'media_item_2',
@@ -534,7 +592,67 @@ describe('MediaItemsRepositoryImpl', () => {
           },
           {
             album_id: albumId1,
-            date_taken: new Date(2024, 4, 4),
+            date_taken: new Date(2024, 4, 3),
+            file_name: 'image3.jpg',
+            gphotos_client_id: 'gphotos_client_3',
+            gphotos_media_item_id: 'media_item_3',
+            height: 2000,
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
+            width: 1000
+          },
+          {
+            album_id: albumId1,
+            date_taken: new Date(1970, 1, 1),
+            file_name: 'image1.jpg',
+            gphotos_client_id: 'gphotos_client_1',
+            gphotos_media_item_id: 'media_item_1',
+            height: 2000,
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
+            location: { latitude: -70, longitude: 40 },
+            width: 1000
+          }
+        ],
+        nextPageToken:
+          'client1:507f1f77bcf86cd799439010,client2:507f1f77bcf86cd799439011'
+      });
+    });
+
+    it('should return media items in order given album1 and pageSize=10 and sortBy=date-taken and sortOrder=ascending', async () => {
+      const res = await mediaItemsRepo.listMediaItems({
+        albumId: albumId1,
+        pageSize: 10,
+        sortBy: {
+          field: SortByField.DATE_TAKEN,
+          direction: SortByDirection.ASCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        mediaItems: [
+          {
+            album_id: albumId1,
+            date_taken: new Date(1970, 1, 1),
+            file_name: 'image1.jpg',
+            gphotos_client_id: 'gphotos_client_1',
+            gphotos_media_item_id: 'media_item_1',
+            height: 2000,
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
+            location: { latitude: -70, longitude: 40 },
+            width: 1000
+          },
+          {
+            album_id: albumId1,
+            date_taken: new Date(2024, 4, 2),
+            file_name: 'image2.jpg',
+            gphotos_client_id: 'gphotos_client_2',
+            gphotos_media_item_id: 'media_item_2',
+            height: 20,
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
+            width: 10
+          },
+          {
+            album_id: albumId1,
+            date_taken: new Date(2024, 4, 3),
             file_name: 'image3.jpg',
             gphotos_client_id: 'gphotos_client_3',
             gphotos_media_item_id: 'media_item_3',
@@ -545,6 +663,64 @@ describe('MediaItemsRepositoryImpl', () => {
           {
             album_id: albumId1,
             date_taken: new Date(2024, 4, 4),
+            file_name: 'image4.jpg',
+            gphotos_client_id: 'gphotos_client_4',
+            gphotos_media_item_id: 'media_item_4',
+            height: 20,
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
+            width: 10
+          }
+        ],
+        nextPageToken:
+          'client2:507f1f77bcf86cd799439013,client1:507f1f77bcf86cd799439012'
+      });
+    });
+
+    it('should return media items in order given album1 and pageSize=10 and sortBy=date-taken and sortOrder=descending', async () => {
+      const res = await mediaItemsRepo.listMediaItems({
+        albumId: albumId1,
+        pageSize: 10,
+        sortBy: {
+          field: SortByField.DATE_TAKEN,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        mediaItems: [
+          {
+            album_id: albumId1,
+            date_taken: new Date(2024, 4, 4),
+            file_name: 'image4.jpg',
+            gphotos_client_id: 'gphotos_client_4',
+            gphotos_media_item_id: 'media_item_4',
+            height: 20,
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
+            width: 10
+          },
+          {
+            album_id: albumId1,
+            date_taken: new Date(2024, 4, 3),
+            file_name: 'image3.jpg',
+            gphotos_client_id: 'gphotos_client_3',
+            gphotos_media_item_id: 'media_item_3',
+            height: 2000,
+            id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
+            width: 1000
+          },
+          {
+            album_id: albumId1,
+            date_taken: new Date(2024, 4, 2),
+            file_name: 'image2.jpg',
+            gphotos_client_id: 'gphotos_client_2',
+            gphotos_media_item_id: 'media_item_2',
+            height: 20,
+            id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
+            width: 10
+          },
+          {
+            album_id: albumId1,
+            date_taken: new Date(1970, 1, 1),
             file_name: 'image1.jpg',
             gphotos_client_id: 'gphotos_client_1',
             gphotos_media_item_id: 'media_item_1',
@@ -574,15 +750,15 @@ describe('sortMediaItem', () => {
     };
 
     it('returns -1 if a.id < b.id', () => {
-      const a = createMediaItem('clientA', 'obj1');
-      const b = createMediaItem('clientB', 'obj2');
+      const a = createMediaItem('clientA', 'obj1', new Date(1970, 1, 1));
+      const b = createMediaItem('clientB', 'obj2', new Date(1970, 1, 1));
 
       expect(sortMediaItem(a, b, sortBy)).toBe(-1);
     });
 
     it('returns 1 if a.id > b.id', () => {
-      const a = createMediaItem('clientC', 'obj9');
-      const b = createMediaItem('clientB', 'obj2');
+      const a = createMediaItem('clientC', 'obj9', new Date(1970, 1, 1));
+      const b = createMediaItem('clientB', 'obj2', new Date(1970, 1, 1));
 
       expect(sortMediaItem(a, b, sortBy)).toBe(1);
     });
@@ -595,21 +771,67 @@ describe('sortMediaItem', () => {
     };
 
     it('returns -1 if a.id > b.id', () => {
-      const a = createMediaItem('clientC', 'obj9');
-      const b = createMediaItem('clientB', 'obj2');
+      const a = createMediaItem('clientC', 'obj9', new Date(1970, 1, 1));
+      const b = createMediaItem('clientB', 'obj2', new Date(1970, 1, 1));
 
       expect(sortMediaItem(a, b, sortBy)).toBe(-1);
     });
 
     it('returns 1 if a.id < b.id', () => {
-      const a = createMediaItem('clientA', 'obj1');
-      const b = createMediaItem('clientB', 'obj2');
+      const a = createMediaItem('clientA', 'obj1', new Date(1970, 1, 1));
+      const b = createMediaItem('clientB', 'obj2', new Date(1970, 1, 1));
 
       expect(sortMediaItem(a, b, sortBy)).toBe(1);
     });
   });
 
-  function createMediaItem(clientId: string, objectId: string): MediaItem {
+  describe('sorting by DATE_TAKEN ascending', () => {
+    const sortBy: SortBy = {
+      field: SortByField.DATE_TAKEN,
+      direction: SortByDirection.ASCENDING
+    };
+
+    it('returns -1 if a.date_taken < b.date_taken', () => {
+      const a = createMediaItem('clientA', 'obj1', new Date(2000, 0, 1));
+      const b = createMediaItem('clientB', 'obj2', new Date(2001, 0, 1));
+
+      expect(sortMediaItem(a, b, sortBy)).toBe(-1);
+    });
+
+    it('returns 1 if a.date_taken > b.date_taken', () => {
+      const a = createMediaItem('clientC', 'obj3', new Date(2002, 0, 1));
+      const b = createMediaItem('clientD', 'obj4', new Date(2001, 0, 1));
+
+      expect(sortMediaItem(a, b, sortBy)).toBe(1);
+    });
+  });
+
+  describe('sorting by DATE_TAKEN descending', () => {
+    const sortBy: SortBy = {
+      field: SortByField.DATE_TAKEN,
+      direction: SortByDirection.DESCENDING
+    };
+
+    it('returns -1 if a.date_taken > b.date_taken', () => {
+      const a = createMediaItem('clientA', 'obj1', new Date(2002, 0, 1));
+      const b = createMediaItem('clientB', 'obj2', new Date(2001, 0, 1));
+
+      expect(sortMediaItem(a, b, sortBy)).toBe(-1);
+    });
+
+    it('returns 1 if a.date_taken < b.date_taken', () => {
+      const a = createMediaItem('clientC', 'obj3', new Date(2000, 0, 1));
+      const b = createMediaItem('clientD', 'obj4', new Date(2001, 0, 1));
+
+      expect(sortMediaItem(a, b, sortBy)).toBe(1);
+    });
+  });
+
+  function createMediaItem(
+    clientId: string,
+    objectId: string,
+    dateTaken: Date
+  ): MediaItem {
     return {
       id: { clientId, objectId },
       file_name: 'file.jpg',
@@ -618,7 +840,7 @@ describe('sortMediaItem', () => {
       album_id: albumId,
       width: 1000,
       height: 2000,
-      date_taken: new Date(2025, 1, 1)
+      date_taken: dateTaken
     };
   }
 });
