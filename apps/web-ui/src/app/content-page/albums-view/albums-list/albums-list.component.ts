@@ -33,7 +33,7 @@ export class AlbumsListComponent {
   readonly ListViewOptions = ListViewOptions;
 
   albumsSortBy: WritableSignal<ListAlbumsSortBy> = signal({
-    field: ListAlbumsSortByFields.ID,
+    field: ListAlbumsSortByFields.NAME,
     direction: ListAlbumsSortDirection.ASCENDING,
   });
 

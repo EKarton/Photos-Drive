@@ -44,7 +44,7 @@
       <label class="label cursor-pointer">
         <input
           type="radio"
-          name="sortField"
+          data-testid="sort-by-id-radio-button"
           class="radio radio-xs checked:bg-primary"
           [checked]="sortBy().field === ListAlbumsSortByFields.ID"
           (change)="setField(ListAlbumsSortByFields.ID)"
@@ -54,7 +54,7 @@
       <label class="label cursor-pointer">
         <input
           type="radio"
-          name="sortField"
+          data-testid="sort-by-name-radio-button"
           class="radio radio-xs checked:bg-primary"
           [checked]="sortBy().field === ListAlbumsSortByFields.NAME"
           (change)="setField(ListAlbumsSortByFields.NAME)"
@@ -70,7 +70,7 @@
       <label class="label cursor-pointer">
         <input
           type="radio"
-          name="sortDirection"
+          data-testid="sort-ascending-radio-button"
           class="radio radio-xs checked:bg-primary"
           [checked]="sortBy().direction === ListAlbumsSortDirection.ASCENDING"
           (change)="setDirection(ListAlbumsSortDirection.ASCENDING)"
@@ -80,7 +80,7 @@
       <label class="label cursor-pointer">
         <input
           type="radio"
-          name="sortDirection"
+          data-testid="sort-descending-radio-button"
           class="radio radio-xs checked:bg-primary"
           [checked]="sortBy().direction === ListAlbumsSortDirection.DESCENDING"
           (change)="setDirection(ListAlbumsSortDirection.DESCENDING)"

@@ -86,11 +86,14 @@ describe('AlbumsListComponent', () => {
     fixture.componentRef.setInput('albumId', 'album3');
     fixture.detectChanges();
 
-    // Click toggle to switch to table view
-    const toggle = fixture.nativeElement.querySelector(
-      '[data-testid="table-view-checkbox"]',
-    );
-    toggle.click();
+    // Click on the dropdown to switch to table view
+    fixture.nativeElement
+      .querySelector('app-content-albums-list-view-dropdown')
+      .click();
+    fixture.detectChanges();
+    fixture.nativeElement
+      .querySelector('[data-testid="table-view-radio-button"]')
+      .click();
     fixture.detectChanges();
 
     const tableRows = fixture.nativeElement.querySelectorAll(
