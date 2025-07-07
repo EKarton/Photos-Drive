@@ -87,11 +87,39 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
 
         const lastSeenMediaItemId = clientIdToMediaItemId.get(clientId);
         if (lastSeenMediaItemId) {
+          const lastSeenMediaItemObjectId = new ObjectId(
+            lastSeenMediaItemId.objectId
+          );
+
           if (req.sortBy.field === SortByField.ID) {
             filterObj['_id'] =
               req.sortBy.direction === SortByDirection.ASCENDING
-                ? { $gt: new ObjectId(lastSeenMediaItemId.objectId) }
-                : { $lt: new ObjectId(lastSeenMediaItemId.objectId) };
+                ? { $gt: lastSeenMediaItemObjectId }
+                : { $lt: lastSeenMediaItemObjectId };
+          } else {
+            const lastSeenAlbum = await mongoClient
+              .db('photos_drive')
+              .collection('media_items')
+              .findOne({ _id: lastSeenMediaItemObjectId });
+            const lastSeenMediaItemDateTaken =
+              lastSeenAlbum!['date_taken'] || new Date(1970, 1, 1);
+
+            filterObj['$or'] =
+              req.sortBy.direction === SortByDirection.ASCENDING
+                ? [
+                    { date_taken: { $gt: lastSeenMediaItemDateTaken } },
+                    {
+                      date_taken: lastSeenMediaItemDateTaken,
+                      _id: { $gt: lastSeenMediaItemObjectId }
+                    }
+                  ]
+                : [
+                    { date_taken: { $lt: lastSeenMediaItemDateTaken } },
+                    {
+                      date_taken: lastSeenMediaItemDateTaken,
+                      _id: { $lt: lastSeenMediaItemObjectId }
+                    }
+                  ];
           }
         }
 
@@ -101,6 +129,9 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
 
         if (req.sortBy.field === SortByField.ID) {
           sortObj['_id'] = mongoSortDirection;
+        } else {
+          sortObj['_id'] = mongoSortDirection;
+          sortObj['date_taken'] = mongoSortDirection;
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
@@ -194,11 +225,25 @@ export function sortMediaItem(
   sortBy: SortBy
 ): number {
   switch (sortBy.field) {
-    case SortByField.ID:
+    case SortByField.ID: {
+      const aId = mediaIdToString(a.id);
+      const bId = mediaIdToString(b.id);
+
       if (sortBy.direction === SortByDirection.ASCENDING) {
-        return mediaIdToString(a.id) < mediaIdToString(b.id) ? -1 : 1;
+        return aId < bId ? -1 : 1;
       } else {
-        return mediaIdToString(a.id) > mediaIdToString(b.id) ? -1 : 1;
+        return aId > bId ? -1 : 1;
       }
+    }
+    case SortByField.DATE_TAKEN: {
+      const aTime = a.date_taken.getTime();
+      const bTime = b.date_taken.getTime();
+
+      if (sortBy.direction === SortByDirection.ASCENDING) {
+        return aTime < bTime ? -1 : 1;
+      } else {
+        return aTime > bTime ? -1 : 1;
+      }
+    }
   }
 }
