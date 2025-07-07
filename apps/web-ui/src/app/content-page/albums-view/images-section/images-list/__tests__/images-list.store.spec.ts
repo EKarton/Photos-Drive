@@ -4,7 +4,11 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../../shared/results/results';
-import { ListMediaItemsResponse } from '../../../../services/types/list-media-items';
+import {
+  ListMediaItemsResponse,
+  ListMediaItemsSortByFields,
+  ListMediaItemsSortDirection,
+} from '../../../../services/types/list-media-items';
 import { MediaItem } from '../../../../services/types/media-item';
 import { WebApiService } from '../../../../services/webapi.service';
 import { ImagesListStore } from '../images-list.store';
@@ -68,8 +72,23 @@ describe('ImagesListStore', () => {
       of(toSuccess(dummyResponse)),
     );
 
-    store.loadInitialPage({ albumId: dummyAlbumId });
+    store.loadInitialPage({
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+    });
 
+    expect(mockWebApiService.listMediaItems).toHaveBeenCalledWith(dummyToken, {
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+      pageSize: undefined,
+      pageToken: undefined,
+    });
     expect(store.mediaItems()).toEqual(dummyMediaItems);
   });
 
@@ -78,8 +97,23 @@ describe('ImagesListStore', () => {
       of(toFailure<ListMediaItemsResponse>(new Error('API error'))),
     );
 
-    store.loadInitialPage({ albumId: dummyAlbumId });
+    store.loadInitialPage({
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+    });
 
+    expect(mockWebApiService.listMediaItems).toHaveBeenCalledWith(dummyToken, {
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+      pageSize: undefined,
+      pageToken: undefined,
+    });
     expect(store.mediaItems()).toEqual([]);
   });
 
@@ -106,11 +140,36 @@ describe('ImagesListStore', () => {
 
     // Set up initial state manually
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(firstPage)));
-    store.loadInitialPage({ albumId: dummyAlbumId });
+    store.loadInitialPage({
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+    });
 
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(secondPage)));
     store.loadMoreMediaItems();
 
+    expect(mockWebApiService.listMediaItems).toHaveBeenCalledTimes(2);
+    expect(mockWebApiService.listMediaItems).toHaveBeenCalledWith(dummyToken, {
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+      pageSize: undefined,
+      pageToken: undefined,
+    });
+    expect(mockWebApiService.listMediaItems).toHaveBeenCalledWith(dummyToken, {
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+      pageToken: 'next123',
+      pageSize: undefined,
+    });
     expect(store.mediaItems()).toEqual([
       ...dummyMediaItems,
       ...secondPage.mediaItems,
@@ -142,10 +201,25 @@ describe('ImagesListStore', () => {
     };
 
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(firstPage)));
-    store.loadInitialPage({ albumId: dummyAlbumId });
+    store.loadInitialPage({
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+    });
     store.loadMoreMediaItems();
 
     expect(mockWebApiService.listMediaItems).toHaveBeenCalledTimes(1);
+    expect(mockWebApiService.listMediaItems).toHaveBeenCalledWith(dummyToken, {
+      albumId: dummyAlbumId,
+      sortBy: {
+        field: ListMediaItemsSortByFields.DATE_TAKEN,
+        direction: ListMediaItemsSortDirection.ASCENDING,
+      },
+      pageSize: undefined,
+      pageToken: undefined,
+    });
     expect(store.mediaItems()).toEqual(dummyMediaItems);
   });
 });
