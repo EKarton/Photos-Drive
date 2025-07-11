@@ -38,7 +38,7 @@ export interface LoadImagesRequest {
   delayBetweenPages?: number;
 }
 
-export const DEFAULT_DELAY_BETWEEN_PAGES = 1050;
+export const DEFAULT_DELAY_BETWEEN_PAGES = 150;
 
 @Injectable()
 export class ImagesMapStore extends ComponentStore<ImagesMapState> {

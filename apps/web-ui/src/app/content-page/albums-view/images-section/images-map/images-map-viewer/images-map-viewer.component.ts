@@ -63,13 +63,12 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       if (this.map) {
-        console.log('Changing theme');
         this.map.setStyle(getTheme(this.isDarkMode()));
+
+        // Re-add heatmap layer and markers after style reload
         this.map.once('styledata', () => {
-          console.log('Re-add heatmap layer and markers after style reload');
-          // Re-add heatmap layer and markers after style reload
           this.addHeatmapLayer();
-          this.updateMarkers(this.markerImages());
+          this.addMarkers();
         });
       }
     });
@@ -90,10 +89,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
       this.subscriptions.add(
         this.mediaItems$.subscribe((mediaItems) => {
-          const source = this.map.getSource('media-heatmap') as
-            | mapboxgl.GeoJSONSource
-            | undefined;
-          source?.setData(buildGeoJSONFromMediaItems(mediaItems));
+          this.updateHeatmapLayer(mediaItems);
         }),
       );
 
@@ -165,6 +161,17 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         },
       });
     }
+  }
+
+  private addMarkers() {
+    console.log('Implement me for adding markers');
+  }
+
+  private updateHeatmapLayer(mediaItems: MediaItem[]) {
+    const source = this.map.getSource('media-heatmap') as
+      | mapboxgl.GeoJSONSource
+      | undefined;
+    source?.setData(buildGeoJSONFromMediaItems(mediaItems));
   }
 
   private updateMarkers(markerImages: MarkerImages[]) {
