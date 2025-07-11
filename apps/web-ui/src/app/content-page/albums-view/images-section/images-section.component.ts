@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  input,
+  signal,
+  ViewChild,
+  WritableSignal,
+} from '@angular/core';
 
 import {
   ListMediaItemsSortBy,
@@ -30,6 +38,8 @@ export class ImagesSectionComponent {
   readonly albumId = input.required<string>();
   readonly ImagesViewOptions = ImagesViewOptions;
 
+  @ViewChild('mapView', { read: ElementRef }) mapView?: ElementRef;
+
   readonly imagesSortBy: WritableSignal<ListMediaItemsSortBy> = signal({
     field: ListMediaItemsSortByFields.DATE_TAKEN,
     direction: ListMediaItemsSortDirection.ASCENDING,
@@ -38,4 +48,15 @@ export class ImagesSectionComponent {
   readonly imagesViewOption: WritableSignal<ImagesViewOptions> = signal(
     ImagesViewOptions.LIST,
   );
+
+  constructor() {
+    // Scroll to the map when the option is selected to map
+    effect(() => {
+      if (this.imagesViewOption() === ImagesViewOptions.MAP) {
+        setTimeout(() => {
+          this.mapView?.nativeElement.scrollIntoView({ behavior: 'smooth' });
+        }, 0);
+      }
+    });
+  }
 }

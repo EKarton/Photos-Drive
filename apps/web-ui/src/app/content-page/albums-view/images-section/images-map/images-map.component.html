@@ -1,1 +1,22 @@
-<div>To be determined...</div>
+<div class="h-screen relative">
+  <div
+    class="card bg-base-100 rounded-xl overflow-hidden shadow-xl absolute inset-0 flex flex-col mt-8 mb-8"
+  >
+    @if (isFetchingImages()) {
+      <div
+        class="absolute top-2 left-2 z-10 flex items-center gap-2 whitespace-nowrap text-s"
+      >
+        <div
+          class="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"
+        ></div>
+        <div>{{ images().length }} items</div>
+      </div>
+    }
+    <app-images-map-viewer
+      class="flex-grow"
+      [mediaItems]="images()"
+      [markerImages]="[]"
+      [isDarkMode]="isDarkMode()"
+    />
+  </div>
+</div>
