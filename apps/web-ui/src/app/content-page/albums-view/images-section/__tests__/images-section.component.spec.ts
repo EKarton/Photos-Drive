@@ -71,7 +71,7 @@ describe('ImagesSectionComponent', () => {
     spyOn(store, 'dispatch');
   });
 
-  it('should render images given album, media items, and gphotos media items have loaded yet', () => {
+  it('should render list of images given album, media items, and gphotos media items have loaded yet', () => {
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
 
     const fixture = TestBed.createComponent(ImagesSectionComponent);
@@ -86,5 +86,25 @@ describe('ImagesSectionComponent', () => {
 
     const elements = fixture.nativeElement.querySelectorAll('app-image');
     expect(elements.length).toEqual(2);
+  });
+
+  it('should render map of images when user changes view to map view', () => {
+    mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
+    const fixture = TestBed.createComponent(ImagesSectionComponent);
+    fixture.componentRef.setInput('albumId', 'album1');
+    fixture.detectChanges();
+
+    fixture.nativeElement
+      .querySelector('app-content-images-view-dropdown')
+      .click();
+    fixture.detectChanges();
+    fixture.nativeElement
+      .querySelector('[data-testid="map-view-radio-button"]')
+      .click();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('app-content-images-map'),
+    ).toBeTruthy();
   });
 });

@@ -3,10 +3,18 @@
 
   <div class="flex items-center gap-2">
     <app-content-images-sort-dropdown [(sortBy)]="imagesSortBy" />
+    <app-content-images-view-dropdown [(imagesViewOption)]="imagesViewOption" />
   </div>
 </div>
 <div class="mb-4xl">
   <div class="mb-4xl">
-    <app-content-images-list [albumId]="albumId()" [sortBy]="imagesSortBy()" />
+    @if (imagesViewOption() === ImagesViewOptions.LIST) {
+      <app-content-images-list
+        [albumId]="albumId()"
+        [sortBy]="imagesSortBy()"
+      />
+    } @else {
+      <app-content-images-map [albumId]="albumId()" />
+    }
   </div>
 </div>
