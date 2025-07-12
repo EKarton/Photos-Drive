@@ -73,7 +73,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.map = this.mapboxFactory.build({
+    this.map = this.mapboxFactory.buildMap({
       accessToken: environment.mapboxToken,
       container: this.mapContainer.nativeElement,
       style: getTheme(this.isDarkMode()),
@@ -289,7 +289,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         );
       }
 
-      const marker = new mapboxgl.Marker(componentRef.location.nativeElement)
+      const marker = this.mapboxFactory
+        .buildMarker(componentRef.location.nativeElement)
         .setLngLat([longitude, latitude])
         .addTo(this.map);
 

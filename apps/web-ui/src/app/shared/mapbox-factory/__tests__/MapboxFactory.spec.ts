@@ -11,17 +11,26 @@ describe('MapboxFactory', () => {
     }).compileComponents();
   });
 
-  it('should return an instance of mapboxgl.Map when called build()', () => {
+  it('should return an instance of mapboxgl.Map when called buildMap()', () => {
     const fixture = TestBed.createComponent(EmptyComponent);
 
     const factory = new MapboxFactory();
-    const map = factory.build({
+    const map = factory.buildMap({
       container: fixture.nativeElement,
       accessToken: '1234',
       testMode: true,
     });
 
     expect(map).toBeInstanceOf(mapboxgl.Map);
+  });
+
+  it('should return an instance of mapboxgl.Marker when called buildMarker()', () => {
+    const fixture = TestBed.createComponent(EmptyComponent);
+
+    const factory = new MapboxFactory();
+    const map = factory.buildMarker(fixture.nativeElement);
+
+    expect(map).toBeInstanceOf(mapboxgl.Marker);
   });
 });
 
