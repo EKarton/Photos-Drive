@@ -12,19 +12,19 @@ import {
 import { WebApiService } from '../../../../../services/webapi.service';
 import { ImageState } from '../../../images-list/image/image.store';
 
-/** State definition for {@code ImageStore}. */
-export interface ImageMarker {
+/** State definition for {@code ImageMapMarkerStore}. */
+export interface ImageMapMarker {
   gPhotosMediaItem: Result<GPhotosMediaItem>;
 }
 
 /** Initial state for {@code ImageMarkerStore}. */
-export const INITIAL_STATE: ImageMarker = {
+export const INITIAL_STATE: ImageMapMarker = {
   gPhotosMediaItem: toPending(),
 };
 
 /** Component store for {@code ImageComponent}. */
 @Injectable()
-export class ImageMarkerStore extends ComponentStore<ImageMarker> {
+export class ImageMapMarkerStore extends ComponentStore<ImageMapMarker> {
   private webApiService = inject(WebApiService);
   private store = inject(Store);
 

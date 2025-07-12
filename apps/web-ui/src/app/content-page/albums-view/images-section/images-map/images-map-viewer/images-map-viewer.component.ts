@@ -18,6 +18,7 @@ import { filter, map, shareReplay, Subscription, take } from 'rxjs';
 import Supercluster from 'supercluster';
 
 import { environment } from '../../../../../../environments/environment';
+import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { MediaItem } from '../../../../services/types/media-item';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
@@ -50,6 +51,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef;
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly store = inject(Store);
+  private readonly mapboxFactory = inject(MAPBOX_FACTORY_TOKEN);
 
   private map!: mapboxgl.Map;
   private supercluster!: Supercluster;
@@ -71,7 +73,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.map = new mapboxgl.Map({
+    this.map = this.mapboxFactory.build({
       accessToken: environment.mapboxToken,
       container: this.mapContainer.nativeElement,
       style: getTheme(this.isDarkMode()),

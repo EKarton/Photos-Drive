@@ -18,7 +18,7 @@
     </div>
   } @else if (imageUrl() | hasFailed) {
     <div
-      data-testid="image-error"
+      data-testid="image-failed"
       class="rounded-lg border-2 border-gray-800 bg-base-300 w-full h-full flex items-center justify-center"
     >
       <svg
@@ -38,6 +38,7 @@
     </div>
   } @else {
     <div
+      data-testid="image-loaded"
       class="rounded-lg border-2 border-gray-800 w-full h-full bg-base-300 bg-cover cursor-pointer overflow-hidden"
       [ngStyle]="{
         'background-image': 'url(' + imageUrl().data! + ')',

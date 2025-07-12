@@ -14,14 +14,14 @@ import { HasFailedPipe } from '../../../../../../shared/results/pipes/has-failed
 import { IsPendingPipe } from '../../../../../../shared/results/pipes/is-pending.pipe';
 import { mapResult } from '../../../../../../shared/results/utils/mapResult';
 import { MediaItem } from '../../../../../services/types/media-item';
-import { ImageMarkerStore } from './image-marker.store';
+import { ImageMapMarkerStore } from './image-map-marker.store';
 
 @Component({
   standalone: true,
   selector: 'app-content-image-map-marker',
   imports: [CommonModule, InViewportModule, HasFailedPipe, IsPendingPipe],
   templateUrl: './image-map-marker.component.html',
-  providers: [ImageMarkerStore],
+  providers: [ImageMapMarkerStore],
 })
 export class ImageMapMarkerComponent {
   readonly mediaItem = input.required<MediaItem>();
@@ -29,7 +29,7 @@ export class ImageMapMarkerComponent {
 
   readonly markerClick = output<Event>();
 
-  private readonly imageMarkerStore = inject(ImageMarkerStore);
+  private readonly imageMarkerStore = inject(ImageMapMarkerStore);
 
   private readonly isInViewport = signal(false);
 
@@ -49,7 +49,6 @@ export class ImageMapMarkerComponent {
   constructor() {
     effect(() => {
       if (this.isInViewport()) {
-        console.log(this.mediaItem());
         this.imageMarkerStore.loadGPhotosMediaItemDetails(
           this.mediaItem().gPhotosMediaItemId,
         );
@@ -58,7 +57,6 @@ export class ImageMapMarkerComponent {
   }
 
   setIsInViewport(visible: boolean) {
-    console.log('isVisible', visible);
     this.isInViewport.set(visible);
   }
 }
