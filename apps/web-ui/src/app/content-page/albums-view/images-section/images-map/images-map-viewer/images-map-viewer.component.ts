@@ -1,30 +1,26 @@
 import {
   Component,
+  ComponentRef,
   effect,
   ElementRef,
+  inject,
   input,
   OnDestroy,
   OnInit,
   output,
   ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { Store } from '@ngrx/store';
 import * as mapboxgl from 'mapbox-gl';
-import { shareReplay, Subscription } from 'rxjs';
+import { filter, map, shareReplay, Subscription, take } from 'rxjs';
+import Supercluster from 'supercluster';
 
 import { environment } from '../../../../../../environments/environment';
 import { MediaItem } from '../../../../services/types/media-item';
-
-export interface ImageLocations {
-  latitude: number;
-  longitude: number;
-}
-
-export interface MarkerImages {
-  id: string;
-  location: ImageLocations;
-  thumbnailUrl: string;
-}
+import { mediaViewerActions } from '../../../../store/media-viewer';
+import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
 
 export interface Bounds {
   north: number;
@@ -41,13 +37,9 @@ export interface Bounds {
 })
 export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   readonly mediaItems = input.required<MediaItem[]>();
-  readonly markerImages = input.required<MarkerImages[]>();
   readonly isDarkMode = input.required<boolean>();
 
   private readonly mediaItems$ = toObservable(this.mediaItems).pipe(
-    shareReplay(1),
-  );
-  private readonly markerImages$ = toObservable(this.markerImages).pipe(
     shareReplay(1),
   );
 
@@ -56,9 +48,12 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   boundsChanged = output<Bounds>();
 
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef;
+  private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly store = inject(Store);
 
   private map!: mapboxgl.Map;
-  private markers: mapboxgl.Marker[] = [];
+  private supercluster!: Supercluster;
+  private imageMarkers: mapboxgl.Marker[] = [];
 
   constructor() {
     effect(() => {
@@ -68,7 +63,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         // Re-add heatmap layer and markers after style reload
         this.map.once('styledata', () => {
           this.addHeatmapLayer();
-          this.addMarkers();
+          this.updateImageMarkers();
+          this.prepareSupercluster();
         });
       }
     });
@@ -83,26 +79,84 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       zoom: 2,
     });
 
+    // Center the map to the first item in mediaItems$
+    this.subscriptions.add(
+      this.mediaItems$
+        .pipe(
+          map((mediaItems) =>
+            mediaItems.find((mediaItem) => mediaItem.location),
+          ),
+          filter(Boolean),
+          take(1),
+        )
+        .subscribe((mediaItem) => {
+          this.map.setCenter([
+            mediaItem.location!.longitude,
+            mediaItem.location!.latitude,
+          ]);
+        }),
+    );
+
+    // Set the map layers whenever it has finished loading
     this.map.on('load', () => {
       this.addHeatmapLayer();
       this.emitBounds();
+      this.updateImageMarkers();
+      this.prepareSupercluster();
 
       this.subscriptions.add(
         this.mediaItems$.subscribe((mediaItems) => {
           this.updateHeatmapLayer(mediaItems);
         }),
       );
-
-      this.subscriptions.add(
-        this.markerImages$.subscribe((markerImages) => {
-          this.updateMarkers(markerImages);
-        }),
-      );
     });
 
+    // Update the map whenever the map has moved
     this.map.on('moveend', () => {
       this.emitBounds();
+      this.updateImageMarkers();
+      this.prepareSupercluster();
     });
+  }
+
+  private prepareSupercluster() {
+    const seen = new Map<string, number>();
+
+    const geojsonPoints: Supercluster.PointFeature<{ mediaItem: MediaItem }>[] =
+      this.mediaItems()
+        .filter((mediaItem) => mediaItem.location)
+        .map((mediaItem) => {
+          const lng = mediaItem.location!.longitude;
+          const lat = mediaItem.location!.latitude;
+          const key = `${lng},${lat}`;
+          let jitteredLng = lng;
+          let jitteredLat = lat;
+
+          // If this location has been seen before, apply jitter
+          const count = seen.get(key) || 0;
+          if (count > 0) {
+            jitteredLng = jitterCoordinate(lng, 0.00005 * (count + 1));
+            jitteredLat = jitterCoordinate(lat, 0.00005 * (count + 1));
+          }
+          seen.set(key, count + 1);
+
+          return {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [jitteredLng, jitteredLat],
+            },
+            properties: {
+              mediaItem,
+            },
+          };
+        });
+
+    this.supercluster = new Supercluster({
+      radius: 40,
+      maxZoom: this.map.getMaxZoom(),
+    });
+    this.supercluster.load(geojsonPoints);
   }
 
   private emitBounds() {
@@ -163,10 +217,6 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     }
   }
 
-  private addMarkers() {
-    console.log('Implement me for adding markers');
-  }
-
   private updateHeatmapLayer(mediaItems: MediaItem[]) {
     const source = this.map.getSource('media-heatmap') as
       | mapboxgl.GeoJSONSource
@@ -174,39 +224,81 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     source?.setData(buildGeoJSONFromMediaItems(mediaItems));
   }
 
-  private updateMarkers(markerImages: MarkerImages[]) {
+  private updateImageMarkers() {
     // Remove old markers
-    this.markers.forEach((m) => m.remove());
-    this.markers = [];
+    this.imageMarkers.forEach((marker) => marker.remove());
+    this.imageMarkers = [];
 
-    // Add new markers for the 4 images
-    markerImages.forEach((image) => {
-      const el = document.createElement('div');
-      el.className = 'marker';
-      el.style.backgroundImage = `url(${image.thumbnailUrl})`;
-      el.style.width = '50px';
-      el.style.height = '50px';
-      el.style.backgroundSize = 'cover';
-      el.style.borderRadius = '50%';
-      el.style.border = '2px solid white';
-      el.style.boxShadow = '0 0 5px rgba(0,0,0,0.3)';
+    // Get clusters for current viewport and zoom
+    const bounds = this.map.getBounds();
+    if (!bounds || !this.supercluster) {
+      return;
+    }
 
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([image.location.longitude, image.location.latitude])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 }).setHTML(
-            `<img src="${image.thumbnailUrl}" width="150"><br><b>${image.id}</b>`,
-          ),
-        )
+    const bbox: GeoJSON.BBox = [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ];
+    const clusters = this.supercluster.getClusters(bbox, this.map.getZoom());
+
+    for (const cluster of clusters) {
+      const [longitude, latitude] = cluster.geometry.coordinates;
+      let componentRef: ComponentRef<ImageMapMarkerComponent>;
+
+      if (cluster.properties.cluster) {
+        const count = cluster.properties.point_count;
+        const leaf = this.supercluster.getLeaves(cluster.id as number, 1)[0];
+        const mediaItem = leaf.properties['mediaItem'] as MediaItem;
+
+        componentRef = this.viewContainerRef.createComponent(
+          ImageMapMarkerComponent,
+        );
+        componentRef.setInput('mediaItem', mediaItem);
+        componentRef.setInput('badgeCount', count);
+
+        const expansionZoom = this.supercluster.getClusterExpansionZoom(
+          cluster.properties.cluster_id as number,
+        );
+        this.subscriptions.add(
+          componentRef.instance.markerClick.subscribe(() => {
+            this.map.easeTo({
+              center: [longitude, latitude],
+              zoom: expansionZoom,
+            });
+          }),
+        );
+      } else {
+        const mediaItem = cluster.properties['mediaItem'] as MediaItem;
+        componentRef = this.viewContainerRef.createComponent(
+          ImageMapMarkerComponent,
+        );
+        componentRef.setInput('mediaItem', mediaItem);
+
+        this.subscriptions.add(
+          componentRef.instance.markerClick.subscribe(() => {
+            this.store.dispatch(
+              mediaViewerActions.openMediaViewer({
+                request: { mediaItemId: mediaItem.id },
+              }),
+            );
+          }),
+        );
+      }
+
+      const marker = new mapboxgl.Marker(componentRef.location.nativeElement)
+        .setLngLat([longitude, latitude])
         .addTo(this.map);
 
-      this.markers.push(marker);
-    });
+      this.imageMarkers.push(marker);
+    }
   }
 
   ngOnDestroy() {
     this.map.remove();
     this.subscriptions.unsubscribe();
+    this.imageMarkers.forEach((marker) => marker.remove());
   }
 }
 
@@ -233,7 +325,14 @@ function buildGeoJSONFromMediaItems(
             mediaItem.location!.latitude,
           ],
         },
-        properties: {},
+        properties: {
+          ...mediaItem,
+        },
       })),
   };
+}
+
+function jitterCoordinate(coord: number, magnitude = 0.00005): number {
+  // magnitude is in degrees; 0.00005 ~ 5 meters
+  return coord + (Math.random() - 0.5) * 2 * magnitude;
 }

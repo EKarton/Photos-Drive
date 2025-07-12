@@ -1,0 +1,64 @@
+import { CommonModule } from '@angular/common';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { InViewportModule } from 'ng-in-viewport';
+
+import { HasFailedPipe } from '../../../../../../shared/results/pipes/has-failed.pipe';
+import { IsPendingPipe } from '../../../../../../shared/results/pipes/is-pending.pipe';
+import { mapResult } from '../../../../../../shared/results/utils/mapResult';
+import { MediaItem } from '../../../../../services/types/media-item';
+import { ImageMarkerStore } from './image-marker.store';
+
+@Component({
+  standalone: true,
+  selector: 'app-content-image-map-marker',
+  imports: [CommonModule, InViewportModule, HasFailedPipe, IsPendingPipe],
+  templateUrl: './image-map-marker.component.html',
+  providers: [ImageMarkerStore],
+})
+export class ImageMapMarkerComponent {
+  readonly mediaItem = input.required<MediaItem>();
+  readonly badgeCount = input<number>(1);
+
+  readonly markerClick = output<Event>();
+
+  private readonly imageMarkerStore = inject(ImageMarkerStore);
+
+  private readonly isInViewport = signal(false);
+
+  readonly title = computed(() =>
+    this.badgeCount() > 1
+      ? `Cluster of ${this.badgeCount()} media items`
+      : `Media item`,
+  );
+
+  readonly imageUrl = computed(() => {
+    return mapResult(
+      this.imageMarkerStore.gPhotosMediaItem(),
+      (gPhotosMediaItem) => gPhotosMediaItem.baseUrl,
+    );
+  });
+
+  constructor() {
+    effect(() => {
+      if (this.isInViewport()) {
+        console.log(this.mediaItem());
+        this.imageMarkerStore.loadGPhotosMediaItemDetails(
+          this.mediaItem().gPhotosMediaItemId,
+        );
+      }
+    });
+  }
+
+  setIsInViewport(visible: boolean) {
+    console.log('isVisible', visible);
+    this.isInViewport.set(visible);
+  }
+}

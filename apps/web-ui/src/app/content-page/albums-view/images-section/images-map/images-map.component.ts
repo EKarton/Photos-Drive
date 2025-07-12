@@ -5,9 +5,9 @@ import {
   computed,
   effect,
   ElementRef,
-  HostListener,
   inject,
   input,
+  OnDestroy,
   Signal,
   signal,
   ViewChild,
@@ -21,6 +21,26 @@ import { MediaItem } from '../../../services/types/media-item';
 import { ImagesMapStore } from './images-map.store';
 import { ImagesMapViewerComponent } from './images-map-viewer/images-map-viewer.component';
 
+interface VendorFullscreenElement extends HTMLElement {
+  // Safari APIs for going and exiting out of full screen
+  webkitRequestFullscreen?: () => Promise<void> | void;
+  webkitExitFullscreen?: () => Promise<void> | void;
+
+  // Edge / IE APIs for going and exiting out of full screen
+  msRequestFullscreen?: () => Promise<void> | void;
+  msExitFullscreen?: () => Promise<void> | void;
+}
+
+interface VendorFullScreenDocument extends Document {
+  // Safari APIs for going and exiting out of full screen
+  webkitRequestFullscreen?: () => Promise<void> | void;
+  webkitExitFullscreen?: () => Promise<void> | void;
+
+  // Edge / IE APIs for going and exiting out of full screen
+  msRequestFullscreen?: () => Promise<void> | void;
+  msExitFullscreen?: () => Promise<void> | void;
+}
+
 @Component({
   standalone: true,
   selector: 'app-content-images-map',
@@ -28,7 +48,7 @@ import { ImagesMapViewerComponent } from './images-map-viewer/images-map-viewer.
   templateUrl: './images-map.component.html',
   providers: [ImagesMapStore],
 })
-export class ImagesMapComponent implements AfterViewInit {
+export class ImagesMapComponent implements AfterViewInit, OnDestroy {
   readonly albumId = input.required<string>();
 
   private readonly store = inject(Store);
@@ -50,6 +70,7 @@ export class ImagesMapComponent implements AfterViewInit {
   });
 
   readonly isDarkMode = this.store.selectSignal(themeState.selectIsDarkMode);
+  readonly isFullscreen = signal(false);
 
   constructor() {
     effect(() => {
@@ -59,48 +80,56 @@ export class ImagesMapComponent implements AfterViewInit {
     });
   }
 
-  @HostListener('document:keydown.escape', ['$event'])
-  onEscapeKey() {
-    console.log('Escape pressed');
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-  }
-
-  readonly isFullscreen = signal(false);
-
   ngAfterViewInit() {
-    console.log('View initialized:', this.fullscreenContainer);
+    document.addEventListener('fullscreenchange', this.onFullscreenChange);
   }
+
+  ngOnDestroy() {
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+  }
+
+  // Use an arrow function to preserve "this"
+  onFullscreenChange = () => {
+    const isNowFullscreen = !!document.fullscreenElement;
+    this.isFullscreen.set(isNowFullscreen);
+    if (!isNowFullscreen) {
+      console.log('Exited fullscreen (any method, including Escape)');
+    }
+  };
 
   toggleFullscreen() {
     if (!this.isFullscreen()) {
       this.goFullscreen();
-      this.isFullscreen.set(true);
     } else {
       this.exitFullscreen();
-      this.isFullscreen.set(false);
     }
   }
 
   goFullscreen() {
-    const elem = this.fullscreenContainer.nativeElement;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if ((elem as any).webkitRequestFullscreen) {
-      (elem as any).webkitRequestFullscreen(); // Safari
-    } else if ((elem as any).msRequestFullscreen) {
-      (elem as any).msRequestFullscreen(); // IE/Edge
+    const element = this.fullscreenContainer
+      .nativeElement as VendorFullscreenElement;
+
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if (element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) {
+      element.msRequestFullscreen();
     }
+
+    this.isFullscreen.set(true);
   }
 
   exitFullscreen() {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if ((document as any).webkitExitFullscreen) {
-      (document as any).webkitExitFullscreen();
-    } else if ((document as any).msExitFullscreen) {
-      (document as any).msExitFullscreen();
+    const element = document as VendorFullScreenDocument;
+    if (element.exitFullscreen) {
+      element.exitFullscreen();
+    } else if (element.webkitExitFullscreen) {
+      element.webkitExitFullscreen();
+    } else if (element.msExitFullscreen) {
+      element.msExitFullscreen();
     }
+
+    this.isFullscreen.set(false);
   }
 }

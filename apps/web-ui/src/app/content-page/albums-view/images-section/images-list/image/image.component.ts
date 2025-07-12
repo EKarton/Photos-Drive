@@ -70,6 +70,18 @@ export class ImageComponent {
     });
   });
 
+  constructor() {
+    effect(() => {
+      if (this.isInViewport()) {
+        this.imageStore.loadGPhotosMediaItemDetails(this.gPhotosMediaItemId());
+      }
+    });
+  }
+
+  setIsInViewport(visible: boolean) {
+    this.isInViewport.set(visible);
+  }
+
   private openImageInNewTab(detail: GPhotosMediaItem) {
     const width = detail.mediaMetadata.width;
     const height = detail.mediaMetadata.height;
@@ -83,17 +95,5 @@ export class ImageComponent {
         request: { mediaItemId },
       }),
     );
-  }
-
-  constructor() {
-    effect(() => {
-      if (this.isInViewport()) {
-        this.imageStore.loadGPhotosMediaItemDetails(this.gPhotosMediaItemId());
-      }
-    });
-  }
-
-  setIsInViewport(visible: boolean) {
-    this.isInViewport.set(visible);
   }
 }
