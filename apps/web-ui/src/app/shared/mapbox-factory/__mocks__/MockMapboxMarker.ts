@@ -1,19 +1,8 @@
-import { ComponentRef } from '@angular/core';
+import { MapboxMarker } from '../MapboxFactory';
 
-/** A mock of the {@code mapboxgl.Marker} */
-
-export class MockMapboxMarker<T> {
-  private componentInstance: ComponentRef<T> | undefined = undefined;
-
-  setLngLat = jasmine.createSpy('setLngLat').and.returnValue(this);
-  addTo = jasmine.createSpy('addTo').and.returnValue(this);
-  remove = jasmine.createSpy('remove');
-
-  setComponentInstance(instance: ComponentRef<T>) {
-    this.componentInstance = instance;
-  }
-
-  getComponentInstance(): ComponentRef<T> | undefined {
-    return this.componentInstance;
-  }
+/** A mock of the {@code MapboxMarker<T>} */
+export class MockMapboxMarker<T> extends MapboxMarker<T> {
+  override setLngLat = jasmine.createSpy('setLngLat').and.returnValue(this);
+  override addTo = jasmine.createSpy('addTo').and.returnValue(this);
+  override remove = jasmine.createSpy('remove');
 }

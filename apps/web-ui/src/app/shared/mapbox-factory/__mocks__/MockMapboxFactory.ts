@@ -1,3 +1,5 @@
+import { ComponentRef } from '@angular/core';
+
 import { MockMapboxMap } from './MockMapboxMap';
 import { MockMapboxMarker } from './MockMapboxMarker';
 
@@ -14,14 +16,17 @@ export class MockMapboxFactory<T> {
     return [...this.markerInstances];
   }
 
-  buildMap(): MockMapboxMap {
-    const instance = new MockMapboxMap();
+  buildMap(options: mapboxgl.MapOptions): MockMapboxMap {
+    const instance = new MockMapboxMap({
+      ...options,
+      testMode: true,
+    });
     this.mapInstances.push(instance);
     return instance;
   }
 
-  buildMarker(): MockMapboxMarker<T> {
-    const instance = new MockMapboxMarker<T>();
+  buildMarker(componentInstance: ComponentRef<T>): MockMapboxMarker<T> {
+    const instance = new MockMapboxMarker<T>(componentInstance);
     this.markerInstances.push(instance);
     return instance;
   }

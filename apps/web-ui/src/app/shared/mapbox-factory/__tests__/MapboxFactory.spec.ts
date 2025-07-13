@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import * as mapboxgl from 'mapbox-gl';
 
-import { MapboxFactory } from '../MapboxFactory';
+import { MapboxFactory, MapboxMarker } from '../MapboxFactory';
 
 describe('MapboxFactory', () => {
   beforeEach(async () => {
@@ -24,13 +24,15 @@ describe('MapboxFactory', () => {
     expect(map).toBeInstanceOf(mapboxgl.Map);
   });
 
-  it('should return an instance of mapboxgl.Marker when called buildMarker()', () => {
+  it('should return an instance of MapboxMarker when called buildMarker()', () => {
+    const factory = new MapboxFactory();
     const fixture = TestBed.createComponent(EmptyComponent);
 
-    const factory = new MapboxFactory();
-    const map = factory.buildMarker(fixture.nativeElement);
+    const marker = factory.buildMarker(fixture.componentRef);
 
-    expect(map).toBeInstanceOf(mapboxgl.Marker);
+    expect(marker).toBeInstanceOf(MapboxMarker);
+    expect(marker).toBeInstanceOf(mapboxgl.Marker);
+    expect(marker.getComponentInstance()).toEqual(fixture.componentRef);
   });
 });
 
