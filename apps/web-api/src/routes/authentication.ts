@@ -65,8 +65,8 @@ export default async function () {
         const token = await new SignJWT()
           .setProtectedHeader({ alg: 'EdDSA' })
           .setIssuedAt()
-          .setIssuer('Sharded-Photos-Drive-WebApi')
-          .setAudience('Sharded-Photos-Drive-WebUI')
+          .setIssuer('Photos-Drive-WebApi')
+          .setAudience('Photos-Drive-WebUI')
           .setSubject(profile.id)
           .setExpirationTime(tokenExpiryTime)
           .sign(secretKey);
