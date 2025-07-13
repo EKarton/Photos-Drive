@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from bson import Binary
 from bson.objectid import ObjectId
+from photos_drive.shared.tiles.mongodb.tiles_repository_impl import TilesRepositoryImpl
 from unittest_parametrize import parametrize
 from unittest_parametrize import ParametrizedTestCase
 
@@ -68,6 +69,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        tiles_repo = TilesRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         root_album_obj = albums_repo.create_album('', None)
@@ -128,6 +130,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            tiles_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -239,6 +242,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        tiles_repo = TilesRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -289,6 +293,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            tiles_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -352,6 +357,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        tiles_repo = TilesRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -427,6 +433,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            tiles_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -465,6 +472,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        tiles_repo = TilesRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -517,6 +525,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            tiles_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -559,6 +568,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        tiles_repo = TilesRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -634,6 +644,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            tiles_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -681,6 +692,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        tiles_repo = TilesRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -757,6 +769,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            tiles_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
