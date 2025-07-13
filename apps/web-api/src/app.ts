@@ -9,6 +9,7 @@ import albumsRouter from './routes/albums';
 import authRouter from './routes/authentication';
 import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
+import mapTiles from './routes/map_tiles';
 import mediaItemsRouter from './routes/media_items';
 import { GPhotosClientsRepository } from './services/blob_store/gphotos/GPhotosClientsRepository';
 import { ConfigStore } from './services/config_store/ConfigStore';
@@ -22,6 +23,7 @@ import {
   MongoDbClientsRepository,
   MongoDbClientsRepositoryImpl
 } from './services/metadata_store/mongodb/MongoDbClientsRepository';
+import { TilesRepositoryImpl } from './services/tiles_store/mongodb/TilesRepositoryImpl';
 import logger from './utils/logger';
 
 export class App {
@@ -33,6 +35,7 @@ export class App {
   private gPhotosClientsRepository?: GPhotosClientsRepository;
   private albumsRepository?: AlbumsRepository;
   private mediaItemsRepository?: MediaItemsRepository;
+  private tilesRepository?: TilesRepositoryImpl;
 
   constructor() {
     this.app = express();
@@ -62,6 +65,9 @@ export class App {
     this.mediaItemsRepository = new MediaItemsRepositoryImpl(
       this.mongoDbClientsRepository
     );
+    this.tilesRepository = new TilesRepositoryImpl(
+      this.mongoDbClientsRepository
+    );
 
     this.app.use(helmet());
     this.app.use(compression());
@@ -84,6 +90,9 @@ export class App {
     );
     this.app.use(await mediaItemsRouter(this.mediaItemsRepository));
     this.app.use(await gPhotosMediaItemsRouter(this.gPhotosClientsRepository));
+    this.app.use(
+      await mapTiles(await this.config.getRootAlbumId(), this.tilesRepository)
+    );
 
     this.app.use(
       (err: Error, _req: Request, res: Response, _next: NextFunction) => {
