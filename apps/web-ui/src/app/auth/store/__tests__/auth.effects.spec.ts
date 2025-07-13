@@ -36,6 +36,7 @@ describe('AuthEffects', () => {
     const tokenResponse: TokenResponse = {
       accessToken: 'mockAccessToken',
       userProfileUrl: 'http://profile.com/1',
+      mapboxApiToken: 'mockMapboxApiToken',
     };
     const result: Result<TokenResponse> = toSuccess(tokenResponse);
 

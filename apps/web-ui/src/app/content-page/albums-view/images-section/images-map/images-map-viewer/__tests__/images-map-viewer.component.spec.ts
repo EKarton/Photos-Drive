@@ -77,6 +77,7 @@ describe('ImagesMapViewerComponent', () => {
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
+            { selector: authState.selectMapboxApiToken, value: 'mockApiToken' },
           ],
         }),
         {

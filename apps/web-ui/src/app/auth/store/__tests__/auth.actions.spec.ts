@@ -18,6 +18,7 @@ describe('Auth Actions', () => {
       const result: Result<TokenResponse> = toSuccess({
         accessToken: 'mockAccessToken',
         userProfileUrl: 'http://profile.com/1',
+        mapboxApiToken: 'mockMapboxApiToken',
       });
       const action = loadAuthResult({ result });
 

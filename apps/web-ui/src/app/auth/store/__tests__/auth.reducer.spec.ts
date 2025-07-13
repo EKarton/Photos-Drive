@@ -15,13 +15,15 @@ describe('Auth Reducer', () => {
     const mockResult = toSuccess<TokenResponse>({
       accessToken: 'mockAccessToken',
       userProfileUrl: 'mockUserProfileUrl',
+      mapboxApiToken: 'mockMapboxApiToken',
     });
 
     const action = authActions.loadAuthResult({ result: mockResult });
     const state = authReducer(initialState, action);
 
-    expect(state.authToken).toBe('mockAccessToken');
-    expect(state.userProfileUrl).toBe('mockUserProfileUrl');
+    expect(state.authToken).toEqual('mockAccessToken');
+    expect(state.userProfileUrl).toEqual('mockUserProfileUrl');
+    expect(state.mapboxApiToken).toEqual('mockMapboxApiToken');
   });
 
   it('should handle loadAuthResult action with missing data gracefully', () => {
@@ -30,7 +32,8 @@ describe('Auth Reducer', () => {
     const action = authActions.loadAuthResult({ result: mockResult });
     const state = authReducer(initialState, action);
 
-    expect(state.authToken).toBe('');
-    expect(state.userProfileUrl).toBe('');
+    expect(state.authToken).toEqual('');
+    expect(state.userProfileUrl).toEqual('');
+    expect(state.mapboxApiToken).toEqual('');
   });
 });

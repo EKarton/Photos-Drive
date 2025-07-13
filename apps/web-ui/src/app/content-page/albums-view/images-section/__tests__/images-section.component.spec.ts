@@ -59,6 +59,7 @@ describe('ImagesSectionComponent', () => {
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
+            { selector: authState.selectMapboxApiToken, value: 'mockApiToken' },
             { selector: themeState.selectIsDarkMode, value: false },
           ],
         }),

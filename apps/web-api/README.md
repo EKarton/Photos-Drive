@@ -6,7 +6,41 @@ This is the web api app used to serve content to the web ui.
 
 ## Getting Started
 
-1. First, create a Google OAuth2 project.
+1. First, create a Google OAuth2 project. Set up OAuth2 and get its client ID and client secrets.
+
+2. Second, create a Mapbox account and grab it's API token.
+
+3. Next, create a `.env` file with these contents:
+
+   ```env
+   # Google OAuth2 client ID and client secrets
+   GOOGLE_CLIENT_ID="YOUR_GOOGLE_OAUTH2_CLIENT_ID"
+   GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_OAUTH2_CLIENT_SECRET"
+   GOOGLE_CALLBACK_URI="YOUR_GOOGLE_OAUTH2_CALLBACK_URI"
+
+   # JWT
+   ACCESS_TOKEN_JWT_PUBLIC_KEY="YOUR_JWT_PUBLIC_KEY"
+   ACCESS_TOKEN_JWT_PRIVATE_KEY="YOUR_JWT_PRIVATE_KEY"
+   ACCESS_TOKEN_ALLOWED_SUBJECT="YOUR_GOOGLE_ACCOUNT_ID"
+
+   # Vault mongo db connection:
+   VAULT_MONGODB="YOUR_READ_WRITE_CONNECTION_STRING_TO_THE_VAULT_IN_MONGODB"
+
+   # If your vault is in the file:
+   # VAULT_FILE_PATH="./../cli-client/test-config.conf"
+
+   # Mapbox API token
+   MAPBOX_API_TOKEN="YOUR_MAPBOX_API_TOKEN"
+
+   PORT="3000"
+   PINO_LOG_LEVEL="error"
+   CORS_FRONTEND_ENDPOINT="http://localhost:4200"
+   NUM_FORKS=1
+   ```
+
+4. Install dependencies and run the app by running: `pnpm install && pnpm dev`
+
+5. It should launch the api on <http://localhost:3000>.
 
 ## Running them locally without Docker
 

@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 export interface TokenResponse {
   accessToken: string;
   userProfileUrl: string;
+  mapboxApiToken: string;
 }
 
 @Injectable({ providedIn: 'root' })
