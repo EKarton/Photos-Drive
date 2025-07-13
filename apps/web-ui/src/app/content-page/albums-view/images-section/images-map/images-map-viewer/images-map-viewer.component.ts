@@ -19,6 +19,7 @@ import Supercluster from 'supercluster';
 
 import { environment } from '../../../../../../environments/environment';
 import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
+import { MockMapboxMarker } from '../../../../../shared/mapbox-factory/__mocks__/mocks';
 import { MediaItem } from '../../../../services/types/media-item';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
@@ -65,8 +66,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         // Re-add heatmap layer and markers after style reload
         this.map.once('styledata', () => {
           this.addHeatmapLayer();
-          this.updateImageMarkers();
           this.prepareSupercluster();
+          this.updateImageMarkers();
         });
       }
     });
@@ -102,9 +103,9 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     // Set the map layers whenever it has finished loading
     this.map.on('load', () => {
       this.addHeatmapLayer();
-      this.emitBounds();
-      this.updateImageMarkers();
       this.prepareSupercluster();
+      this.updateImageMarkers();
+      this.emitBounds();
 
       this.subscriptions.add(
         this.mediaItems$.subscribe((mediaItems) => {
@@ -115,9 +116,9 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
     // Update the map whenever the map has moved
     this.map.on('moveend', () => {
-      this.emitBounds();
+      // this.prepareSupercluster(); // TODO: Do we need this?
       this.updateImageMarkers();
-      this.prepareSupercluster();
+      this.emitBounds();
     });
   }
 
@@ -294,6 +295,10 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         .setLngLat([longitude, latitude])
         .addTo(this.map);
 
+      if (marker instanceof MockMapboxMarker) {
+        marker.setComponentInstance(componentRef);
+      }
+
       this.imageMarkers.push(marker);
     }
   }
@@ -335,7 +340,7 @@ function buildGeoJSONFromMediaItems(
   };
 }
 
-function jitterCoordinate(coord: number, magnitude = 0.00005): number {
-  // magnitude is in degrees; 0.00005 ~ 5 meters
+function jitterCoordinate(coord: number, magnitude: number): number {
+  // Magnitude is in degrees; 0.00005 ~ 5 meters
   return coord + (Math.random() - 0.5) * 2 * magnitude;
 }
