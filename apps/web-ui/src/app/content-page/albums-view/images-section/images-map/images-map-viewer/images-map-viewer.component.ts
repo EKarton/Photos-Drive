@@ -81,7 +81,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       container: this.mapContainer.nativeElement,
       style: getTheme(this.isDarkMode()),
       center: [0, 0],
-      zoom: 2,
+      zoom: 10,
     });
 
     // Center the map to the first item in mediaItems$
