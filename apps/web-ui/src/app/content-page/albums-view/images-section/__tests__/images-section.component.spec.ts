@@ -3,13 +3,16 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 
-import { WINDOW } from '../../../../app.tokens';
+import { MAPBOX_FACTORY_TOKEN, WINDOW } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
+import { MockMapboxFactory } from '../../../../shared/mapbox-factory/__mocks__/MockMapboxFactory';
 import { toSuccess } from '../../../../shared/results/results';
+import { themeState } from '../../../../themes/store';
 import { ListMediaItemsResponse } from '../../../services/types/list-media-items';
 import { WebApiService } from '../../../services/webapi.service';
 import { albumsState } from '../../../store/albums';
 import { mediaViewerState } from '../../../store/media-viewer';
+import { ImageMapMarkerComponent } from '../images-map/images-map-viewer/image-map-marker/image-map-marker.component';
 import { ImagesSectionComponent } from '../images-section.component';
 
 const PAGE_1: ListMediaItemsResponse = {
@@ -38,11 +41,13 @@ const PAGE_1: ListMediaItemsResponse = {
 describe('ImagesSectionComponent', () => {
   let store: MockStore;
   let mockWebApiService: jasmine.SpyObj<WebApiService>;
+  let mockMapboxFactory: MockMapboxFactory<ImageMapMarkerComponent>;
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
       'listMediaItems',
     ]);
+    mockMapboxFactory = new MockMapboxFactory();
 
     await TestBed.configureTestingModule({
       imports: [ImagesSectionComponent],
@@ -54,6 +59,7 @@ describe('ImagesSectionComponent', () => {
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
+            { selector: themeState.selectIsDarkMode, value: false },
           ],
         }),
         {
@@ -63,6 +69,10 @@ describe('ImagesSectionComponent', () => {
         {
           provide: WebApiService,
           useValue: mockWebApiService,
+        },
+        {
+          provide: MAPBOX_FACTORY_TOKEN,
+          useValue: mockMapboxFactory,
         },
       ],
     }).compileComponents();
