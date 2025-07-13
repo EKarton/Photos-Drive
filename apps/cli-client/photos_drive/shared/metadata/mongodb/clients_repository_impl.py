@@ -86,7 +86,23 @@ class MongoDbClientsRepository(ClientsRepository):
         best_client_id = None
         most_unused_space = float("-inf")
 
-        for id, client in self.__id_to_client.items():
+        for client_id, free_space in self.get_free_space_for_all_clients():
+            if free_space <= 0:
+                continue
+
+            if free_space > most_unused_space:
+                best_client_id = client_id
+                most_unused_space = free_space
+
+        if best_client_id is None:
+            raise ValueError("No MongoDB client found with free space!")
+
+        return best_client_id
+
+    def get_free_space_for_all_clients(self) -> list[tuple[ObjectId, int]]:
+        free_spaces = []
+
+        for client_id, client in self.__id_to_client.items():
             db = client["photos_drive"]
             db_stats = db.command({'dbStats': 1, 'freeStorage': 1})
             raw_total_free_storage = db_stats["totalFreeStorageSize"]
@@ -97,17 +113,9 @@ class MongoDbClientsRepository(ClientsRepository):
             if raw_total_free_storage == 0:
                 free_space = BYTES_512MB - db_stats["storageSize"]
 
-            if free_space <= 0:
-                continue
+            free_spaces.append((ObjectId(client_id), free_space))
 
-            if free_space > most_unused_space:
-                best_client_id = id
-                most_unused_space = free_space
-
-        if best_client_id is None:
-            raise ValueError("No MongoDB client found with free space!")
-
-        return ObjectId(best_client_id)
+        return free_spaces
 
     def get_all_clients(self) -> list[tuple[ObjectId, MongoClient]]:
         """

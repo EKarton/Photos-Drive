@@ -88,6 +88,23 @@ class TestTilesRepositoryImpl(unittest.TestCase):
         )
         self.assertIsNone(found)
 
+    def test_add_media_item_with_no_space(self):
+        mock_client = create_mock_mongo_client(1)
+
+        mongo_clients_repo = MongoDbClientsRepository()
+        mongo_clients_repo.add_mongodb_client(MONGO_CLIENT_ID_1, mock_client)
+        repo = TilesRepositoryImpl(mongo_clients_repo)
+
+        with self.assertRaises(ValueError):
+            repo.add_media_item(make_media_item())
+        found = self.mock_client_1["photos_drive"]["tiles"].find_one(
+            {
+                "album_id": album_id_to_string(ALBUM_ID_1),
+                "media_item_id": media_item_id_to_string(MEDIA_ITEM_ID_1),
+            }
+        )
+        self.assertIsNone(found)
+
     def test_remove_media_item(self):
         media_item = make_media_item()
         self.repo.add_media_item(media_item)

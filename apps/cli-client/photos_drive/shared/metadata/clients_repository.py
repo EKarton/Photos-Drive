@@ -14,6 +14,16 @@ class ClientsRepository(ABC):
         pass
 
     @abstractmethod
+    def get_free_space_for_all_clients(self) -> list[tuple[ObjectId, int]]:
+        '''
+        Returns a list of free spaces for each client ID.
+
+        Returns:
+            tuple[ObjectId, int]: A list tuples, where each tuple is a client ID
+                and their free space
+        '''
+
+    @abstractmethod
     def start_transactions(self):
         '''
         Starts a transaction.

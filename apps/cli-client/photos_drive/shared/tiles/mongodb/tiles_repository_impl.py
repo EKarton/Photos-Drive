@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Dict, Mapping
+from bson.objectid import ObjectId
 import mercantile
 
 from photos_drive.shared.metadata.album_id import AlbumId, album_id_to_string
@@ -74,7 +75,34 @@ class TilesRepositoryImpl(TilesRepository):
             ]
         )
 
+        client_id_to_tiles: Dict[ObjectId, list[any]] = {}
+        free_spaces = self.mongodb_clients_repository.get_free_space_for_all_clients()
         for tile in tiles:
+            best_free_space = float("-inf")
+            best_client_id = None
+            best_idx = None
+
+            for i in range(len(free_spaces)):
+                client_id, free_space = free_spaces[i]
+                if free_space <= 0:
+                    continue
+
+                if free_space > best_free_space:
+                    best_free_space = free_space
+                    best_client_id = client_id
+                    best_idx = i
+
+            if best_client_id is None:
+                raise ValueError("Unable to find space for tile")
+
+            if best_client_id not in client_id_to_tiles:
+                client_id_to_tiles[best_client_id] = []
+            client_id_to_tiles[best_client_id].append(tile)
+
+            # Decrement the free space for the chosen client
+            free_spaces[best_idx] = (best_client_id, best_free_space - 1)
+
+        for client_id, tiles in client_id_to_tiles.items():
             client_id = (
                 self.mongodb_clients_repository.find_id_of_client_with_most_space()
             )
@@ -82,14 +110,20 @@ class TilesRepositoryImpl(TilesRepository):
             session = self.mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            client["photos_drive"]["tiles"].insert_one(
-                document={
+
+            docs = [
+                {
                     "x": tile.x,
                     "y": tile.y,
                     "z": tile.z,
                     "album_id": album_id_to_string(media_item.album_id),
                     "media_item_id": media_item_id_to_string(media_item.id),
-                },
+                }
+                for tile in tiles
+            ]
+
+            client["photos_drive"]["tiles"].insert_many(
+                docs,
                 session=session,
             )
 
