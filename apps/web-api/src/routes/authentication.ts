@@ -73,7 +73,8 @@ export default async function () {
 
         res.json({
           accessToken: token,
-          userProfileUrl: profilePhoto
+          userProfileUrl: profilePhoto,
+          mapboxApiToken: config.mapboxApiToken
         });
       } catch (error) {
         logger.error(`Error authenticating ${error}`);

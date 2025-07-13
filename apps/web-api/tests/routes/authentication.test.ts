@@ -9,6 +9,7 @@ describe('Authentication Router', () => {
   const fakeGoogleClientId = '123';
   const fakeGoogleClientSecret = '456';
   const fakeGoogleCallbackUri = 'http://localhost:3000/photos';
+  const fakeMapboxApiToken = 'fakeMapboxApiToken1';
 
   let cleanupTestEnvFn = () => {};
 
@@ -18,7 +19,8 @@ describe('Authentication Router', () => {
       ...fakeAuthEnv,
       GOOGLE_CLIENT_ID: fakeGoogleClientId,
       GOOGLE_CLIENT_SECRET: fakeGoogleClientSecret,
-      GOOGLE_CALLBACK_URI: fakeGoogleCallbackUri
+      GOOGLE_CALLBACK_URI: fakeGoogleCallbackUri,
+      MAPBOX_API_TOKEN: fakeMapboxApiToken
     });
   });
 
@@ -81,7 +83,8 @@ describe('Authentication Router', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
         accessToken: expect.any(String),
-        userProfileUrl: 'https://lh4.googleusercontent.com/profile-pic.jpg'
+        userProfileUrl: 'https://lh4.googleusercontent.com/profile-pic.jpg',
+        mapboxApiToken: fakeMapboxApiToken
       });
     });
 
