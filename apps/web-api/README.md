@@ -13,7 +13,7 @@ This is the web api app used to serve content to the web ui.
 3. Next, create a `.env` file with these contents:
 
    ```env
-   # Prod client ID and client secrets
+   # Google OAuth2 client ID and client secrets
    GOOGLE_CLIENT_ID="YOUR_GOOGLE_OAUTH2_CLIENT_ID"
    GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_OAUTH2_CLIENT_SECRET"
    GOOGLE_CALLBACK_URI="YOUR_GOOGLE_OAUTH2_CALLBACK_URI"
