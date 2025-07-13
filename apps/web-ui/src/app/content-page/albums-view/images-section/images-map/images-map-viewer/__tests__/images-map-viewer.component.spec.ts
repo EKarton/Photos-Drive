@@ -119,8 +119,9 @@ describe('ImagesMapViewerComponent', () => {
     expect(mapInstances[0].addSource).toHaveBeenCalled();
     expect(mapInstances[0].addLayer).toHaveBeenCalled();
 
-    // It should build two separate map markers
-    expect(mockMapboxFactory.getMarkerInstances().length).toEqual(2);
+    // It should show two markers
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
+    expect(markers.length).toEqual(2);
   });
 
   it('should re-render the map when isDarkMode changes', () => {
@@ -150,15 +151,11 @@ describe('ImagesMapViewerComponent', () => {
     expect(mapInstances[0].addLayer).toHaveBeenCalledTimes(1);
     expect(mapInstances[0].addSource).toHaveBeenCalledTimes(1);
 
-    // The first two markers should be deleted, and two new markers should be created.
-    const markers = mockMapboxFactory.getMarkerInstances();
-    expect(markers.length).toEqual(4);
-    expect(markers[0].remove).toHaveBeenCalled();
-    expect(markers[1].remove).toHaveBeenCalled();
-    expect(markers[2].remove).not.toHaveBeenCalled();
-    expect(markers[3].remove).not.toHaveBeenCalled();
-    expect(markers[2].getComponentInstance()?.instance.badgeCount()).toEqual(1);
-    expect(markers[3].getComponentInstance()?.instance.badgeCount()).toEqual(1);
+    // It should show two markers
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
+    expect(markers.length).toEqual(2);
+    expect(markers[0].getComponentInstance()?.instance.badgeCount()).toEqual(1);
+    expect(markers[1].getComponentInstance()?.instance.badgeCount()).toEqual(1);
   });
 
   it('should output boundsChanged when map pans', () => {
@@ -207,7 +204,8 @@ describe('ImagesMapViewerComponent', () => {
     expect(mapInstances[0].addSource).toHaveBeenCalled();
     expect(mapInstances[0].addLayer).toHaveBeenCalled();
 
-    const markers = mockMapboxFactory.getMarkerInstances();
+    // It should show only one marker since the two images are clustered together
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
     expect(markers.length).toEqual(1);
     expect(markers[0].getComponentInstance()?.instance.badgeCount()).toEqual(2);
   });
@@ -228,7 +226,7 @@ describe('ImagesMapViewerComponent', () => {
     mapInstances[0].triggerOnEvent('load');
 
     // Check there is only one cluster marker
-    const markers = mockMapboxFactory.getMarkerInstances();
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
     expect(markers.length).toEqual(1);
 
     // Click on the marker
@@ -240,7 +238,7 @@ describe('ImagesMapViewerComponent', () => {
     expect(mapInstances[0].easeTo).toHaveBeenCalled();
   });
 
-  it('should zoom into the map when user clicks on an individual map marker', () => {
+  it('should open the image viewer when user clicks on an individual map marker', () => {
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
     fixture.componentRef.setInput('mediaItems', [MEDIA_ITEM_1, MEDIA_ITEM_2]);
     fixture.componentRef.setInput('isDarkMode', false);
@@ -252,8 +250,8 @@ describe('ImagesMapViewerComponent', () => {
     mapInstances[0].setBounds(-70, 90, -80, 70);
     mapInstances[0].triggerOnEvent('load');
 
-    // Check there are two separate map markers
-    const markers = mockMapboxFactory.getMarkerInstances();
+    // Check there is only one cluster marker
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
     expect(markers.length).toEqual(2);
 
     // Click on one of the markers

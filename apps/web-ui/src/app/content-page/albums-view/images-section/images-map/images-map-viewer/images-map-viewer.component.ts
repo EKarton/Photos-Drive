@@ -14,7 +14,14 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import * as mapboxgl from 'mapbox-gl';
-import { filter, map, shareReplay, Subscription, take } from 'rxjs';
+import {
+  debounceTime,
+  filter,
+  map,
+  shareReplay,
+  Subscription,
+  take,
+} from 'rxjs';
 import Supercluster from 'supercluster';
 
 import { environment } from '../../../../../../environments/environment';
@@ -108,14 +115,15 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
       this.subscriptions.add(
         this.mediaItems$.subscribe((mediaItems) => {
+          this.prepareSupercluster();
           this.updateHeatmapLayer(mediaItems);
+          this.updateImageMarkers();
         }),
       );
     });
 
     // Update the map whenever the map has moved
     this.map.on('moveend', () => {
-      // this.prepareSupercluster(); // TODO: Do we need this?
       this.updateImageMarkers();
       this.emitBounds();
     });
@@ -155,7 +163,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         });
 
     this.supercluster = new Supercluster({
-      radius: 40,
+      radius: 48,
       maxZoom: this.map.getMaxZoom(),
     });
     this.supercluster.load(geojsonPoints);

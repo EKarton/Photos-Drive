@@ -16,6 +16,12 @@ export class MockMapboxFactory<T> {
     return [...this.markerInstances];
   }
 
+  getVisibleMarkerInstances(): MockMapboxMarker<T>[] {
+    return this.markerInstances.filter(
+      (marker) => marker.remove.calls.count() === 0,
+    );
+  }
+
   buildMap(): MockMapboxMap {
     const instance = new MockMapboxMap();
     this.mapInstances.push(instance);
