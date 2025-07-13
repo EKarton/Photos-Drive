@@ -3,6 +3,7 @@ import {
   buildInitialState,
   selectAuthState,
   selectAuthToken,
+  selectMapboxApiToken,
   selectUserProfileUrl,
 } from '../auth.state';
 
@@ -22,6 +23,7 @@ describe('Auth Selectors', () => {
     const state: AuthState = {
       authToken: 'mockAccessToken',
       userProfileUrl: 'mockUserProfileUrl',
+      mapboxApiToken: 'mockMapboxApiToken',
     };
 
     const result = selectAuthToken.projector(state);
@@ -32,6 +34,7 @@ describe('Auth Selectors', () => {
     const state: AuthState = {
       authToken: 'mockAccessToken',
       userProfileUrl: 'mockUserProfileUrl',
+      mapboxApiToken: 'mockMapboxApiToken',
     };
 
     const result = selectUserProfileUrl.projector(state);
@@ -45,6 +48,11 @@ describe('Auth Selectors', () => {
 
   it('should return empty string for user profile URL when state is initial', () => {
     const result = selectUserProfileUrl.projector(initialState);
+    expect(result).toBe('');
+  });
+
+  it('should return empty string for mapbox api token when state is initial', () => {
+    const result = selectMapboxApiToken.projector(initialState);
     expect(result).toBe('');
   });
 });

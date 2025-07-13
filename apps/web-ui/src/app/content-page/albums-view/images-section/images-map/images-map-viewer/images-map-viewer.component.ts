@@ -17,8 +17,8 @@ import * as mapboxgl from 'mapbox-gl';
 import { filter, map, shareReplay, Subscription, take } from 'rxjs';
 import Supercluster from 'supercluster';
 
-import { environment } from '../../../../../../environments/environment';
 import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
+import { authState } from '../../../../../auth/store';
 import { MediaItem } from '../../../../services/types/media-item';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
@@ -52,6 +52,9 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly store = inject(Store);
   private readonly mapboxFactory = inject(MAPBOX_FACTORY_TOKEN);
+  private readonly mapboxApiToken = this.store.selectSignal(
+    authState.selectMapboxApiToken,
+  );
 
   private map!: mapboxgl.Map;
   private supercluster!: Supercluster;
@@ -74,7 +77,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.map = this.mapboxFactory.buildMap({
-      accessToken: environment.mapboxToken,
+      accessToken: this.mapboxApiToken(),
       container: this.mapContainer.nativeElement,
       style: getTheme(this.isDarkMode()),
       center: [0, 0],
@@ -301,8 +304,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.map.remove();
-    this.subscriptions.unsubscribe();
     this.imageMarkers.forEach((marker) => marker.remove());
+    this.subscriptions.unsubscribe();
   }
 }
 

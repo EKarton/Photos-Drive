@@ -12,6 +12,7 @@ export const authReducer = createReducer(
       ...state,
       authToken: result.data?.accessToken ?? '',
       userProfileUrl: result.data?.userProfileUrl ?? '',
+      mapboxApiToken: result.data?.mapboxApiToken ?? '',
     };
   }),
 );

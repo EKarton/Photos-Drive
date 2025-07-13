@@ -3,7 +3,6 @@ declare interface Env {
   readonly NODE_ENV: string;
   readonly NG_APP_LOGIN_URL: string;
   readonly NG_APP_WEB_API_ENDPOINT: string;
-  readonly NG_APP_MAPBOX_TOKEN: string;
 }
 
 declare interface ImportMeta {
