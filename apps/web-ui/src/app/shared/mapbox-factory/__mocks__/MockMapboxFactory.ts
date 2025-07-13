@@ -1,6 +1,5 @@
-import * as mapboxgl from 'mapbox-gl';
-
-import { MockMapboxMap, MockMapboxMarker } from './mocks';
+import { MockMapboxMap } from './MockMapboxMap';
+import { MockMapboxMarker } from './MockMapboxMarker';
 
 /** A factory class used to build an instance of Mapbox class. */
 export class MockMapboxFactory<T> {
@@ -15,13 +14,13 @@ export class MockMapboxFactory<T> {
     return [...this.markerInstances];
   }
 
-  buildMap(_: mapboxgl.MapOptions): MockMapboxMap {
+  buildMap(): MockMapboxMap {
     const instance = new MockMapboxMap();
     this.mapInstances.push(instance);
     return instance;
   }
 
-  buildMarker(_: mapboxgl.MarkerOptions): MockMapboxMarker<T> {
+  buildMarker(): MockMapboxMarker<T> {
     const instance = new MockMapboxMarker<T>();
     this.markerInstances.push(instance);
     return instance;

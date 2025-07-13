@@ -1,4 +1,3 @@
-import { ComponentRef } from '@angular/core';
 import mapboxgl from 'mapbox-gl';
 
 /** A mock of the {@code mapboxgl.Map} */
@@ -75,22 +74,5 @@ export class MockMapboxMap {
   triggerOnceEvents(event: string) {
     this.onceToLambda.get(event)!();
     this.onceToLambda.delete(event);
-  }
-}
-
-/** A mock of the {@code mapboxgl.Marker} */
-export class MockMapboxMarker<T> {
-  private componentInstance: ComponentRef<T> | undefined = undefined;
-
-  setLngLat = jasmine.createSpy('setLngLat').and.returnValue(this);
-  addTo = jasmine.createSpy('addTo').and.returnValue(this);
-  remove = jasmine.createSpy('remove');
-
-  setComponentInstance(instance: ComponentRef<T>) {
-    this.componentInstance = instance;
-  }
-
-  getComponentInstance(): ComponentRef<T> | undefined {
-    return this.componentInstance;
   }
 }

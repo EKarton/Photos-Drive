@@ -19,7 +19,7 @@ import Supercluster from 'supercluster';
 
 import { environment } from '../../../../../../environments/environment';
 import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
-import { MockMapboxMarker } from '../../../../../shared/mapbox-factory/__mocks__/mocks';
+import { MockMapboxMarker } from '../../../../../shared/mapbox-factory/__mocks__/MockMapboxMarker';
 import { MediaItem } from '../../../../services/types/media-item';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
