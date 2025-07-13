@@ -138,8 +138,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
           // If this location has been seen before, apply jitter
           const count = seen.get(key) || 0;
           if (count > 0) {
-            jitteredLng = jitterCoordinate(lng, 0.00005 * (count + 1));
-            jitteredLat = jitterCoordinate(lat, 0.00005 * (count + 1));
+            jitteredLng = jitterCoordinate(lng, 0.0001 * (count + 1));
+            jitteredLat = jitterCoordinate(lat, 0.0001 * (count + 1));
           }
           seen.set(key, count + 1);
 
@@ -157,7 +157,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
     this.supercluster = new Supercluster({
       radius: 48,
-      maxZoom: this.map.getMaxZoom(),
+      maxZoom: this.map.getMaxZoom() - 1,
     });
     this.supercluster.load(geojsonPoints);
   }

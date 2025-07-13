@@ -21,26 +21,6 @@ import { MediaItem } from '../../../services/types/media-item';
 import { ImagesMapStore } from './images-map.store';
 import { ImagesMapViewerComponent } from './images-map-viewer/images-map-viewer.component';
 
-interface VendorFullscreenElement extends HTMLElement {
-  // Safari APIs for going and exiting out of full screen
-  webkitRequestFullscreen?: () => Promise<void> | void;
-  webkitExitFullscreen?: () => Promise<void> | void;
-
-  // Edge / IE APIs for going and exiting out of full screen
-  msRequestFullscreen?: () => Promise<void> | void;
-  msExitFullscreen?: () => Promise<void> | void;
-}
-
-interface VendorFullScreenDocument extends Document {
-  // Safari APIs for going and exiting out of full screen
-  webkitRequestFullscreen?: () => Promise<void> | void;
-  webkitExitFullscreen?: () => Promise<void> | void;
-
-  // Edge / IE APIs for going and exiting out of full screen
-  msRequestFullscreen?: () => Promise<void> | void;
-  msExitFullscreen?: () => Promise<void> | void;
-}
-
 @Component({
   standalone: true,
   selector: 'app-content-images-map',
@@ -92,9 +72,6 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
   onFullscreenChange = () => {
     const isNowFullscreen = !!document.fullscreenElement;
     this.isFullscreen.set(isNowFullscreen);
-    if (!isNowFullscreen) {
-      console.log('Exited fullscreen (any method, including Escape)');
-    }
   };
 
   toggleFullscreen() {
@@ -105,30 +82,20 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  goFullscreen() {
-    const element = this.fullscreenContainer
-      .nativeElement as VendorFullscreenElement;
-
+  private goFullscreen() {
+    const element = this.fullscreenContainer.nativeElement;
     if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
+      element
+        .requestFullscreen()
+        .then(() => this.isFullscreen.set(true))
+        .catch((err: Error) => {
+          console.error('Failed to enter fullscreen:', err);
+        });
     }
-
-    this.isFullscreen.set(true);
   }
 
-  exitFullscreen() {
-    const element = document as VendorFullScreenDocument;
-    if (element.exitFullscreen) {
-      element.exitFullscreen();
-    } else if (element.webkitExitFullscreen) {
-      element.webkitExitFullscreen();
-    } else if (element.msExitFullscreen) {
-      element.msExitFullscreen();
-    }
+  private exitFullscreen() {
+    document.exitFullscreen();
 
     this.isFullscreen.set(false);
   }
