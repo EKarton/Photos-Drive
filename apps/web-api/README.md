@@ -10,7 +10,30 @@ This is the web api app used to serve content to the web ui.
 
 2. Second, create a Mapbox account and grab it's API token.
 
-3. Next, create a `.env` file with these contents:
+3. Generate public and private keys by running:
+
+   ```bash
+   openssl genpkey -algorithm ed25519 -out private.pem
+   openssl pkey -in private.pem -pubout -out public.pem
+   ```
+
+   It will create two files: `private.pem` and `public.pem`.
+
+4. Now, run this to set the `private.pem` file as a single string:
+
+   ```bash
+   export ACCESS_TOKEN_JWT_PRIVATE_KEY=$(tr -d '\n' < private.pem)
+   echo ${ACCESS_TOKEN_JWT_PUBLIC_KEY}
+   ```
+
+5. Similarly, run this to get the `public.pem` file as a single string:
+
+   ```bash
+   export ACCESS_TOKEN_JWT_PUBLIC_KEY=$(tr -d '\n' < public.pem)
+   echo ${ACCESS_TOKEN_JWT_PUBLIC_KEY}
+   ```
+
+6. Next, create a `.env` file with these contents:
 
    ```env
    # Google OAuth2 client ID and client secrets
@@ -19,8 +42,8 @@ This is the web api app used to serve content to the web ui.
    GOOGLE_CALLBACK_URI="YOUR_GOOGLE_OAUTH2_CALLBACK_URI"
 
    # JWT
-   ACCESS_TOKEN_JWT_PUBLIC_KEY="YOUR_JWT_PUBLIC_KEY"
-   ACCESS_TOKEN_JWT_PRIVATE_KEY="YOUR_JWT_PRIVATE_KEY"
+   ACCESS_TOKEN_JWT_PUBLIC_KEY="YOUR_JWT_PUBLIC_KEY_FROM_STEP_4"
+   ACCESS_TOKEN_JWT_PRIVATE_KEY="YOUR_JWT_PRIVATE_KEY_FROM_STEP_5"
    ACCESS_TOKEN_ALLOWED_SUBJECT="YOUR_GOOGLE_ACCOUNT_ID"
 
    # Vault mongo db connection:
@@ -38,9 +61,19 @@ This is the web api app used to serve content to the web ui.
    NUM_FORKS=1
    ```
 
-4. Install dependencies and run the app by running: `pnpm install && pnpm dev`
+7. Install dependencies and run the app by running: `pnpm install && pnpm dev`
 
-5. It should launch the api on <http://localhost:3000>.
+8. It should launch the api on <http://localhost:3000>.
+
+9. When you try to log in, in the logs, you will get this error:
+
+   ```bash
+   User XYZ is forbidden
+   ```
+
+   This is your unique Google account ID. Set `ACCESS_TOKEN_ALLOWED_SUBJECT` in your `.env` file to `XYZ`.
+
+   If you want to expose your api to anyone, put `*` in `ACCESS_TOKEN_ALLOWED_SUBJECT`.
 
 ## Running them locally without Docker
 
@@ -69,26 +102,3 @@ This is the web api app used to serve content to the web ui.
 4. To run tests with coverage, run `pnpm test:coverage`
 
 5. To run tests with coverage for a particular file, run tests like this: `pnpm test:coverage tests/middlewares`
-
-## Generating keys
-
-1. Generate public and private keys by running:
-
-   ```bash
-   openssl genpkey -algorithm ed25519 -out private.pem
-   openssl pkey -in private.pem -pubout -out public.pem
-   ```
-
-   It will create two files: `private.pem` and `public.pem`.
-
-2. Now, run this to set the `private.pem` file as the environment variable `ACCESS_TOKEN_JWT_PRIVATE_KEY`:
-
-   ```bash
-   export ACCESS_TOKEN_JWT_PRIVATE_KEY=$(tr -d '\n' < private.pem)
-   ```
-
-3. Similarly, run this to set the `public.pem` file as the environment variable `ACCESS_TOKEN_JWT_PUBLIC_KEY`:
-
-   ```bash
-   export ACCESS_TOKEN_JWT_PUBLIC_KEY=$(tr -d '\n' < public.pem)
-   ```
