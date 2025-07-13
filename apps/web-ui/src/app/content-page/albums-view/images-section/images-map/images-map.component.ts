@@ -15,7 +15,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 
-import * as results from '../../../../shared/results/results';
+import { takeSuccessfulDataOrElse } from '../../../../shared/results/utils/takeSuccessfulDataOrElse';
 import * as themeState from '../../../../themes/store/theme.state';
 import { MediaItem } from '../../../services/types/media-item';
 import { ImagesMapStore } from './images-map.store';
@@ -42,11 +42,7 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
 
   readonly images: Signal<MediaItem[]> = computed(() => {
     const imagesResult = this.imagesMapViewStore.images();
-    if (!results.hasSucceed(imagesResult)) {
-      return [];
-    }
-
-    return imagesResult.data!;
+    return takeSuccessfulDataOrElse(imagesResult, []);
   });
 
   readonly isDarkMode = this.store.selectSignal(themeState.selectIsDarkMode);
