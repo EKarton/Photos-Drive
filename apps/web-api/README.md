@@ -22,20 +22,20 @@ This is the web api app used to serve content to the web ui.
    ACCESS_TOKEN_JWT_PUBLIC_KEY="YOUR_JWT_PUBLIC_KEY"
    ACCESS_TOKEN_JWT_PRIVATE_KEY="YOUR_JWT_PRIVATE_KEY"
    ACCESS_TOKEN_ALLOWED_SUBJECT="YOUR_GOOGLE_ACCOUNT_ID"
-   NUM_FORKS=1
 
-   # Prod vault mongo db:
-   VAULT_MONGODB="YOUR_READ_WRITE_CONNECTION_STRING_TO_THE_VAULT"
+   # Vault mongo db connection:
+   VAULT_MONGODB="YOUR_READ_WRITE_CONNECTION_STRING_TO_THE_VAULT_IN_MONGODB"
 
-   # Prod Mapbox API token
-   MAPBOX_API_TOKEN="YOUR_MAPBOX_API_TOKEN"
-
-   # Other vault
+   # If your vault is in the file:
    # VAULT_FILE_PATH="./../cli-client/test-config.conf"
+
+   # Mapbox API token
+   MAPBOX_API_TOKEN="YOUR_MAPBOX_API_TOKEN"
 
    PORT="3000"
    PINO_LOG_LEVEL="error"
    CORS_FRONTEND_ENDPOINT="http://localhost:4200"
+   NUM_FORKS=1
    ```
 
 4. Install dependencies and run the app by running: `pnpm install && pnpm dev`
