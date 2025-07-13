@@ -14,14 +14,7 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import * as mapboxgl from 'mapbox-gl';
-import {
-  debounceTime,
-  filter,
-  map,
-  shareReplay,
-  Subscription,
-  take,
-} from 'rxjs';
+import { filter, map, shareReplay, Subscription, take } from 'rxjs';
 import Supercluster from 'supercluster';
 
 import { environment } from '../../../../../../environments/environment';
