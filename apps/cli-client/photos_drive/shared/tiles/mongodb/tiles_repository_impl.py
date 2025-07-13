@@ -18,7 +18,7 @@ from photos_drive.shared.tiles.tiles_repository import (
     TilesRepository,
 )
 
-MAX_ZOOM_LEVEL = 24
+MAX_ZOOM_LEVEL = 15
 
 
 @dataclass(frozen=True)
@@ -63,11 +63,18 @@ class TilesRepositoryImpl(TilesRepository):
         if not media_item.location:
             raise ValueError(f"No gps location for media item {media_item}")
 
-        for zoom_level in range(0, MAX_ZOOM_LEVEL + 1):
-            tile = mercantile.tile(
-                media_item.location.longitude, media_item.location.latitude, zoom_level
-            )
+        tiles = set(
+            [
+                mercantile.tile(
+                    media_item.location.longitude,
+                    media_item.location.latitude,
+                    zoom_level,
+                )
+                for zoom_level in range(0, MAX_ZOOM_LEVEL + 1)
+            ]
+        )
 
+        for tile in tiles:
             client_id = (
                 self.mongodb_clients_repository.find_id_of_client_with_most_space()
             )
@@ -90,24 +97,16 @@ class TilesRepositoryImpl(TilesRepository):
         if not media_item.location:
             raise ValueError(f"No gps location for media item {media_item}")
 
-        for zoom_level in range(0, MAX_ZOOM_LEVEL + 1):
-            tile = mercantile.tile(
-                media_item.location.longitude, media_item.location.latitude, zoom_level
+        for client_id, client in self.mongodb_clients_repository.get_all_clients():
+            session = self.mongodb_clients_repository.get_session_for_client_id(
+                client_id,
             )
-            for client_id, client in self.mongodb_clients_repository.get_all_clients():
-                session = self.mongodb_clients_repository.get_session_for_client_id(
-                    client_id,
-                )
-                client['photos_drive']['tiles'].delete_many(
-                    filter={
-                        "x": tile.x,
-                        "y": tile.y,
-                        "z": tile.z,
-                        "album_id": album_id_to_string(media_item.album_id),
-                        "media_item_id": media_item_id_to_string(media_item.id),
-                    },
-                    session=session,
-                )
+            client['photos_drive']['tiles'].delete_many(
+                filter={
+                    "media_item_id": media_item_id_to_string(media_item.id),
+                },
+                session=session,
+            )
 
     def get_num_media_items_in_tile(
         self, request: GetNumMediaItemsInTileRequest
