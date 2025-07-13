@@ -16,11 +16,8 @@ export class MockMapboxFactory<T> {
     return [...this.markerInstances];
   }
 
-  buildMap(options: mapboxgl.MapOptions): MockMapboxMap {
-    const instance = new MockMapboxMap({
-      ...options,
-      testMode: true,
-    });
+  buildMap(): MockMapboxMap {
+    const instance = new MockMapboxMap();
     this.mapInstances.push(instance);
     return instance;
   }

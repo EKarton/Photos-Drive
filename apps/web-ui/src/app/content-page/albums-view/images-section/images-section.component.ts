@@ -46,7 +46,7 @@ export class ImagesSectionComponent {
   });
 
   readonly imagesViewOption: WritableSignal<ImagesViewOptions> = signal(
-    ImagesViewOptions.MAP,
+    ImagesViewOptions.LIST,
   );
 
   constructor() {

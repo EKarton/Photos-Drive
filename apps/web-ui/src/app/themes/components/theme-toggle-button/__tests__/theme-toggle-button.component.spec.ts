@@ -15,9 +15,7 @@ describe('ThemeToggleButtonComponent', () => {
       imports: [ThemeToggleButtonComponent],
       providers: [
         provideMockStore({
-          selectors: [
-            { selector: themeState.selectIsDarkMode, value: false }, // Initial state for isDarkMode
-          ],
+          selectors: [{ selector: themeState.selectIsDarkMode, value: false }],
         }),
       ],
     });

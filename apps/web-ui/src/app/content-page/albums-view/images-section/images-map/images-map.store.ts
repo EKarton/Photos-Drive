@@ -120,7 +120,10 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
         return {
           ...state,
           imagesResult: mapResult(response, (page) => page.mediaItems),
-          isFetchingImages: true,
+          isFetchingImages: takeSuccessfulDataOrElse(
+            mapResult(response, (cur) => cur.nextPageToken !== undefined),
+            true,
+          ),
         };
       }
 
