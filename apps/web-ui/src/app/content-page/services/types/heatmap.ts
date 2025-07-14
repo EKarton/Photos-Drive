@@ -1,4 +1,4 @@
-export interface GetMapTileHeatmapRequest {
+export interface GetHeatmapRequest {
   x: number;
   y: number;
   z: number;
@@ -6,16 +6,16 @@ export interface GetMapTileHeatmapRequest {
 }
 
 /** Represents an entry to the heat map.  */
-export interface HeatmapEntry {
-  cellId: string;
+export interface HeatmapPoints {
   count: number;
   latitude: number;
   longitude: number;
+  sampledMediaItemId: string;
 }
 
 /** Represents a heat map. */
 export interface Heatmap {
-  entries: HeatmapEntry[];
+  points: HeatmapPoints[];
 }
 
-export type GetMapTileHeatmapResponse = Heatmap;
+export type GetHeatmapResponse = Heatmap;

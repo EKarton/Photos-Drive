@@ -5,7 +5,6 @@ import {
   from,
   map,
   mergeMap,
-  of,
   switchMap,
   tap,
   toArray,
@@ -13,34 +12,21 @@ import {
 } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
-import {
-  Result,
-  toPending,
-  toSuccess,
-} from '../../../../shared/results/results';
-import { mapResultRxJs } from '../../../../shared/results/rxjs/mapResultRxJs';
-import { switchMapResultToResultRxJs } from '../../../../shared/results/rxjs/switchMapResultToResultRxJs';
+import { Result, toPending } from '../../../../shared/results/results';
 import { combineResults } from '../../../../shared/results/utils/combineResults';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
-import { takeSuccessfulDataOrElse } from '../../../../shared/results/utils/takeSuccessfulDataOrElse';
-import {
-  GetMapTileHeatmapRequest,
-  Heatmap,
-} from '../../../services/types/heatmap';
-import { GetMapTileRequest } from '../../../services/types/map-tile';
+import { GetHeatmapRequest, Heatmap } from '../../../services/types/heatmap';
 import { WebApiService } from '../../../services/webapi.service';
-import { Tile, TileId } from './images-map-viewer/images-map-viewer.component';
+import { TileId } from './images-map-viewer/images-map-viewer.component';
 
 export interface ImagesMapState {
   heatmapResult: Result<Heatmap>;
   numTiles: number;
-  isFetchingTiles: boolean;
 }
 
 export const INITIAL_STATE: ImagesMapState = {
   heatmapResult: toPending(),
   numTiles: 0,
-  isFetchingTiles: false,
 };
 
 export interface LoadTilesRequest {
@@ -61,10 +47,6 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
     super(INITIAL_STATE);
   }
 
-  readonly isFetchingTiles = this.selectSignal(
-    (state) => state.isFetchingTiles,
-  );
-
   readonly heatmapResult = this.selectSignal((state) => state.heatmapResult);
 
   readonly numTiles = this.selectSignal((state) => state.numTiles);
@@ -78,10 +60,9 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
             this.patchState({
               heatmapResult: toPending(),
               numTiles: request.tileIds.length,
-              isFetchingTiles: true,
             });
 
-            const apiRequests: GetMapTileHeatmapRequest[] = request.tileIds.map(
+            const apiRequests: GetHeatmapRequest[] = request.tileIds.map(
               (tileId) => ({
                 x: tileId.x,
                 y: tileId.y,
@@ -94,10 +75,7 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
               .pipe(
                 mergeMap(
                   (apiRequest) =>
-                    this.webApiService.getMapTileHeatmap(
-                      accessToken,
-                      apiRequest,
-                    ),
+                    this.webApiService.getHeatmap(accessToken, apiRequest),
                   MAX_CONCURRENCY,
                 ),
                 toArray(),
@@ -109,12 +87,8 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
                 tap((result: Result<Heatmap[]>) => {
                   this.patchState({
                     heatmapResult: mapResult(result, (heatmaps) => ({
-                      entries: heatmaps.map((h) => h.entries).flat(),
+                      points: heatmaps.map((h) => h.points).flat(),
                     })),
-                    isFetchingTiles: takeSuccessfulDataOrElse(
-                      mapResult(result, () => false),
-                      true,
-                    ),
                   });
                 }),
               );

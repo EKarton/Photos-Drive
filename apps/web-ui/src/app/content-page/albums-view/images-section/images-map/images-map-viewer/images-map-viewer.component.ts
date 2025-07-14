@@ -1,6 +1,5 @@
 import {
   Component,
-  ComponentRef,
   effect,
   ElementRef,
   inject,
@@ -16,20 +15,14 @@ import * as tilebelt from '@mapbox/tilebelt';
 import { Store } from '@ngrx/store';
 import range from 'lodash/range';
 import * as mapboxgl from 'mapbox-gl';
-import { filter, map, shareReplay, Subscription, take } from 'rxjs';
+import { shareReplay, Subscription } from 'rxjs';
+import Supercluster from 'supercluster';
 
 import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
-import { MediaItem } from '../../../../services/types/media-item';
+import { Heatmap } from '../../../../services/types/heatmap';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
-import { Heatmap } from '../../../../services/types/heatmap';
-
-export interface Tile {
-  tileId: TileId;
-  chosenMediaItem?: MediaItem;
-  numMediaItems: number;
-}
 
 export interface TileId {
   x: number;
@@ -62,6 +55,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   );
 
   private map!: mapboxgl.Map;
+  private supercluster!: Supercluster;
   private imageMarkers: mapboxgl.Marker[] = [];
 
   constructor() {
@@ -71,9 +65,9 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
         // Re-add heatmap layer and markers after style reload
         this.map.once('styledata', () => {
-          this.updateImageMarkers();
           this.updateTileGridLayer();
           this.updateHeatmapLayer();
+          this.updateImageMarkers();
         });
       }
     });
@@ -88,54 +82,153 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       zoom: 10,
     });
 
-    // Center the map to the first item in tiles$
-    this.subscriptions.add(
-      this.heatmap$
-        .pipe(
-          map((tiles) => tiles.entries[0]),
-          filter(Boolean),
-          take(1),
-        )
-        .subscribe((heatmapEntry) => {
-          this.map.setCenter([heatmapEntry.longitude, heatmapEntry.latitude]);
-        }),
-    );
-
     // Set the map layers whenever it has finished loading
     this.map.on('load', () => {
-      this.updateImageMarkers();
       this.updateTileGridLayer();
       this.updateHeatmapLayer();
+      this.prepareSupercluster();
+      this.updateImageMarkers();
       this.emitVisibleTiles();
 
       this.subscriptions.add(
         this.heatmap$.subscribe(() => {
-          this.updateImageMarkers();
-          this.updateTileGridLayer();
           this.updateHeatmapLayer();
+          this.prepareSupercluster();
+          this.updateImageMarkers();
         }),
       );
     });
 
     // Update the map whenever the map has moved
     this.map.on('moveend', () => {
-      this.updateImageMarkers();
       this.updateTileGridLayer();
       this.updateHeatmapLayer();
+      this.updateImageMarkers();
       this.emitVisibleTiles();
     });
   }
 
-  private emitVisibleTiles() {
+  private updateTileGridLayer() {
+    const sourceId = 'tile-grid';
+    const tileSource: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: this.getVisibleTiles().map((tile) => ({
+        type: 'Feature',
+        geometry: tilebelt.tileToGeoJSON([tile.x, tile.y, tile.z]),
+        properties: {},
+      })),
+    };
+
+    if (!this.map.getSource(sourceId)) {
+      this.map.addSource(sourceId, {
+        type: 'geojson',
+        data: tileSource,
+      });
+
+      // Fill layer for tile background
+      this.map.addLayer({
+        id: 'tile-grid-fill',
+        type: 'fill',
+        source: sourceId,
+        paint: {
+          'fill-color': ['rgba', 255, 255, 255, 0.1], // white, 10% opacity
+          'fill-outline-color': '#000000',
+        },
+      });
+
+      // Line layer for tile outlines
+      this.map.addLayer({
+        id: 'tile-grid-outline',
+        type: 'line',
+        source: sourceId,
+        paint: {
+          'line-color': '#ff0000',
+          'line-width': 2,
+        },
+      });
+    } else {
+      // Update source data if it already exists
+      (this.map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(
+        tileSource,
+      );
+    }
+  }
+
+  private getVisibleTiles(): TileId[] {
     const bounds = this.map.getBounds();
     if (!bounds) {
-      return;
+      return [];
     }
 
-    const zoom = Math.floor(this.map.getZoom());
-    const visibleTiles = this.getVisibleTiles(zoom, bounds);
+    const zoom = this.map.getZoom();
+    const maxIndex = Math.pow(2, zoom) - 1;
 
-    this.visibleTilesChanged.emit(visibleTiles);
+    const north = clampLat(bounds.getNorth());
+    const south = clampLat(bounds.getSouth());
+    const east = clampLng(bounds.getEast());
+    const west = clampLng(bounds.getWest());
+
+    const [xTop, yTop] = tilebelt.pointToTile(west, north, zoom);
+    const [xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom);
+
+    function numbersInclusive(x: number, y: number): number[] {
+      if (x <= y) {
+        return range(x, y + 1);
+      } else {
+        // If x > y, that means that it wrap around the antimeridian
+        // So we compute values from x, ..., maxIndex and from 0, ... y
+        return [...range(x, maxIndex + 1), ...range(0, y + 1)];
+      }
+    }
+
+    const xValues = numbersInclusive(xTop, xBottom);
+    const yValues = numbersInclusive(yTop, yBottom);
+
+    const center = this.map.getCenter();
+    const tiles: TileId[] = [];
+
+    for (const x of xValues) {
+      for (const y of yValues) {
+        if (isTileVisibleInGlobe([x, y, zoom], center.lat, center.lng)) {
+          tiles.push({ x, y, z: zoom });
+        }
+      }
+    }
+
+    return tiles;
+  }
+
+  private prepareSupercluster() {
+    const geojsonPoints: Supercluster.PointFeature<{
+      sampledMediaItemId: string;
+      count: number;
+    }>[] = this.heatmap().points.map((point) => {
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [point.longitude, point.latitude],
+        },
+        properties: {
+          sampledMediaItemId: point.sampledMediaItemId,
+          count: point.count,
+        },
+      };
+    });
+
+    this.supercluster = new Supercluster({
+      radius: 60,
+      maxZoom: this.map.getMaxZoom() - 1,
+      map: (props) => {
+        return {
+          count: props['count'] as number,
+        };
+      },
+      reduce: (accumulated, props) => {
+        accumulated.count += props.count;
+      },
+    });
+    this.supercluster.load(geojsonPoints);
   }
 
   private updateImageMarkers() {
@@ -143,58 +236,74 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     this.imageMarkers.forEach((marker) => marker.remove());
     this.imageMarkers = [];
 
-    // for (const tile of this.tiles()) {
-    //   if (tile.numMediaItems === 0 || !tile.chosenMediaItem) {
-    //     continue;
-    //   }
+    // Get clusters for current viewport and zoom
+    const bounds = this.map.getBounds();
+    if (!bounds || !this.supercluster) {
+      return;
+    }
 
-    //   let componentRef: ComponentRef<ImageMapMarkerComponent>;
+    const bbox: GeoJSON.BBox = [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ];
+    const clusters = this.supercluster.getClusters(bbox, this.map.getZoom());
 
-    //   if (tile.numMediaItems > 1) {
-    //     componentRef = this.viewContainerRef.createComponent(
-    //       ImageMapMarkerComponent,
-    //     );
-    //     componentRef.setInput('mediaItem', tile.chosenMediaItem!);
-    //     componentRef.setInput('badgeCount', tile.numMediaItems);
+    for (const cluster of clusters) {
+      const longitude = cluster.geometry.coordinates[0];
+      const latitude = cluster.geometry.coordinates[1];
 
-    //     const location = tile.chosenMediaItem!.location!;
-    //     this.subscriptions.add(
-    //       componentRef.instance.markerClick.subscribe(() => {
-    //         this.map.easeTo({
-    //           center: [location.longitude, location.latitude],
-    //           zoom: tile.tileId.z + 1,
-    //         });
-    //       }),
-    //     );
-    //   } else {
-    //     componentRef = this.viewContainerRef.createComponent(
-    //       ImageMapMarkerComponent,
-    //     );
-    //     componentRef.setInput('mediaItem', tile.chosenMediaItem);
+      let mediaItemId: string;
+      let count: number;
 
-    //     this.subscriptions.add(
-    //       componentRef.instance.markerClick.subscribe(() => {
-    //         this.store.dispatch(
-    //           mediaViewerActions.openMediaViewer({
-    //             request: { mediaItemId: tile.chosenMediaItem!.id },
-    //           }),
-    //         );
-    //       }),
-    //     );
-    //   }
+      if (cluster.properties.cluster) {
+        const leaf = this.supercluster.getLeaves(cluster.id as number, 1)[0];
+        mediaItemId = leaf.properties['sampledMediaItemId'] as string;
 
-    //   if (componentRef && tile.chosenMediaItem.location) {
-    //     const marker = this.mapboxFactory
-    //       .buildMarker(componentRef)
-    //       .setLngLat([
-    //         tile.chosenMediaItem.location.longitude,
-    //         tile.chosenMediaItem.location.latitude,
-    //       ])
-    //       .addTo(this.map);
+        count = cluster.properties['count'] as number;
+      } else {
+        mediaItemId = cluster.properties['sampledMediaItemId'] as string;
+        count = cluster.properties['count'] as number;
+      }
 
-    //     this.imageMarkers.push(marker);
-    //   }
-    // }
+      const componentRef = this.viewContainerRef.createComponent(
+        ImageMapMarkerComponent,
+      );
+      componentRef.setInput('mediaItemId', mediaItemId);
+      componentRef.setInput('badgeCount', count);
+
+      if (count === 1) {
+        this.subscriptions.add(
+          componentRef.instance.markerClick.subscribe(() => {
+            this.store.dispatch(
+              mediaViewerActions.openMediaViewer({
+                request: { mediaItemId: mediaItemId },
+              }),
+            );
+          }),
+        );
+      } else {
+        const expansionZoom = this.supercluster.getClusterExpansionZoom(
+          cluster.id as number,
+        );
+        this.subscriptions.add(
+          componentRef.instance.markerClick.subscribe(() => {
+            this.map.easeTo({
+              center: [longitude, latitude],
+              zoom: expansionZoom,
+            });
+          }),
+        );
+      }
+
+      const marker = this.mapboxFactory
+        .buildMarker(componentRef)
+        .setLngLat([longitude, latitude])
+        .addTo(this.map);
+
+      this.imageMarkers.push(marker);
+    }
   }
 
   private updateHeatmapLayer() {
@@ -202,7 +311,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     const layerId = 'heatmap-layer';
 
     // Prepare GeoJSON from your Heatmap object
-    const geojson = this.buildGeoJSONFromMediaItems(this.heatmap());
+    const geojson = this.buildGeoJSONFromHeatmap(this.heatmap());
 
     // Add or update the source
     if (!this.map.getSource(sourceId)) {
@@ -264,10 +373,10 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     }
   }
 
-  private buildGeoJSONFromMediaItems(heatmap: Heatmap): GeoJSON.GeoJSON {
+  private buildGeoJSONFromHeatmap(heatmap: Heatmap): GeoJSON.GeoJSON {
     return {
       type: 'FeatureCollection',
-      features: heatmap.entries.map((entry) => ({
+      features: heatmap.points.map((entry) => ({
         type: 'Feature',
         geometry: {
           type: 'Point',
@@ -275,110 +384,14 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         },
         properties: {
           count: entry.count,
-          cellId: entry.cellId,
         },
       })),
     };
   }
 
-  private updateTileGridLayer() {
-    const sourceId = 'tile-grid';
-    const bounds = this.map.getBounds();
-    if (!bounds) {
-      return;
-    }
-
-    const zoom = Math.floor(this.map.getZoom());
-
-    const tileSource: GeoJSON.FeatureCollection = {
-      type: 'FeatureCollection',
-      features: this.getVisibleTiles(zoom, bounds).map((tile) => ({
-        type: 'Feature',
-        geometry: tilebelt.tileToGeoJSON([tile.x, tile.y, tile.z]),
-        properties: {},
-      })),
-    };
-
-    if (!this.map.getSource(sourceId)) {
-      this.map.addSource(sourceId, {
-        type: 'geojson',
-        data: tileSource,
-      });
-
-      // Fill layer for tile background
-      this.map.addLayer({
-        id: 'tile-grid-fill',
-        type: 'fill',
-        source: sourceId,
-        paint: {
-          'fill-color': ['rgba', 255, 255, 255, 0.1], // white, 10% opacity
-          'fill-outline-color': '#000000',
-        },
-      });
-
-      // Line layer for tile outlines
-      this.map.addLayer({
-        id: 'tile-grid-outline',
-        type: 'line',
-        source: sourceId,
-        paint: {
-          'line-color': '#ff0000',
-          'line-width': 2,
-        },
-      });
-    } else {
-      // Update source data if it already exists
-      (this.map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(
-        tileSource,
-      );
-    }
-  }
-
-  private getVisibleTiles(
-    zoom: number,
-    bounds: mapboxgl.LngLatBounds,
-  ): TileId[] {
-    if (!bounds) {
-      return [];
-    }
-
-    const maxIndex = Math.pow(2, zoom) - 1;
-
-    console.log('Zoom:', zoom);
-
-    const north = clampLat(bounds.getNorth());
-    const south = clampLat(bounds.getSouth());
-    const east = clampLng(bounds.getEast());
-    const west = clampLng(bounds.getWest());
-
-    const [xTop, yTop] = tilebelt.pointToTile(west, north, zoom);
-    const [xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom);
-
-    function numbersInclusive(x: number, y: number): number[] {
-      if (x <= y) {
-        return range(x, y + 1);
-      } else {
-        // If x > y, that means that it wrap around the antimeridian
-        // So we compute values from x, ..., maxIndex and from 0, ... y
-        return [...range(x, maxIndex + 1), ...range(0, y + 1)];
-      }
-    }
-
-    const xValues = numbersInclusive(xTop, xBottom);
-    const yValues = numbersInclusive(yTop, yBottom);
-
-    const center = this.map.getCenter();
-    const tiles: TileId[] = [];
-
-    for (const x of xValues) {
-      for (const y of yValues) {
-        if (isTileVisibleInGlobe([x, y, zoom], center.lat, center.lng)) {
-          tiles.push({ x, y, z: zoom });
-        }
-      }
-    }
-
-    return tiles;
+  private emitVisibleTiles() {
+    const visibleTiles = this.getVisibleTiles();
+    this.visibleTilesChanged.emit(visibleTiles);
   }
 
   ngOnDestroy() {

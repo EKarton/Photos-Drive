@@ -7,12 +7,19 @@
       'absolute inset-0': !isFullscreen(),
     }"
   >
-    @if (isFetchingTiles()) {
+    @if (heatmapResult() | isPending) {
       <div
         class="absolute top-2 left-2 z-10 flex items-center gap-2 whitespace-nowrap text-s"
       >
         <span class="loading loading-spinner loading-md"></span>
         <div>Loading {{ numTiles() }} tiles</div>
+      </div>
+    } @else if (heatmapResult() | hasFailed) {
+      <div
+        class="absolute top-2 left-2 z-10 flex items-center gap-2 whitespace-nowrap text-s"
+      >
+        <span class="loading loading-spinner loading-md"></span>
+        <div>Error: {{ heatmapResult().error }}</div>
       </div>
     }
 

@@ -20,10 +20,7 @@ import {
   RawMediaItemDetailsApiResponse,
 } from './types/media-item';
 import { RawMediaItem } from './types/media-item';
-import {
-  GetMapTileHeatmapRequest,
-  GetMapTileHeatmapResponse,
-} from './types/heatmap';
+import { GetHeatmapRequest, GetHeatmapResponse } from './types/heatmap';
 
 @Injectable({ providedIn: 'root' })
 export class WebApiService {
@@ -169,10 +166,10 @@ export class WebApiService {
       .pipe(toResult());
   }
 
-  getMapTileHeatmap(
+  getHeatmap(
     accessToken: string,
-    request: GetMapTileHeatmapRequest,
-  ): Observable<Result<GetMapTileHeatmapResponse>> {
+    request: GetHeatmapRequest,
+  ): Observable<Result<GetHeatmapResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/maps/heatmap`;
 
     let params = new HttpParams();
@@ -185,7 +182,7 @@ export class WebApiService {
     }
 
     return this.httpClient
-      .get<GetMapTileHeatmapResponse>(url, {
+      .get<GetHeatmapResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

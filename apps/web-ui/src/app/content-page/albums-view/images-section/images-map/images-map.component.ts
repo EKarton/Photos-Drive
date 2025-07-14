@@ -15,20 +15,28 @@ import {
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 
+import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe';
+import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
+import { Result } from '../../../../shared/results/results';
 import { takeSuccessfulDataOrElse } from '../../../../shared/results/utils/takeSuccessfulDataOrElse';
 import * as themeState from '../../../../themes/store/theme.state';
+import { Heatmap } from '../../../services/types/heatmap';
 import { ImagesMapStore } from './images-map.store';
 import {
   ImagesMapViewerComponent,
-  Tile,
   TileId,
 } from './images-map-viewer/images-map-viewer.component';
-import { Heatmap } from '../../../services/types/heatmap';
 
 @Component({
   standalone: true,
   selector: 'app-content-images-map',
-  imports: [CommonModule, FormsModule, ImagesMapViewerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HasFailedPipe,
+    IsPendingPipe,
+    ImagesMapViewerComponent,
+  ],
   templateUrl: './images-map.component.html',
   providers: [ImagesMapStore],
 })
@@ -41,14 +49,13 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('fullscreenContainer', { static: true })
   fullscreenContainer!: ElementRef;
 
-  readonly isFetchingTiles: Signal<boolean> =
-    this.imagesMapViewStore.isFetchingTiles;
-
   readonly numTiles: Signal<number> = this.imagesMapViewStore.numTiles;
 
+  readonly heatmapResult: Signal<Result<Heatmap>> =
+    this.imagesMapViewStore.heatmapResult;
+
   readonly heatmap: Signal<Heatmap> = computed(() => {
-    const heatmapResult = this.imagesMapViewStore.heatmapResult();
-    return takeSuccessfulDataOrElse(heatmapResult, { entries: [] });
+    return takeSuccessfulDataOrElse(this.heatmapResult(), { points: [] });
   });
 
   readonly isDarkMode = this.store.selectSignal(themeState.selectIsDarkMode);

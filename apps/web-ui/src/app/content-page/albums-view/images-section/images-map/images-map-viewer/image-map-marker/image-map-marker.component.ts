@@ -13,7 +13,6 @@ import { InViewportModule } from 'ng-in-viewport';
 import { HasFailedPipe } from '../../../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../../../shared/results/pipes/is-pending.pipe';
 import { mapResult } from '../../../../../../shared/results/utils/mapResult';
-import { MediaItem } from '../../../../../services/types/media-item';
 import { ImageMapMarkerStore } from './image-map-marker.store';
 
 @Component({
@@ -24,7 +23,7 @@ import { ImageMapMarkerStore } from './image-map-marker.store';
   providers: [ImageMapMarkerStore],
 })
 export class ImageMapMarkerComponent {
-  readonly mediaItem = input.required<MediaItem>();
+  readonly mediaItemId = input.required<string>();
   readonly badgeCount = input<number>(1);
 
   readonly markerClick = output<Event>();
@@ -49,9 +48,7 @@ export class ImageMapMarkerComponent {
   constructor() {
     effect(() => {
       if (this.isInViewport()) {
-        this.imageMarkerStore.loadGPhotosMediaItemDetails(
-          this.mediaItem().gPhotosMediaItemId,
-        );
+        this.imageMarkerStore.loadGPhotosMediaItemDetails(this.mediaItemId());
       }
     });
   }
