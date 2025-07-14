@@ -1,44 +1,52 @@
 import { inject, Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { Store } from '@ngrx/store';
-import { delay, EMPTY, expand, switchMap, tap, withLatestFrom } from 'rxjs';
+import {
+  from,
+  map,
+  mergeMap,
+  of,
+  switchMap,
+  tap,
+  toArray,
+  withLatestFrom,
+} from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import {
-  hasSucceed,
-  isPending,
   Result,
   toPending,
+  toSuccess,
 } from '../../../../shared/results/results';
-import { combineResults2 } from '../../../../shared/results/utils/combineResults2';
+import { mapResultRxJs } from '../../../../shared/results/rxjs/mapResultRxJs';
+import { switchMapResultToResultRxJs } from '../../../../shared/results/rxjs/switchMapResultToResultRxJs';
+import { combineResults } from '../../../../shared/results/utils/combineResults';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
 import { takeSuccessfulDataOrElse } from '../../../../shared/results/utils/takeSuccessfulDataOrElse';
-import {
-  ListMediaItemsRequest,
-  ListMediaItemsResponse,
-} from '../../../services/types/list-media-items';
-import { MediaItem } from '../../../services/types/media-item';
+import { GetMapTileRequest } from '../../../services/types/map-tile';
 import { WebApiService } from '../../../services/webapi.service';
+import { Tile, TileId } from './images-map-viewer/images-map-viewer.component';
 
 export interface ImagesMapState {
-  albumId: string;
-  imagesResult: Result<MediaItem[]>;
-  isFetchingImages: boolean;
+  tilesResult: Result<Tile[]>;
+  numTiles: number;
+  isFetchingTiles: boolean;
 }
 
 export const INITIAL_STATE: ImagesMapState = {
-  albumId: '',
-  imagesResult: toPending(),
-  isFetchingImages: false,
+  tilesResult: toPending(),
+  numTiles: 0,
+  isFetchingTiles: false,
 };
 
-export interface LoadImagesRequest {
+export interface LoadTilesRequest {
+  tileIds: TileId[];
   albumId: string;
-  pageSize?: number;
-  delayBetweenPages?: number;
 }
 
 export const DEFAULT_DELAY_BETWEEN_PAGES = 150;
+
+export const MAX_CONCURRENCY = 4;
 
 @Injectable()
 export class ImagesMapStore extends ComponentStore<ImagesMapState> {
@@ -49,96 +57,91 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
     super(INITIAL_STATE);
   }
 
-  readonly isFetchingImages = this.selectSignal(
-    (state) => state.isFetchingImages,
+  readonly isFetchingTiles = this.selectSignal(
+    (state) => state.isFetchingTiles,
   );
-  readonly images = this.selectSignal((state) => state.imagesResult);
+  readonly tilesResult = this.selectSignal((state) => state.tilesResult);
 
-  readonly loadImages = this.effect<LoadImagesRequest>((request$) =>
+  readonly numTiles = this.selectSignal((state) => state.numTiles);
+
+  readonly loadTiles = this.effect<LoadTilesRequest>((request$) =>
     request$.pipe(
       withLatestFrom(this.state$),
       switchMap(([request]) => {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
-            const apiRequest: ListMediaItemsRequest = {
-              albumId: request.albumId,
-              pageSize: request.pageSize,
-            };
-
             this.patchState({
-              albumId: request.albumId,
-              imagesResult: toPending(),
-              isFetchingImages: true,
+              tilesResult: toPending(),
+              numTiles: request.tileIds.length,
+              isFetchingTiles: true,
             });
 
-            return this.webApiService
-              .listMediaItems(accessToken, apiRequest)
+            const apiRequests: GetMapTileRequest[] = request.tileIds.map(
+              (tileId) => ({
+                x: tileId.x,
+                y: tileId.y,
+                z: tileId.z,
+                albumId: request.albumId,
+              }),
+            );
+
+            return from(apiRequests)
               .pipe(
-                expand((response) => {
-                  if (!hasSucceed(response)) {
-                    return EMPTY;
-                  }
+                mergeMap(
+                  (apiRequest) =>
+                    this.webApiService.getMapTile(accessToken, apiRequest).pipe(
+                      switchMapResultToResultRxJs((response) => {
+                        if (!response.mediaItemId) {
+                          return of(
+                            toSuccess({
+                              tileId: {
+                                x: apiRequest.x,
+                                y: apiRequest.y,
+                                z: apiRequest.z,
+                              },
+                              chosenMediaItem: undefined,
+                              numMediaItems: 0,
+                            }),
+                          );
+                        }
 
-                  if (!response.data?.nextPageToken) {
-                    return EMPTY;
-                  }
-
-                  const newApiRequest: ListMediaItemsRequest = {
-                    ...apiRequest,
-                    pageToken: response.data?.nextPageToken,
-                  };
-
-                  return this.webApiService
-                    .listMediaItems(accessToken, newApiRequest)
-                    .pipe(
-                      delay(
-                        request.delayBetweenPages ??
-                          DEFAULT_DELAY_BETWEEN_PAGES,
-                      ),
-                    );
-                }),
-                tap((response: Result<ListMediaItemsResponse>) => {
-                  this.addResponse(response);
+                        return this.webApiService
+                          .getMediaItem(accessToken, response.mediaItemId)
+                          .pipe(
+                            mapResultRxJs((mediaItem) => {
+                              const tile: Tile = {
+                                tileId: {
+                                  x: apiRequest.x,
+                                  y: apiRequest.y,
+                                  z: apiRequest.z,
+                                },
+                                chosenMediaItem: mediaItem,
+                                numMediaItems: response.numMediaItems,
+                              };
+                              return tile;
+                            }),
+                          );
+                      }),
+                    ),
+                  MAX_CONCURRENCY,
+                ),
+                toArray(),
+                map((results) => combineResults(results, (tiles) => tiles)),
+              )
+              .pipe(
+                tap((result: Result<Tile[]>) => {
+                  this.patchState({
+                    tilesResult: result,
+                    isFetchingTiles: takeSuccessfulDataOrElse(
+                      mapResult(result, () => false),
+                      true,
+                    ),
+                  });
                 }),
               );
           }),
         );
       }),
     ),
-  );
-
-  private readonly addResponse = this.updater(
-    (
-      state: ImagesMapState,
-      response: Result<ListMediaItemsResponse>,
-    ): ImagesMapState => {
-      if (isPending(response)) {
-        return state;
-      }
-
-      if (isPending(state.imagesResult)) {
-        return {
-          ...state,
-          imagesResult: mapResult(response, (page) => page.mediaItems),
-          isFetchingImages: takeSuccessfulDataOrElse(
-            mapResult(response, (cur) => cur.nextPageToken !== undefined),
-            true,
-          ),
-        };
-      }
-
-      return {
-        ...state,
-        imagesResult: combineResults2(
-          state.imagesResult,
-          response,
-          (prev, cur) => [...prev, ...cur.mediaItems],
-        ),
-        isFetchingImages: takeSuccessfulDataOrElse(
-          mapResult(response, (cur) => cur.nextPageToken !== undefined),
-          true,
-        ),
-      };
-    },
   );
 }

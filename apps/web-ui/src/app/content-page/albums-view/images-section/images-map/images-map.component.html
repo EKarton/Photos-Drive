@@ -7,12 +7,12 @@
       'absolute inset-0': !isFullscreen(),
     }"
   >
-    @if (isFetchingImages()) {
+    @if (isFetchingTiles()) {
       <div
         class="absolute top-2 left-2 z-10 flex items-center gap-2 whitespace-nowrap text-s"
       >
         <span class="loading loading-spinner loading-md"></span>
-        <div>{{ images().length }} items</div>
+        <div>Loading {{ numTiles() }} tiles</div>
       </div>
     }
 
@@ -56,7 +56,8 @@
 
     <app-images-map-viewer
       class="flex-grow"
-      [mediaItems]="images()"
+      [tiles]="tiles()"
+      (visibleTilesChanged)="fetchTiles($event, albumId())"
       [isDarkMode]="isDarkMode()"
     />
   </div>

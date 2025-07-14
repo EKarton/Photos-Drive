@@ -17,9 +17,12 @@ import { Store } from '@ngrx/store';
 
 import { takeSuccessfulDataOrElse } from '../../../../shared/results/utils/takeSuccessfulDataOrElse';
 import * as themeState from '../../../../themes/store/theme.state';
-import { MediaItem } from '../../../services/types/media-item';
 import { ImagesMapStore } from './images-map.store';
-import { ImagesMapViewerComponent } from './images-map-viewer/images-map-viewer.component';
+import {
+  ImagesMapViewerComponent,
+  Tile,
+  TileId,
+} from './images-map-viewer/images-map-viewer.component';
 
 @Component({
   standalone: true,
@@ -37,12 +40,14 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('fullscreenContainer', { static: true })
   fullscreenContainer!: ElementRef;
 
-  readonly isFetchingImages: Signal<boolean> =
-    this.imagesMapViewStore.isFetchingImages;
+  readonly isFetchingTiles: Signal<boolean> =
+    this.imagesMapViewStore.isFetchingTiles;
 
-  readonly images: Signal<MediaItem[]> = computed(() => {
-    const imagesResult = this.imagesMapViewStore.images();
-    return takeSuccessfulDataOrElse(imagesResult, []);
+  readonly numTiles: Signal<number> = this.imagesMapViewStore.numTiles;
+
+  readonly tiles: Signal<Tile[]> = computed(() => {
+    const tilesResult = this.imagesMapViewStore.tilesResult();
+    return takeSuccessfulDataOrElse(tilesResult, []);
   });
 
   readonly isDarkMode = this.store.selectSignal(themeState.selectIsDarkMode);
@@ -50,9 +55,14 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     effect(() => {
-      this.imagesMapViewStore.loadImages({
-        albumId: this.albumId(),
-      });
+      this.fetchTiles([], this.albumId());
+    });
+  }
+
+  fetchTiles(tileIds: TileId[], albumId: string) {
+    this.imagesMapViewStore.loadTiles({
+      tileIds: tileIds,
+      albumId,
     });
   }
 
