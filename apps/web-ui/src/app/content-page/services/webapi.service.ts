@@ -7,20 +7,19 @@ import { Result } from '../../shared/results/results';
 import { toResult } from '../../shared/results/rxjs/toResult';
 import { AlbumDetailsApiResponse } from './types/album';
 import { GPhotosMediaItemDetailsApiResponse } from './types/gphotos-media-item';
+import { GetHeatmapRequest, GetHeatmapResponse } from './types/heatmap';
 import { ListAlbumsRequest, ListAlbumsResponse } from './types/list-albums';
 import {
   ListMediaItemsRequest,
   ListMediaItemsResponse,
   RawListMediaItemsResponse,
 } from './types/list-media-items';
-import { GetMapTileRequest, GetMapTileResponse } from './types/map-tile';
 import {
   MediaItem,
   MediaItemDetailsApiResponse,
   RawMediaItemDetailsApiResponse,
 } from './types/media-item';
 import { RawMediaItem } from './types/media-item';
-import { GetHeatmapRequest, GetHeatmapResponse } from './types/heatmap';
 
 @Injectable({ providedIn: 'root' })
 export class WebApiService {
@@ -133,31 +132,6 @@ export class WebApiService {
 
     return this.httpClient
       .get<ListAlbumsResponse>(url, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params,
-      })
-      .pipe(toResult());
-  }
-
-  getMapTile(
-    accessToken: string,
-    request: GetMapTileRequest,
-  ): Observable<Result<GetMapTileResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/map-tiles`;
-
-    let params = new HttpParams();
-    params = params.set('x', request.x);
-    params = params.set('y', request.y);
-    params = params.set('z', request.z);
-
-    if (request.albumId) {
-      params = params.set('album_id', request.albumId);
-    }
-
-    return this.httpClient
-      .get<GetMapTileResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
