@@ -23,18 +23,22 @@ import { switchMapResultToResultRxJs } from '../../../../shared/results/rxjs/swi
 import { combineResults } from '../../../../shared/results/utils/combineResults';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
 import { takeSuccessfulDataOrElse } from '../../../../shared/results/utils/takeSuccessfulDataOrElse';
+import {
+  GetMapTileHeatmapRequest,
+  Heatmap,
+} from '../../../services/types/heatmap';
 import { GetMapTileRequest } from '../../../services/types/map-tile';
 import { WebApiService } from '../../../services/webapi.service';
 import { Tile, TileId } from './images-map-viewer/images-map-viewer.component';
 
 export interface ImagesMapState {
-  tilesResult: Result<Tile[]>;
+  heatmapResult: Result<Heatmap>;
   numTiles: number;
   isFetchingTiles: boolean;
 }
 
 export const INITIAL_STATE: ImagesMapState = {
-  tilesResult: toPending(),
+  heatmapResult: toPending(),
   numTiles: 0,
   isFetchingTiles: false,
 };
@@ -60,7 +64,8 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
   readonly isFetchingTiles = this.selectSignal(
     (state) => state.isFetchingTiles,
   );
-  readonly tilesResult = this.selectSignal((state) => state.tilesResult);
+
+  readonly heatmapResult = this.selectSignal((state) => state.heatmapResult);
 
   readonly numTiles = this.selectSignal((state) => state.numTiles);
 
@@ -71,12 +76,12 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
             this.patchState({
-              tilesResult: toPending(),
+              heatmapResult: toPending(),
               numTiles: request.tileIds.length,
               isFetchingTiles: true,
             });
 
-            const apiRequests: GetMapTileRequest[] = request.tileIds.map(
+            const apiRequests: GetMapTileHeatmapRequest[] = request.tileIds.map(
               (tileId) => ({
                 x: tileId.x,
                 y: tileId.y,
@@ -89,49 +94,23 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
               .pipe(
                 mergeMap(
                   (apiRequest) =>
-                    this.webApiService.getMapTile(accessToken, apiRequest).pipe(
-                      switchMapResultToResultRxJs((response) => {
-                        if (!response.mediaItemId) {
-                          return of(
-                            toSuccess({
-                              tileId: {
-                                x: apiRequest.x,
-                                y: apiRequest.y,
-                                z: apiRequest.z,
-                              },
-                              chosenMediaItem: undefined,
-                              numMediaItems: 0,
-                            }),
-                          );
-                        }
-
-                        return this.webApiService
-                          .getMediaItem(accessToken, response.mediaItemId)
-                          .pipe(
-                            mapResultRxJs((mediaItem) => {
-                              const tile: Tile = {
-                                tileId: {
-                                  x: apiRequest.x,
-                                  y: apiRequest.y,
-                                  z: apiRequest.z,
-                                },
-                                chosenMediaItem: mediaItem,
-                                numMediaItems: response.numMediaItems,
-                              };
-                              return tile;
-                            }),
-                          );
-                      }),
+                    this.webApiService.getMapTileHeatmap(
+                      accessToken,
+                      apiRequest,
                     ),
                   MAX_CONCURRENCY,
                 ),
                 toArray(),
-                map((results) => combineResults(results, (tiles) => tiles)),
+                map((results) =>
+                  combineResults(results, (heatmaps) => heatmaps),
+                ),
               )
               .pipe(
-                tap((result: Result<Tile[]>) => {
+                tap((result: Result<Heatmap[]>) => {
                   this.patchState({
-                    tilesResult: result,
+                    heatmapResult: mapResult(result, (heatmaps) => ({
+                      entries: heatmaps.map((h) => h.entries).flat(),
+                    })),
                     isFetchingTiles: takeSuccessfulDataOrElse(
                       mapResult(result, () => false),
                       true,

@@ -23,6 +23,7 @@ import {
   Tile,
   TileId,
 } from './images-map-viewer/images-map-viewer.component';
+import { Heatmap } from '../../../services/types/heatmap';
 
 @Component({
   standalone: true,
@@ -45,9 +46,9 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
 
   readonly numTiles: Signal<number> = this.imagesMapViewStore.numTiles;
 
-  readonly tiles: Signal<Tile[]> = computed(() => {
-    const tilesResult = this.imagesMapViewStore.tilesResult();
-    return takeSuccessfulDataOrElse(tilesResult, []);
+  readonly heatmap: Signal<Heatmap> = computed(() => {
+    const heatmapResult = this.imagesMapViewStore.heatmapResult();
+    return takeSuccessfulDataOrElse(heatmapResult, { entries: [] });
   });
 
   readonly isDarkMode = this.store.selectSignal(themeState.selectIsDarkMode);

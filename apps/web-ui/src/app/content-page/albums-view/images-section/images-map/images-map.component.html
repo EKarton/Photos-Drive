@@ -56,7 +56,7 @@
 
     <app-images-map-viewer
       class="flex-grow"
-      [tiles]="tiles()"
+      [heatmap]="heatmap()"
       (visibleTilesChanged)="fetchTiles($event, albumId())"
       [isDarkMode]="isDarkMode()"
     />

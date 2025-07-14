@@ -23,6 +23,7 @@ import { authState } from '../../../../../auth/store';
 import { MediaItem } from '../../../../services/types/media-item';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
+import { Heatmap } from '../../../../services/types/heatmap';
 
 export interface Tile {
   tileId: TileId;
@@ -36,8 +37,6 @@ export interface TileId {
   z: number;
 }
 
-const TARGET_TILES_TO_DISPLAY = 50;
-
 @Component({
   selector: 'app-images-map-viewer',
   templateUrl: './images-map-viewer.component.html',
@@ -45,12 +44,12 @@ const TARGET_TILES_TO_DISPLAY = 50;
   standalone: true,
 })
 export class ImagesMapViewerComponent implements OnInit, OnDestroy {
-  readonly tiles = input<Tile[]>([]);
+  readonly heatmap = input.required<Heatmap>();
   readonly isDarkMode = input.required<boolean>();
 
   readonly visibleTilesChanged = output<TileId[]>();
 
-  private readonly tiles$ = toObservable(this.tiles).pipe(shareReplay(1));
+  private readonly heatmap$ = toObservable(this.heatmap).pipe(shareReplay(1));
 
   private readonly subscriptions = new Subscription();
 
@@ -74,6 +73,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         this.map.once('styledata', () => {
           this.updateImageMarkers();
           this.updateTileGridLayer();
+          this.updateHeatmapLayer();
         });
       }
     });
@@ -90,17 +90,14 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
     // Center the map to the first item in tiles$
     this.subscriptions.add(
-      this.tiles$
+      this.heatmap$
         .pipe(
-          map((tiles) => tiles[0]?.chosenMediaItem),
+          map((tiles) => tiles.entries[0]),
           filter(Boolean),
           take(1),
         )
-        .subscribe((mediaItem) => {
-          this.map.setCenter([
-            mediaItem.location!.longitude,
-            mediaItem.location!.latitude,
-          ]);
+        .subscribe((heatmapEntry) => {
+          this.map.setCenter([heatmapEntry.longitude, heatmapEntry.latitude]);
         }),
     );
 
@@ -108,12 +105,14 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     this.map.on('load', () => {
       this.updateImageMarkers();
       this.updateTileGridLayer();
+      this.updateHeatmapLayer();
       this.emitVisibleTiles();
 
       this.subscriptions.add(
-        this.tiles$.subscribe(() => {
+        this.heatmap$.subscribe(() => {
           this.updateImageMarkers();
           this.updateTileGridLayer();
+          this.updateHeatmapLayer();
         }),
       );
     });
@@ -122,6 +121,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     this.map.on('moveend', () => {
       this.updateImageMarkers();
       this.updateTileGridLayer();
+      this.updateHeatmapLayer();
       this.emitVisibleTiles();
     });
   }
@@ -132,11 +132,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const zoom = this.findBestZoomLevel(
-      TARGET_TILES_TO_DISPLAY,
-      Math.floor(this.map.getZoom()),
-      bounds,
-    );
+    const zoom = Math.floor(this.map.getZoom());
     const visibleTiles = this.getVisibleTiles(zoom, bounds);
 
     this.visibleTilesChanged.emit(visibleTiles);
@@ -147,58 +143,142 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     this.imageMarkers.forEach((marker) => marker.remove());
     this.imageMarkers = [];
 
-    for (const tile of this.tiles()) {
-      if (tile.numMediaItems === 0 || !tile.chosenMediaItem) {
-        continue;
-      }
+    // for (const tile of this.tiles()) {
+    //   if (tile.numMediaItems === 0 || !tile.chosenMediaItem) {
+    //     continue;
+    //   }
 
-      let componentRef: ComponentRef<ImageMapMarkerComponent>;
+    //   let componentRef: ComponentRef<ImageMapMarkerComponent>;
 
-      if (tile.numMediaItems > 1) {
-        componentRef = this.viewContainerRef.createComponent(
-          ImageMapMarkerComponent,
-        );
-        componentRef.setInput('mediaItem', tile.chosenMediaItem!);
-        componentRef.setInput('badgeCount', tile.numMediaItems);
+    //   if (tile.numMediaItems > 1) {
+    //     componentRef = this.viewContainerRef.createComponent(
+    //       ImageMapMarkerComponent,
+    //     );
+    //     componentRef.setInput('mediaItem', tile.chosenMediaItem!);
+    //     componentRef.setInput('badgeCount', tile.numMediaItems);
 
-        const location = tile.chosenMediaItem!.location!;
-        this.subscriptions.add(
-          componentRef.instance.markerClick.subscribe(() => {
-            this.map.easeTo({
-              center: [location.longitude, location.latitude],
-              zoom: tile.tileId.z + 1,
-            });
-          }),
-        );
-      } else {
-        componentRef = this.viewContainerRef.createComponent(
-          ImageMapMarkerComponent,
-        );
-        componentRef.setInput('mediaItem', tile.chosenMediaItem);
+    //     const location = tile.chosenMediaItem!.location!;
+    //     this.subscriptions.add(
+    //       componentRef.instance.markerClick.subscribe(() => {
+    //         this.map.easeTo({
+    //           center: [location.longitude, location.latitude],
+    //           zoom: tile.tileId.z + 1,
+    //         });
+    //       }),
+    //     );
+    //   } else {
+    //     componentRef = this.viewContainerRef.createComponent(
+    //       ImageMapMarkerComponent,
+    //     );
+    //     componentRef.setInput('mediaItem', tile.chosenMediaItem);
 
-        this.subscriptions.add(
-          componentRef.instance.markerClick.subscribe(() => {
-            this.store.dispatch(
-              mediaViewerActions.openMediaViewer({
-                request: { mediaItemId: tile.chosenMediaItem!.id },
-              }),
-            );
-          }),
-        );
-      }
+    //     this.subscriptions.add(
+    //       componentRef.instance.markerClick.subscribe(() => {
+    //         this.store.dispatch(
+    //           mediaViewerActions.openMediaViewer({
+    //             request: { mediaItemId: tile.chosenMediaItem!.id },
+    //           }),
+    //         );
+    //       }),
+    //     );
+    //   }
 
-      if (componentRef && tile.chosenMediaItem.location) {
-        const marker = this.mapboxFactory
-          .buildMarker(componentRef)
-          .setLngLat([
-            tile.chosenMediaItem.location.longitude,
-            tile.chosenMediaItem.location.latitude,
-          ])
-          .addTo(this.map);
+    //   if (componentRef && tile.chosenMediaItem.location) {
+    //     const marker = this.mapboxFactory
+    //       .buildMarker(componentRef)
+    //       .setLngLat([
+    //         tile.chosenMediaItem.location.longitude,
+    //         tile.chosenMediaItem.location.latitude,
+    //       ])
+    //       .addTo(this.map);
 
-        this.imageMarkers.push(marker);
-      }
+    //     this.imageMarkers.push(marker);
+    //   }
+    // }
+  }
+
+  private updateHeatmapLayer() {
+    const sourceId = 'media-heatmap';
+    const layerId = 'heatmap-layer';
+
+    // Prepare GeoJSON from your Heatmap object
+    const geojson = this.buildGeoJSONFromMediaItems(this.heatmap());
+
+    // Add or update the source
+    if (!this.map.getSource(sourceId)) {
+      this.map.addSource(sourceId, {
+        type: 'geojson',
+        data: geojson,
+      });
+
+      // Add the heatmap layer
+      this.map.addLayer({
+        id: layerId,
+        type: 'heatmap',
+        source: sourceId,
+        maxzoom: 22,
+        paint: {
+          'heatmap-weight': [
+            'interpolate',
+            ['linear'],
+            ['get', 'count'],
+            0,
+            0,
+            10,
+            0.2,
+            50,
+            0.5,
+            100,
+            0.8,
+            200,
+            1,
+          ],
+          'heatmap-intensity': 1,
+          'heatmap-color': [
+            'interpolate',
+            ['linear'],
+            ['heatmap-density'],
+            0,
+            'rgba(33,102,172,0)',
+            0.2,
+            'rgb(103,169,207)',
+            0.4,
+            'rgb(209,229,240)',
+            0.6,
+            'rgb(253,219,199)',
+            0.8,
+            'rgb(239,138,98)',
+            1,
+            'rgb(178,24,43)',
+          ],
+          'heatmap-radius': 20,
+          'heatmap-opacity': 0.8,
+        },
+      });
+    } else {
+      // Update the data if the source already exists
+      const source = this.map.getSource(sourceId) as
+        | mapboxgl.GeoJSONSource
+        | undefined;
+      source?.setData(geojson);
     }
+  }
+
+  private buildGeoJSONFromMediaItems(heatmap: Heatmap): GeoJSON.GeoJSON {
+    return {
+      type: 'FeatureCollection',
+      features: heatmap.entries.map((entry) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [entry.longitude, entry.latitude],
+        },
+        properties: {
+          count: entry.count,
+          cellId: entry.cellId,
+        },
+      })),
+    };
   }
 
   private updateTileGridLayer() {
@@ -208,11 +288,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const zoom = this.findBestZoomLevel(
-      TARGET_TILES_TO_DISPLAY,
-      Math.floor(this.map.getZoom()),
-      bounds,
-    );
+    const zoom = Math.floor(this.map.getZoom());
 
     const tileSource: GeoJSON.FeatureCollection = {
       type: 'FeatureCollection',
@@ -256,70 +332,6 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         tileSource,
       );
     }
-  }
-
-  findBestZoomLevel(
-    target: number,
-    initialZoomLevel: number,
-    bounds: mapboxgl.LngLatBounds,
-  ): number {
-    let low = initialZoomLevel;
-    let high = 24;
-    let bestZoom = 0;
-    let bestDiff = Infinity;
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
-      const tiles = this.getNumTiles(mid, bounds);
-      const diff = Math.abs(tiles - target);
-
-      if (diff < bestDiff) {
-        bestDiff = diff;
-        bestZoom = mid;
-      }
-
-      if (tiles < target) {
-        low = mid + 1;
-      } else if (tiles > target) {
-        high = mid - 1;
-      } else {
-        // Exact match
-        return mid;
-      }
-    }
-
-    return bestZoom;
-  }
-
-  private getNumTiles(zoom: number, bounds: mapboxgl.LngLatBounds): number {
-    if (!bounds) {
-      return 0;
-    }
-
-    const maxIndex = Math.pow(2, zoom) - 1;
-
-    const north = clampLat(bounds.getNorth());
-    const south = clampLat(bounds.getSouth());
-    const east = clampLng(bounds.getEast());
-    const west = clampLng(bounds.getWest());
-
-    const [xTop, yTop] = tilebelt.pointToTile(west, north, zoom);
-    const [xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom);
-
-    function numbersInclusive(x: number, y: number): number {
-      if (x <= y) {
-        return y + 1 - x;
-      } else {
-        // If x > y, that means that it wrap around the antimeridian
-        // So we compute values from x, ..., maxIndex and from 0, ... y
-        return maxIndex + 1 - x + (y + 1 - 0);
-      }
-    }
-
-    const numXValues = numbersInclusive(xTop, xBottom);
-    const numYValues = numbersInclusive(yTop, yBottom);
-
-    return numXValues * numYValues;
   }
 
   private getVisibleTiles(
