@@ -32,7 +32,11 @@ export default async function (
       }
 
       if (isNaN(inputTileX) || isNaN(inputTileY) || isNaN(inputTileZ)) {
-        return res.status(400).json({ error: 'Bad request for tile id' });
+        return res
+          .status(400)
+          .json({
+            error: `Bad request for tile id ${inputTileX}:${inputTileY}:${inputTileZ}`
+          });
       }
 
       const [mediaItemIds, numMediaItems] = await Promise.all([
