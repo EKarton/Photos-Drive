@@ -2,19 +2,21 @@ import { performance } from 'perf_hooks';
 import * as tilebelt from '@mapbox/tilebelt';
 import { cellToLatLng, polygonToCells } from 'h3-js';
 import { AlbumId } from '../metadata_store/Albums';
+import { MediaItemId } from '../metadata_store/MediaItems';
 import { CellId, MapCellsRepository } from './MapCellsRepository';
 
 /** Represents an entry to the heat map.  */
-export interface HeatmapEntry {
+export interface HeatmapPoint {
   cellId: CellId;
   count: number;
   latitude: number;
   longitude: number;
+  sampledMediaItemId: MediaItemId;
 }
 
 /** Represents a heat map. */
 export interface Heatmap {
-  entries: HeatmapEntry[];
+  points: HeatmapPoint[];
 }
 
 /** Represents a tile on the map. */
@@ -33,7 +35,8 @@ export class HeatmapGenerator {
 
   async getHeatmapForTile(
     tile: Tile,
-    albumId: AlbumId | undefined
+    albumId: AlbumId | undefined,
+    options?: { abortController?: AbortController }
   ): Promise<Heatmap> {
     const start = performance.now();
 
@@ -48,22 +51,29 @@ export class HeatmapGenerator {
     const h3Res = mapboxZoomToH3Resolution(tile.z);
     const cellIds = polygonToCells([polygon], h3Res, true);
 
-    const cellToCountsMap: Map<CellId, number> =
-      await this.mapCellRepository.getNumMediaItemsInCells(cellIds, albumId);
-
-    const heatmapData = Array.from(cellToCountsMap)
-      .filter(([_, count]) => count > 0)
-      .map(([cellId, count]) => {
-        const [latitude, longitude] = cellToLatLng(cellId);
-        return { cellId, count, latitude, longitude };
-      });
+    const heatmapCells = await this.mapCellRepository.getHeatmapPointsInCells(
+      cellIds,
+      albumId,
+      options
+    );
 
     console.log(
       `getHeatmapForTile for ${tile} took ${performance.now() - start} ms`
     );
 
     return {
-      entries: heatmapData.filter((entry) => entry !== undefined)
+      points: heatmapCells
+        .filter((heatmapCell) => heatmapCell.count > 0)
+        .map((heatmapCell) => {
+          const [latitude, longitude] = cellToLatLng(heatmapCell.cellId);
+          return {
+            cellId: heatmapCell.cellId,
+            count: heatmapCell.count,
+            latitude,
+            longitude,
+            sampledMediaItemId: heatmapCell.sampledMediaItemId
+          };
+        })
     };
   }
 }
@@ -71,31 +81,11 @@ export class HeatmapGenerator {
 function mapboxZoomToH3Resolution(zoom: number): number {
   if (zoom < 4) {
     return 2;
-  } else if (zoom < 5) {
-    return 3;
-  } else if (zoom < 6) {
-    return 4;
-  } else if (zoom < 7) {
-    return 5;
-  } else if (zoom < 8) {
-    return 6;
-  } else if (zoom < 9) {
-    return 7;
-  } else if (zoom < 10) {
-    return 8;
-  } else if (zoom < 11) {
-    return 9;
-  } else if (zoom < 12) {
-    return 10;
-  } else if (zoom < 13) {
-    return 11;
-  } else if (zoom < 14) {
-    return 12;
-  } else if (zoom < 15) {
-    return 13;
-  } else if (zoom < 16) {
-    return 14;
-  } else {
+  }
+
+  if (zoom > 15) {
     return 15;
   }
+
+  return Math.floor(zoom - 1);
 }

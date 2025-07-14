@@ -33,12 +33,18 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
     this.mongoDbRepository = mongoDbRepository;
   }
 
-  async getMediaItemById(id: MediaItemId): Promise<MediaItem> {
+  async getMediaItemById(
+    id: MediaItemId,
+    options?: { abortController?: AbortController }
+  ): Promise<MediaItem> {
     const mongoDbClient = this.mongoDbRepository.getClientFromId(id.clientId);
     const rawDocs = await mongoDbClient
       .db('photos_drive')
       .collection('media_items')
-      .findOne({ _id: new ObjectId(id.objectId) });
+      .findOne(
+        { _id: new ObjectId(id.objectId) },
+        { signal: options?.abortController?.signal }
+      );
 
     if (rawDocs === null) {
       throw new MediaItemNotFoundError(id);
@@ -47,15 +53,21 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
     return this.convertMongoDbDocToMediaItemInstance(id, rawDocs);
   }
 
-  async getNumMediaItemsInAlbum(albumId: AlbumId): Promise<number> {
+  async getNumMediaItemsInAlbum(
+    albumId: AlbumId,
+    options?: { abortController?: AbortController }
+  ): Promise<number> {
     const counts = await Promise.all(
       this.mongoDbRepository.listClients().map(async ([_, mongoDbClient]) => {
         const numDocs = await mongoDbClient
           .db('photos_drive')
           .collection('media_items')
-          .countDocuments({
-            album_id: `${albumId.clientId}:${albumId.objectId}`
-          });
+          .countDocuments(
+            {
+              album_id: `${albumId.clientId}:${albumId.objectId}`
+            },
+            { signal: options?.abortController?.signal }
+          );
 
         return numDocs;
       })
@@ -65,7 +77,8 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
   }
 
   async listMediaItems(
-    req: ListMediaItemsRequest
+    req: ListMediaItemsRequest,
+    options?: { abortController?: AbortController }
   ): Promise<ListMediaItemsResponse> {
     const clientIdToMongoClient = new Map(this.mongoDbRepository.listClients());
     const clientIdToMediaItemId = new Map(
@@ -100,7 +113,10 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
             const lastSeenMediaItem = await mongoClient
               .db('photos_drive')
               .collection('media_items')
-              .findOne({ _id: lastSeenMediaItemObjectId });
+              .findOne(
+                { _id: lastSeenMediaItemObjectId },
+                { signal: options?.abortController?.signal }
+              );
             const lastSeenDateTaken: Date =
               lastSeenMediaItem!['date_taken'] ?? new Date(1970, 1, 1);
 
@@ -123,15 +139,17 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
           }
         }
 
-        const sortObj: Sort = {};
         const mongoSortDirection =
           req.sortBy.direction === SortByDirection.ASCENDING ? 1 : -1;
 
+        let sortObj: Sort;
         if (req.sortBy.field === SortByField.ID) {
-          sortObj['_id'] = mongoSortDirection;
+          sortObj = { _id: mongoSortDirection };
         } else {
-          sortObj['date_taken'] = mongoSortDirection;
-          sortObj['_id'] = mongoSortDirection;
+          sortObj = {
+            date_taken: mongoSortDirection,
+            _id: mongoSortDirection
+          };
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
@@ -141,7 +159,7 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
         const rawDocs = await mongoClient
           .db('photos_drive')
           .collection('media_items')
-          .find(filterObj)
+          .find(filterObj, { signal: options?.abortController?.signal })
           .sort(sortObj)
           .limit(overFetchSize)
           .toArray();

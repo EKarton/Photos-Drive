@@ -34,9 +34,20 @@ export type ListAlbumsResponse = {
 
 /** A class that stores the albums from the database. */
 export interface AlbumsRepository {
-  getAlbumById(id: AlbumId): Promise<Album>;
-  getNumAlbumsInAlbum(id: AlbumId): Promise<number>;
-  listAlbums(req: ListAlbumsRequest): Promise<ListAlbumsResponse>;
+  getAlbumById(
+    id: AlbumId,
+    options?: { abortController?: AbortController }
+  ): Promise<Album>;
+
+  getNumAlbumsInAlbum(
+    id: AlbumId,
+    options?: { abortController?: AbortController }
+  ): Promise<number>;
+
+  listAlbums(
+    req: ListAlbumsRequest,
+    options?: { abortController?: AbortController }
+  ): Promise<ListAlbumsResponse>;
 }
 
 /** Represents an error for when an album is not found. */

@@ -9,7 +9,7 @@ import albumsRouter from './routes/albums';
 import authRouter from './routes/authentication';
 import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
-import mapsRouter from './routes/maps';
+import mapsRouter from './routes/heatmap';
 import mediaItemsRouter from './routes/media_items';
 import { GPhotosClientsRepository } from './services/blob_store/gphotos/GPhotosClientsRepository';
 import { ConfigStore } from './services/config_store/ConfigStore';

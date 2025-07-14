@@ -35,9 +35,20 @@ export type ListMediaItemsResponse = {
 
 /** A class that stores the media items from the database. */
 export interface MediaItemsRepository {
-  getMediaItemById(id: MediaItemId): Promise<MediaItem>;
-  getNumMediaItemsInAlbum(albumId: AlbumId): Promise<number>;
-  listMediaItems(req: ListMediaItemsRequest): Promise<ListMediaItemsResponse>;
+  getMediaItemById(
+    id: MediaItemId,
+    options?: { abortController?: AbortController }
+  ): Promise<MediaItem>;
+
+  getNumMediaItemsInAlbum(
+    albumId: AlbumId,
+    options?: { abortController?: AbortController }
+  ): Promise<number>;
+
+  listMediaItems(
+    req: ListMediaItemsRequest,
+    options?: { abortController?: AbortController }
+  ): Promise<ListMediaItemsResponse>;
 }
 
 /** Represents an error for when an album is not found. */

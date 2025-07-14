@@ -10,6 +10,7 @@ import {
   AlbumId,
   convertStringToAlbumId
 } from '../services/metadata_store/Albums';
+import { mediaIdToString } from '../services/metadata_store/MediaItems';
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -41,8 +42,21 @@ export default async function (
         });
       }
 
-      const heatmap = await heatmapGenerator.getHeatmapForTile(tile, albumId);
-      return res.status(200).json(heatmap);
+      const abortController = new AbortController();
+      req.on('close', () => abortController.abort());
+
+      const heatmap = await heatmapGenerator.getHeatmapForTile(tile, albumId, {
+        abortController
+      });
+
+      return res.status(200).json({
+        points: heatmap.points.map((point) => ({
+          count: point.count,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          sampledMediaItemId: mediaIdToString(point.sampledMediaItemId)
+        }))
+      });
     })
   );
 
