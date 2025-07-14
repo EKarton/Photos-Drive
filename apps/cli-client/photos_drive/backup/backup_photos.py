@@ -4,7 +4,7 @@ from typing import Optional, Dict, cast
 from collections import deque
 import logging
 from bson.objectid import ObjectId
-from photos_drive.shared.tiles.tiles_repository import TilesRepository
+from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
 
 from ..shared.metadata.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
@@ -67,7 +67,7 @@ class PhotosBackup:
         config: Config,
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
-        tiles_repo: TilesRepository,
+        map_cells_repo: MapCellsRepository,
         gphotos_client_repo: GPhotosClientsRepository,
         clients_repo: ClientsRepository,
         parallelize_uploads: bool = False,
@@ -75,7 +75,7 @@ class PhotosBackup:
         self.__config = config
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
-        self.__tiles_repo = tiles_repo
+        self.__map_cells_repo = map_cells_repo
         self.__diffs_assigner = DiffsAssigner(gphotos_client_repo)
         self.__albums_pruner = AlbumsPruner(
             config.get_root_album_id(), albums_repo, media_items_repo
@@ -173,7 +173,7 @@ class PhotosBackup:
                 )
 
                 if media_item.location is not None:
-                    self.__tiles_repo.add_media_item(media_item)
+                    self.__map_cells_repo.add_media_item(media_item)
                 total_num_media_item_added += 1
                 num_media_items += 1
 
@@ -190,7 +190,7 @@ class PhotosBackup:
         # Step 6: Delete the media items marked for deletion
         self.__media_items_repo.delete_many_media_items(total_media_item_ids_to_delete)
         for media_item in total_media_items_to_delete_from_tiles:
-            self.__tiles_repo.remove_media_item(media_item)
+            self.__map_cells_repo.remove_media_item(media_item)
 
         # Step 7: Delete albums with no child albums and no media items
         total_num_albums_deleted = 0

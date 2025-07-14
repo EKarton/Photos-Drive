@@ -554,6 +554,58 @@ protobuf = ">=3.20.2,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4
 grpc = ["grpcio (>=1.44.0,<2.0.0.dev0)"]
 
 [[package]]
+name = "h3"
+version = "4.3.0"
+description = "Uber's hierarchical hexagonal geospatial indexing system"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "h3-4.3.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:15bf255188d5fdd4b33cd24ed3952fbf8161575a42dcba2730a4530ef0f057fa"},
+    {file = "h3-4.3.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:d45005bb56a9d70ab420bda6096c579e4246038f8b0553394b2b82aa474f2d1c"},
+    {file = "h3-4.3.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:67c3a8d883b7b233b30a372f85434f48cba3b42b926598a835a73512a0a3d958"},
+    {file = "h3-4.3.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1e5d2180c1391db507473a6877c2df036de396d88212e90d7d0f6c73b33901d3"},
+    {file = "h3-4.3.0-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:7de13e47ea3e3a3fc06c50def371050227ecfb1ccf0c8923c2b8bd8acba27355"},
+    {file = "h3-4.3.0-cp310-cp310-win_amd64.whl", hash = "sha256:67c82019afb5b0b214f50502a141bdb4e9b72dfffe5ed63fdd7630119edee123"},
+    {file = "h3-4.3.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:689cb238becb5f5af3631934e54cb8c7782c60af8fa9daf7e2cd972235b88c6a"},
+    {file = "h3-4.3.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:69dc186712c6adeb500b1aaec875493c742fbddb7b9b40d02016769a991732d1"},
+    {file = "h3-4.3.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7f870c0c90fd6657b51d8b1501142e9bee0787437be9486251a0e86e2d1513c1"},
+    {file = "h3-4.3.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:56862fa893903b966840a4aff27e19be2ee62b80e7e67d93dbd805ab719195bc"},
+    {file = "h3-4.3.0-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:0f6b8432a104dacf21a2a06bb5dd60e2b63375b544d4964d7e4980543d8285da"},
+    {file = "h3-4.3.0-cp311-cp311-win_amd64.whl", hash = "sha256:a9c18bec33c300485452f3ed46a5165d27b186cfb15ee36fb7252228483c84b9"},
+    {file = "h3-4.3.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:a647d9635633ca243d8c24c990a9e37e3b294781fd6a47a0f5dfe9a1dec0dd13"},
+    {file = "h3-4.3.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:6adba5b249792d8f01abd9e410439a2912a4e900073cfcc2d32297f2ec803db0"},
+    {file = "h3-4.3.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:69ceab01438558ab2b5a90a2a30cf9e1627a4a8b6923ad8ec51a9e2dfa2ad0e8"},
+    {file = "h3-4.3.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e8a7d63ee5213f43dea80b79821fa7e07d9377260bc352201cac5c954017ea99"},
+    {file = "h3-4.3.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:6409d7d9c7c3a888359c5012aa7eedfe909da230e0f109d6a80ab973c0a2bf73"},
+    {file = "h3-4.3.0-cp312-cp312-win_amd64.whl", hash = "sha256:24ad4e247388bb7f5afece4fb5f901b1168c4b2f0417b3459bae5c4939939327"},
+    {file = "h3-4.3.0-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:ee2d2ab17c10172b265876b4655094c530251cae24f03cf0d2f339aca5ee603f"},
+    {file = "h3-4.3.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:902e92c06bb2c08a6a551d5ca6a69a5deae2a9802263ae54455a803c3fb1766c"},
+    {file = "h3-4.3.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c61761f524d7b42872f085dfcafc6466b7ff2ef0fc4c4626b336448e8fffca3a"},
+    {file = "h3-4.3.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1fe4c11a1b512ef64cc155c84977fa41bdc8f059d0db3c411da854805b08ad59"},
+    {file = "h3-4.3.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:e46ac17a7dc520ba7e5b5698bf39f3123e68e2c834398711a93a42ab3ec46d60"},
+    {file = "h3-4.3.0-cp313-cp313-win_amd64.whl", hash = "sha256:02df69a61c59d06b8516c85d9cf4f6bb2efc8e8b526000ac46b16328540d0952"},
+    {file = "h3-4.3.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:b75f40700466cf5ac82509cccb3c66404b586ee9ddf97168f4550e02504edfa1"},
+    {file = "h3-4.3.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:2edcae634d23535827e16bf16282646eacacd911f1735aacee381ff717d8a5e9"},
+    {file = "h3-4.3.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:309bed3271bb7dc5ed32b073dd0a3fda56f4985cf7c4ec2b33d0621ce4357e16"},
+    {file = "h3-4.3.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:81ce3b1caeb510618332853a75d6aba5a259f4cf03f9e681c726063915b90d14"},
+    {file = "h3-4.3.0-cp38-cp38-musllinux_1_2_x86_64.whl", hash = "sha256:dbaa311260ed1497f6ff97ec8c582fcfb8fbfd90a4156d3d4831d964f0431702"},
+    {file = "h3-4.3.0-cp38-cp38-win_amd64.whl", hash = "sha256:0963d760b9b067cffbebab3c8514214bdbc18eb66c6292092ca6439fbed25b2b"},
+    {file = "h3-4.3.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:6f22ce0f63b1bae098e7258321d51ea268b4cb9f8b4db0be68042b5158e1433b"},
+    {file = "h3-4.3.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:c961be621a7a14a6fcc2a71c5c4e6b4cf0865781d29e000048a4a5ceb8734ff2"},
+    {file = "h3-4.3.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e42d6efec68363943dd062e228f2d77b288041870679ffd08eb37813e9694c96"},
+    {file = "h3-4.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f5d19bdb1d592fa01aaeb6a469050c621eea6d82ffb99f095b5502f483151b70"},
+    {file = "h3-4.3.0-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:019f47d5d3bd174b1714ba4c2560783c2a81be98b6a37b130a52e6f00c2aea37"},
+    {file = "h3-4.3.0-cp39-cp39-win_amd64.whl", hash = "sha256:23ee690ab45f95997fa20674937eb2d49018395c272ad63373d0f2cc31925094"},
+    {file = "h3-4.3.0.tar.gz", hash = "sha256:b9d35dfa97e7f4b4c9c9f1564f22a44565694ac1ca96469a08170869e7d0ce0a"},
+]
+
+[package.extras]
+all = ["cartopy", "contextily", "geodatasets", "geopandas", "geoviews", "h3[test]", "jupyter-book", "jupyterlab", "jupyterlab-geojson", "matplotlib", "sphinx (>=7.3.3)"]
+numpy = ["numpy"]
+test = ["numpy", "pytest", "pytest-cov", "ruff"]
+
+[[package]]
 name = "httplib2"
 version = "0.22.0"
 description = "A comprehensive HTTP client library."
@@ -643,25 +695,6 @@ files = [
     {file = "mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
     {file = "mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba"},
 ]
-
-[[package]]
-name = "mercantile"
-version = "1.2.1"
-description = "Web mercator XYZ tile utilities"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "mercantile-1.2.1-py3-none-any.whl", hash = "sha256:30f457a73ee88261aab787b7069d85961a5703bb09dc57a170190bc042cd023f"},
-    {file = "mercantile-1.2.1.tar.gz", hash = "sha256:fa3c6db15daffd58454ac198b31887519a19caccee3f9d63d17ae7ff61b3b56b"},
-]
-
-[package.dependencies]
-click = ">=3.0"
-
-[package.extras]
-dev = ["check-manifest"]
-test = ["hypothesis", "pytest"]
 
 [[package]]
 name = "mongomock"
@@ -1812,4 +1845,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "2f94dfe5149d6da6d9151e6909a6ab98d94a44b4e55f010a3cff4b42214f6ebb"
+content-hash = "03df0bad5909a651e2b57b87a5783a7cc475c529b74087422a558ca0502f9f1c"

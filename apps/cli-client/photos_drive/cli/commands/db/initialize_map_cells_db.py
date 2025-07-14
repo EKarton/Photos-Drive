@@ -1,11 +1,13 @@
 import logging
 from typing_extensions import Annotated
+import typer
+
+from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
+    MapCellsRepositoryImpl,
+)
 from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from photos_drive.shared.tiles.mongodb.tiles_repository_impl import TilesRepositoryImpl
-import typer
-
 from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
@@ -22,7 +24,7 @@ config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 
 
 @app.command()
-def initialize_tiles_db(
+def initialize_map_cells_db(
     config_file: Annotated[
         str | None,
         typer.Option(
@@ -51,7 +53,7 @@ def initialize_tiles_db(
     setup_logging(verbose)
 
     logger.debug(
-        "Called db initialize-tiles-db handler with args:\n"
+        "Called db initialize-map-cells-db handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
         + f" verbose={verbose}"
@@ -62,12 +64,13 @@ def initialize_tiles_db(
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
 
     for _, client in mongodb_clients_repo.get_all_clients():
-        collection = client['photos_drive']['tiles']
-        collection.delete_many({})
-        collection.create_index([("x", 1), ("y", 1), ("z", 1), ("album_id", 1)])
+        client['photos_drive']['tiles'].delete_many({})
+        client['photos_drive']['map_cells'].create_index(
+            [("cell_id", 1), ("album_id", 1), ("media_item_id", 1)]
+        )
 
     media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
-    tiles_repo = TilesRepositoryImpl(mongodb_clients_repo)
+    tiles_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
     for media_item in media_items_repo.get_all_media_items():
         if media_item.location is not None:
             tiles_repo.add_media_item(media_item)
