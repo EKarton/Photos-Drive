@@ -253,31 +253,15 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   }
 
   private prepareSupercluster() {
-    const seen = new Map<string, number>();
-
     const geojsonPoints: Supercluster.PointFeature<{
       sampledMediaItemId: string;
       count: number;
     }>[] = this.heatmap().points.map((point) => {
-      const longitude = point.longitude;
-      const latitude = point.latitude;
-      const key = `${longitude},${latitude}`;
-      let jitteredLongitude = longitude;
-      let jitteredLatitude = latitude;
-
-      // If this location has been seen before, apply jitter
-      const count = seen.get(key) || 0;
-      if (count > 0) {
-        jitteredLongitude = jitterCoordinate(longitude, 0.0001 * (count + 1));
-        jitteredLatitude = jitterCoordinate(latitude, 0.0001 * (count + 1));
-      }
-      seen.set(key, count + 1);
-
       return {
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: [jitteredLongitude, jitteredLatitude],
+          coordinates: [point.longitude, point.latitude],
         },
         properties: {
           sampledMediaItemId: point.sampledMediaItemId,
@@ -477,9 +461,4 @@ function clampLat(lat: number): number {
 /** Clamp the longitude value from -179.99999 to 179.99999 */
 function clampLng(lng: number): number {
   return Math.max(-179.9999, Math.min(179.9999, lng));
-}
-
-/** Adds randomness to coordinates, where magnitude is in degrees; 0.00005 ~ 5 meters  */
-function jitterCoordinate(coord: number, magnitude: number): number {
-  return coord + (Math.random() - 0.5) * 2 * magnitude;
 }
