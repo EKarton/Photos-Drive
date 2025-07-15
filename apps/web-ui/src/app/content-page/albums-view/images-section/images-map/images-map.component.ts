@@ -49,6 +49,9 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('fullscreenContainer', { static: true })
   fullscreenContainer!: ElementRef;
 
+  private readonly isHeatmapVisible = signal(true);
+  private readonly areSampledImagesVisible = signal(true);
+
   readonly numTiles: Signal<number> = this.imagesMapViewStore.numTiles;
 
   readonly heatmapResult: Signal<Result<Heatmap>> =

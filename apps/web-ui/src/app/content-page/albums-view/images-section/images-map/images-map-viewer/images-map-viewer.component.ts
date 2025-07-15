@@ -39,6 +39,8 @@ export interface TileId {
 export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   readonly heatmap = input.required<Heatmap>();
   readonly isDarkMode = input.required<boolean>();
+  readonly showMarkers = input<boolean>(true);
+  readonly showHeatmap = input<boolean>(true);
 
   readonly visibleTilesChanged = output<TileId[]>();
 
@@ -67,7 +69,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         this.map.once('styledata', () => {
           this.updateTileGridLayer();
           this.updateHeatmapLayer();
-          this.updateImageMarkers();
+          this.updateImageMarkers(this.showMarkers());
         });
       }
     });
@@ -78,8 +80,6 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       accessToken: this.mapboxApiToken(),
       container: this.mapContainer.nativeElement,
       style: getTheme(this.isDarkMode()),
-      center: [0, 0],
-      zoom: 10,
     });
 
     // Set the map layers whenever it has finished loading
@@ -87,14 +87,14 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       this.updateTileGridLayer();
       this.updateHeatmapLayer();
       this.prepareSupercluster();
-      this.updateImageMarkers();
+      this.updateImageMarkers(this.showMarkers());
       this.emitVisibleTiles();
 
       this.subscriptions.add(
         this.heatmap$.subscribe(() => {
           this.updateHeatmapLayer();
           this.prepareSupercluster();
-          this.updateImageMarkers();
+          this.updateImageMarkers(this.showMarkers());
         }),
       );
     });
@@ -103,7 +103,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     this.map.on('moveend', () => {
       this.updateTileGridLayer();
       this.updateHeatmapLayer();
-      this.updateImageMarkers();
+      this.updateImageMarkers(this.showMarkers());
       this.emitVisibleTiles();
     });
   }
@@ -160,7 +160,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       return [];
     }
 
-    const zoom = this.map.getZoom();
+    const zoom = Math.max(1, Math.floor(this.map.getZoom()));
+    console.log(zoom);
     const maxIndex = Math.pow(2, zoom) - 1;
 
     const north = clampLat(bounds.getNorth());
@@ -184,14 +185,11 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     const xValues = numbersInclusive(xTop, xBottom);
     const yValues = numbersInclusive(yTop, yBottom);
 
-    const center = this.map.getCenter();
     const tiles: TileId[] = [];
 
     for (const x of xValues) {
       for (const y of yValues) {
-        if (isTileVisibleInGlobe([x, y, zoom], center.lat, center.lng)) {
-          tiles.push({ x, y, z: zoom });
-        }
+        tiles.push({ x, y, z: zoom });
       }
     }
 
@@ -199,15 +197,31 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   }
 
   private prepareSupercluster() {
+    const seen = new Map<string, number>();
+
     const geojsonPoints: Supercluster.PointFeature<{
       sampledMediaItemId: string;
       count: number;
     }>[] = this.heatmap().points.map((point) => {
+      const longitude = point.longitude;
+      const latitude = point.latitude;
+      const key = `${longitude},${latitude}`;
+      let jitteredLongitude = longitude;
+      let jitteredLatitude = latitude;
+
+      // If this location has been seen before, apply jitter
+      const count = seen.get(key) || 0;
+      if (count > 0) {
+        jitteredLongitude = jitterCoordinate(longitude, 0.0001 * (count + 1));
+        jitteredLatitude = jitterCoordinate(latitude, 0.0001 * (count + 1));
+      }
+      seen.set(key, count + 1);
+
       return {
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: [point.longitude, point.latitude],
+          coordinates: [jitteredLongitude, jitteredLatitude],
         },
         properties: {
           sampledMediaItemId: point.sampledMediaItemId,
@@ -231,14 +245,14 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     this.supercluster.load(geojsonPoints);
   }
 
-  private updateImageMarkers() {
+  private updateImageMarkers(showMarkers: boolean) {
     // Remove old markers
     this.imageMarkers.forEach((marker) => marker.remove());
     this.imageMarkers = [];
 
     // Get clusters for current viewport and zoom
     const bounds = this.map.getBounds();
-    if (!bounds || !this.supercluster) {
+    if (!showMarkers || !bounds || !this.supercluster) {
       return;
     }
 
@@ -256,15 +270,20 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
       let mediaItemId: string;
       let count: number;
+      let expansionZoom: number;
 
       if (cluster.properties.cluster) {
         const leaf = this.supercluster.getLeaves(cluster.id as number, 1)[0];
         mediaItemId = leaf.properties['sampledMediaItemId'] as string;
 
         count = cluster.properties['count'] as number;
+        expansionZoom = this.supercluster.getClusterExpansionZoom(
+          cluster.id as number,
+        );
       } else {
         mediaItemId = cluster.properties['sampledMediaItemId'] as string;
         count = cluster.properties['count'] as number;
+        expansionZoom = this.map.getZoom() + 1;
       }
 
       const componentRef = this.viewContainerRef.createComponent(
@@ -284,9 +303,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
           }),
         );
       } else {
-        const expansionZoom = this.supercluster.getClusterExpansionZoom(
-          cluster.id as number,
-        );
+        console.log(latitude, longitude, expansionZoom);
         this.subscriptions.add(
           componentRef.instance.markerClick.subscribe(() => {
             this.map.easeTo({
@@ -327,21 +344,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         source: sourceId,
         maxzoom: 22,
         paint: {
-          'heatmap-weight': [
-            'interpolate',
-            ['linear'],
-            ['get', 'count'],
-            0,
-            0,
-            10,
-            0.2,
-            50,
-            0.5,
-            100,
-            0.8,
-            200,
-            1,
-          ],
+          // Customize heatmap style as you want
+          'heatmap-weight': 1,
           'heatmap-intensity': 1,
           'heatmap-color': [
             'interpolate',
@@ -417,38 +421,7 @@ function clampLng(lng: number): number {
   return Math.max(-179.9999, Math.min(179.9999, lng));
 }
 
-/**
- * Returns true if the tile is on the visible hemisphere of the globe.
- */
-function isTileVisibleInGlobe(
-  tile: [number, number, number],
-  cameraLat: number,
-  cameraLng: number,
-): boolean {
-  // Get tile center
-  const bbox = tilebelt.tileToBBOX(tile); // [west, south, east, north]
-  const centerLng = (bbox[0] + bbox[2]) / 2;
-  const centerLat = (bbox[1] + bbox[3]) / 2;
-
-  // Convert to 3D vectors
-  const tileVec = latLngToVec3(centerLat, centerLng);
-  const cameraVec = latLngToVec3(cameraLat, cameraLng);
-
-  // Dot product > 0 means on same hemisphere
-  return (
-    tileVec[0] * cameraVec[0] +
-      tileVec[1] * cameraVec[1] +
-      tileVec[2] * cameraVec[2] >
-    0
-  );
-}
-
-function latLngToVec3(lat: number, lng: number): [number, number, number] {
-  const radLat = (lat * Math.PI) / 180;
-  const radLng = (lng * Math.PI) / 180;
-  return [
-    Math.cos(radLat) * Math.cos(radLng),
-    Math.cos(radLat) * Math.sin(radLng),
-    Math.sin(radLat),
-  ];
+function jitterCoordinate(coord: number, magnitude: number): number {
+  // Magnitude is in degrees; 0.00005 ~ 5 meters
+  return coord + (Math.random() - 0.5) * 2 * magnitude;
 }
