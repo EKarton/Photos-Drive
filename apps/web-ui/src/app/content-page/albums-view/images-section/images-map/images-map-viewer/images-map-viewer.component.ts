@@ -30,6 +30,13 @@ export interface TileId {
   z: number;
 }
 
+const HEATMAP_SOURCE_ID = 'media-heatmap';
+const HEATMAP_LAYER_ID = 'heatmap-layer';
+
+const TILES_SOURCE_ID = 'tile-grid';
+const TILES_FILL_LAYER_ID = 'tile-grid-fill';
+const TILES_OUTLINE_LAYER_ID = 'tile-grid-outline';
+
 @Component({
   selector: 'app-images-map-viewer',
   templateUrl: './images-map-viewer.component.html',
@@ -41,10 +48,23 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   readonly isDarkMode = input.required<boolean>();
   readonly showMarkers = input<boolean>(true);
   readonly showHeatmap = input<boolean>(true);
+  readonly showTiles = input<boolean>(true);
 
   readonly visibleTilesChanged = output<TileId[]>();
 
   private readonly heatmap$ = toObservable(this.heatmap).pipe(shareReplay(1));
+  private readonly isDarkMode$ = toObservable(this.isDarkMode).pipe(
+    shareReplay(1),
+  );
+  private readonly showMarkers$ = toObservable(this.showMarkers).pipe(
+    shareReplay(1),
+  );
+  private readonly showHeatmap$ = toObservable(this.showHeatmap).pipe(
+    shareReplay(1),
+  );
+  private readonly showTiles$ = toObservable(this.showTiles).pipe(
+    shareReplay(1),
+  );
 
   private readonly subscriptions = new Subscription();
 
@@ -57,60 +77,78 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   );
 
   private map!: mapboxgl.Map;
+  private heatmapGeoJson!: GeoJSON.GeoJSON;
   private supercluster!: Supercluster;
   private imageMarkers: mapboxgl.Marker[] = [];
-
-  constructor() {
-    effect(() => {
-      if (this.map) {
-        this.map.setStyle(getTheme(this.isDarkMode()));
-
-        // Re-add heatmap layer and markers after style reload
-        this.map.once('styledata', () => {
-          this.updateTileGridLayer();
-          this.updateHeatmapLayer();
-          this.updateImageMarkers(this.showMarkers());
-        });
-      }
-    });
-  }
+  private tilesGeoJson!: GeoJSON.GeoJSON;
 
   ngOnInit() {
     this.map = this.mapboxFactory.buildMap({
       accessToken: this.mapboxApiToken(),
       container: this.mapContainer.nativeElement,
       style: getTheme(this.isDarkMode()),
+      maxZoom: 22,
     });
 
     // Set the map layers whenever it has finished loading
     this.map.on('load', () => {
-      this.updateTileGridLayer();
-      this.updateHeatmapLayer();
+      this.updateTileGridLayer(this.showTiles());
+      this.updateHeatmapLayer(this.showHeatmap());
       this.prepareSupercluster();
       this.updateImageMarkers(this.showMarkers());
       this.emitVisibleTiles();
 
       this.subscriptions.add(
+        this.isDarkMode$.subscribe((isDarkMode) => {
+          this.map.setStyle(getTheme(isDarkMode));
+
+          // Update the map when style changes
+          this.map.once('styledata', () => {
+            this.updateTileGridLayer(this.showTiles());
+            this.updateHeatmapLayer(this.showHeatmap());
+            this.updateImageMarkers(this.showMarkers());
+          });
+        }),
+      );
+
+      this.subscriptions.add(
         this.heatmap$.subscribe(() => {
-          this.updateHeatmapLayer();
+          this.prepareHeatmapLayer();
+          this.updateHeatmapLayer(this.showHeatmap());
           this.prepareSupercluster();
           this.updateImageMarkers(this.showMarkers());
+        }),
+      );
+
+      this.subscriptions.add(
+        this.showMarkers$.subscribe((showMarkers) => {
+          this.updateImageMarkers(showMarkers);
+        }),
+      );
+
+      this.subscriptions.add(
+        this.showHeatmap$.subscribe((showHeatmap) => {
+          this.updateHeatmapLayer(showHeatmap);
+        }),
+      );
+
+      this.subscriptions.add(
+        this.showTiles$.subscribe((showTiles) => {
+          this.updateTileGridLayer(showTiles);
         }),
       );
     });
 
     // Update the map whenever the map has moved
     this.map.on('moveend', () => {
-      this.updateTileGridLayer();
-      this.updateHeatmapLayer();
-      this.updateImageMarkers(this.showMarkers());
+      this.prepareTileLayer();
+      this.updateTileGridLayer(this.showTiles());
       this.emitVisibleTiles();
     });
   }
 
-  private updateTileGridLayer() {
-    const sourceId = 'tile-grid';
-    const tileSource: GeoJSON.FeatureCollection = {
+  private prepareTileLayer() {
+    this.tilesGeoJson = {
       type: 'FeatureCollection',
       features: this.getVisibleTiles().map((tile) => ({
         type: 'Feature',
@@ -118,18 +156,20 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         properties: {},
       })),
     };
+  }
 
-    if (!this.map.getSource(sourceId)) {
-      this.map.addSource(sourceId, {
+  private updateTileGridLayer(showTiles: boolean) {
+    if (!this.map.getSource(TILES_SOURCE_ID)) {
+      this.map.addSource(TILES_SOURCE_ID, {
         type: 'geojson',
-        data: tileSource,
+        data: this.tilesGeoJson,
       });
 
       // Fill layer for tile background
       this.map.addLayer({
-        id: 'tile-grid-fill',
+        id: TILES_FILL_LAYER_ID,
         type: 'fill',
-        source: sourceId,
+        source: TILES_SOURCE_ID,
         paint: {
           'fill-color': ['rgba', 255, 255, 255, 0.1], // white, 10% opacity
           'fill-outline-color': '#000000',
@@ -138,9 +178,9 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
       // Line layer for tile outlines
       this.map.addLayer({
-        id: 'tile-grid-outline',
+        id: TILES_OUTLINE_LAYER_ID,
         type: 'line',
-        source: sourceId,
+        source: TILES_SOURCE_ID,
         paint: {
           'line-color': '#ff0000',
           'line-width': 2,
@@ -148,8 +188,24 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       });
     } else {
       // Update source data if it already exists
-      (this.map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(
-        tileSource,
+      (this.map.getSource(TILES_SOURCE_ID) as mapboxgl.GeoJSONSource).setData(
+        this.tilesGeoJson,
+      );
+    }
+
+    if (
+      this.map.getLayer(TILES_FILL_LAYER_ID) &&
+      this.map.getLayer(TILES_OUTLINE_LAYER_ID)
+    ) {
+      this.map.setLayoutProperty(
+        TILES_FILL_LAYER_ID,
+        'visibility',
+        showTiles ? 'visible' : 'none',
+      );
+      this.map.setLayoutProperty(
+        TILES_OUTLINE_LAYER_ID,
+        'visibility',
+        showTiles ? 'visible' : 'none',
       );
     }
   }
@@ -323,25 +379,35 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateHeatmapLayer() {
-    const sourceId = 'media-heatmap';
-    const layerId = 'heatmap-layer';
+  private prepareHeatmapLayer() {
+    this.heatmapGeoJson = {
+      type: 'FeatureCollection',
+      features: this.heatmap().points.map((entry) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [entry.longitude, entry.latitude],
+        },
+        properties: {
+          count: entry.count,
+        },
+      })),
+    };
+  }
 
-    // Prepare GeoJSON from your Heatmap object
-    const geojson = this.buildGeoJSONFromHeatmap(this.heatmap());
-
+  private updateHeatmapLayer(showHeatmap: boolean) {
     // Add or update the source
-    if (!this.map.getSource(sourceId)) {
-      this.map.addSource(sourceId, {
+    if (!this.map.getSource(HEATMAP_SOURCE_ID)) {
+      this.map.addSource(HEATMAP_SOURCE_ID, {
         type: 'geojson',
-        data: geojson,
+        data: this.heatmapGeoJson,
       });
 
       // Add the heatmap layer
       this.map.addLayer({
-        id: layerId,
+        id: HEATMAP_LAYER_ID,
         type: 'heatmap',
-        source: sourceId,
+        source: HEATMAP_SOURCE_ID,
         maxzoom: 22,
         paint: {
           // Customize heatmap style as you want
@@ -370,27 +436,19 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       });
     } else {
       // Update the data if the source already exists
-      const source = this.map.getSource(sourceId) as
+      const source = this.map.getSource(HEATMAP_SOURCE_ID) as
         | mapboxgl.GeoJSONSource
         | undefined;
-      source?.setData(geojson);
+      source?.setData(this.heatmapGeoJson);
     }
-  }
 
-  private buildGeoJSONFromHeatmap(heatmap: Heatmap): GeoJSON.GeoJSON {
-    return {
-      type: 'FeatureCollection',
-      features: heatmap.points.map((entry) => ({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [entry.longitude, entry.latitude],
-        },
-        properties: {
-          count: entry.count,
-        },
-      })),
-    };
+    if (this.map.getLayer(HEATMAP_LAYER_ID)) {
+      this.map.setLayoutProperty(
+        HEATMAP_LAYER_ID,
+        'visibility',
+        showHeatmap ? 'visible' : 'none',
+      );
+    }
   }
 
   private emitVisibleTiles() {
@@ -421,7 +479,7 @@ function clampLng(lng: number): number {
   return Math.max(-179.9999, Math.min(179.9999, lng));
 }
 
+/** Adds randomness to coordinates, where magnitude is in degrees; 0.00005 ~ 5 meters  */
 function jitterCoordinate(coord: number, magnitude: number): number {
-  // Magnitude is in degrees; 0.00005 ~ 5 meters
   return coord + (Math.random() - 0.5) * 2 * magnitude;
 }
