@@ -49,7 +49,10 @@ export class HeatmapGenerator {
       [bbox[0], bbox[1]] // Close polygon
     ];
     const h3Res = mapboxZoomToH3Resolution(tile.z);
+    console.log('polygon:', polygon);
+    console.log('tile:', tile);
     const cellIds = polygonToCells([polygon], h3Res, true);
+    console.log('Num cells:', cellIds.length);
 
     const heatmapCells = await this.mapCellRepository.getHeatmapPointsInCells(
       cellIds,
@@ -80,7 +83,7 @@ export class HeatmapGenerator {
 
 function mapboxZoomToH3Resolution(zoom: number): number {
   if (zoom < 4) {
-    return 2;
+    return Math.min(2, zoom);
   }
 
   if (zoom > 15) {
