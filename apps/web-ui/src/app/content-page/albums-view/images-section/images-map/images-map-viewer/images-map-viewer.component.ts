@@ -1,6 +1,5 @@
 import {
   Component,
-  effect,
   ElementRef,
   inject,
   input,
@@ -15,7 +14,7 @@ import * as tilebelt from '@mapbox/tilebelt';
 import { Store } from '@ngrx/store';
 import range from 'lodash/range';
 import * as mapboxgl from 'mapbox-gl';
-import { shareReplay, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import Supercluster from 'supercluster';
 
 import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
@@ -45,26 +44,18 @@ const TILES_OUTLINE_LAYER_ID = 'tile-grid-outline';
 })
 export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   readonly heatmap = input.required<Heatmap>();
-  readonly isDarkMode = input.required<boolean>();
+  readonly isDarkMode = input<boolean>(false);
   readonly showMarkers = input<boolean>(true);
   readonly showHeatmap = input<boolean>(true);
   readonly showTiles = input<boolean>(true);
 
   readonly visibleTilesChanged = output<TileId[]>();
 
-  private readonly heatmap$ = toObservable(this.heatmap).pipe(shareReplay(1));
-  private readonly isDarkMode$ = toObservable(this.isDarkMode).pipe(
-    shareReplay(1),
-  );
-  private readonly showMarkers$ = toObservable(this.showMarkers).pipe(
-    shareReplay(1),
-  );
-  private readonly showHeatmap$ = toObservable(this.showHeatmap).pipe(
-    shareReplay(1),
-  );
-  private readonly showTiles$ = toObservable(this.showTiles).pipe(
-    shareReplay(1),
-  );
+  private readonly heatmap$ = toObservable(this.heatmap);
+  private readonly isDarkMode$ = toObservable(this.isDarkMode);
+  private readonly showMarkers$ = toObservable(this.showMarkers);
+  private readonly showHeatmap$ = toObservable(this.showHeatmap);
+  private readonly showTiles$ = toObservable(this.showTiles);
 
   private readonly subscriptions = new Subscription();
 
@@ -93,6 +84,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     // Set the map layers whenever it has finished loading
     this.map.on('load', () => {
       this.updateTileGridLayer(this.showTiles());
+      this.prepareHeatmapLayer();
       this.updateHeatmapLayer(this.showHeatmap());
       this.prepareSupercluster();
       this.updateImageMarkers(this.showMarkers());
@@ -216,8 +208,15 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       return [];
     }
 
+    console.log(this.map.getZoom());
+    console.log(
+      bounds.getNorth(),
+      bounds.getEast(),
+      bounds.getSouth(),
+      bounds.getWest(),
+    );
+
     const zoom = Math.max(1, Math.floor(this.map.getZoom()));
-    console.log(zoom);
     const maxIndex = Math.pow(2, zoom) - 1;
 
     const north = clampLat(bounds.getNorth());
@@ -229,10 +228,10 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     const [xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom);
 
     function numbersInclusive(x: number, y: number): number[] {
-      if (x <= y) {
+      if (x < y) {
         return range(x, y + 1);
       } else {
-        // If x > y, that means that it wrap around the antimeridian
+        // If x >= y, that means that it wrap around the antimeridian
         // So we compute values from x, ..., maxIndex and from 0, ... y
         return [...range(x, maxIndex + 1), ...range(0, y + 1)];
       }
@@ -241,11 +240,17 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     const xValues = numbersInclusive(xTop, xBottom);
     const yValues = numbersInclusive(yTop, yBottom);
 
-    const tiles: TileId[] = [];
+    const seenTiles = new Set<string>();
+    const tiles = [];
 
     for (const x of xValues) {
       for (const y of yValues) {
-        tiles.push({ x, y, z: zoom });
+        const key = `${x}/${y}/${zoom}`;
+
+        if (!seenTiles.has(key)) {
+          tiles.push({ x, y, z: zoom });
+          seenTiles.add(key);
+        }
       }
     }
 
@@ -343,7 +348,6 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
           }),
         );
       } else {
-        console.log(latitude, longitude, expansionZoom);
         this.subscriptions.add(
           componentRef.instance.markerClick.subscribe(() => {
             this.map.easeTo({

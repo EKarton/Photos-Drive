@@ -33,7 +33,7 @@ export class ImageMapMarkerStore extends ComponentStore<ImageMapMarkerState> {
     (state) => state.gPhotosMediaItem,
   );
 
-  readonly loadGPhotosMediaItemDetails = this.effect<string>((mediaItemId$) =>
+  readonly loadGPhotosMediaItem = this.effect<string>((mediaItemId$) =>
     mediaItemId$.pipe(
       switchMap((mediaItemId) => {
         this.patchState({

@@ -92,18 +92,18 @@ To run all unit tests, run:
 npm run test
 ```
 
-It will check for code coverage, which you can see from the `./coverage` directory.
+It will also check for code coverage, which you can see from the `./coverage` directory.
 
 To only run specific unit test(s), run:
 
 ```bash
-ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage --include=<path-to-test-file>
+npm run test:in <path-to-test-file>
 ```
 
 For instance, to only run tests under `src/app/content-page/store/media-items`, run:
 
 ```bash
-ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage --include=src/app/content-page/store/media-items
+npm run test:in src/app/content-page/store/media-items
 ```
 
 ### Running end-to-end tests

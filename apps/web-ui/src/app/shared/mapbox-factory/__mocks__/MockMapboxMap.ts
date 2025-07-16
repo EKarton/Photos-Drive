@@ -58,6 +58,8 @@ export class MockMapboxMap {
       this.layerIdToLayer.set(specs.id, specs),
     );
 
+  setLayoutProperty = jasmine.createSpy('setLayoutProperty');
+
   getBounds = jasmine.createSpy('getBounds').and.callFake(() => this.bounds);
 
   setBounds(north: number, east: number, south: number, west: number) {
@@ -65,6 +67,10 @@ export class MockMapboxMap {
       [west, south], // Southwest corner
       [east, north], // Northeast corner
     );
+  }
+
+  setZoom(newZoom: number) {
+    this.zoom = newZoom;
   }
 
   triggerOnEvent(event: string) {

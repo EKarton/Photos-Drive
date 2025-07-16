@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
@@ -8,18 +8,36 @@ import { authState } from '../../../../../../auth/store';
 import { MockMapboxFactory } from '../../../../../../shared/mapbox-factory/__mocks__/MockMapboxFactory';
 import { toSuccess } from '../../../../../../shared/results/results';
 import { GPhotosMediaItem } from '../../../../../services/types/gphotos-media-item';
+import { Heatmap } from '../../../../../services/types/heatmap';
 import { MediaItem } from '../../../../../services/types/media-item';
 import { WebApiService } from '../../../../../services/webapi.service';
 import { mediaViewerState } from '../../../../../store/media-viewer';
 import { openMediaViewer } from '../../../../../store/media-viewer/media-viewer.actions';
 import { ImageMapMarkerComponent } from '../image-map-marker/image-map-marker.component';
 import {
-  Bounds,
   ImagesMapViewerComponent,
+  TileId,
 } from '../images-map-viewer.component';
 
+const HEATMAP: Heatmap = {
+  points: [
+    {
+      count: 1,
+      latitude: -79,
+      longitude: 80,
+      sampledMediaItemId: 'client1:photos1',
+    },
+    {
+      count: 3,
+      latitude: -79,
+      longitude: 80.1,
+      sampledMediaItemId: 'client1:photos2',
+    },
+  ],
+};
+
 const MEDIA_ITEM_1: MediaItem = {
-  id: 'photos1',
+  id: 'client1:photos1',
   fileName: 'cat.png',
   hashCode: '',
   gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
@@ -33,7 +51,7 @@ const MEDIA_ITEM_1: MediaItem = {
 };
 
 const MEDIA_ITEM_2: MediaItem = {
-  id: 'photos2',
+  id: 'client1:photos2',
   fileName: 'dog.png',
   hashCode: '',
   gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
@@ -63,6 +81,8 @@ describe('ImagesMapViewerComponent', () => {
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
+      'getHeatmap',
+      'getMediaItem',
       'getGPhotosMediaItem',
     ]);
     mockMapboxFactory = new MockMapboxFactory();
@@ -94,162 +114,131 @@ describe('ImagesMapViewerComponent', () => {
     store = TestBed.inject(MockStore);
     spyOn(store, 'dispatch');
 
+    mockWebApiService.getHeatmap.and.returnValue(of(toSuccess(HEATMAP)));
+    mockWebApiService.getMediaItem.and.callFake(
+      (_accessToken: string, mediaItemId: string) => {
+        return mediaItemId === 'photos1'
+          ? of(toSuccess(MEDIA_ITEM_1))
+          : of(toSuccess(MEDIA_ITEM_2));
+      },
+    );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
       of(toSuccess(G_MEDIA_ITEM)),
     );
   });
 
-  it('should add heat map and map markers when map loads and map markers is in the viewport', () => {
+  it('should add heat map and map markers when map loads and map markers is in the viewport', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [MEDIA_ITEM_1, MEDIA_ITEM_2]);
-    fixture.componentRef.setInput('isDarkMode', false);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
     fixture.detectChanges();
+    tick();
 
     // Load the map
     const mapInstances = mockMapboxFactory.getMapInstances();
     expect(mapInstances.length).toEqual(1);
     mapInstances[0].setBounds(-70, 90, -80, 70);
     mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
 
     // It should set the correct style
     expect(mapInstances[0].setStyle).toHaveBeenCalledWith(
       'mapbox://styles/mapbox/streets-v12',
     );
 
-    // It should build the heat map
-    expect(mapInstances[0].addSource).toHaveBeenCalled();
-    expect(mapInstances[0].addLayer).toHaveBeenCalled();
+    // It should build the heat map and tile map
+    expect(mapInstances[0].addSource).toHaveBeenCalledTimes(2);
+    expect(mapInstances[0].addLayer).toHaveBeenCalledTimes(3);
 
     // It should show two markers
     const markers = mockMapboxFactory.getVisibleMarkerInstances();
     expect(markers.length).toEqual(2);
-  });
+    expect(markers[0].getComponentInstance()?.instance.badgeCount()).toEqual(1);
+    expect(markers[1].getComponentInstance()?.instance.badgeCount()).toEqual(3);
+  }));
 
-  it('should re-render the map when isDarkMode changes', () => {
+  it('should re-render the map when isDarkMode changes', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [MEDIA_ITEM_1, MEDIA_ITEM_2]);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
     fixture.componentRef.setInput('isDarkMode', false);
     fixture.detectChanges();
+    tick();
 
     // Load the map
     const mapInstances = mockMapboxFactory.getMapInstances();
     expect(mapInstances.length).toEqual(1);
     mapInstances[0].setBounds(-70, 90, -80, 70);
     mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
 
     // Change the mode to dark mode
     fixture.componentRef.setInput('isDarkMode', true);
     fixture.detectChanges();
+    tick();
     mapInstances[0].triggerOnceEvents('styledata');
     fixture.detectChanges();
+    tick();
 
     // It should set the style to a new style
     expect(mapInstances[0].setStyle).toHaveBeenCalledWith(
       'mapbox://styles/mapbox/dark-v11',
     );
 
-    // It should only call addLayer() and addSource() once
-    expect(mapInstances[0].addLayer).toHaveBeenCalledTimes(1);
-    expect(mapInstances[0].addSource).toHaveBeenCalledTimes(1);
+    // It should only call addLayer() and addSource() for heat map and tiles once
+    expect(mapInstances[0].addSource).toHaveBeenCalledTimes(2);
+    expect(mapInstances[0].addLayer).toHaveBeenCalledTimes(3);
 
     // It should show two markers
     const markers = mockMapboxFactory.getVisibleMarkerInstances();
     expect(markers.length).toEqual(2);
     expect(markers[0].getComponentInstance()?.instance.badgeCount()).toEqual(1);
-    expect(markers[1].getComponentInstance()?.instance.badgeCount()).toEqual(1);
-  });
+    expect(markers[1].getComponentInstance()?.instance.badgeCount()).toEqual(3);
+  }));
 
-  it('should output boundsChanged when map pans', () => {
+  it('should output visibleTilesChanged when map pans', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [MEDIA_ITEM_1, MEDIA_ITEM_2]);
-    fixture.componentRef.setInput('isDarkMode', false);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
     fixture.detectChanges();
-
-    // Listen to boundsChanged events
-    const boundsEmitted: Bounds[] = [];
-    fixture.componentInstance.boundsChanged.subscribe((newBounds) =>
-      boundsEmitted.push(newBounds),
-    );
+    tick();
 
     // Load the map
     const mapInstances = mockMapboxFactory.getMapInstances();
     expect(mapInstances.length).toEqual(1);
     mapInstances[0].setBounds(-70, 90, -80, 70);
     mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Listen to visibleTilesChanged events
+    let newTilesEmitted1 = false;
+    fixture.componentInstance.visibleTilesChanged.subscribe(() => {
+      newTilesEmitted1 = true;
+    });
 
     // Move map to the right
     mapInstances[0].setBounds(-70, 95, -80, 75);
     mapInstances[0].triggerOnEvent('moveend');
-
-    // Expect boundsChanged to be emitted
-    expect(boundsEmitted).toEqual([
-      { north: -70, south: -80, east: 90, west: 70 },
-      { north: -70, south: -80, east: 95, west: 75 },
-    ]);
-  });
-
-  it('should render the map with a cluster map marker when media items have the same gps locations', () => {
-    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [
-      MEDIA_ITEM_1,
-      { ...MEDIA_ITEM_2, location: MEDIA_ITEM_1.location },
-    ]);
-    fixture.componentRef.setInput('isDarkMode', false);
     fixture.detectChanges();
+    tick();
 
-    const mapInstances = mockMapboxFactory.getMapInstances();
-    expect(mapInstances.length).toEqual(1);
-    mapInstances[0].setBounds(-70, 90, -80, 70);
-    mapInstances[0].triggerOnEvent('load');
+    // Expect the visibleTilesChanged to be emitted
+    expect(newTilesEmitted1).toBeTrue();
+  }));
 
-    expect(mapInstances[0].addSource).toHaveBeenCalled();
-    expect(mapInstances[0].addLayer).toHaveBeenCalled();
-
-    // It should show only one marker since the two images are clustered together
-    const markers = mockMapboxFactory.getVisibleMarkerInstances();
-    expect(markers.length).toEqual(1);
-    expect(markers[0].getComponentInstance()?.instance.badgeCount()).toEqual(2);
-  });
-
-  it('should zoom into the map when user clicks on a cluster marker', () => {
+  it('should open the image viewer when user clicks on an individual map marker', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [
-      MEDIA_ITEM_1,
-      { ...MEDIA_ITEM_2, location: MEDIA_ITEM_1.location },
-    ]);
-    fixture.componentRef.setInput('isDarkMode', false);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
     fixture.detectChanges();
+    tick();
 
     // Load the map
     const mapInstances = mockMapboxFactory.getMapInstances();
     expect(mapInstances.length).toEqual(1);
     mapInstances[0].setBounds(-70, 90, -80, 70);
     mapInstances[0].triggerOnEvent('load');
-
-    // Check there is only one cluster marker
-    const markers = mockMapboxFactory.getVisibleMarkerInstances();
-    expect(markers.length).toEqual(1);
-
-    // Click on the marker
-    const mouseEvent = new MouseEvent('click');
-    markers[0].getComponentInstance()?.instance.markerClick.emit(mouseEvent);
     fixture.detectChanges();
-
-    // Expect the map to zoom in
-    expect(mapInstances[0].easeTo).toHaveBeenCalled();
-  });
-
-  it('should open the image viewer when user clicks on an individual map marker', () => {
-    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [MEDIA_ITEM_1, MEDIA_ITEM_2]);
-    fixture.componentRef.setInput('isDarkMode', false);
-    fixture.detectChanges();
-
-    // Load the map
-    const mapInstances = mockMapboxFactory.getMapInstances();
-    expect(mapInstances.length).toEqual(1);
-    mapInstances[0].setBounds(-70, 90, -80, 70);
-    mapInstances[0].triggerOnEvent('load');
+    tick();
 
     // Check there is only one cluster marker
     const markers = mockMapboxFactory.getVisibleMarkerInstances();
@@ -259,6 +248,7 @@ describe('ImagesMapViewerComponent', () => {
     const mouseEvent = new MouseEvent('click');
     markers[0].getComponentInstance()?.instance.markerClick.emit(mouseEvent);
     fixture.detectChanges();
+    tick();
 
     // Expect the media viewer to be dispatched
     expect(store.dispatch).toHaveBeenCalledWith(
@@ -268,49 +258,309 @@ describe('ImagesMapViewerComponent', () => {
         },
       }),
     );
-  });
+  }));
 
-  it('should not create map markers when map has not loaded yet but user has moved the map', () => {
+  it('should cluster heat maps together when they are closeby', fakeAsync(() => {
+    const heatmap: Heatmap = {
+      points: [
+        {
+          count: 1,
+          latitude: -79,
+          longitude: 80,
+          sampledMediaItemId: 'client1:photos1',
+        },
+        {
+          count: 3,
+          latitude: -79,
+          longitude: 80,
+          sampledMediaItemId: 'client1:photos2',
+        },
+      ],
+    };
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [MEDIA_ITEM_1, MEDIA_ITEM_2]);
-    fixture.componentRef.setInput('isDarkMode', false);
+    fixture.componentRef.setInput('heatmap', heatmap);
     fixture.detectChanges();
+    tick();
 
-    // Listen to boundsChanged events
-    const boundsEmitted: Bounds[] = [];
-    fixture.componentInstance.boundsChanged.subscribe((newBounds) =>
-      boundsEmitted.push(newBounds),
-    );
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Check there is only one cluster marker
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
+    expect(markers.length).toEqual(1);
+
+    // Expect the counts to be summed together
+    expect(markers[0].getComponentInstance()?.instance.badgeCount()).toEqual(4);
+  }));
+
+  it('should zoom into the map when user clicks on a cluster of images', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.detectChanges();
+    tick();
+
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Check there is only one cluster marker
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
+    expect(markers.length).toEqual(2);
+
+    // Click on the marker
+    const mouseEvent = new MouseEvent('click');
+    markers[1].getComponentInstance()?.instance.markerClick.emit(mouseEvent);
+    fixture.detectChanges();
+    tick();
+
+    // Expect the map to zoom in
+    expect(mapInstances[0].easeTo).toHaveBeenCalled();
+  }));
+
+  it('should not create map markers when map has not loaded yet but user has moved the map', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.detectChanges();
+    tick();
 
     // Move the map without the map loading yet
     const mapInstances = mockMapboxFactory.getMapInstances();
     expect(mapInstances.length).toEqual(1);
     mapInstances[0].setBounds(-70, 90, -80, 70);
     mapInstances[0].triggerOnEvent('moveend');
+    fixture.detectChanges();
+    tick();
 
     // Expect no map markers to be created
     expect(mockMapboxFactory.getMarkerInstances().length).toEqual(0);
-  });
+  }));
 
-  it('should not create map markers when map has no bounds yet', () => {
+  it('should emit empty list in visibleTilesChanged when map has no bounds yet', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('mediaItems', [MEDIA_ITEM_1, MEDIA_ITEM_2]);
-    fixture.componentRef.setInput('isDarkMode', false);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
     fixture.detectChanges();
+    tick();
 
-    // Listen to boundsChanged events
-    const boundsEmitted: Bounds[] = [];
-    fixture.componentInstance.boundsChanged.subscribe((newBounds) =>
-      boundsEmitted.push(newBounds),
+    // Listen to visibleTilesChanged events
+    const newTilesEmitted: TileId[][] = [];
+    fixture.componentInstance.visibleTilesChanged.subscribe((newTiles) =>
+      newTilesEmitted.push(newTiles),
     );
 
-    // Move the map without the map loading yet
+    // Move the map without bounds
     const mapInstances = mockMapboxFactory.getMapInstances();
     expect(mapInstances.length).toEqual(1);
     mapInstances[0].triggerOnEvent('load');
-    mapInstances[0].triggerOnEvent('moveend');
+    fixture.detectChanges();
+    tick();
 
-    // Expect no map markers to be created
-    expect(mockMapboxFactory.getMarkerInstances().length).toEqual(0);
-  });
+    // Expect newTilesEmitted to emit empty list
+    expect(newTilesEmitted).toEqual([[]]);
+  }));
+
+  it('should emit tiles correctly when map crosses anti-meridian line', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.detectChanges();
+    tick();
+
+    // Listen to visibleTilesChanged events
+    const newTilesEmitted: TileId[][] = [];
+    fixture.componentInstance.visibleTilesChanged.subscribe((newTiles) =>
+      newTilesEmitted.push(newTiles),
+    );
+
+    // Move the map to an area where it crosses the anti-meridian
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setZoom(1.5);
+    mapInstances[0].setBounds(
+      62.31221578663522,
+      -107.96255025177345,
+      -53.2500141696064,
+      -247.1205622441226,
+    );
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Expect newTilesEmitted to emit the correct tiles that cross the anti-meridian
+    expect(newTilesEmitted).toEqual([
+      [
+        { x: 0, y: 0, z: 1 },
+        { x: 0, y: 1, z: 1 },
+        { x: 1, y: 0, z: 1 },
+        { x: 1, y: 1, z: 1 },
+      ],
+    ]);
+  }));
+
+  it('should hide markers when the showMarkers input has changed to false', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.componentRef.setInput('showMarkers', true);
+    fixture.detectChanges();
+    tick();
+
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Change showMarkers to false
+    fixture.componentRef.setInput('showMarkers', false);
+    fixture.detectChanges();
+    tick();
+
+    // It should show no markers
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
+    expect(markers.length).toEqual(0);
+  }));
+
+  it('should show markers when the showMarkers input has changed to true', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.componentRef.setInput('showMarkers', false);
+    fixture.detectChanges();
+    tick();
+
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Change showMarkers to true
+    fixture.componentRef.setInput('showMarkers', true);
+    fixture.detectChanges();
+    tick();
+
+    // It should show two markers
+    const markers = mockMapboxFactory.getVisibleMarkerInstances();
+    expect(markers.length).toEqual(2);
+  }));
+
+  it('should hide the heat map when showHeatmap is set to false', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.componentRef.setInput('showHeatmap', true);
+    fixture.detectChanges();
+    tick();
+
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Change showMarkers to true
+    fixture.componentRef.setInput('showHeatmap', false);
+    fixture.detectChanges();
+    tick();
+
+    // It should show two markers
+    expect(
+      mockMapboxFactory.getMapInstances()[0].setLayoutProperty,
+    ).toHaveBeenCalledWith('heatmap-layer', 'visibility', 'none');
+  }));
+
+  it('should hide the heat map when showHeatmap is set to true', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.componentRef.setInput('showHeatmap', false);
+    fixture.detectChanges();
+    tick();
+
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Change showMarkers to true
+    fixture.componentRef.setInput('showHeatmap', true);
+    fixture.detectChanges();
+    tick();
+
+    // It should show two markers
+    expect(
+      mockMapboxFactory.getMapInstances()[0].setLayoutProperty,
+    ).toHaveBeenCalledWith('heatmap-layer', 'visibility', 'visible');
+  }));
+
+  it('should hide the tiles map when showTiles is set to false', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.componentRef.setInput('showTiles', true);
+    fixture.detectChanges();
+    tick();
+
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Change showTiles to true
+    fixture.componentRef.setInput('showTiles', false);
+    fixture.detectChanges();
+    tick();
+
+    // It should hide the two tile layers
+    expect(
+      mockMapboxFactory.getMapInstances()[0].setLayoutProperty,
+    ).toHaveBeenCalledWith('tile-grid-fill', 'visibility', 'none');
+    expect(
+      mockMapboxFactory.getMapInstances()[0].setLayoutProperty,
+    ).toHaveBeenCalledWith('tile-grid-outline', 'visibility', 'none');
+  }));
+
+  it('should hide the tiles map when showTiles is set to true', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
+    fixture.componentRef.setInput('heatmap', HEATMAP);
+    fixture.componentRef.setInput('showTiles', false);
+    fixture.detectChanges();
+    tick();
+
+    // Load the map
+    const mapInstances = mockMapboxFactory.getMapInstances();
+    expect(mapInstances.length).toEqual(1);
+    mapInstances[0].setBounds(-70, 90, -80, 70);
+    mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
+
+    // Change showTiles to true
+    fixture.componentRef.setInput('showTiles', true);
+    fixture.detectChanges();
+    tick();
+
+    // It should show the two tile layers
+    expect(
+      mockMapboxFactory.getMapInstances()[0].setLayoutProperty,
+    ).toHaveBeenCalledWith('tile-grid-fill', 'visibility', 'visible');
+    expect(
+      mockMapboxFactory.getMapInstances()[0].setLayoutProperty,
+    ).toHaveBeenCalledWith('tile-grid-outline', 'visibility', 'visible');
+  }));
 });

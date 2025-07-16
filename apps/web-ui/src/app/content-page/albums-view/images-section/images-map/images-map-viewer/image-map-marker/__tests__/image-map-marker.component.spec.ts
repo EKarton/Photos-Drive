@@ -13,21 +13,32 @@ import {
   GPhotosMediaItem,
   GPhotosMediaItemDetailsApiResponse,
 } from '../../../../../../services/types/gphotos-media-item';
-import { MediaItem } from '../../../../../../services/types/media-item';
+import {
+  MediaItem,
+  MediaItemDetailsApiResponse,
+} from '../../../../../../services/types/media-item';
 import { WebApiService } from '../../../../../../services/webapi.service';
 import { ImageMapMarkerComponent } from '../image-map-marker.component';
 
+const MEDIA_ITEM_ID = 'client1:photos1';
+
+const GPHOTOS_MEDIA_ITEM_ID = 'gPhotosClient1:gPhotosMediaItem1';
+
 const MEDIA_ITEM: MediaItem = {
-  id: 'photos1',
+  id: MEDIA_ITEM_ID,
   fileName: 'cat.png',
   hashCode: '',
-  gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+  gPhotosMediaItemId: GPHOTOS_MEDIA_ITEM_ID,
   width: 200,
   height: 300,
+  location: {
+    latitude: -79,
+    longitude: 80,
+  },
   dateTaken: new Date('2024-05-27T13:17:46.000Z'),
 };
 
-const G_MEDIA_ITEM: GPhotosMediaItem = {
+const GPHOTOS_MEDIA_ITEM: GPhotosMediaItem = {
   baseUrl: 'http://www.google.com/photos/1',
   mimeType: 'image/jpeg',
   mediaMetadata: {
@@ -43,6 +54,7 @@ describe('ImageMapMarkerComponent', () => {
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
+      'getMediaItem',
       'getGPhotosMediaItem',
     ]);
 
@@ -67,12 +79,15 @@ describe('ImageMapMarkerComponent', () => {
   });
 
   it('should render skeleton when media item is not loaded yet', () => {
+    mockWebApiService.getMediaItem.and.returnValue(
+      of(toPending<MediaItemDetailsApiResponse>()),
+    );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
       of(toPending<GPhotosMediaItemDetailsApiResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
-    fixture.componentRef.setInput('mediaItem', MEDIA_ITEM);
+    fixture.componentRef.setInput('mediaItemId', MEDIA_ITEM_ID);
     fixture.detectChanges();
 
     const spinner = fixture.nativeElement.querySelector(
@@ -82,16 +97,15 @@ describe('ImageMapMarkerComponent', () => {
   });
 
   it('should render error when fetching media item failed', () => {
+    mockWebApiService.getMediaItem.and.returnValue(
+      of(toFailure<MediaItemDetailsApiResponse>(new Error('Random error'))),
+    );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
-      of(
-        toFailure<GPhotosMediaItemDetailsApiResponse>(
-          new Error('Random error'),
-        ),
-      ),
+      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
-    fixture.componentRef.setInput('mediaItem', MEDIA_ITEM);
+    fixture.componentRef.setInput('mediaItemId', MEDIA_ITEM_ID);
     fixture.detectChanges();
     fixture.componentInstance.setIsInViewport(true);
     fixture.detectChanges();
@@ -103,12 +117,13 @@ describe('ImageMapMarkerComponent', () => {
   });
 
   it('should fetch gphotos media item and render image when it is in viewport', () => {
+    mockWebApiService.getMediaItem.and.returnValue(of(toSuccess(MEDIA_ITEM)));
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
-      of(toSuccess(G_MEDIA_ITEM)),
+      of(toSuccess(GPHOTOS_MEDIA_ITEM)),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
-    fixture.componentRef.setInput('mediaItem', MEDIA_ITEM);
+    fixture.componentRef.setInput('mediaItemId', MEDIA_ITEM_ID);
     fixture.detectChanges();
     fixture.componentInstance.setIsInViewport(true);
     fixture.detectChanges();
@@ -117,9 +132,13 @@ describe('ImageMapMarkerComponent', () => {
       '[data-testid="image-loaded"]',
     );
     expect(image).toBeTruthy();
+    expect(mockWebApiService.getMediaItem).toHaveBeenCalledWith(
+      'mockAccessToken',
+      MEDIA_ITEM_ID,
+    );
     expect(mockWebApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       'mockAccessToken',
-      'gPhotosClient1:gPhotosMediaItem1',
+      GPHOTOS_MEDIA_ITEM_ID,
     );
   });
 
@@ -141,11 +160,12 @@ describe('ImageMapMarkerComponent', () => {
     },
   ].forEach(({ event }) => {
     it(`should emit event when user emits event ${event} on image`, () => {
+      mockWebApiService.getMediaItem.and.returnValue(of(toSuccess(MEDIA_ITEM)));
       mockWebApiService.getGPhotosMediaItem.and.returnValue(
-        of(toSuccess(G_MEDIA_ITEM)),
+        of(toSuccess(GPHOTOS_MEDIA_ITEM)),
       );
       const fixture = TestBed.createComponent(ImageMapMarkerComponent);
-      fixture.componentRef.setInput('mediaItem', MEDIA_ITEM);
+      fixture.componentRef.setInput('mediaItemId', MEDIA_ITEM_ID);
       fixture.detectChanges();
       fixture.componentInstance.setIsInViewport(true);
       fixture.detectChanges();

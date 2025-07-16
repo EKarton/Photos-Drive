@@ -48,7 +48,7 @@ export class ImageMapMarkerComponent {
   constructor() {
     effect(() => {
       if (this.isInViewport()) {
-        this.imageMarkerStore.loadGPhotosMediaItemDetails(this.mediaItemId());
+        this.imageMarkerStore.loadGPhotosMediaItem(this.mediaItemId());
       }
     });
   }

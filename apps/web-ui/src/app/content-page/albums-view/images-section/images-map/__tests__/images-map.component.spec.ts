@@ -9,41 +9,56 @@ import { MockMapboxFactory } from '../../../../../shared/mapbox-factory/__mocks_
 import { toSuccess } from '../../../../../shared/results/results';
 import { themeState } from '../../../../../themes/store';
 import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
-import { ListMediaItemsResponse } from '../../../../services/types/list-media-items';
+import { Heatmap } from '../../../../services/types/heatmap';
+import { MediaItem } from '../../../../services/types/media-item';
 import { WebApiService } from '../../../../services/webapi.service';
 import { albumsState } from '../../../../store/albums';
 import { ImagesMapComponent } from '../images-map.component';
 import { ImageMapMarkerComponent } from '../images-map-viewer/image-map-marker/image-map-marker.component';
 
-const PAGE_1: ListMediaItemsResponse = {
-  mediaItems: [
+const HEATMAP: Heatmap = {
+  points: [
     {
-      id: 'photos1',
-      fileName: 'cat.png',
-      hashCode: '',
-      gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
-      width: 200,
-      height: 300,
-      location: {
-        latitude: -79,
-        longitude: 80,
-      },
-      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+      count: 1,
+      latitude: -79,
+      longitude: 80,
+      sampledMediaItemId: 'client1:photos1',
     },
     {
-      id: 'photos2',
-      fileName: 'dog.png',
-      hashCode: '',
-      gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
-      width: 200,
-      height: 300,
-      location: {
-        latitude: -79,
-        longitude: 80.1,
-      },
-      dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+      count: 3,
+      latitude: -79,
+      longitude: 80.1,
+      sampledMediaItemId: 'client1:photos2',
     },
   ],
+};
+
+const MEDIA_ITEM_1: MediaItem = {
+  id: 'photos1',
+  fileName: 'cat.png',
+  hashCode: '',
+  gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+  width: 200,
+  height: 300,
+  location: {
+    latitude: -79,
+    longitude: 80,
+  },
+  dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+};
+
+const MEDIA_ITEM_2: MediaItem = {
+  id: 'photos2',
+  fileName: 'dog.png',
+  hashCode: '',
+  gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem2',
+  width: 200,
+  height: 300,
+  location: {
+    latitude: -79,
+    longitude: 80.1,
+  },
+  dateTaken: new Date('2024-05-27T13:17:46.000Z'),
 };
 
 const G_MEDIA_ITEM: GPhotosMediaItem = {
@@ -63,8 +78,9 @@ describe('ImagesMapComponent', () => {
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
-      'listMediaItems',
+      'getHeatmap',
       'getGPhotosMediaItem',
+      'getMediaItem',
     ]);
     mockMapboxFactory = new MockMapboxFactory();
 
@@ -100,13 +116,20 @@ describe('ImagesMapComponent', () => {
     store = TestBed.inject(MockStore);
     spyOn(store, 'dispatch');
 
-    mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
+    mockWebApiService.getHeatmap.and.returnValue(of(toSuccess(HEATMAP)));
+    mockWebApiService.getMediaItem.and.callFake(
+      (_accessToken: string, mediaItemId: string) => {
+        return mediaItemId === 'photos1'
+          ? of(toSuccess(MEDIA_ITEM_1))
+          : of(toSuccess(MEDIA_ITEM_2));
+      },
+    );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
       of(toSuccess(G_MEDIA_ITEM)),
     );
   });
 
-  it('should render map with markers', () => {
+  it('should render map with markers', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapComponent);
     fixture.componentRef.setInput('albumId', 'album1');
     fixture.detectChanges();
@@ -116,9 +139,12 @@ describe('ImagesMapComponent', () => {
     expect(mapInstances.length).toEqual(1);
     mapInstances[0].setBounds(-70, 90, -80, 70);
     mapInstances[0].triggerOnEvent('load');
+    fixture.detectChanges();
+    tick();
 
+    // Expect the heatmap, markers, and tiles to be visible
     expect(mockMapboxFactory.getVisibleMarkerInstances().length).toEqual(2);
-  });
+  }));
 
   it('should go to full screen when user clicks on the fullscreen button', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapComponent);
