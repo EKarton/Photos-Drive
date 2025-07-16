@@ -225,6 +225,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
     const [xTop, yTop] = tilebelt.pointToTile(west, north, zoom);
     const [xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom);
+
     const xValues = range(xTop, xBottom + 1);
     const yValues = range(yTop, yBottom + 1);
 
