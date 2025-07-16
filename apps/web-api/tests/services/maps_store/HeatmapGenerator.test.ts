@@ -174,7 +174,34 @@ describe('HeatmapGenerator', () => {
       ALBUM_ID_2
     );
 
-    const tile: Tile = { x: 1, y: 2, z: 11 };
+    const tile: Tile = { x: 1, y: 2, z: 3 };
+    const result = await heatmapGenerator.getHeatmapForTile(tile, undefined);
+
+    expect(result).toEqual({ points: [] });
+  });
+
+  it('returns empty heatmap if no cells returned and it is zoomed in', async () => {
+    // Insert some data to the db
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.714236894670336,
+      -74.00616064667702,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.74434432061207,
+      -74.00057852268219,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.77004083960827,
+      -74.02383582932607,
+      ALBUM_ID_2
+    );
+
+    const tile: Tile = { x: 1, y: 2, z: 20 };
     const result = await heatmapGenerator.getHeatmapForTile(tile, undefined);
 
     expect(result).toEqual({ points: [] });
