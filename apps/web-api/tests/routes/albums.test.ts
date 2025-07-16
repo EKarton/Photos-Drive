@@ -255,15 +255,18 @@ describe('Albums Router', () => {
         ]
       });
 
-      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
-        parentAlbumId: undefined,
-        pageSize: 25,
-        pageToken: undefined,
-        sortBy: {
-          field: SortByField.ID,
-          direction: SortByDirection.ASCENDING
-        }
-      });
+      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith(
+        {
+          parentAlbumId: undefined,
+          pageSize: 25,
+          pageToken: undefined,
+          sortBy: {
+            field: SortByField.ID,
+            direction: SortByDirection.ASCENDING
+          }
+        },
+        { abortController: expect.any(AbortController) }
+      );
     });
 
     it('should return 200 with query parameters pageSize, pageToken, sortBy, sortDir, and parentAlbumId', async () => {
@@ -305,18 +308,21 @@ describe('Albums Router', () => {
         nextPageToken: 'nextToken'
       });
 
-      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
-        parentAlbumId: {
-          clientId: 'albumClient1',
-          objectId: 'albumObject0'
+      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith(
+        {
+          parentAlbumId: {
+            clientId: 'albumClient1',
+            objectId: 'albumObject0'
+          },
+          pageSize: 5,
+          pageToken: 'abc/def',
+          sortBy: {
+            field: SortByField.ID,
+            direction: SortByDirection.DESCENDING
+          }
         },
-        pageSize: 5,
-        pageToken: 'abc/def',
-        sortBy: {
-          field: SortByField.ID,
-          direction: SortByDirection.DESCENDING
-        }
-      });
+        { abortController: expect.any(AbortController) }
+      );
     });
 
     it('should return 200 with parentAlbumId set to root', async () => {
@@ -355,15 +361,18 @@ describe('Albums Router', () => {
         ]
       });
 
-      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith({
-        parentAlbumId: MOCK_ROOT_ALBUM_ID,
-        pageSize: 25,
-        pageToken: undefined,
-        sortBy: {
-          field: SortByField.ID,
-          direction: SortByDirection.ASCENDING
-        }
-      });
+      expect(mockAlbumsRepository.listAlbums).toHaveBeenCalledWith(
+        {
+          parentAlbumId: MOCK_ROOT_ALBUM_ID,
+          pageSize: 25,
+          pageToken: undefined,
+          sortBy: {
+            field: SortByField.ID,
+            direction: SortByDirection.ASCENDING
+          }
+        },
+        { abortController: expect.any(AbortController) }
+      );
     });
 
     it('should return 500 when albumsRepo.listAlbums throws unexpected error', async () => {

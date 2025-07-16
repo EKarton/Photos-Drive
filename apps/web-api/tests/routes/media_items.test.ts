@@ -122,14 +122,17 @@ describe('Media Items Router', () => {
         ],
         nextPageToken: undefined
       });
-      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
-        pageSize: 25,
-        pageToken: undefined,
-        sortBy: {
-          field: SortByField.ID,
-          direction: SortByDirection.ASCENDING
-        }
-      });
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith(
+        {
+          pageSize: 25,
+          pageToken: undefined,
+          sortBy: {
+            field: SortByField.ID,
+            direction: SortByDirection.ASCENDING
+          }
+        },
+        { abortController: expect.any(AbortController) }
+      );
     });
 
     it('should return 200 with albumId', async () => {
@@ -151,17 +154,20 @@ describe('Media Items Router', () => {
         mediaItems: [],
         nextPageToken: 'next-token'
       });
-      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
-        albumId: {
-          clientId: 'albumClient1',
-          objectId: 'albumObject1'
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith(
+        {
+          albumId: {
+            clientId: 'albumClient1',
+            objectId: 'albumObject1'
+          },
+          pageSize: 25,
+          sortBy: {
+            field: SortByField.ID,
+            direction: SortByDirection.ASCENDING
+          }
         },
-        pageSize: 25,
-        sortBy: {
-          field: SortByField.ID,
-          direction: SortByDirection.ASCENDING
-        }
-      });
+        { abortController: expect.any(AbortController) }
+      );
     });
 
     it('should return 200 with pageToken, sortBy=id, and sortDir=asc', async () => {
@@ -185,14 +191,17 @@ describe('Media Items Router', () => {
         mediaItems: [],
         nextPageToken: 'next-token'
       });
-      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
-        pageSize: 10,
-        pageToken: 'abc',
-        sortBy: {
-          field: SortByField.ID,
-          direction: SortByDirection.ASCENDING
-        }
-      });
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith(
+        {
+          pageSize: 10,
+          pageToken: 'abc',
+          sortBy: {
+            field: SortByField.ID,
+            direction: SortByDirection.ASCENDING
+          }
+        },
+        { abortController: expect.any(AbortController) }
+      );
     });
 
     it('should return 200 with pageToken, sortBy=id, and sortDir=desc', async () => {
@@ -216,14 +225,17 @@ describe('Media Items Router', () => {
         mediaItems: [],
         nextPageToken: 'next-token'
       });
-      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith({
-        pageSize: 10,
-        pageToken: 'abc',
-        sortBy: {
-          field: SortByField.ID,
-          direction: SortByDirection.DESCENDING
-        }
-      });
+      expect(mockMediaItemsRepository.listMediaItems).toHaveBeenCalledWith(
+        {
+          pageSize: 10,
+          pageToken: 'abc',
+          sortBy: {
+            field: SortByField.ID,
+            direction: SortByDirection.DESCENDING
+          }
+        },
+        { abortController: expect.any(AbortController) }
+      );
     });
 
     it('should return 500 when an unexpected error is thrown', async () => {
