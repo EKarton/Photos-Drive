@@ -1,4 +1,5 @@
-from typing import Dict
+import sys
+from typing import Dict, cast
 import h3
 from bson.objectid import ObjectId
 
@@ -38,13 +39,14 @@ class MapCellsRepositoryImpl(MapCellsRepository):
             MAX_CELL_RESOLUTION,
         )
         cell_ids = set(
-            h3.cell_to_parent(cell_id, res) for res in range(0, MAX_CELL_RESOLUTION + 1)
+            cast(str, h3.cell_to_parent(cell_id, res))
+            for res in range(0, MAX_CELL_RESOLUTION + 1)
         )
 
-        client_id_to_cell_ids: Dict[ObjectId, list[any]] = {}
+        client_id_to_cell_ids: Dict[ObjectId, set[str]] = {}
         free_spaces = self.mongodb_clients_repository.get_free_space_for_all_clients()
         for cell_id in cell_ids:
-            best_free_space = float("-inf")
+            best_free_space = -sys.maxsize - 1
             best_client_id = None
             best_idx = None
 
@@ -58,12 +60,12 @@ class MapCellsRepositoryImpl(MapCellsRepository):
                     best_client_id = client_id
                     best_idx = i
 
-            if best_client_id is None:
+            if best_client_id is None or best_idx is None:
                 raise ValueError("Unable to find space for tile")
 
             if best_client_id not in client_id_to_cell_ids:
-                client_id_to_cell_ids[best_client_id] = []
-            client_id_to_cell_ids[best_client_id].append(cell_id)
+                client_id_to_cell_ids[best_client_id] = set()
+            client_id_to_cell_ids[best_client_id].add(cell_id)
 
             # Decrement the free space for the chosen client
             free_spaces[best_idx] = (best_client_id, best_free_space - 1)

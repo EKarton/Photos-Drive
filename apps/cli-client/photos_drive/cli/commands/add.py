@@ -1,5 +1,8 @@
 import logging
 from typing_extensions import Annotated
+from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
+    MapCellsRepositoryImpl,
+)
 import typer
 
 from photos_drive.backup.backup_photos import PhotosBackup
@@ -90,6 +93,7 @@ def add(
     gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
     albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
     media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+    map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
 
     # Get the diffs
     diffs = [
@@ -114,6 +118,7 @@ def add(
         config,
         albums_repo,
         media_items_repo,
+        map_cells_repository,
         gphoto_clients_repo,
         mongodb_clients_repo,
         parallelize_uploads,
