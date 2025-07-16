@@ -83,6 +83,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
     // Set the map layers whenever it has finished loading
     this.map.on('load', () => {
+      this.prepareTileLayer();
       this.updateTileGridLayer(this.showTiles());
       this.prepareHeatmapLayer();
       this.updateHeatmapLayer(this.showHeatmap());
