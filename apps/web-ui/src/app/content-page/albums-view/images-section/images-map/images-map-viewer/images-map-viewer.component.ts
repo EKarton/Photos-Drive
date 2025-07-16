@@ -217,7 +217,6 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
     );
 
     const zoom = Math.max(1, Math.floor(this.map.getZoom()));
-    const maxIndex = Math.pow(2, zoom) - 1;
 
     const north = clampLat(bounds.getNorth());
     const south = clampLat(bounds.getSouth());
@@ -226,19 +225,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
 
     const [xTop, yTop] = tilebelt.pointToTile(west, north, zoom);
     const [xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom);
-
-    function numbersInclusive(x: number, y: number): number[] {
-      if (x < y) {
-        return range(x, y + 1);
-      } else {
-        // If x >= y, that means that it wrap around the antimeridian
-        // So we compute values from x, ..., maxIndex and from 0, ... y
-        return [...range(x, maxIndex + 1), ...range(0, y + 1)];
-      }
-    }
-
-    const xValues = numbersInclusive(xTop, xBottom);
-    const yValues = numbersInclusive(yTop, yBottom);
+    const xValues = range(xTop, xBottom + 1);
+    const yValues = range(yTop, yBottom + 1);
 
     const seenTiles = new Set<string>();
     const tiles = [];
