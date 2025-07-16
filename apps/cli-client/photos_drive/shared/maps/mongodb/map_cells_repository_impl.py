@@ -70,7 +70,7 @@ class MapCellsRepositoryImpl(MapCellsRepository):
             # Decrement the free space for the chosen client
             free_spaces[best_idx] = (best_client_id, best_free_space - 1)
 
-        for client_id, cell_ids in client_id_to_cell_ids.items():
+        for client_id, client_id_cell_ids in client_id_to_cell_ids.items():
             client_id = (
                 self.mongodb_clients_repository.find_id_of_client_with_most_space()
             )
@@ -85,7 +85,7 @@ class MapCellsRepositoryImpl(MapCellsRepository):
                     "album_id": album_id_to_string(media_item.album_id),
                     "media_item_id": media_item_id_to_string(media_item.id),
                 }
-                for cell_id in cell_ids
+                for cell_id in client_id_cell_ids
             ]
 
             client["photos_drive"]["map_cells"].insert_many(

@@ -122,8 +122,6 @@ class PhotosBackup:
         total_num_albums_created = self.__build_missing_albums(root_diffs_tree_node)
         logger.debug(f"Finished building missing albums: {total_num_albums_created}")
 
-        print(root_diffs_tree_node)
-
         # Step 5: Go through the tree and modify album's media item ids list
         total_media_item_ids_to_delete = []
         total_media_items_to_delete_from_tiles = []
