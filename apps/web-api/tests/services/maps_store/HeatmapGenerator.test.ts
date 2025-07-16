@@ -1,20 +1,17 @@
-import { cellToLatLng, latLngToCell, polygonToCells } from 'h3-js';
+import { latLngToCell } from 'h3-js';
 import { MongoClient } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   HeatmapGenerator,
   Tile
 } from '../../../src/services/maps_store/HeatmapGenerator';
-import { MapCellsRepository } from '../../../src/services/maps_store/MapCellsRepository';
 import { MapCellsRepositoryImpl } from '../../../src/services/maps_store/mongodb/MapCellsRepositoryImpl';
 import {
-  Album,
   AlbumId,
   albumIdToString
 } from '../../../src/services/metadata_store/Albums';
 import {
   mediaIdToString,
-  MediaItem,
   MediaItemId
 } from '../../../src/services/metadata_store/MediaItems';
 import { InMemoryMongoDbClientsRepository } from '../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
@@ -41,7 +38,7 @@ const ALBUM_ID_1: AlbumId = {
 
 const ALBUM_ID_2: AlbumId = {
   clientId: 'client1',
-  objectId: 'album1'
+  objectId: 'album2'
 };
 
 describe('HeatmapGenerator', () => {
@@ -77,30 +74,107 @@ describe('HeatmapGenerator', () => {
 
   it('returns heatmap points given data exists in the region', async () => {
     // Insert some data to the db
-    await insertMediaItemToDatabase(MEDIA_ITEM_ID_1, -70, 90, ALBUM_ID_1);
-    await insertMediaItemToDatabase(MEDIA_ITEM_ID_1, -71, 91, ALBUM_ID_1);
-    await insertMediaItemToDatabase(MEDIA_ITEM_ID_1, -72, 92, ALBUM_ID_2);
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.714236894670336,
+      -74.00616064667702,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_2,
+      40.74434432061207,
+      -74.00057852268219,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_3,
+      40.77004083960827,
+      -74.02383582932607,
+      ALBUM_ID_2
+    );
 
-    const tile: Tile = { x: 48, y: 53, z: 6 };
+    const tile: Tile = { x: 602, y: 769, z: 11 };
     const result = await heatmapGenerator.getHeatmapForTile(tile, undefined);
 
-    expect(result).toBeNull();
+    expect(result.points.length).toEqual(2);
+    const point1 = result.points.find(
+      (point) => point.sampledMediaItemId.objectId == MEDIA_ITEM_ID_1.objectId
+    );
+    expect(point1).toEqual({
+      cellId: '892a1072c67ffff',
+      count: 1,
+      latitude: 40.714959860432664,
+      longitude: -74.0078835084681,
+      sampledMediaItemId: MEDIA_ITEM_ID_1
+    });
+    const point2 = result.points.find(
+      (point) => point.sampledMediaItemId.objectId == MEDIA_ITEM_ID_3.objectId
+    );
+    expect(point2).toEqual({
+      cellId: '892a1072467ffff',
+      count: 1,
+      latitude: 40.77000805916279,
+      longitude: -74.02505660827177,
+      sampledMediaItemId: MEDIA_ITEM_ID_3
+    });
   });
 
   it('returns points that belong to an album if albumId is passed', async () => {
     // Insert some data to the db
-    await insertMediaItemToDatabase(MEDIA_ITEM_ID_1, -70, 90, ALBUM_ID_1);
-    await insertMediaItemToDatabase(MEDIA_ITEM_ID_1, -71, 91, ALBUM_ID_1);
-    await insertMediaItemToDatabase(MEDIA_ITEM_ID_1, -72, 92, ALBUM_ID_2);
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.714236894670336,
+      -74.00616064667702,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_2,
+      40.74434432061207,
+      -74.00057852268219,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_3,
+      40.77004083960827,
+      -74.02383582932607,
+      ALBUM_ID_2
+    );
 
-    const tile: Tile = { x: 48, y: 53, z: 6 };
-    const result = await heatmapGenerator.getHeatmapForTile(tile, ALBUM_ID_1);
+    const tile: Tile = { x: 602, y: 769, z: 11 };
+    const result = await heatmapGenerator.getHeatmapForTile(tile, ALBUM_ID_2);
 
-    expect(result).toBeNull();
+    expect(result.points.length).toEqual(1);
+    expect(result.points[0]).toEqual({
+      cellId: '892a1072467ffff',
+      count: 1,
+      latitude: 40.77000805916279,
+      longitude: -74.02505660827177,
+      sampledMediaItemId: MEDIA_ITEM_ID_3
+    });
   });
 
   it('returns empty heatmap if no cells returned', async () => {
-    const tile: Tile = { x: 0, y: 0, z: 4 };
+    // Insert some data to the db
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.714236894670336,
+      -74.00616064667702,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.74434432061207,
+      -74.00057852268219,
+      ALBUM_ID_1
+    );
+    await insertMediaItemToDatabase(
+      MEDIA_ITEM_ID_1,
+      40.77004083960827,
+      -74.02383582932607,
+      ALBUM_ID_2
+    );
+
+    const tile: Tile = { x: 1, y: 2, z: 11 };
     const result = await heatmapGenerator.getHeatmapForTile(tile, undefined);
 
     expect(result).toEqual({ points: [] });
