@@ -103,7 +103,7 @@ describe('HeatmapGenerator', () => {
     const tile: Tile = { x: 0, y: 0, z: 4 };
     const result = await heatmapGenerator.getHeatmapForTile(tile, undefined);
 
-    expect(result).toBeNull();
+    expect(result).toEqual({ points: [] });
   });
 
   /**
