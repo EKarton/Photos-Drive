@@ -69,10 +69,6 @@ export class MockMapboxMap {
     );
   }
 
-  setZoom(newZoom: number) {
-    this.zoom = newZoom;
-  }
-
   triggerOnEvent(event: string) {
     this.onToLambda.get(event)!();
   }
