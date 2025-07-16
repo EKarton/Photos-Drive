@@ -74,7 +74,7 @@
                 data-testid="list-view-radio-button"
                 class="radio radio-xs checked:bg-primary"
                 [checked]="isHeatmapVisible()"
-                (click)="toggleHeatmapVisibility()"
+                (click)="isHeatmapVisible.set(!isHeatmapVisible())"
               />
               <span class="label-text ml-2">View heatmap</span>
             </label>
@@ -84,7 +84,9 @@
                 data-testid="map-view-radio-button"
                 class="radio radio-xs checked:bg-primary"
                 [checked]="areSampledImagesVisible()"
-                (click)="toggleSampledImagesVisibility()"
+                (click)="
+                  areSampledImagesVisible.set(!areSampledImagesVisible())
+                "
               />
               <span class="label-text ml-2">View sampled images</span>
             </label>
@@ -94,7 +96,7 @@
                 data-testid="map-view-radio-button"
                 class="radio radio-xs checked:bg-primary"
                 [checked]="areTilesVisible()"
-                (click)="toggleTilesVisibility()"
+                (click)="areTilesVisible.set(!this.areTilesVisible())"
               />
               <span class="label-text ml-2">View tiles</span>
             </label>

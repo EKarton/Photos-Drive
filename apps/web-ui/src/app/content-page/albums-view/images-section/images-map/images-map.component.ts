@@ -75,23 +75,8 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
     document.addEventListener('fullscreenchange', this.onFullscreenChange);
   }
 
-  toggleTilesVisibility() {
-    this.areTilesVisible.set(!this.areTilesVisible());
-  }
-
-  toggleHeatmapVisibility() {
-    this.isHeatmapVisible.set(!this.isHeatmapVisible());
-  }
-
-  toggleSampledImagesVisibility() {
-    this.areSampledImagesVisible.set(!this.areSampledImagesVisible());
-  }
-
-  fetchTiles(tileIds: TileId[], albumId: string) {
-    this.imagesMapViewStore.loadTiles({
-      tileIds: tileIds,
-      albumId,
-    });
+  ngOnDestroy() {
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange);
   }
 
   // Use an arrow function to preserve "this"
@@ -126,7 +111,10 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
     this.isFullscreen.set(false);
   }
 
-  ngOnDestroy() {
-    document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+  fetchTiles(tileIds: TileId[], albumId: string) {
+    this.imagesMapViewStore.loadTiles({
+      tileIds: tileIds,
+      albumId,
+    });
   }
 }

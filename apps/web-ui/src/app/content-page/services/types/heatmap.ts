@@ -2,7 +2,7 @@ export interface GetHeatmapRequest {
   x: number;
   y: number;
   z: number;
-  albumId: string | undefined;
+  albumId?: string | undefined;
 }
 
 /** Represents an entry to the heat map.  */

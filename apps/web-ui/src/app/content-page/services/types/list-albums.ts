@@ -12,11 +12,6 @@ export interface ListAlbumsSortBy {
   direction: ListAlbumsSortDirection;
 }
 
-export interface ListAlbumsResponse {
-  albums: Album[];
-  nextPageToken?: string;
-}
-
 export enum ListAlbumsSortByFields {
   ID = 'id',
   NAME = 'name',
@@ -25,4 +20,9 @@ export enum ListAlbumsSortByFields {
 export enum ListAlbumsSortDirection {
   ASCENDING = 'asc',
   DESCENDING = 'desc',
+}
+
+export interface ListAlbumsResponse {
+  albums: Album[];
+  nextPageToken?: string;
 }

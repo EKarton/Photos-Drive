@@ -73,8 +73,8 @@ describe('ImagesMapStore', () => {
     store.loadTiles({ tileIds: TILES, albumId: '' });
     tick();
 
-    expect(store.state().heatmapResult).toEqual(toPending());
-    expect(store.state().numTiles).toEqual(2);
+    expect(store.heatmapResult()).toEqual(toPending());
+    expect(store.numTiles()).toEqual(2);
   }));
 
   it('should fetch images and update state on success', fakeAsync(() => {
@@ -83,12 +83,12 @@ describe('ImagesMapStore', () => {
 
     store.loadTiles({ tileIds: TILES, albumId: '' });
 
-    expect(store.state().heatmapResult).toEqual(
+    expect(store.heatmapResult()).toEqual(
       toSuccess({
         points: HEATMAP.points.concat(HEATMAP.points),
       }),
     );
-    expect(store.state().numTiles).toEqual(2);
+    expect(store.numTiles()).toEqual(2);
   }));
 
   it('should handle errors and not update imagesResult on error', fakeAsync(() => {
@@ -98,7 +98,7 @@ describe('ImagesMapStore', () => {
 
     store.loadTiles({ tileIds: TILES, albumId: '' });
 
-    expect(store.state().heatmapResult).toEqual(toFailure(error));
-    expect(store.state().numTiles).toEqual(2);
+    expect(store.heatmapResult()).toEqual(toFailure(error));
+    expect(store.numTiles()).toEqual(2);
   }));
 });
