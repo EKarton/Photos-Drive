@@ -13,7 +13,6 @@ class MapCellsRepository(ABC):
         '''
         Adds a media item to the cells repository.
         '''
-        pass
 
     @abstractmethod
     def remove_media_item(self, media_item: MediaItem):
@@ -23,4 +22,3 @@ class MapCellsRepository(ABC):
         Args:
             media_item (MediaItem): The media item to remove
         '''
-        pass

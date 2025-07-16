@@ -52,6 +52,7 @@ class MapCellsRepositoryImpl(MapCellsRepository):
 
             for i in range(len(free_spaces)):
                 client_id, free_space = free_spaces[i]
+                print(free_space)
                 if free_space <= 0:
                     continue
 
@@ -61,7 +62,7 @@ class MapCellsRepositoryImpl(MapCellsRepository):
                     best_idx = i
 
             if best_client_id is None or best_idx is None:
-                raise ValueError("Unable to find space for tile")
+                raise ValueError("Unable to find space to insert h3 map cells")
 
             if best_client_id not in client_id_to_cell_ids:
                 client_id_to_cell_ids[best_client_id] = set()
@@ -94,9 +95,6 @@ class MapCellsRepositoryImpl(MapCellsRepository):
             )
 
     def remove_media_item(self, media_item: MediaItem):
-        if not media_item.location:
-            raise ValueError(f"No gps location for media item {media_item}")
-
         for client_id, client in self.mongodb_clients_repository.get_all_clients():
             session = self.mongodb_clients_repository.get_session_for_client_id(
                 client_id,
