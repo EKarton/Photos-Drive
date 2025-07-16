@@ -53,17 +53,37 @@ describe('MapCellsRepositoryImpl', () => {
         .db('photos_drive')
         .collection('map_cells')
         .insertMany([
-          { cell_id: 'A1', album_id: 'client1:album1', media_item_id: 'client1:mid11' },
-          { cell_id: 'A1', album_id: 'client1:album1', media_item_id: 'client1:mid12' },
-          { cell_id: 'B2', album_id: 'client1:album2', media_item_id: 'client1:mid13' }
+          {
+            cell_id: 'A1',
+            album_id: 'client1:album1',
+            media_item_id: 'client1:mid11'
+          },
+          {
+            cell_id: 'A1',
+            album_id: 'client1:album1',
+            media_item_id: 'client1:mid12'
+          },
+          {
+            cell_id: 'B2',
+            album_id: 'client1:album2',
+            media_item_id: 'client1:mid13'
+          }
         ]);
 
       await mongoClient2
         .db('photos_drive')
         .collection('map_cells')
         .insertMany([
-          { cell_id: 'A1', album_id: 'client2:album1', media_item_id: 'client2:mid21' },
-          { cell_id: 'C3', album_id: 'client2:album3', media_item_id: 'client2:mid22' }
+          {
+            cell_id: 'A1',
+            album_id: 'client2:album1',
+            media_item_id: 'client2:mid21'
+          },
+          {
+            cell_id: 'C3',
+            album_id: 'client2:album3',
+            media_item_id: 'client2:mid22'
+          }
         ]);
     });
 
