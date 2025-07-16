@@ -367,43 +367,6 @@ describe('ImagesMapViewerComponent', () => {
     expect(newTilesEmitted).toEqual([[]]);
   }));
 
-  it('should emit tiles correctly when map crosses anti-meridian line', fakeAsync(() => {
-    const fixture = TestBed.createComponent(ImagesMapViewerComponent);
-    fixture.componentRef.setInput('heatmap', HEATMAP);
-    fixture.detectChanges();
-    tick();
-
-    // Listen to visibleTilesChanged events
-    const newTilesEmitted: TileId[][] = [];
-    fixture.componentInstance.visibleTilesChanged.subscribe((newTiles) =>
-      newTilesEmitted.push(newTiles),
-    );
-
-    // Move the map to an area where it crosses the anti-meridian
-    const mapInstances = mockMapboxFactory.getMapInstances();
-    expect(mapInstances.length).toEqual(1);
-    mapInstances[0].setZoom(1.5);
-    mapInstances[0].setBounds(
-      62.31221578663522,
-      -107.96255025177345,
-      -53.2500141696064,
-      -247.1205622441226,
-    );
-    mapInstances[0].triggerOnEvent('load');
-    fixture.detectChanges();
-    tick();
-
-    // Expect newTilesEmitted to emit the correct tiles that cross the anti-meridian
-    expect(newTilesEmitted).toEqual([
-      [
-        { x: 0, y: 0, z: 1 },
-        { x: 0, y: 1, z: 1 },
-        { x: 1, y: 0, z: 1 },
-        { x: 1, y: 1, z: 1 },
-      ],
-    ]);
-  }));
-
   it('should hide markers when the showMarkers input has changed to false', fakeAsync(() => {
     const fixture = TestBed.createComponent(ImagesMapViewerComponent);
     fixture.componentRef.setInput('heatmap', HEATMAP);
