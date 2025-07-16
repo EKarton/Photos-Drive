@@ -1,44 +1,42 @@
 import { inject, Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { Store } from '@ngrx/store';
-import { delay, EMPTY, expand, switchMap, tap, withLatestFrom } from 'rxjs';
+import {
+  from,
+  map,
+  mergeMap,
+  switchMap,
+  tap,
+  toArray,
+  withLatestFrom,
+} from 'rxjs';
 
 import { authState } from '../../../../auth/store';
-import {
-  hasSucceed,
-  isPending,
-  Result,
-  toPending,
-} from '../../../../shared/results/results';
-import { combineResults2 } from '../../../../shared/results/utils/combineResults2';
+import { Result, toPending } from '../../../../shared/results/results';
+import { combineResults } from '../../../../shared/results/utils/combineResults';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
-import { takeSuccessfulDataOrElse } from '../../../../shared/results/utils/takeSuccessfulDataOrElse';
-import {
-  ListMediaItemsRequest,
-  ListMediaItemsResponse,
-} from '../../../services/types/list-media-items';
-import { MediaItem } from '../../../services/types/media-item';
+import { GetHeatmapRequest, Heatmap } from '../../../services/types/heatmap';
 import { WebApiService } from '../../../services/webapi.service';
+import { TileId } from './images-map-viewer/images-map-viewer.component';
 
 export interface ImagesMapState {
-  albumId: string;
-  imagesResult: Result<MediaItem[]>;
-  isFetchingImages: boolean;
+  heatmapResult: Result<Heatmap>;
+  numTiles: number;
 }
 
 export const INITIAL_STATE: ImagesMapState = {
-  albumId: '',
-  imagesResult: toPending(),
-  isFetchingImages: false,
+  heatmapResult: toPending(),
+  numTiles: 0,
 };
 
-export interface LoadImagesRequest {
+export interface LoadTilesRequest {
+  tileIds: TileId[];
   albumId: string;
-  pageSize?: number;
-  delayBetweenPages?: number;
 }
 
 export const DEFAULT_DELAY_BETWEEN_PAGES = 150;
+
+export const MAX_CONCURRENCY = 4;
 
 @Injectable()
 export class ImagesMapStore extends ComponentStore<ImagesMapState> {
@@ -49,96 +47,54 @@ export class ImagesMapStore extends ComponentStore<ImagesMapState> {
     super(INITIAL_STATE);
   }
 
-  readonly isFetchingImages = this.selectSignal(
-    (state) => state.isFetchingImages,
-  );
-  readonly images = this.selectSignal((state) => state.imagesResult);
+  readonly heatmapResult = this.selectSignal((state) => state.heatmapResult);
 
-  readonly loadImages = this.effect<LoadImagesRequest>((request$) =>
+  readonly numTiles = this.selectSignal((state) => state.numTiles);
+
+  readonly loadTiles = this.effect<LoadTilesRequest>((request$) =>
     request$.pipe(
       withLatestFrom(this.state$),
       switchMap(([request]) => {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
-            const apiRequest: ListMediaItemsRequest = {
-              albumId: request.albumId,
-              pageSize: request.pageSize,
-            };
-
             this.patchState({
-              albumId: request.albumId,
-              imagesResult: toPending(),
-              isFetchingImages: true,
+              heatmapResult: toPending(),
+              numTiles: request.tileIds.length,
             });
 
-            return this.webApiService
-              .listMediaItems(accessToken, apiRequest)
+            const apiRequests: GetHeatmapRequest[] = request.tileIds.map(
+              (tileId) => ({
+                x: tileId.x,
+                y: tileId.y,
+                z: tileId.z,
+                albumId: request.albumId,
+              }),
+            );
+
+            return from(apiRequests)
               .pipe(
-                expand((response) => {
-                  if (!hasSucceed(response)) {
-                    return EMPTY;
-                  }
-
-                  if (!response.data?.nextPageToken) {
-                    return EMPTY;
-                  }
-
-                  const newApiRequest: ListMediaItemsRequest = {
-                    ...apiRequest,
-                    pageToken: response.data?.nextPageToken,
-                  };
-
-                  return this.webApiService
-                    .listMediaItems(accessToken, newApiRequest)
-                    .pipe(
-                      delay(
-                        request.delayBetweenPages ??
-                          DEFAULT_DELAY_BETWEEN_PAGES,
-                      ),
-                    );
-                }),
-                tap((response: Result<ListMediaItemsResponse>) => {
-                  this.addResponse(response);
+                mergeMap(
+                  (apiRequest) =>
+                    this.webApiService.getHeatmap(accessToken, apiRequest),
+                  MAX_CONCURRENCY,
+                ),
+                toArray(),
+                map((results) =>
+                  combineResults(results, (heatmaps) => heatmaps),
+                ),
+              )
+              .pipe(
+                tap((result: Result<Heatmap[]>) => {
+                  this.patchState({
+                    heatmapResult: mapResult(result, (heatmaps) => ({
+                      points: heatmaps.map((h) => h.points).flat(),
+                    })),
+                  });
                 }),
               );
           }),
         );
       }),
     ),
-  );
-
-  private readonly addResponse = this.updater(
-    (
-      state: ImagesMapState,
-      response: Result<ListMediaItemsResponse>,
-    ): ImagesMapState => {
-      if (isPending(response)) {
-        return state;
-      }
-
-      if (isPending(state.imagesResult)) {
-        return {
-          ...state,
-          imagesResult: mapResult(response, (page) => page.mediaItems),
-          isFetchingImages: takeSuccessfulDataOrElse(
-            mapResult(response, (cur) => cur.nextPageToken !== undefined),
-            true,
-          ),
-        };
-      }
-
-      return {
-        ...state,
-        imagesResult: combineResults2(
-          state.imagesResult,
-          response,
-          (prev, cur) => [...prev, ...cur.mediaItems],
-        ),
-        isFetchingImages: takeSuccessfulDataOrElse(
-          mapResult(response, (cur) => cur.nextPageToken !== undefined),
-          true,
-        ),
-      };
-    },
   );
 }

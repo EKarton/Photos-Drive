@@ -9,11 +9,15 @@ import albumsRouter from './routes/albums';
 import authRouter from './routes/authentication';
 import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
+import mapsRouter from './routes/heatmap';
 import mediaItemsRouter from './routes/media_items';
 import { GPhotosClientsRepository } from './services/blob_store/gphotos/GPhotosClientsRepository';
 import { ConfigStore } from './services/config_store/ConfigStore';
 import { ConfigStoreFromFile } from './services/config_store/ConfigStoreFromFile';
 import { ConfigStoreFromMongoDb } from './services/config_store/ConfigStoreFromMongoDb';
+import { HeatmapGenerator } from './services/maps_store/HeatmapGenerator';
+import { MapCellsRepository } from './services/maps_store/MapCellsRepository';
+import { MapCellsRepositoryImpl } from './services/maps_store/mongodb/MapCellsRepositoryImpl';
 import { AlbumsRepository } from './services/metadata_store/AlbumsRepository';
 import { MediaItemsRepository } from './services/metadata_store/MediaItemsRepository';
 import { AlbumsRepositoryImpl } from './services/metadata_store/mongodb/AlbumsRepositoryImpl';
@@ -33,6 +37,8 @@ export class App {
   private gPhotosClientsRepository?: GPhotosClientsRepository;
   private albumsRepository?: AlbumsRepository;
   private mediaItemsRepository?: MediaItemsRepository;
+  private mapCellsRepository?: MapCellsRepository;
+  private heatmapGenerator?: HeatmapGenerator;
 
   constructor() {
     this.app = express();
@@ -62,6 +68,12 @@ export class App {
     this.mediaItemsRepository = new MediaItemsRepositoryImpl(
       this.mongoDbClientsRepository
     );
+    this.mapCellsRepository = new MapCellsRepositoryImpl(
+      this.mongoDbClientsRepository
+    );
+    this.heatmapGenerator = new HeatmapGenerator(this.mapCellsRepository);
+
+    const rootAlbumId = await this.config.getRootAlbumId();
 
     this.app.use(helmet());
     this.app.use(compression());
@@ -77,13 +89,14 @@ export class App {
     this.app.use(await authRouter());
     this.app.use(
       await albumsRouter(
-        await this.config.getRootAlbumId(),
+        rootAlbumId,
         this.albumsRepository,
         this.mediaItemsRepository
       )
     );
     this.app.use(await mediaItemsRouter(this.mediaItemsRepository));
     this.app.use(await gPhotosMediaItemsRouter(this.gPhotosClientsRepository));
+    this.app.use(await mapsRouter(rootAlbumId, this.heatmapGenerator));
 
     this.app.use(
       (err: Error, _req: Request, res: Response, _next: NextFunction) => {

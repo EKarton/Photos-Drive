@@ -1,7 +1,5 @@
 import {
   Component,
-  ComponentRef,
-  effect,
   ElementRef,
   inject,
   input,
@@ -12,23 +10,31 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
+import * as tilebelt from '@mapbox/tilebelt';
 import { Store } from '@ngrx/store';
+import range from 'lodash/range';
 import * as mapboxgl from 'mapbox-gl';
-import { filter, map, shareReplay, Subscription, take } from 'rxjs';
+import { Subscription } from 'rxjs';
 import Supercluster from 'supercluster';
 
 import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
-import { MediaItem } from '../../../../services/types/media-item';
+import { Heatmap } from '../../../../services/types/heatmap';
 import { mediaViewerActions } from '../../../../store/media-viewer';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
 
-export interface Bounds {
-  north: number;
-  south: number;
-  east: number;
-  west: number;
+export interface TileId {
+  x: number;
+  y: number;
+  z: number;
 }
+
+const HEATMAP_SOURCE_ID = 'media-heatmap';
+const HEATMAP_LAYER_ID = 'heatmap-layer';
+
+const TILES_SOURCE_ID = 'tile-grid';
+const TILES_FILL_LAYER_ID = 'tile-grid-fill';
+const TILES_OUTLINE_LAYER_ID = 'tile-grid-outline';
 
 @Component({
   selector: 'app-images-map-viewer',
@@ -37,16 +43,21 @@ export interface Bounds {
   standalone: true,
 })
 export class ImagesMapViewerComponent implements OnInit, OnDestroy {
-  readonly mediaItems = input.required<MediaItem[]>();
-  readonly isDarkMode = input.required<boolean>();
+  readonly heatmap = input.required<Heatmap>();
+  readonly isDarkMode = input<boolean>(false);
+  readonly showMarkers = input<boolean>(true);
+  readonly showHeatmap = input<boolean>(true);
+  readonly showTiles = input<boolean>(true);
 
-  private readonly mediaItems$ = toObservable(this.mediaItems).pipe(
-    shareReplay(1),
-  );
+  readonly visibleTilesChanged = output<TileId[]>();
+
+  private readonly heatmap$ = toObservable(this.heatmap);
+  private readonly isDarkMode$ = toObservable(this.isDarkMode);
+  private readonly showMarkers$ = toObservable(this.showMarkers);
+  private readonly showHeatmap$ = toObservable(this.showHeatmap);
+  private readonly showTiles$ = toObservable(this.showTiles);
 
   private readonly subscriptions = new Subscription();
-
-  boundsChanged = output<Bounds>();
 
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef;
   private readonly viewContainerRef = inject(ViewContainerRef);
@@ -57,143 +68,334 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
   );
 
   private map!: mapboxgl.Map;
+  private heatmapGeoJson!: GeoJSON.GeoJSON;
   private supercluster!: Supercluster;
   private imageMarkers: mapboxgl.Marker[] = [];
-
-  constructor() {
-    effect(() => {
-      if (this.map) {
-        this.map.setStyle(getTheme(this.isDarkMode()));
-
-        // Re-add heatmap layer and markers after style reload
-        this.map.once('styledata', () => {
-          this.addHeatmapLayer();
-          this.prepareSupercluster();
-          this.updateImageMarkers();
-        });
-      }
-    });
-  }
+  private tilesGeoJson!: GeoJSON.GeoJSON;
 
   ngOnInit() {
     this.map = this.mapboxFactory.buildMap({
       accessToken: this.mapboxApiToken(),
       container: this.mapContainer.nativeElement,
       style: getTheme(this.isDarkMode()),
-      center: [0, 0],
-      zoom: 10,
+      maxZoom: 22,
     });
-
-    // Center the map to the first item in mediaItems$
-    this.subscriptions.add(
-      this.mediaItems$
-        .pipe(
-          map((mediaItems) =>
-            mediaItems.find((mediaItem) => mediaItem.location),
-          ),
-          filter(Boolean),
-          take(1),
-        )
-        .subscribe((mediaItem) => {
-          this.map.setCenter([
-            mediaItem.location!.longitude,
-            mediaItem.location!.latitude,
-          ]);
-        }),
-    );
 
     // Set the map layers whenever it has finished loading
     this.map.on('load', () => {
-      this.addHeatmapLayer();
+      this.updateTileGridLayer(this.showTiles());
+      this.prepareHeatmapLayer();
+      this.updateHeatmapLayer(this.showHeatmap());
       this.prepareSupercluster();
-      this.updateImageMarkers();
-      this.emitBounds();
+      this.updateImageMarkers(this.showMarkers());
+      this.emitVisibleTiles();
 
       this.subscriptions.add(
-        this.mediaItems$.subscribe((mediaItems) => {
+        this.isDarkMode$.subscribe((isDarkMode) => {
+          this.map.setStyle(getTheme(isDarkMode));
+
+          // Update the map when style changes
+          this.map.once('styledata', () => {
+            this.updateTileGridLayer(this.showTiles());
+            this.updateHeatmapLayer(this.showHeatmap());
+            this.updateImageMarkers(this.showMarkers());
+          });
+        }),
+      );
+
+      this.subscriptions.add(
+        this.heatmap$.subscribe(() => {
+          this.prepareHeatmapLayer();
+          this.updateHeatmapLayer(this.showHeatmap());
           this.prepareSupercluster();
-          this.updateHeatmapLayer(mediaItems);
-          this.updateImageMarkers();
+          this.updateImageMarkers(this.showMarkers());
+        }),
+      );
+
+      this.subscriptions.add(
+        this.showMarkers$.subscribe((showMarkers) => {
+          this.updateImageMarkers(showMarkers);
+        }),
+      );
+
+      this.subscriptions.add(
+        this.showHeatmap$.subscribe((showHeatmap) => {
+          this.updateHeatmapLayer(showHeatmap);
+        }),
+      );
+
+      this.subscriptions.add(
+        this.showTiles$.subscribe((showTiles) => {
+          this.updateTileGridLayer(showTiles);
         }),
       );
     });
 
     // Update the map whenever the map has moved
     this.map.on('moveend', () => {
-      this.updateImageMarkers();
-      this.emitBounds();
+      this.prepareTileLayer();
+      this.updateTileGridLayer(this.showTiles());
+      this.emitVisibleTiles();
     });
   }
 
+  private prepareTileLayer() {
+    this.tilesGeoJson = {
+      type: 'FeatureCollection',
+      features: this.getVisibleTiles().map((tile) => ({
+        type: 'Feature',
+        geometry: tilebelt.tileToGeoJSON([tile.x, tile.y, tile.z]),
+        properties: {},
+      })),
+    };
+  }
+
+  private updateTileGridLayer(showTiles: boolean) {
+    if (!this.map.getSource(TILES_SOURCE_ID)) {
+      this.map.addSource(TILES_SOURCE_ID, {
+        type: 'geojson',
+        data: this.tilesGeoJson,
+      });
+
+      // Fill layer for tile background
+      this.map.addLayer({
+        id: TILES_FILL_LAYER_ID,
+        type: 'fill',
+        source: TILES_SOURCE_ID,
+        paint: {
+          'fill-color': ['rgba', 255, 255, 255, 0.1], // white, 10% opacity
+          'fill-outline-color': '#000000',
+        },
+      });
+
+      // Line layer for tile outlines
+      this.map.addLayer({
+        id: TILES_OUTLINE_LAYER_ID,
+        type: 'line',
+        source: TILES_SOURCE_ID,
+        paint: {
+          'line-color': '#ff0000',
+          'line-width': 2,
+        },
+      });
+    } else {
+      // Update source data if it already exists
+      (this.map.getSource(TILES_SOURCE_ID) as mapboxgl.GeoJSONSource).setData(
+        this.tilesGeoJson,
+      );
+    }
+
+    if (
+      this.map.getLayer(TILES_FILL_LAYER_ID) &&
+      this.map.getLayer(TILES_OUTLINE_LAYER_ID)
+    ) {
+      this.map.setLayoutProperty(
+        TILES_FILL_LAYER_ID,
+        'visibility',
+        showTiles ? 'visible' : 'none',
+      );
+      this.map.setLayoutProperty(
+        TILES_OUTLINE_LAYER_ID,
+        'visibility',
+        showTiles ? 'visible' : 'none',
+      );
+    }
+  }
+
+  private getVisibleTiles(): TileId[] {
+    const bounds = this.map.getBounds();
+    if (!bounds) {
+      return [];
+    }
+
+    console.log(this.map.getZoom());
+    console.log(
+      bounds.getNorth(),
+      bounds.getEast(),
+      bounds.getSouth(),
+      bounds.getWest(),
+    );
+
+    const zoom = Math.max(1, Math.floor(this.map.getZoom()));
+    const maxIndex = Math.pow(2, zoom) - 1;
+
+    const north = clampLat(bounds.getNorth());
+    const south = clampLat(bounds.getSouth());
+    const east = clampLng(bounds.getEast());
+    const west = clampLng(bounds.getWest());
+
+    const [xTop, yTop] = tilebelt.pointToTile(west, north, zoom);
+    const [xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom);
+
+    function numbersInclusive(x: number, y: number): number[] {
+      if (x < y) {
+        return range(x, y + 1);
+      } else {
+        // If x >= y, that means that it wrap around the antimeridian
+        // So we compute values from x, ..., maxIndex and from 0, ... y
+        return [...range(x, maxIndex + 1), ...range(0, y + 1)];
+      }
+    }
+
+    const xValues = numbersInclusive(xTop, xBottom);
+    const yValues = numbersInclusive(yTop, yBottom);
+
+    const seenTiles = new Set<string>();
+    const tiles = [];
+
+    for (const x of xValues) {
+      for (const y of yValues) {
+        const key = `${x}/${y}/${zoom}`;
+
+        if (!seenTiles.has(key)) {
+          tiles.push({ x, y, z: zoom });
+          seenTiles.add(key);
+        }
+      }
+    }
+
+    return tiles;
+  }
+
   private prepareSupercluster() {
-    const seen = new Map<string, number>();
-
-    const geojsonPoints: Supercluster.PointFeature<{ mediaItem: MediaItem }>[] =
-      this.mediaItems()
-        .filter((mediaItem) => mediaItem.location)
-        .map((mediaItem) => {
-          const lng = mediaItem.location!.longitude;
-          const lat = mediaItem.location!.latitude;
-          const key = `${lng},${lat}`;
-          let jitteredLng = lng;
-          let jitteredLat = lat;
-
-          // If this location has been seen before, apply jitter
-          const count = seen.get(key) || 0;
-          if (count > 0) {
-            jitteredLng = jitterCoordinate(lng, 0.0001 * (count + 1));
-            jitteredLat = jitterCoordinate(lat, 0.0001 * (count + 1));
-          }
-          seen.set(key, count + 1);
-
-          return {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [jitteredLng, jitteredLat],
-            },
-            properties: {
-              mediaItem,
-            },
-          };
-        });
+    const geojsonPoints: Supercluster.PointFeature<{
+      sampledMediaItemId: string;
+      count: number;
+    }>[] = this.heatmap().points.map((point) => {
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [point.longitude, point.latitude],
+        },
+        properties: {
+          sampledMediaItemId: point.sampledMediaItemId,
+          count: point.count,
+        },
+      };
+    });
 
     this.supercluster = new Supercluster({
-      radius: 48,
+      radius: 60,
       maxZoom: this.map.getMaxZoom() - 1,
+      map: (props) => {
+        return {
+          count: props['count'] as number,
+        };
+      },
+      reduce: (accumulated, props) => {
+        accumulated.count += props.count;
+      },
     });
     this.supercluster.load(geojsonPoints);
   }
 
-  private emitBounds() {
-    const bounds = this.map.getBounds();
+  private updateImageMarkers(showMarkers: boolean) {
+    // Remove old markers
+    this.imageMarkers.forEach((marker) => marker.remove());
+    this.imageMarkers = [];
 
-    if (bounds) {
-      this.boundsChanged.emit({
-        north: bounds.getNorth(),
-        south: bounds.getSouth(),
-        east: bounds.getEast(),
-        west: bounds.getWest(),
-      });
+    // Get clusters for current viewport and zoom
+    const bounds = this.map.getBounds();
+    if (!showMarkers || !bounds || !this.supercluster) {
+      return;
+    }
+
+    const bbox: GeoJSON.BBox = [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ];
+    const clusters = this.supercluster.getClusters(bbox, this.map.getZoom());
+
+    for (const cluster of clusters) {
+      const longitude = cluster.geometry.coordinates[0];
+      const latitude = cluster.geometry.coordinates[1];
+
+      let mediaItemId: string;
+      let count: number;
+      let expansionZoom: number;
+
+      if (cluster.properties.cluster) {
+        const leaf = this.supercluster.getLeaves(cluster.id as number, 1)[0];
+        mediaItemId = leaf.properties['sampledMediaItemId'] as string;
+
+        count = cluster.properties['count'] as number;
+        expansionZoom = this.supercluster.getClusterExpansionZoom(
+          cluster.id as number,
+        );
+      } else {
+        mediaItemId = cluster.properties['sampledMediaItemId'] as string;
+        count = cluster.properties['count'] as number;
+        expansionZoom = this.map.getZoom() + 1;
+      }
+
+      const componentRef = this.viewContainerRef.createComponent(
+        ImageMapMarkerComponent,
+      );
+      componentRef.setInput('mediaItemId', mediaItemId);
+      componentRef.setInput('badgeCount', count);
+
+      if (count === 1) {
+        this.subscriptions.add(
+          componentRef.instance.markerClick.subscribe(() => {
+            this.store.dispatch(
+              mediaViewerActions.openMediaViewer({
+                request: { mediaItemId: mediaItemId },
+              }),
+            );
+          }),
+        );
+      } else {
+        this.subscriptions.add(
+          componentRef.instance.markerClick.subscribe(() => {
+            this.map.easeTo({
+              center: [longitude, latitude],
+              zoom: expansionZoom,
+            });
+          }),
+        );
+      }
+
+      const marker = this.mapboxFactory
+        .buildMarker(componentRef)
+        .setLngLat([longitude, latitude])
+        .addTo(this.map);
+
+      this.imageMarkers.push(marker);
     }
   }
 
-  private addHeatmapLayer() {
-    const sourceId = 'media-heatmap';
-    const layerId = 'heatmap-layer';
+  private prepareHeatmapLayer() {
+    this.heatmapGeoJson = {
+      type: 'FeatureCollection',
+      features: this.heatmap().points.map((entry) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [entry.longitude, entry.latitude],
+        },
+        properties: {
+          count: entry.count,
+        },
+      })),
+    };
+  }
 
-    if (!this.map.getSource(sourceId)) {
-      this.map.addSource(sourceId, {
+  private updateHeatmapLayer(showHeatmap: boolean) {
+    // Add or update the source
+    if (!this.map.getSource(HEATMAP_SOURCE_ID)) {
+      this.map.addSource(HEATMAP_SOURCE_ID, {
         type: 'geojson',
-        data: buildGeoJSONFromMediaItems(this.mediaItems()),
+        data: this.heatmapGeoJson,
       });
-    }
 
-    if (!this.map.getLayer(layerId)) {
+      // Add the heatmap layer
       this.map.addLayer({
-        id: layerId,
+        id: HEATMAP_LAYER_ID,
         type: 'heatmap',
-        source: sourceId,
+        source: HEATMAP_SOURCE_ID,
         maxzoom: 22,
         paint: {
           // Customize heatmap style as you want
@@ -220,86 +422,26 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
           'heatmap-opacity': 0.8,
         },
       });
+    } else {
+      // Update the data if the source already exists
+      const source = this.map.getSource(HEATMAP_SOURCE_ID) as
+        | mapboxgl.GeoJSONSource
+        | undefined;
+      source?.setData(this.heatmapGeoJson);
+    }
+
+    if (this.map.getLayer(HEATMAP_LAYER_ID)) {
+      this.map.setLayoutProperty(
+        HEATMAP_LAYER_ID,
+        'visibility',
+        showHeatmap ? 'visible' : 'none',
+      );
     }
   }
 
-  private updateHeatmapLayer(mediaItems: MediaItem[]) {
-    const source = this.map.getSource('media-heatmap') as
-      | mapboxgl.GeoJSONSource
-      | undefined;
-    source?.setData(buildGeoJSONFromMediaItems(mediaItems));
-  }
-
-  private updateImageMarkers() {
-    // Remove old markers
-    this.imageMarkers.forEach((marker) => marker.remove());
-    this.imageMarkers = [];
-
-    // Get clusters for current viewport and zoom
-    const bounds = this.map.getBounds();
-    if (!bounds || !this.supercluster) {
-      return;
-    }
-
-    const bbox: GeoJSON.BBox = [
-      bounds.getWest(),
-      bounds.getSouth(),
-      bounds.getEast(),
-      bounds.getNorth(),
-    ];
-    const clusters = this.supercluster.getClusters(bbox, this.map.getZoom());
-
-    for (const cluster of clusters) {
-      const [longitude, latitude] = cluster.geometry.coordinates;
-      let componentRef: ComponentRef<ImageMapMarkerComponent>;
-
-      if (cluster.properties.cluster) {
-        const count = cluster.properties.point_count;
-        const leaf = this.supercluster.getLeaves(cluster.id as number, 1)[0];
-        const mediaItem = leaf.properties['mediaItem'] as MediaItem;
-
-        componentRef = this.viewContainerRef.createComponent(
-          ImageMapMarkerComponent,
-        );
-        componentRef.setInput('mediaItem', mediaItem);
-        componentRef.setInput('badgeCount', count);
-
-        const expansionZoom = this.supercluster.getClusterExpansionZoom(
-          cluster.properties.cluster_id as number,
-        );
-        this.subscriptions.add(
-          componentRef.instance.markerClick.subscribe(() => {
-            this.map.easeTo({
-              center: [longitude, latitude],
-              zoom: expansionZoom,
-            });
-          }),
-        );
-      } else {
-        const mediaItem = cluster.properties['mediaItem'] as MediaItem;
-        componentRef = this.viewContainerRef.createComponent(
-          ImageMapMarkerComponent,
-        );
-        componentRef.setInput('mediaItem', mediaItem);
-
-        this.subscriptions.add(
-          componentRef.instance.markerClick.subscribe(() => {
-            this.store.dispatch(
-              mediaViewerActions.openMediaViewer({
-                request: { mediaItemId: mediaItem.id },
-              }),
-            );
-          }),
-        );
-      }
-
-      const marker = this.mapboxFactory
-        .buildMarker(componentRef)
-        .setLngLat([longitude, latitude])
-        .addTo(this.map);
-
-      this.imageMarkers.push(marker);
-    }
+  private emitVisibleTiles() {
+    const visibleTiles = this.getVisibleTiles();
+    this.visibleTilesChanged.emit(visibleTiles);
   }
 
   ngOnDestroy() {
@@ -315,31 +457,12 @@ function getTheme(isDarkMode: boolean) {
     : 'mapbox://styles/mapbox/streets-v12';
 }
 
-function buildGeoJSONFromMediaItems(
-  mediaItems: MediaItem[],
-): GeoJSON.FeatureCollection {
-  console.log('building', mediaItems.length);
-  return {
-    type: 'FeatureCollection',
-    features: mediaItems
-      .filter((mediaItem) => mediaItem.location)
-      .map((mediaItem) => ({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [
-            mediaItem.location!.longitude,
-            mediaItem.location!.latitude,
-          ],
-        },
-        properties: {
-          ...mediaItem,
-        },
-      })),
-  };
+/** Clamp the latitude value from -89.99999 to 89.99999 */
+function clampLat(lat: number): number {
+  return Math.max(-89.9999, Math.min(89.9999, lat));
 }
 
-function jitterCoordinate(coord: number, magnitude: number): number {
-  // Magnitude is in degrees; 0.00005 ~ 5 meters
-  return coord + (Math.random() - 0.5) * 2 * magnitude;
+/** Clamp the longitude value from -179.99999 to 179.99999 */
+function clampLng(lng: number): number {
+  return Math.max(-179.9999, Math.min(179.9999, lng));
 }

@@ -32,12 +32,18 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
     this.mongoDbRepository = mongoDbRepository;
   }
 
-  async getAlbumById(id: AlbumId): Promise<Album> {
+  async getAlbumById(
+    id: AlbumId,
+    options?: { abortController?: AbortController }
+  ): Promise<Album> {
     const mongoDbClient = this.mongoDbRepository.getClientFromId(id.clientId);
     const rawDocs = await mongoDbClient
       .db('photos_drive')
       .collection('albums')
-      .findOne({ _id: new ObjectId(id.objectId) });
+      .findOne(
+        { _id: new ObjectId(id.objectId) },
+        { signal: options?.abortController?.signal }
+      );
 
     if (rawDocs === null) {
       throw new AlbumNotFoundError(id);
@@ -46,15 +52,21 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
     return this.convertMongoDbDocumentToAlbumInstance(id, rawDocs);
   }
 
-  async getNumAlbumsInAlbum(id: AlbumId): Promise<number> {
+  async getNumAlbumsInAlbum(
+    id: AlbumId,
+    options?: { abortController?: AbortController }
+  ): Promise<number> {
     const counts = await Promise.all(
       this.mongoDbRepository.listClients().map(async ([_, mongoDbClient]) => {
         const numDocs = await mongoDbClient
           .db('photos_drive')
           .collection('albums')
-          .countDocuments({
-            parent_album_id: albumIdToString(id)
-          });
+          .countDocuments(
+            {
+              parent_album_id: albumIdToString(id)
+            },
+            { signal: options?.abortController?.signal }
+          );
 
         return numDocs;
       })
@@ -63,7 +75,10 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
     return sum(counts);
   }
 
-  async listAlbums(req: ListAlbumsRequest): Promise<ListAlbumsResponse> {
+  async listAlbums(
+    req: ListAlbumsRequest,
+    options?: { abortController?: AbortController }
+  ): Promise<ListAlbumsResponse> {
     const clientIdToMongoClient = new Map(this.mongoDbRepository.listClients());
     const clientIdToAlbumId = new Map(
       req.pageToken?.split(',').map((pageToken) => {
@@ -95,7 +110,10 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
             const lastSeenAlbum = await mongoClient
               .db('photos_drive')
               .collection('albums')
-              .findOne({ _id: lastSeenAlbumObjectId });
+              .findOne(
+                { _id: lastSeenAlbumObjectId },
+                { signal: options?.abortController?.signal }
+              );
             const lastSeenAlbumName = lastSeenAlbum!['name'];
 
             filterObj['$or'] =
@@ -117,15 +135,19 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
           }
         }
 
-        const sortObj: Sort = {};
         const mongoSortDirection =
           req.sortBy.direction === SortByDirection.ASCENDING ? 1 : -1;
 
+        let sortObj: Sort;
         if (req.sortBy.field === SortByField.ID) {
-          sortObj['_id'] = mongoSortDirection;
-        } else if (req.sortBy.field === SortByField.NAME) {
-          sortObj['name'] = mongoSortDirection;
-          sortObj['_id'] = mongoSortDirection;
+          sortObj = {
+            _id: mongoSortDirection
+          };
+        } else {
+          sortObj = {
+            name: mongoSortDirection,
+            _id: mongoSortDirection
+          };
         }
 
         logger.debug(`Filter object: ${JSON.stringify(filterObj)}`);
@@ -135,7 +157,10 @@ export class AlbumsRepositoryImpl implements AlbumsRepository {
         const rawDocs = await mongoClient
           .db('photos_drive')
           .collection('albums')
-          .find(filterObj, { collation: { locale: 'en', strength: 1 } })
+          .find(filterObj, {
+            collation: { locale: 'en', strength: 1 },
+            signal: options?.abortController?.signal
+          })
           .sort(sortObj)
           .limit(overFetchSize)
           .toArray();

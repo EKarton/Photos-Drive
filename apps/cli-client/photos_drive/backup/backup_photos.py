@@ -4,6 +4,7 @@ from typing import Optional, Dict, cast
 from collections import deque
 import logging
 from bson.objectid import ObjectId
+from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
 
 from ..shared.metadata.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
@@ -66,6 +67,7 @@ class PhotosBackup:
         config: Config,
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
+        map_cells_repo: MapCellsRepository,
         gphotos_client_repo: GPhotosClientsRepository,
         clients_repo: ClientsRepository,
         parallelize_uploads: bool = False,
@@ -73,6 +75,7 @@ class PhotosBackup:
         self.__config = config
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
+        self.__map_cells_repo = map_cells_repo
         self.__diffs_assigner = DiffsAssigner(gphotos_client_repo)
         self.__albums_pruner = AlbumsPruner(
             config.get_root_album_id(), albums_repo, media_items_repo
@@ -119,10 +122,9 @@ class PhotosBackup:
         total_num_albums_created = self.__build_missing_albums(root_diffs_tree_node)
         logger.debug(f"Finished building missing albums: {total_num_albums_created}")
 
-        print(root_diffs_tree_node)
-
         # Step 5: Go through the tree and modify album's media item ids list
         total_media_item_ids_to_delete = []
+        total_media_items_to_delete_from_tiles = []
         total_num_media_item_added = 0
         total_album_ids_to_prune = []
         queue = deque([root_diffs_tree_node])
@@ -143,9 +145,13 @@ class PhotosBackup:
                     FindMediaItemRequest(album_id=cur_album.id, file_name=file_name)
                 ):
                     total_media_item_ids_to_delete.append(media_item.id)
+
+                    if media_item.location is not None:
+                        total_media_items_to_delete_from_tiles.append(media_item)
                     num_media_items -= 1
 
-            # Step 5b: Find the media items to add to the album, and create them
+            # Step 5b: Find the media items to add to the album,
+            # and create them and add it to the tiles repo
             for add_diff in add_diffs:
                 create_media_item_request = CreateMediaItemRequest(
                     file_name=add_diff.file_name,
@@ -163,6 +169,9 @@ class PhotosBackup:
                 media_item = self.__media_items_repo.create_media_item(
                     create_media_item_request
                 )
+
+                if media_item.location is not None:
+                    self.__map_cells_repo.add_media_item(media_item)
                 total_num_media_item_added += 1
                 num_media_items += 1
 
@@ -178,6 +187,8 @@ class PhotosBackup:
 
         # Step 6: Delete the media items marked for deletion
         self.__media_items_repo.delete_many_media_items(total_media_item_ids_to_delete)
+        for media_item in total_media_items_to_delete_from_tiles:
+            self.__map_cells_repo.remove_media_item(media_item)
 
         # Step 7: Delete albums with no child albums and no media items
         total_num_albums_deleted = 0

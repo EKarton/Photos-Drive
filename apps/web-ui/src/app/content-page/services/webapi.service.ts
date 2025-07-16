@@ -7,6 +7,7 @@ import { Result } from '../../shared/results/results';
 import { toResult } from '../../shared/results/rxjs/toResult';
 import { AlbumDetailsApiResponse } from './types/album';
 import { GPhotosMediaItemDetailsApiResponse } from './types/gphotos-media-item';
+import { GetHeatmapRequest, GetHeatmapResponse } from './types/heatmap';
 import { ListAlbumsRequest, ListAlbumsResponse } from './types/list-albums';
 import {
   ListMediaItemsRequest,
@@ -131,6 +132,31 @@ export class WebApiService {
 
     return this.httpClient
       .get<ListAlbumsResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params,
+      })
+      .pipe(toResult());
+  }
+
+  getHeatmap(
+    accessToken: string,
+    request: GetHeatmapRequest,
+  ): Observable<Result<GetHeatmapResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/maps/heatmap`;
+
+    let params = new HttpParams();
+    params = params.set('x', request.x);
+    params = params.set('y', request.y);
+    params = params.set('z', request.z);
+
+    if (request.albumId) {
+      params = params.set('album_id', request.albumId);
+    }
+
+    return this.httpClient
+      .get<GetHeatmapResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

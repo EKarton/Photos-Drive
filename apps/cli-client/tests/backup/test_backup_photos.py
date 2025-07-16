@@ -4,6 +4,9 @@ from bson.objectid import ObjectId
 from unittest_parametrize import parametrize
 from unittest_parametrize import ParametrizedTestCase
 
+from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
+    MapCellsRepositoryImpl,
+)
 from photos_drive.shared.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.blob_store.gphotos.testing import (
     FakeGPhotosClient,
@@ -68,6 +71,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         root_album_obj = albums_repo.create_album('', None)
@@ -128,6 +132,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            map_cells_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -215,6 +220,44 @@ class TestPhotosBackup(ParametrizedTestCase):
             bird_item['album_id'], f'{mongodb_client_1_id}:{album_2009['_id']}'
         )
 
+        # Test assert: check that the photos are added to map cells repository
+        cell_items = list(
+            mongodb_client_1['photos_drive']['map_cells'].find({})
+        ) + list(mongodb_client_2['photos_drive']['map_cells'].find({}))
+        dog_citem = list(
+            filter(
+                lambda x: x['media_item_id']
+                == f'{mongodb_client_1_id}:{dog_item['_id']}',
+                cell_items,
+            )
+        )
+        cat_citem = list(
+            filter(
+                lambda x: x['media_item_id']
+                == f'{mongodb_client_1_id}:{cat_item['_id']}',
+                cell_items,
+            )
+        )
+        fish_citem = list(
+            filter(
+                lambda x: x['media_item_id']
+                == f'{mongodb_client_1_id}:{fish_item['_id']}',
+                cell_items,
+            )
+        )
+        bird_citem = list(
+            filter(
+                lambda x: x['media_item_id']
+                == f'{mongodb_client_1_id}:{bird_item['_id']}',
+                cell_items,
+            )
+        )
+        self.assertEqual(len(dog_citem), 16)
+        self.assertEqual(len(cat_citem), 16)
+        self.assertEqual(len(fish_citem), 16)
+        self.assertEqual(len(bird_citem), 16)
+        self.assertEqual(len(cell_items), 16 * 4)
+
     @parametrize_use_parallel_uploads
     def test_backup_adding_items_to_existing_albums(self, use_parallel_uploads: bool):
         # Test setup 1: Set up the config
@@ -239,6 +282,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -289,6 +333,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            map_cells_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -326,6 +371,20 @@ class TestPhotosBackup(ParametrizedTestCase):
         albums_1 = list(mongodb_client_1['photos_drive']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
 
+        # Test assert: check that the new photo is added to map cells repository
+        cell_items = list(
+            mongodb_client_1['photos_drive']['map_cells'].find({})
+        ) + list(mongodb_client_2['photos_drive']['map_cells'].find({}))
+        cat_citem = list(
+            filter(
+                lambda x: x['media_item_id']
+                == f'{mongodb_client_1_id}:{cat_mitem['_id']}',
+                cell_items,
+            )
+        )
+        self.assertEqual(len(cell_items), 16)
+        self.assertEqual(len(cat_citem), 16)
+
     @parametrize_use_parallel_uploads
     def test_backup_deleted_one_item_on_album_with_two_items(
         self, use_parallel_uploads: bool
@@ -352,6 +411,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -377,11 +437,11 @@ class TestPhotosBackup(ParametrizedTestCase):
                 [gcat_upload_token]
             )
         )
-        media_items_repo.create_media_item(
+        dog_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='dog.png',
                 file_hash=MOCK_FILE_HASH,
-                location=None,
+                location=GpsLocation(latitude=-1, longitude=1),
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_1.newMediaItemResults[
                     0
@@ -392,11 +452,12 @@ class TestPhotosBackup(ParametrizedTestCase):
                 date_taken=MOCK_DATE_TAKEN,
             )
         )
-        media_items_repo.create_media_item(
+        map_cells_repo.add_media_item(dog_media_item)
+        cat_media_item = media_items_repo.create_media_item(
             CreateMediaItemRequest(
                 file_name='cat.png',
                 file_hash=MOCK_FILE_HASH,
-                location=None,
+                location=GpsLocation(latitude=-1, longitude=1),
                 gphotos_client_id=ObjectId(gphotos_client_1_id),
                 gphotos_media_item_id=media_items_results_2.newMediaItemResults[
                     0
@@ -407,6 +468,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 date_taken=MOCK_DATE_TAKEN,
             )
         )
+        map_cells_repo.add_media_item(cat_media_item)
 
         # Act: Upload a set of processed diffs
         diffs = [
@@ -427,6 +489,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            map_cells_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -440,6 +503,8 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         # Test assert: Check that there is dog.png but no cat.png media item in the db
         mitems_1 = list(mongodb_client_1['photos_drive']['media_items'].find({}))
+        dog_mitem = next(filter(lambda x: x['file_name'] == 'dog.png', mitems_1))
+        self.assertIsNotNone(dog_mitem)
         self.assertEqual(
             list(filter(lambda x: x['file_name'] == 'cat.png', mitems_1)), []
         )
@@ -447,6 +512,20 @@ class TestPhotosBackup(ParametrizedTestCase):
         # Test assert: Check that no new albums have been made
         albums_1 = list(mongodb_client_1['photos_drive']['albums'].find({}))
         self.assertEqual(len(albums_1), 4)
+
+        # Test assert: check that dog.png is still in the map cells repository
+        cell_items = list(
+            mongodb_client_1['photos_drive']['map_cells'].find({})
+        ) + list(mongodb_client_2['photos_drive']['map_cells'].find({}))
+        dog_citem = list(
+            filter(
+                lambda x: x['media_item_id']
+                == f'{mongodb_client_1_id}:{dog_mitem['_id']}',
+                cell_items,
+            )
+        )
+        self.assertEqual(len(cell_items), 16)
+        self.assertEqual(len(dog_citem), 16)
 
     @parametrize_use_parallel_uploads
     def test_backup_pruning_1(self, use_parallel_uploads: bool):
@@ -465,6 +544,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -517,6 +597,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            map_cells_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -559,6 +640,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -634,6 +716,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            map_cells_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -681,6 +764,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -757,6 +841,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             config,
             albums_repo,
             media_items_repo,
+            map_cells_repo,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,

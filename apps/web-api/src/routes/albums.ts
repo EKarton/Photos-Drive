@@ -11,6 +11,7 @@ import {
 import {
   AlbumNotFoundError,
   AlbumsRepository,
+  ListAlbumsRequest,
   SortByDirection,
   SortByField
 } from '../services/metadata_store/AlbumsRepository';
@@ -40,10 +41,13 @@ export default async function (
           albumId = convertStringToAlbumId(inputAlbumId);
         }
 
+        const abortController = new AbortController();
+        req.on('close', () => abortController.abort());
+
         const [album, numChildAlbums, numMediaItems] = await Promise.all([
-          albumsRepo.getAlbumById(albumId),
-          albumsRepo.getNumAlbumsInAlbum(albumId),
-          mediaItemsRepo.getNumMediaItemsInAlbum(albumId)
+          albumsRepo.getAlbumById(albumId, { abortController }),
+          albumsRepo.getNumAlbumsInAlbum(albumId, { abortController }),
+          mediaItemsRepo.getNumMediaItemsInAlbum(albumId, { abortController })
         ]);
 
         return res
@@ -82,7 +86,10 @@ export default async function (
         }
       }
 
-      const response = await albumsRepo.listAlbums({
+      const abortController = new AbortController();
+      req.on('close', () => abortController.abort());
+
+      const listAlbumsRequest: ListAlbumsRequest = {
         parentAlbumId,
         pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
@@ -94,6 +101,9 @@ export default async function (
             SortByDirection.ASCENDING
           )
         }
+      };
+      const response = await albumsRepo.listAlbums(listAlbumsRequest, {
+        abortController
       });
 
       const [mediaItemCounts, childAlbumCounts] = await Promise.all([

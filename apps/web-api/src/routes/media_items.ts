@@ -12,6 +12,7 @@ import {
   MediaItemId
 } from '../services/metadata_store/MediaItems';
 import {
+  ListMediaItemsRequest,
   MediaItemNotFoundError,
   MediaItemsRepository,
   SortByDirection,
@@ -34,7 +35,10 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
       const sortBy = req.query['sortBy'];
       const sortDir = req.query['sortDir'];
 
-      const response = await mediaItemsRepo.listMediaItems({
+      const abortController = new AbortController();
+      req.on('close', () => abortController.abort());
+
+      const listMediaItemsRequest: ListMediaItemsRequest = {
         albumId: albumId ? convertStringToAlbumId(albumId) : undefined,
         pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
@@ -46,7 +50,12 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
             SortByDirection.ASCENDING
           )
         }
-      });
+      };
+      const response = await mediaItemsRepo.listMediaItems(
+        listMediaItemsRequest,
+        { abortController }
+      );
+
       return res.status(200).json({
         mediaItems: response.mediaItems.map(serializeMediaItem),
         nextPageToken: response.nextPageToken
@@ -69,7 +78,12 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
       };
 
       try {
-        const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId);
+        const abortController = new AbortController();
+        req.on('close', () => abortController.abort());
+
+        const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId, {
+          abortController
+        });
         return res.status(200).json(serializeMediaItem(mediaItem));
       } catch (error) {
         const isNotFound =

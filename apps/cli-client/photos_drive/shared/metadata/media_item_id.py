@@ -1,6 +1,4 @@
 from bson.objectid import ObjectId
-
-
 from dataclasses import dataclass
 
 

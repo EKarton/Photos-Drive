@@ -5,26 +5,23 @@ import { switchMap, tap } from 'rxjs/operators';
 
 import { authState } from '../../../../../../auth/store';
 import { Result, toPending } from '../../../../../../shared/results/results';
-import {
-  GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
-} from '../../../../../services/types/gphotos-media-item';
+import { switchMapResultToResultRxJs } from '../../../../../../shared/results/rxjs/switchMapResultToResultRxJs';
+import { GPhotosMediaItem } from '../../../../../services/types/gphotos-media-item';
 import { WebApiService } from '../../../../../services/webapi.service';
-import { ImageState } from '../../../images-list/image/image.store';
 
 /** State definition for {@code ImageMapMarkerStore}. */
-export interface ImageMapMarker {
+export interface ImageMapMarkerState {
   gPhotosMediaItem: Result<GPhotosMediaItem>;
 }
 
 /** Initial state for {@code ImageMarkerStore}. */
-export const INITIAL_STATE: ImageMapMarker = {
+export const INITIAL_STATE: ImageMapMarkerState = {
   gPhotosMediaItem: toPending(),
 };
 
 /** Component store for {@code ImageComponent}. */
 @Injectable()
-export class ImageMapMarkerStore extends ComponentStore<ImageMapMarker> {
+export class ImageMapMarkerStore extends ComponentStore<ImageMapMarkerState> {
   private webApiService = inject(WebApiService);
   private store = inject(Store);
 
@@ -36,32 +33,35 @@ export class ImageMapMarkerStore extends ComponentStore<ImageMapMarker> {
     (state) => state.gPhotosMediaItem,
   );
 
-  readonly loadGPhotosMediaItemDetails = this.effect<string>(
-    (gPhotoMediaItemId$) =>
-      gPhotoMediaItemId$.pipe(
-        switchMap((gPhotosMediaItemId) => {
-          this.patchState({
-            ...INITIAL_STATE,
-          });
+  readonly loadGPhotosMediaItem = this.effect<string>((mediaItemId$) =>
+    mediaItemId$.pipe(
+      switchMap((mediaItemId) => {
+        this.patchState({
+          ...INITIAL_STATE,
+        });
 
-          return this.store.select(authState.selectAuthToken).pipe(
-            switchMap((accessToken) => {
-              return this.webApiService
-                .getGPhotosMediaItem(accessToken, gPhotosMediaItemId)
-                .pipe(tap((response) => this.setGPhotosMediaItem(response)));
-            }),
-          );
-        }),
-      ),
-  );
-
-  private readonly setGPhotosMediaItem = this.updater(
-    (
-      state: ImageState,
-      response: Result<GPhotosMediaItemDetailsApiResponse>,
-    ): ImageState => ({
-      ...state,
-      gPhotosMediaItem: response,
-    }),
+        return this.store.select(authState.selectAuthToken).pipe(
+          switchMap((accessToken) => {
+            return this.webApiService
+              .getMediaItem(accessToken, mediaItemId)
+              .pipe(
+                switchMapResultToResultRxJs((mediaItem) => {
+                  return this.webApiService.getGPhotosMediaItem(
+                    accessToken,
+                    mediaItem.gPhotosMediaItemId,
+                  );
+                }),
+              )
+              .pipe(
+                tap((response) => {
+                  this.patchState({
+                    gPhotosMediaItem: response,
+                  });
+                }),
+              );
+          }),
+        );
+      }),
+    ),
   );
 }

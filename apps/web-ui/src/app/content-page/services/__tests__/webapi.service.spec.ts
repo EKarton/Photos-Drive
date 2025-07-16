@@ -9,6 +9,7 @@ import { environment } from '../../../../environments/environment';
 import { toSuccess } from '../../../shared/results/results';
 import { AlbumDetailsApiResponse } from '../types/album';
 import { GPhotosMediaItemDetailsApiResponse } from '../types/gphotos-media-item';
+import { GetHeatmapRequest, Heatmap } from '../types/heatmap';
 import {
   ListAlbumsRequest,
   ListAlbumsResponse,
@@ -307,6 +308,82 @@ describe('WebApiService', () => {
       );
 
       req.flush(mockResponse);
+    });
+  });
+
+  describe('getHeatmap', () => {
+    const accessToken = 'fake-token';
+    const heatmap: Heatmap = {
+      points: [
+        {
+          count: 1,
+          latitude: -79,
+          longitude: 80,
+          sampledMediaItemId: 'client1:photos1',
+        },
+        {
+          count: 3,
+          latitude: -79,
+          longitude: 80.1,
+          sampledMediaItemId: 'client1:photos2',
+        },
+      ],
+    };
+
+    it('should make a GET request to fetch heat map with no albumId', () => {
+      const request: GetHeatmapRequest = {
+        x: 0,
+        y: 0,
+        z: 1,
+      };
+      service.getHeatmap(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(toSuccess(heatmap));
+      });
+
+      const req = httpMock.expectOne((req) => {
+        return (
+          req.url === `${environment.webApiEndpoint}/api/v1/maps/heatmap` &&
+          req.params.get('x') === '0' &&
+          req.params.get('y') === '0' &&
+          req.params.get('z') === '1'
+        );
+      });
+
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+
+      req.flush(heatmap);
+    });
+
+    it('should make a GET request to fetch heat map with albumId', () => {
+      const request: GetHeatmapRequest = {
+        x: 0,
+        y: 0,
+        z: 1,
+        albumId: 'client1:album1',
+      };
+      service.getHeatmap(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(toSuccess(heatmap));
+      });
+
+      const req = httpMock.expectOne((req) => {
+        return (
+          req.url === `${environment.webApiEndpoint}/api/v1/maps/heatmap` &&
+          req.params.get('x') === '0' &&
+          req.params.get('y') === '0' &&
+          req.params.get('z') === '1' &&
+          req.params.get('album_id') === 'client1:album1'
+        );
+      });
+
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+
+      req.flush(heatmap);
     });
   });
 });

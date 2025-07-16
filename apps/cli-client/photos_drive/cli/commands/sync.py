@@ -2,6 +2,9 @@ import logging
 import math
 from typing import Generator
 from typing_extensions import Annotated
+from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
+    MapCellsRepositoryImpl,
+)
 import typer
 
 from ...backup.backup_photos import (
@@ -167,12 +170,14 @@ def __backup_diffs_to_system(
             gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
             albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
             media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+            map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
 
             # Process the diffs
             backup_service = PhotosBackup(
                 config,
                 albums_repo,
                 media_items_repo,
+                map_cells_repository,
                 gphoto_clients_repo,
                 mongodb_clients_repo,
                 parallelize_uploads,
