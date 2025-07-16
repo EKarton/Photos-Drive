@@ -89,7 +89,7 @@ describe('Heatmap Router', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      error: 'Bad request for tile id [NaN,2,3]'
+      error: 'Bad request for tile id x=NaN, y=2, z=3'
     });
   });
 

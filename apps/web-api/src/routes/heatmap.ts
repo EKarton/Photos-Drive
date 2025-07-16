@@ -38,7 +38,7 @@ export default async function (
 
       if (isNaN(tile.x) || isNaN(tile.y) || isNaN(tile.z)) {
         return res.status(400).json({
-          error: `Bad request for tile id ${tile}`
+          error: `Bad request for tile id x=${tile.x}, y=${tile.y}, z=${tile.z}`
         });
       }
 
