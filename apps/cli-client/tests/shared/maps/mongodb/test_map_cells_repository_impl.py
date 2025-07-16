@@ -1,3 +1,4 @@
+from datetime import datetime
 import unittest
 from bson import ObjectId
 
@@ -32,11 +33,11 @@ MEDIA_ITEM = MediaItem(
     location=GpsLocation(latitude=37.7749, longitude=-122.4194),  # San Francisco
     file_hash=FILE_HASH,
     gphotos_media_item_id="gphotos:media1",
-    gphotos_client_id="gphotos",
+    gphotos_client_id=ObjectId(),
     album_id=ALBUM_ID,
     width=4000,
     height=3000,
-    date_taken="2024-01-01T00:00:00Z",
+    date_taken=datetime(2026, 1, 1, 14, 30, 0),
 )
 
 
@@ -81,11 +82,11 @@ class TestMapCellsRepositoryImpl(unittest.TestCase):
             location=None,
             file_hash=FILE_HASH,
             gphotos_media_item_id="gphotos:media1",
-            gphotos_client_id="gphotos",
+            gphotos_client_id=ObjectId(),
             album_id=ALBUM_ID,
             width=4000,
             height=3000,
-            date_taken="2024-01-01T00:00:00Z",
+            date_taken=datetime(2026, 1, 1, 14, 30, 0),
         )
 
         with self.assertRaises(ValueError) as context:
