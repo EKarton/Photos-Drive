@@ -4,6 +4,7 @@
       <div class="flex gap-4">
         <button
           type="button"
+          data-testid="hamburger-menu-button"
           class="md:hidden"
           (click)="openSideBar()"
           aria-label="Open main menu"
@@ -45,6 +46,7 @@
         >
           <div role="tablist" class="tabs tabs-border">
             <button
+              data-testid="albums-tab"
               role="tab"
               class="tab"
               [ngClass]="{ 'tab-active': selectedTab() === Tabs.ALBUMS }"
@@ -53,6 +55,7 @@
               Albums
             </button>
             <button
+              data-testid="photos-tab"
               role="tab"
               class="tab"
               [ngClass]="{ 'tab-active': selectedTab() === Tabs.PHOTOS }"
@@ -70,10 +73,9 @@
 </nav>
 @if (isSidebarOpen()) {
   <aside class="fixed inset-0 z-40 flex">
-    <button
-      class="fixed inset-0 bg-black opacity-55"
-      (click)="closeSideBar()"
-    ></button>
+    <button class="fixed inset-0 bg-black opacity-55" (click)="closeSideBar()">
+      <span class="sr-only">Close sidebar</span>
+    </button>
 
     <div
       class="relative w-64 flex flex-col h-full z-50 py-4 bg-base-300 shadow-lg"
@@ -84,6 +86,7 @@
           <app-theme-toggle-button />
         </div>
         <button
+          data-testid="close-sidepanel-button"
           class="self-end btn btn-ghost btn-circle"
           aria-label="Close menu"
           (click)="closeSideBar()"
