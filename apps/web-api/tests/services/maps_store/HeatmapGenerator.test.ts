@@ -101,10 +101,10 @@ describe('HeatmapGenerator', () => {
       (point) => point.sampledMediaItemId.objectId == MEDIA_ITEM_ID_1.objectId
     );
     expect(point1).toEqual({
-      cellId: '892a1072c67ffff',
+      cellId: '8a2a1072c66ffff',
       count: 1,
-      latitude: 40.714959860432664,
-      longitude: -74.0078835084681,
+      latitude: 40.714624300619306,
+      longitude: -74.0063425810389,
       sampledMediaItemId: MEDIA_ITEM_ID_1
     });
     const point2 = result.points.find(
@@ -147,8 +147,8 @@ describe('HeatmapGenerator', () => {
     expect(result.points[0]).toEqual({
       cellId: '892a1072467ffff',
       count: 1,
-      latitude: 40.77000805916279,
-      longitude: -74.02505660827177,
+      latitude: 40.7696724616256,
+      longitude: -74.02351373030828,
       sampledMediaItemId: MEDIA_ITEM_ID_3
     });
   });
