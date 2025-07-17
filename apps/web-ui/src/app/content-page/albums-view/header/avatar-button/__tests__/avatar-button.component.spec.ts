@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 
 import { WINDOW } from '../../../../../app.tokens';
@@ -6,8 +6,6 @@ import { authState } from '../../../../../auth/store';
 import { AvatarButtonComponent } from '../avatar-button.component';
 
 describe('AvatarButtonComponent', () => {
-  let component: AvatarButtonComponent;
-  let fixture: ComponentFixture<AvatarButtonComponent>;
   let windowMock: {
     localStorage: { removeItem: jasmine.Spy };
     location: { href: string; pathname: string };
@@ -38,17 +36,25 @@ describe('AvatarButtonComponent', () => {
         { provide: WINDOW, useValue: windowMock },
       ],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(AvatarButtonComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should render component correctly', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(AvatarButtonComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should position dropdown to the left when dropdownPosition is set to left', () => {
+    const fixture = TestBed.createComponent(AvatarButtonComponent);
+    fixture.componentRef.setInput('dropdownPosition', 'left');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
   it('should show dropdown menu when user clicks on the profile picture', () => {
+    const fixture = TestBed.createComponent(AvatarButtonComponent);
     const button = fixture.nativeElement.querySelector('button');
     button.click();
     fixture.detectChanges();
@@ -59,6 +65,9 @@ describe('AvatarButtonComponent', () => {
   });
 
   it('should close dropdown menu when user clicks on the profile picture again', () => {
+    const fixture = TestBed.createComponent(AvatarButtonComponent);
+    fixture.detectChanges();
+
     const button = fixture.nativeElement.querySelector('button');
     button.click();
     fixture.detectChanges();
@@ -75,6 +84,9 @@ describe('AvatarButtonComponent', () => {
   });
 
   it('should clear local storage, redirect user to home page, and close dropdown menu when user clicks on the profile picture again', () => {
+    const fixture = TestBed.createComponent(AvatarButtonComponent);
+    fixture.detectChanges();
+
     const button = fixture.nativeElement.querySelector('button');
     button.click();
     fixture.detectChanges();
