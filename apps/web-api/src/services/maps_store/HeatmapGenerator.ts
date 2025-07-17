@@ -45,7 +45,7 @@ export class HeatmapGenerator {
       [bbox[0], bbox[3]], // NW: [minLon, maxLat]
       [bbox[0], bbox[1]] // Close polygon
     ];
-    const h3Res = mapboxZoomToH3Resolution(tile.z);
+    const h3Res = tileZoomToH3Resolution(tile.z);
     const cellIds = polygonToCells([polygon], h3Res, true);
 
     const heatmapCells = await this.mapCellRepository.getHeatmapPointsInCells(
@@ -71,6 +71,7 @@ export class HeatmapGenerator {
   }
 }
 
-function mapboxZoomToH3Resolution(zoom: number): number {
-  return Math.max(1, Math.min(15, zoom - 2));
+function tileZoomToH3Resolution(zoom: number): number {
+  return Math.max(1, Math.min(15, zoom - 1));
+  // return Math.min(15, Math.max(1, Math.floor(zoom / 1.5)));
 }
