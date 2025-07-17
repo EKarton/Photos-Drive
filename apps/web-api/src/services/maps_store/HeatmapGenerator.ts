@@ -1,4 +1,3 @@
-import { performance } from 'perf_hooks';
 import * as tilebelt from '@mapbox/tilebelt';
 import { cellToLatLng, polygonToCells } from 'h3-js';
 import { AlbumId } from '../metadata_store/Albums';
@@ -38,8 +37,6 @@ export class HeatmapGenerator {
     albumId: AlbumId | undefined,
     options?: { abortController?: AbortController }
   ): Promise<Heatmap> {
-    const start = performance.now();
-
     const bbox = tilebelt.tileToBBOX([tile.x, tile.y, tile.z]);
     const polygon = [
       [bbox[0], bbox[1]], // SW: [minLon, minLat]
@@ -48,17 +45,13 @@ export class HeatmapGenerator {
       [bbox[0], bbox[3]], // NW: [minLon, maxLat]
       [bbox[0], bbox[1]] // Close polygon
     ];
-    const h3Res = mapboxZoomToH3Resolution(tile.z);
+    const h3Res = tileZoomToH3Resolution(tile.z);
     const cellIds = polygonToCells([polygon], h3Res, true);
 
     const heatmapCells = await this.mapCellRepository.getHeatmapPointsInCells(
       cellIds,
       albumId,
       options
-    );
-
-    console.log(
-      `getHeatmapForTile for ${tile} took ${performance.now() - start} ms`
     );
 
     return {
@@ -78,14 +71,7 @@ export class HeatmapGenerator {
   }
 }
 
-function mapboxZoomToH3Resolution(zoom: number): number {
-  if (zoom <= 4) {
-    return Math.max(1, zoom - 2);
-  }
-
-  if (zoom < 17) {
-    return zoom - 2;
-  }
-
-  return 15;
+function tileZoomToH3Resolution(zoom: number): number {
+  return Math.max(1, Math.min(15, zoom - 1));
+  // return Math.min(15, Math.max(1, Math.floor(zoom / 1.5)));
 }

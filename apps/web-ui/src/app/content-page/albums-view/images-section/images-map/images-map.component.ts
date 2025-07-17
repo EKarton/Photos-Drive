@@ -107,7 +107,6 @@ export class ImagesMapComponent implements AfterViewInit, OnDestroy {
 
   private exitFullscreen() {
     document.exitFullscreen();
-
     this.isFullscreen.set(false);
   }
 

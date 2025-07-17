@@ -1,4 +1,3 @@
-import { performance } from 'perf_hooks';
 import { Filter, Document as MongoDbDocument } from 'mongodb';
 import { AlbumId, albumIdToString } from '../../metadata_store/Albums';
 import { convertStringToMediaItemId } from '../../metadata_store/MediaItems';
@@ -9,7 +8,11 @@ import {
   MapCellsRepository
 } from '../MapCellsRepository';
 
+/** The max h3 zoom level */
 export const MAX_ZOOM_LEVEL = 15;
+
+/** The max query time for MongoDB */
+export const MAX_QUERY_TIME_MS = 5000;
 
 /** Implementation of {@code TilesRepository} */
 export class MapCellsRepositoryImpl implements MapCellsRepository {
@@ -24,8 +27,6 @@ export class MapCellsRepositoryImpl implements MapCellsRepository {
     albumId: AlbumId | undefined,
     options?: { abortController?: AbortController }
   ): Promise<HeatmapPoints[]> {
-    const start = performance.now();
-
     const clientCounts = await Promise.all(
       this.mongoDbRepository.listClients().map(async ([_, client]) => {
         const query: Filter<MongoDbDocument> = {
@@ -55,6 +56,7 @@ export class MapCellsRepositoryImpl implements MapCellsRepository {
               signal: options?.abortController?.signal
             }
           )
+          .maxTimeMS(MAX_QUERY_TIME_MS)
           .toArray();
 
         return docs.map((doc) => ({
@@ -77,8 +79,6 @@ export class MapCellsRepositoryImpl implements MapCellsRepository {
           results.get(cellId)?.sampledMediaItemId ?? sampledMediaItemId
       });
     }
-
-    console.log('getNumMediaItemsInCells took', performance.now() - start);
 
     return [...results.values()];
   }
