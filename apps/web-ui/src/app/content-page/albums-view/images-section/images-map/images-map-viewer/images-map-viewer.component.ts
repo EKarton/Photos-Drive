@@ -209,14 +209,6 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
       return [];
     }
 
-    console.log(this.map.getZoom());
-    console.log(
-      bounds.getNorth(),
-      bounds.getEast(),
-      bounds.getSouth(),
-      bounds.getWest(),
-    );
-
     const zoom = Math.max(1, Math.floor(this.map.getZoom()));
 
     const north = clampLat(bounds.getNorth());
