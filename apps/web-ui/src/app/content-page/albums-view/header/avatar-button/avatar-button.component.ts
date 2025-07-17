@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { NgClickOutsideDirective } from 'ng-click-outside2';
 
 import { WINDOW } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
+
+type DropdownPosition = 'left' | 'right';
 
 @Component({
   standalone: true,
@@ -13,6 +15,8 @@ import { authState } from '../../../../auth/store';
   templateUrl: './avatar-button.component.html',
 })
 export class AvatarButtonComponent {
+  readonly dropdownPosition = input<DropdownPosition>('right');
+
   private readonly store = inject(Store);
   private readonly window = inject(WINDOW);
 

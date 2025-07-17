@@ -30,9 +30,11 @@ export class ThemeEffects {
         tap(([, isDark]) => {
           if (isDark) {
             document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('class', 'dark');
             localStorage.setItem('theme', 'dark');
           } else {
             document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.setAttribute('class', 'light');
             localStorage.setItem('theme', 'light');
           }
         }),

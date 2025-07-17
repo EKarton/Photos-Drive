@@ -1,9 +1,28 @@
 <nav>
   <div class="container mx-auto px-4">
     <div class="relative flex h-16 items-center justify-between">
-      <div
-        class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start"
-      >
+      <div class="flex gap-4">
+        <button
+          type="button"
+          class="md:hidden"
+          (click)="openSideBar()"
+          aria-label="Open main menu"
+        >
+          <svg
+            class="size-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
         <div class="flex shrink-0 items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -20,12 +39,123 @@
           </svg>
         </div>
       </div>
-      <div
-        class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
-      >
-        <app-theme-toggle-button />
-        <app-header-avatar-button />
+      <div class="hidden md:block">
+        <div
+          class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
+        >
+          <div role="tablist" class="tabs tabs-border">
+            <button
+              role="tab"
+              class="tab"
+              [ngClass]="{ 'tab-active': selectedTab() === Tabs.ALBUMS }"
+              (click)="selectTab(Tabs.ALBUMS)"
+            >
+              Albums
+            </button>
+            <button
+              role="tab"
+              class="tab"
+              [ngClass]="{ 'tab-active': selectedTab() === Tabs.PHOTOS }"
+              (click)="selectTab(Tabs.PHOTOS)"
+            >
+              Photos
+            </button>
+          </div>
+          <app-theme-toggle-button class="mr-3" />
+          <app-header-avatar-button />
+        </div>
       </div>
     </div>
   </div>
 </nav>
+@if (isSidebarOpen()) {
+  <aside class="fixed inset-0 z-40 flex">
+    <button
+      class="fixed inset-0 bg-black opacity-55"
+      (click)="closeSideBar()"
+    ></button>
+
+    <div
+      class="relative w-64 flex flex-col h-full z-50 py-4 bg-base-300 shadow-lg"
+    >
+      <div class="flex items-center justify-between pl-4">
+        <div class="flex gap-2 items-center">
+          <app-header-avatar-button dropdownPosition="left" />
+          <app-theme-toggle-button />
+        </div>
+        <button
+          class="self-end btn btn-ghost btn-circle"
+          aria-label="Close menu"
+          (click)="closeSideBar()"
+        >
+          <!-- X (close) icon -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18 18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <nav class="menu flex flex-col w-full gap-2 pt-4 pr-4 pl-0">
+        <button
+          class="flex items-center gap-4 py-3 pl-4 pr-16 text-left rounded-r-lg hover:bg-gray-300 dark:hover:bg-gray-700"
+          [ngClass]="{
+            'bg-gray-300 dark:bg-gray-800 shadow':
+              selectedTab() === Tabs.ALBUMS,
+          }"
+          (click)="selectTab(Tabs.ALBUMS)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+            />
+          </svg>
+          Albums
+        </button>
+        <button
+          class="flex items-center gap-4 py-3 pl-4 pr-16 text-left rounded-r-lg hover:bg-gray-300 dark:hover:bg-gray-700"
+          [ngClass]="{
+            'bg-gray-300 dark:bg-gray-800 shadow':
+              selectedTab() === Tabs.PHOTOS,
+          }"
+          (click)="selectTab(Tabs.PHOTOS)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+            />
+          </svg>
+          Photos
+        </button>
+      </nav>
+    </div>
+  </aside>
+}
