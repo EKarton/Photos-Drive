@@ -9,8 +9,8 @@ import {
   toSuccess,
 } from '../../../../../../shared/results/results';
 import {
-  GPhotosMediaItem,
   GetGPhotosMediaItemDetailsResponse,
+  GPhotosMediaItem,
 } from '../../../../../services/types/gphotos-media-item';
 import {
   MediaItem,
@@ -105,7 +105,7 @@ describe('ImageStore', () => {
     );
     expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
-      GPHOTOS_MEDIA_ITEM_ID,
+      { gPhotosMediaItemId: GPHOTOS_MEDIA_ITEM_ID },
     );
     expect(store.gPhotosMediaItem()).toEqual(toSuccess(GPHOTOS_MEDIA_ITEM));
   });

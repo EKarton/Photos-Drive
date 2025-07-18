@@ -91,7 +91,7 @@ describe('MediaViewerStore', () => {
     );
     expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
-      'gPhotosClientId1:gPhotosMediaItem1',
+      { gPhotosMediaItemId: 'gPhotosClientId1:gPhotosMediaItem1' },
     );
   });
 

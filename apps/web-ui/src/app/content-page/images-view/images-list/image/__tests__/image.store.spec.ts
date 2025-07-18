@@ -64,7 +64,7 @@ describe('ImageStore', () => {
 
     expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
-      gPhotoId,
+      { gPhotosMediaItemId: gPhotoId },
     );
 
     const result = store.gPhotosMediaItem();

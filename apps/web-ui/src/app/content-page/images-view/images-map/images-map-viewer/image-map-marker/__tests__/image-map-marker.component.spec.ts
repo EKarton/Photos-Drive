@@ -10,8 +10,8 @@ import {
   toSuccess,
 } from '../../../../../../shared/results/results';
 import {
-  GPhotosMediaItem,
   GetGPhotosMediaItemDetailsResponse,
+  GPhotosMediaItem,
 } from '../../../../../services/types/gphotos-media-item';
 import {
   MediaItem,
@@ -138,7 +138,7 @@ describe('ImageMapMarkerComponent', () => {
     );
     expect(mockWebApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       'mockAccessToken',
-      GPHOTOS_MEDIA_ITEM_ID,
+      { gPhotosMediaItemId: GPHOTOS_MEDIA_ITEM_ID },
     );
   });
 

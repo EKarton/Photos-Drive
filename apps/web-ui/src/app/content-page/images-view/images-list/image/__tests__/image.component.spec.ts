@@ -99,7 +99,7 @@ describe('ImageComponent', () => {
 
     expect(mockWebApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       'mockAccessToken',
-      'gPhotos1',
+      { gPhotosMediaItemId: 'gPhotos1' },
     );
 
     const image = fixture.nativeElement.querySelector(
