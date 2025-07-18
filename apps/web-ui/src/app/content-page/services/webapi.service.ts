@@ -5,8 +5,11 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Result } from '../../shared/results/results';
 import { toResult } from '../../shared/results/rxjs/toResult';
-import { AlbumDetailsApiResponse } from './types/album';
-import { GPhotosMediaItemDetailsApiResponse } from './types/gphotos-media-item';
+import { GetAlbumDetailsResponse } from './types/album';
+import {
+  GetGPhotosMediaItemDetailsRequest,
+  GetGPhotosMediaItemDetailsResponse,
+} from './types/gphotos-media-item';
 import { GetHeatmapRequest, GetHeatmapResponse } from './types/heatmap';
 import { ListAlbumsRequest, ListAlbumsResponse } from './types/list-albums';
 import {
@@ -29,10 +32,10 @@ export class WebApiService {
   getAlbum(
     accessToken: string,
     albumId: string,
-  ): Observable<Result<AlbumDetailsApiResponse>> {
+  ): Observable<Result<GetAlbumDetailsResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/albums/${albumId}`;
     return this.httpClient
-      .get<AlbumDetailsApiResponse>(url, {
+      .get<GetAlbumDetailsResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -58,11 +61,11 @@ export class WebApiService {
   /** Fetches the details of a gphotos media item. */
   getGPhotosMediaItem(
     accessToken: string,
-    gMediaItemId: string,
-  ): Observable<Result<GPhotosMediaItemDetailsApiResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${gMediaItemId}`;
+    request: GetGPhotosMediaItemDetailsRequest,
+  ): Observable<Result<GetGPhotosMediaItemDetailsResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${request.gPhotosMediaItemId}`;
     return this.httpClient
-      .get<GPhotosMediaItemDetailsApiResponse>(url, {
+      .get<GetGPhotosMediaItemDetailsResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -140,6 +143,7 @@ export class WebApiService {
       .pipe(toResult());
   }
 
+  /** Get the heat map of photos within a tile. */
   getHeatmap(
     accessToken: string,
     request: GetHeatmapRequest,

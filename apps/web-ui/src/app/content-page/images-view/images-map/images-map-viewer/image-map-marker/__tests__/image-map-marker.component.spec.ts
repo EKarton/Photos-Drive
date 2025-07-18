@@ -11,7 +11,7 @@ import {
 } from '../../../../../../shared/results/results';
 import {
   GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
+  GetGPhotosMediaItemDetailsResponse,
 } from '../../../../../services/types/gphotos-media-item';
 import {
   MediaItem,
@@ -83,7 +83,7 @@ describe('ImageMapMarkerComponent', () => {
       of(toPending<MediaItemDetailsApiResponse>()),
     );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
-      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+      of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
@@ -101,7 +101,7 @@ describe('ImageMapMarkerComponent', () => {
       of(toFailure<MediaItemDetailsApiResponse>(new Error('Random error'))),
     );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
-      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+      of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);

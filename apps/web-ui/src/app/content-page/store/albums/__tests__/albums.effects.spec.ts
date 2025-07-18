@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../../../services/types/album';
+import { GetAlbumDetailsResponse } from '../../../services/types/album';
 import { WebApiService } from '../../../services/webapi.service';
 import * as albumsActions from '../albums.actions';
 import { AlbumsEffects } from '../albums.effects';
@@ -65,7 +65,7 @@ describe('AlbumsEffects', () => {
   it('should handle error when fetching album details', (done) => {
     const error = new Error('Test error');
     webapiService.getAlbum.and.returnValue(
-      of(toFailure<AlbumDetailsApiResponse>(error)),
+      of(toFailure<GetAlbumDetailsResponse>(error)),
     );
 
     effects.loadAlbumDetails$.subscribe((action) => {

@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
 import { Result } from '../../../shared/results/results';
-import { Album, AlbumDetailsApiResponse } from '../../services/types/album';
+import { Album, GetAlbumDetailsResponse } from '../../services/types/album';
 
 /** An action that fetches the details of an album. */
 export const loadAlbumDetails = createAction(
@@ -12,7 +12,7 @@ export const loadAlbumDetails = createAction(
 /** An action that saves the results of fetching a list of GPhotos clients */
 export const loadAlbumDetailsResult = createAction(
   '[Albums] Saves results of getting details of an album',
-  props<{ albumId: string; result: Result<AlbumDetailsApiResponse> }>(),
+  props<{ albumId: string; result: Result<GetAlbumDetailsResponse> }>(),
 );
 
 /** An action that adds an album to the store */

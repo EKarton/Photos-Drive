@@ -10,7 +10,7 @@ import {
 } from '../../../../../../shared/results/results';
 import {
   GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
+  GetGPhotosMediaItemDetailsResponse,
 } from '../../../../../services/types/gphotos-media-item';
 import {
   MediaItem,
@@ -85,7 +85,7 @@ describe('ImageStore', () => {
       of(toPending<MediaItemDetailsApiResponse>()),
     );
     webApiService.getGPhotosMediaItem.and.returnValue(
-      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+      of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
 
     expect(store.gPhotosMediaItem()).toEqual(INITIAL_STATE.gPhotosMediaItem);
@@ -114,7 +114,7 @@ describe('ImageStore', () => {
     const error = new Error('API failed');
     webApiService.getMediaItem.and.returnValue(of(toSuccess(MEDIA_ITEM)));
     webApiService.getGPhotosMediaItem.and.returnValue(
-      of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
+      of(toFailure<GetGPhotosMediaItemDetailsResponse>(error)),
     );
 
     store.loadGPhotosMediaItem(MEDIA_ITEM_ID);

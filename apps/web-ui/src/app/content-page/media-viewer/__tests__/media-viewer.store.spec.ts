@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../auth/store';
 import { toFailure, toSuccess } from '../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../services/types/gphotos-media-item';
+import { GetGPhotosMediaItemDetailsResponse } from '../../services/types/gphotos-media-item';
 import { GPhotosMediaItem } from '../../services/types/gphotos-media-item';
 import { MediaItemDetailsApiResponse } from '../../services/types/media-item';
 import { MediaItem } from '../../services/types/media-item';
@@ -113,7 +113,7 @@ describe('MediaViewerStore', () => {
       of(toSuccess(fakeMediaItemDetails)),
     );
     webApiService.getGPhotosMediaItem.and.returnValue(
-      of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
+      of(toFailure<GetGPhotosMediaItemDetailsResponse>(error)),
     );
 
     store.loadDetails(fakeMediaItemId);

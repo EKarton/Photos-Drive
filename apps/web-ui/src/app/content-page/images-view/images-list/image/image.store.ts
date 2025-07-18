@@ -5,7 +5,7 @@ import { switchMap, tap } from 'rxjs/operators';
 
 import { authState } from '../../../../auth/store';
 import { Result, toPending } from '../../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../../services/types/gphotos-media-item';
+import { GetGPhotosMediaItemDetailsResponse } from '../../../services/types/gphotos-media-item';
 import { GPhotosMediaItem } from '../../../services/types/gphotos-media-item';
 import { WebApiService } from '../../../services/webapi.service';
 
@@ -42,7 +42,9 @@ export class ImageStore extends ComponentStore<ImageState> {
           return this.store.select(authState.selectAuthToken).pipe(
             switchMap((accessToken) => {
               return this.webApiService
-                .getGPhotosMediaItem(accessToken, gPhotosMediaItemId)
+                .getGPhotosMediaItem(accessToken, {
+                  gPhotosMediaItemId,
+                })
                 .pipe(tap((response) => this.setGPhotosMediaItem(response)));
             }),
           );
@@ -59,7 +61,7 @@ export class ImageStore extends ComponentStore<ImageState> {
   private readonly setGPhotosMediaItem = this.updater(
     (
       state: ImageState,
-      response: Result<GPhotosMediaItemDetailsApiResponse>,
+      response: Result<GetGPhotosMediaItemDetailsResponse>,
     ): ImageState => ({
       ...state,
       gPhotosMediaItem: response,

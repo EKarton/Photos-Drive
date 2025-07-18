@@ -1,5 +1,5 @@
 import { toSuccess } from '../../../../shared/results/results';
-import { Album, AlbumDetailsApiResponse } from '../../../services/types/album';
+import { Album, GetAlbumDetailsResponse } from '../../../services/types/album';
 import * as albumsActions from '../albums.actions';
 import { albumsReducer } from '../albums.reducer';
 import { buildInitialState } from '../albums.state';
@@ -25,7 +25,7 @@ describe('Albums Reducer', () => {
 
   it('should handle loadAlbumDetailsResult', () => {
     const albumId = '123';
-    const result = toSuccess<AlbumDetailsApiResponse>({
+    const result = toSuccess<GetAlbumDetailsResponse>({
       id: albumId,
       albumName: 'Test Album',
       numChildAlbums: 0,
@@ -56,7 +56,7 @@ describe('Albums Reducer', () => {
     const newState = albumsReducer(initialState, action);
 
     expect(newState.idToDetails.get(albumId)).toEqual(
-      toSuccess<AlbumDetailsApiResponse>(album),
+      toSuccess<GetAlbumDetailsResponse>(album),
     );
   });
 });

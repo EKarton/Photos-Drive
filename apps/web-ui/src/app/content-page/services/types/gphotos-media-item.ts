@@ -1,6 +1,3 @@
-/** The response of /api/v1/gphotos/:id/media-items/:media-item-id */
-export type GPhotosMediaItemDetailsApiResponse = GPhotosMediaItem;
-
 /**
  * Represents a media item in Google Photos.
  * Follows the data model at:
@@ -97,3 +94,11 @@ export interface Status {
   /** The status code, corresponding to an enum value of google.rpc.Code. */
   code?: number;
 }
+
+/** The request type of /api/v1/gphotos/:id/media-items/:media-item-id */
+export interface GetGPhotosMediaItemDetailsRequest {
+  gPhotosMediaItemId: string;
+}
+
+/** The response type of /api/v1/gphotos/:id/media-items/:media-item-id */
+export type GetGPhotosMediaItemDetailsResponse = GPhotosMediaItem;
