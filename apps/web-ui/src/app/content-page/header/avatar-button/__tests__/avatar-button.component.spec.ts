@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 
-import { WINDOW } from '../../../../../app.tokens';
-import { authState } from '../../../../../auth/store';
+import { WINDOW } from '../../../../app.tokens';
+import { authState } from '../../../../auth/store';
 import { AvatarButtonComponent } from '../avatar-button.component';
 
 describe('AvatarButtonComponent', () => {

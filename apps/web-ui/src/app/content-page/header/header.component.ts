@@ -1,0 +1,75 @@
+import { CommonModule } from '@angular/common';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterModule,
+} from '@angular/router';
+import { filter, Subscription } from 'rxjs';
+
+import { ThemeToggleButtonComponent } from '../../themes/components/theme-toggle-button/theme-toggle-button.component';
+import { AvatarButtonComponent } from './avatar-button/avatar-button.component';
+
+enum Tabs {
+  ALBUMS = 'albums',
+  PHOTOS = 'photos',
+}
+
+@Component({
+  standalone: true,
+  selector: 'app-content-header',
+  imports: [
+    CommonModule,
+    RouterModule,
+    ThemeToggleButtonComponent,
+    AvatarButtonComponent,
+  ],
+  templateUrl: './header.component.html',
+})
+export class HeaderComponent implements OnInit, OnDestroy {
+  readonly isSidebarOpen = signal(false);
+  readonly selectedTab = signal(Tabs.ALBUMS);
+  readonly Tabs = Tabs;
+
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  private subscriptions = new Subscription();
+
+  ngOnInit() {
+    this.subscriptions.add(
+      this.router.events
+        .pipe(filter((event) => event instanceof NavigationEnd))
+        .subscribe(() => {
+          // Find out what the current route is
+          let child = this.route.firstChild;
+          while (child?.firstChild) child = child.firstChild;
+          const path = child?.snapshot.routeConfig?.path;
+
+          if (path?.startsWith('albums/')) {
+            this.selectedTab.set(Tabs.ALBUMS);
+          } else if (path === 'photos') {
+            this.selectedTab.set(Tabs.PHOTOS);
+          }
+        }),
+    );
+  }
+
+  selectTab(tab: Tabs) {
+    this.selectedTab.set(tab);
+    this.isSidebarOpen.set(false);
+  }
+
+  openSideBar() {
+    this.isSidebarOpen.set(true);
+  }
+
+  closeSideBar() {
+    this.isSidebarOpen.set(false);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+}

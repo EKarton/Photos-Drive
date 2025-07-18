@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 
-import { authState } from '../../../../auth/store';
-import { themeState } from '../../../../themes/store';
+import { authState } from '../../../auth/store';
+import { themeState } from '../../../themes/store';
 import { HeaderComponent } from '../header.component';
 
 describe('HeaderComponent', () => {

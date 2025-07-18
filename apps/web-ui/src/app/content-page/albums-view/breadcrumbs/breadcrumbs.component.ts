@@ -53,7 +53,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
         return albums.map((album) => ({
           id: album.id,
           text: album.albumName || 'Home',
-          routerLink: `/content/${album.id}`,
+          routerLink: `/albums/${album.id}`,
         }));
       }),
     );
