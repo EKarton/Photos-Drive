@@ -374,7 +374,7 @@ describe('WebApiService', () => {
           req.params.get('x') === '0' &&
           req.params.get('y') === '0' &&
           req.params.get('z') === '1' &&
-          req.params.get('album_id') === 'client1:album1'
+          req.params.get('albumId') === 'client1:album1'
         );
       });
 

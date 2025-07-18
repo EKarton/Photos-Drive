@@ -152,7 +152,7 @@ export class WebApiService {
     params = params.set('z', request.z);
 
     if (request.albumId) {
-      params = params.set('album_id', request.albumId);
+      params = params.set('albumId', request.albumId);
     }
 
     return this.httpClient
