@@ -3,8 +3,8 @@ import { Component, inject, input, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { NgClickOutsideDirective } from 'ng-click-outside2';
 
-import { WINDOW } from '../../../../app.tokens';
-import { authState } from '../../../../auth/store';
+import { WINDOW } from '../../../app.tokens';
+import { authState } from '../../../auth/store';
 
 type DropdownPosition = 'left' | 'right';
 

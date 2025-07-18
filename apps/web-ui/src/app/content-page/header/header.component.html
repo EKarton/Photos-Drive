@@ -45,24 +45,24 @@
           class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
         >
           <div role="tablist" class="tabs tabs-border">
-            <button
+            <a
               data-testid="albums-tab"
               role="tab"
               class="tab"
               [ngClass]="{ 'tab-active': selectedTab() === Tabs.ALBUMS }"
-              (click)="selectTab(Tabs.ALBUMS)"
+              [routerLink]="['/albums', 'root']"
             >
               Albums
-            </button>
-            <button
+            </a>
+            <a
               data-testid="photos-tab"
               role="tab"
               class="tab"
               [ngClass]="{ 'tab-active': selectedTab() === Tabs.PHOTOS }"
-              (click)="selectTab(Tabs.PHOTOS)"
+              [routerLink]="['/photos']"
             >
               Photos
-            </button>
+            </a>
           </div>
           <app-theme-toggle-button class="mr-3" />
           <app-header-avatar-button />
@@ -110,13 +110,14 @@
       </div>
 
       <nav class="menu flex flex-col w-full gap-2 pt-4 pr-4 pl-0">
-        <button
+        <a
           class="flex items-center gap-4 py-3 pl-4 pr-16 text-left rounded-r-lg hover:bg-gray-300 dark:hover:bg-gray-700"
           [ngClass]="{
             'bg-gray-300 dark:bg-gray-800 shadow':
               selectedTab() === Tabs.ALBUMS,
           }"
-          (click)="selectTab(Tabs.ALBUMS)"
+          [routerLink]="['/albums', 'root']"
+          (click)="closeSideBar()"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -133,14 +134,15 @@
             />
           </svg>
           Albums
-        </button>
-        <button
+        </a>
+        <a
           class="flex items-center gap-4 py-3 pl-4 pr-16 text-left rounded-r-lg hover:bg-gray-300 dark:hover:bg-gray-700"
           [ngClass]="{
             'bg-gray-300 dark:bg-gray-800 shadow':
               selectedTab() === Tabs.PHOTOS,
           }"
-          (click)="selectTab(Tabs.PHOTOS)"
+          [routerLink]="['/photos']"
+          (click)="closeSideBar()"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -157,7 +159,7 @@
             />
           </svg>
           Photos
-        </button>
+        </a>
       </nav>
     </div>
   </aside>

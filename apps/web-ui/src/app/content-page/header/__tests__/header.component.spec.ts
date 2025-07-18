@@ -1,18 +1,27 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { provideMockStore } from '@ngrx/store/testing';
 
-import { authState } from '../../../../auth/store';
-import { themeState } from '../../../../themes/store';
+import { authState } from '../../../auth/store';
+import { themeState } from '../../../themes/store';
+import { routes } from '../../content-page.routes';
 import { HeaderComponent } from '../header.component';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
+        provideRouter(routes),
         provideMockStore({
           selectors: [
             { selector: themeState.selectIsDarkMode, value: false },
@@ -28,6 +37,9 @@ describe('HeaderComponent', () => {
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    router = TestBed.inject(Router);
+    router.navigateByUrl('/albums/1234');
   });
 
   it('should render component', () => {
@@ -57,17 +69,37 @@ describe('HeaderComponent', () => {
     expect(fixture.nativeElement.querySelector('aside')).toBeNull();
   });
 
-  it('should be truthy when user clicks on Albums tab', () => {
-    fixture.nativeElement.querySelector('[data-testid="albums-tab"]').click();
+  it('should highlight the Albums tab when the user is on the /albums/:albumId route', () => {
+    router.navigateByUrl('/albums/1234');
     fixture.detectChanges();
 
-    expect(component).toBeTruthy();
+    expect(
+      fixture.nativeElement
+        .querySelector('[data-testid="albums-tab"]')
+        .classList.contains('tab-active'),
+    ).toBeTrue();
+    expect(
+      fixture.nativeElement
+        .querySelector('[data-testid="photos-tab"]')
+        .classList.contains('tab-active'),
+    ).toBeFalse();
   });
 
-  it('should be truthy when user clicks on Photos tab', () => {
-    fixture.nativeElement.querySelector('[data-testid="photos-tab"]').click();
+  it('should highlight the Photos tab when the user is on the /photos route', fakeAsync(() => {
+    router.navigateByUrl('/photos');
+    fixture.detectChanges();
+    tick();
     fixture.detectChanges();
 
-    expect(component).toBeTruthy();
-  });
+    expect(
+      fixture.nativeElement
+        .querySelector('[data-testid="albums-tab"]')
+        .classList.contains('tab-active'),
+    ).toBeFalse();
+    expect(
+      fixture.nativeElement
+        .querySelector('[data-testid="photos-tab"]')
+        .classList.contains('tab-active'),
+    ).toBeTrue();
+  }));
 });

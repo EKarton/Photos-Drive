@@ -58,7 +58,7 @@ describe('CallbackPageComponent', () => {
     store.refreshState();
     fixture.detectChanges();
 
-    expect(router.navigate).toHaveBeenCalledWith(['/content/root']);
+    expect(router.navigate).toHaveBeenCalledWith(['/albums/root']);
   });
 
   it('should navigate to custom redirect path if set in localStorage', () => {
