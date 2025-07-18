@@ -4,12 +4,17 @@ import {
   TestBed,
   tick,
 } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router } from '@angular/router';
+import { provideStore } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
 
 import { authState } from '../../../auth/store';
 import { themeState } from '../../../themes/store';
 import { routes } from '../../content-page.routes';
+import { WebApiService } from '../../services/webapi.service';
+import { albumsState } from '../../store/albums';
+import { mediaViewerState } from '../../store/media-viewer';
 import { HeaderComponent } from '../header.component';
 
 describe('HeaderComponent', () => {
@@ -18,19 +23,29 @@ describe('HeaderComponent', () => {
   let router: Router;
 
   beforeEach(async () => {
+    const mockWebApiService = jasmine.createSpyObj('WebApiService', [
+      'listMediaItems',
+      'listAlbums',
+    ]);
+
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
         provideRouter(routes),
+        provideStore({}),
         provideMockStore({
-          selectors: [
-            { selector: themeState.selectIsDarkMode, value: false },
-            {
-              selector: authState.selectUserProfileUrl,
-              value: 'http://profile.com/1',
-            },
-          ],
+          initialState: {
+            [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
+            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+            [themeState.FEATURE_KEY]: themeState.initialState,
+            [authState.FEATURE_KEY]: authState.buildInitialState(),
+          },
         }),
+        {
+          provide: WebApiService,
+          useValue: mockWebApiService,
+        },
+        provideNoopAnimations(),
       ],
     }).compileComponents();
 

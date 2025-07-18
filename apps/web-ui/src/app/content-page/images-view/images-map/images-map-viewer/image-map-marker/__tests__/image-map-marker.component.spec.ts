@@ -10,8 +10,8 @@ import {
   toSuccess,
 } from '../../../../../../shared/results/results';
 import {
+  GetGPhotosMediaItemDetailsResponse,
   GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
 } from '../../../../../services/types/gphotos-media-item';
 import {
   MediaItem,
@@ -83,7 +83,7 @@ describe('ImageMapMarkerComponent', () => {
       of(toPending<MediaItemDetailsApiResponse>()),
     );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
-      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+      of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
@@ -101,7 +101,7 @@ describe('ImageMapMarkerComponent', () => {
       of(toFailure<MediaItemDetailsApiResponse>(new Error('Random error'))),
     );
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
-      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+      of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
@@ -138,7 +138,7 @@ describe('ImageMapMarkerComponent', () => {
     );
     expect(mockWebApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       'mockAccessToken',
-      GPHOTOS_MEDIA_ITEM_ID,
+      { gPhotosMediaItemId: GPHOTOS_MEDIA_ITEM_ID },
     );
   });
 

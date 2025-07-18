@@ -1,5 +1,5 @@
 import { toSuccess } from '../../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../../../services/types/album';
+import { GetAlbumDetailsResponse } from '../../../services/types/album';
 import * as fromActions from '../albums.actions';
 
 describe('Album Actions', () => {
@@ -13,7 +13,7 @@ describe('Album Actions', () => {
 
   it('should create a loadAlbumDetailsResult action', () => {
     const albumId = '123';
-    const result = toSuccess<AlbumDetailsApiResponse>({
+    const result = toSuccess<GetAlbumDetailsResponse>({
       id: albumId,
       albumName: 'Test Album',
       parentAlbumId: undefined,

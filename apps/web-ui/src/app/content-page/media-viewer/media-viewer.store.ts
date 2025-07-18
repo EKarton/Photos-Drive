@@ -6,7 +6,7 @@ import { switchMap, tap } from 'rxjs/operators';
 import { authState } from '../../auth/store';
 import { Result, toPending } from '../../shared/results/results';
 import { switchMapResultToResultRxJs } from '../../shared/results/rxjs/switchMapResultToResultRxJs';
-import { GPhotosMediaItemDetailsApiResponse } from '../services/types/gphotos-media-item';
+import { GetGPhotosMediaItemDetailsResponse } from '../services/types/gphotos-media-item';
 import { GPhotosMediaItem } from '../services/types/gphotos-media-item';
 import { MediaItemDetailsApiResponse } from '../services/types/media-item';
 import { MediaItem } from '../services/types/media-item';
@@ -60,7 +60,7 @@ export class MediaViewerStore extends ComponentStore<MediaViewerState> {
   private readonly setGMediaItemResult = this.updater(
     (
       state: MediaViewerState,
-      response: Result<GPhotosMediaItemDetailsApiResponse>,
+      response: Result<GetGPhotosMediaItemDetailsResponse>,
     ): MediaViewerState => ({
       ...state,
       gMediaItemResult: response,
@@ -82,10 +82,9 @@ export class MediaViewerStore extends ComponentStore<MediaViewerState> {
                 ),
                 switchMapResultToResultRxJs((mediaItem) => {
                   return this.webApiService
-                    .getGPhotosMediaItem(
-                      accessToken,
-                      mediaItem.gPhotosMediaItemId,
-                    )
+                    .getGPhotosMediaItem(accessToken, {
+                      gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
+                    })
                     .pipe(
                       tap((gMediaItemResult) =>
                         this.setGMediaItemResult(gMediaItemResult),

@@ -9,8 +9,8 @@ import {
   toSuccess,
 } from '../../../../../../shared/results/results';
 import {
+  GetGPhotosMediaItemDetailsResponse,
   GPhotosMediaItem,
-  GPhotosMediaItemDetailsApiResponse,
 } from '../../../../../services/types/gphotos-media-item';
 import {
   MediaItem,
@@ -85,7 +85,7 @@ describe('ImageStore', () => {
       of(toPending<MediaItemDetailsApiResponse>()),
     );
     webApiService.getGPhotosMediaItem.and.returnValue(
-      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+      of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
 
     expect(store.gPhotosMediaItem()).toEqual(INITIAL_STATE.gPhotosMediaItem);
@@ -105,7 +105,7 @@ describe('ImageStore', () => {
     );
     expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
-      GPHOTOS_MEDIA_ITEM_ID,
+      { gPhotosMediaItemId: GPHOTOS_MEDIA_ITEM_ID },
     );
     expect(store.gPhotosMediaItem()).toEqual(toSuccess(GPHOTOS_MEDIA_ITEM));
   });
@@ -114,7 +114,7 @@ describe('ImageStore', () => {
     const error = new Error('API failed');
     webApiService.getMediaItem.and.returnValue(of(toSuccess(MEDIA_ITEM)));
     webApiService.getGPhotosMediaItem.and.returnValue(
-      of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
+      of(toFailure<GetGPhotosMediaItemDetailsResponse>(error)),
     );
 
     store.loadGPhotosMediaItem(MEDIA_ITEM_ID);

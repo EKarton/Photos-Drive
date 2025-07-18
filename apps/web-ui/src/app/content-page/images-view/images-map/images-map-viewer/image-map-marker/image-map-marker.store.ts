@@ -46,10 +46,9 @@ export class ImageMapMarkerStore extends ComponentStore<ImageMapMarkerState> {
               .getMediaItem(accessToken, mediaItemId)
               .pipe(
                 switchMapResultToResultRxJs((mediaItem) => {
-                  return this.webApiService.getGPhotosMediaItem(
-                    accessToken,
-                    mediaItem.gPhotosMediaItemId,
-                  );
+                  return this.webApiService.getGPhotosMediaItem(accessToken, {
+                    gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
+                  });
                 }),
               )
               .pipe(

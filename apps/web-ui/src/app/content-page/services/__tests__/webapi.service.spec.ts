@@ -7,8 +7,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../../environments/environment';
 import { toSuccess } from '../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../types/album';
-import { GPhotosMediaItemDetailsApiResponse } from '../types/gphotos-media-item';
+import { GetAlbumDetailsResponse } from '../types/album';
+import { GetGPhotosMediaItemDetailsResponse } from '../types/gphotos-media-item';
 import { GetHeatmapRequest, Heatmap } from '../types/heatmap';
 import {
   ListAlbumsRequest,
@@ -46,7 +46,7 @@ describe('WebApiService', () => {
   describe('getAlbum()', () => {
     it('should fetch album details', () => {
       const albumId = 'album123';
-      const mockResponse: AlbumDetailsApiResponse = {
+      const mockResponse: GetAlbumDetailsResponse = {
         id: albumId,
         albumName: 'Test Album',
         numChildAlbums: 0,
@@ -111,8 +111,8 @@ describe('WebApiService', () => {
 
   describe('getGPhotosMediaItem', () => {
     it('should fetch GPhotos media item details', () => {
-      const gMediaItemId = 'client1:gphoto123';
-      const mockResponse: GPhotosMediaItemDetailsApiResponse = {
+      const gPhotosMediaItemId = 'client1:gphoto123';
+      const mockResponse: GetGPhotosMediaItemDetailsResponse = {
         baseUrl: 'https://example.com/media-item.jpg',
         mimeType: 'image/jpeg',
         mediaMetadata: {
@@ -131,13 +131,13 @@ describe('WebApiService', () => {
       };
 
       service
-        .getGPhotosMediaItem('authToken123', gMediaItemId)
+        .getGPhotosMediaItem('authToken123', { gPhotosMediaItemId })
         .subscribe((response) => {
           expect(response).toEqual(toSuccess(mockResponse));
         });
 
       const req = httpMock.expectOne(
-        `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${gMediaItemId}`,
+        `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${gPhotosMediaItemId}`,
       );
       expect(req.request.method).toBe('GET');
       expect(req.request.headers.get('Authorization')).toEqual(
@@ -374,7 +374,7 @@ describe('WebApiService', () => {
           req.params.get('x') === '0' &&
           req.params.get('y') === '0' &&
           req.params.get('z') === '1' &&
-          req.params.get('album_id') === 'client1:album1'
+          req.params.get('albumId') === 'client1:album1'
         );
       });
 

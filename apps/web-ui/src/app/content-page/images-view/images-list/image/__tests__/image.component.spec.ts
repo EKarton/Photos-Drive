@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { WINDOW } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { toPending, toSuccess } from '../../../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../../../services/types/gphotos-media-item';
+import { GetGPhotosMediaItemDetailsResponse } from '../../../../services/types/gphotos-media-item';
 import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
 import { WebApiService } from '../../../../services/webapi.service';
 import {
@@ -65,7 +65,7 @@ describe('ImageComponent', () => {
 
   it('should render skeleton when media item is not loaded yet', () => {
     mockWebApiService.getGPhotosMediaItem.and.returnValue(
-      of(toPending<GPhotosMediaItemDetailsApiResponse>()),
+      of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageComponent);
@@ -99,7 +99,7 @@ describe('ImageComponent', () => {
 
     expect(mockWebApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       'mockAccessToken',
-      'gPhotos1',
+      { gPhotosMediaItemId: 'gPhotos1' },
     );
 
     const image = fixture.nativeElement.querySelector(

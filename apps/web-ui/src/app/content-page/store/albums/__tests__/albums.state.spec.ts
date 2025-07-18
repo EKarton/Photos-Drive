@@ -5,7 +5,7 @@ import {
   toPending,
   toSuccess,
 } from '../../../../shared/results/results';
-import { AlbumDetailsApiResponse } from '../../../services/types/album';
+import { GetAlbumDetailsResponse } from '../../../services/types/album';
 import { Album } from '../../../services/types/album';
 import {
   AlbumsState,
@@ -32,7 +32,7 @@ describe('Albums State', () => {
     });
 
     it('should return album details when present in state', () => {
-      const albumDetailsResult = toSuccess<AlbumDetailsApiResponse>({
+      const albumDetailsResult = toSuccess<GetAlbumDetailsResponse>({
         id: '123',
         albumName: 'Test Album',
         numChildAlbums: 0,

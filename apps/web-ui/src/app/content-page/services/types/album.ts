@@ -8,4 +8,4 @@ export interface Album {
 }
 
 /** Represents the api response returned from {@code getAlbum()} */
-export type AlbumDetailsApiResponse = Album;
+export type GetAlbumDetailsResponse = Album;

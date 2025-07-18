@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../../shared/results/results';
-import { GPhotosMediaItemDetailsApiResponse } from '../../../../services/types/gphotos-media-item';
+import { GetGPhotosMediaItemDetailsResponse } from '../../../../services/types/gphotos-media-item';
 import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
 import { WebApiService } from '../../../../services/webapi.service';
 import { ImageStore, INITIAL_STATE } from '../image.store';
@@ -64,7 +64,7 @@ describe('ImageStore', () => {
 
     expect(webApiService.getGPhotosMediaItem).toHaveBeenCalledWith(
       fakeAuthToken,
-      gPhotoId,
+      { gPhotosMediaItemId: gPhotoId },
     );
 
     const result = store.gPhotosMediaItem();
@@ -74,7 +74,7 @@ describe('ImageStore', () => {
   it('should update state to failure on API error', () => {
     const error = new Error('API failed');
     webApiService.getGPhotosMediaItem.and.returnValue(
-      of(toFailure<GPhotosMediaItemDetailsApiResponse>(error)),
+      of(toFailure<GetGPhotosMediaItemDetailsResponse>(error)),
     );
 
     store.loadGPhotosMediaItemDetails(gPhotoId);
