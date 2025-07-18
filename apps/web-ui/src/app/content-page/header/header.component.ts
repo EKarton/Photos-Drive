@@ -57,11 +57,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     );
   }
 
-  selectTab(tab: Tabs) {
-    this.selectedTab.set(tab);
-    this.isSidebarOpen.set(false);
-  }
-
   openSideBar() {
     this.isSidebarOpen.set(true);
   }

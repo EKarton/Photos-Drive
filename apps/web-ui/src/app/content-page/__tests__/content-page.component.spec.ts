@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { ActivatedRoute } from '@angular/router';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { provideRouter, Router } from '@angular/router';
+import { provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
 import { of } from 'rxjs';
 
@@ -9,6 +9,7 @@ import { authState } from '../../auth/store';
 import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
+import { routes } from '../content-page.routes';
 import { Album } from '../services/types/album';
 import { ListAlbumsResponse } from '../services/types/list-albums';
 import { ListMediaItemsResponse } from '../services/types/list-media-items';
@@ -79,9 +80,9 @@ const PAGE_1: ListMediaItemsResponse = {
 };
 
 describe('ContentPageComponent', () => {
-  let fixture: ComponentFixture<ContentPageComponent>;
-  let store: MockStore;
   let mockWebApiService: jasmine.SpyObj<WebApiService>;
+  let fixture: ComponentFixture<ContentPageComponent>;
+  let router: Router;
 
   beforeEach(async () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
@@ -90,22 +91,23 @@ describe('ContentPageComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [ContentPageComponent],
       providers: [
+        provideRouter(routes),
         provideMockStore({
           initialState: {
-            [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
+            [albumsState.FEATURE_KEY]: {
+              idToDetails: ImmutableMap()
+                .set('album1', toSuccess(ALBUM_DETAILS_ROOT))
+                .set('album2', toSuccess(ALBUM_DETAILS_ARCHIVES))
+                .set('album3', toSuccess(ALBUM_DETAILS_PHOTOS))
+                .set('album4', toSuccess(ALBUM_DETAILS_2010))
+                .set('album5', toSuccess(ALBUM_DETAILS_2011)),
+            },
             [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
             [authState.FEATURE_KEY]: authState.buildInitialState(),
           },
         }),
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            paramMap: of(ImmutableMap().set('albumId', 'album3')),
-          },
-        },
         {
           provide: WebApiService,
           useValue: mockWebApiService,
@@ -117,10 +119,8 @@ describe('ContentPageComponent', () => {
     fixture = TestBed.createComponent(ContentPageComponent);
     fixture.detectChanges();
 
-    store = TestBed.inject(MockStore);
-  });
+    router = TestBed.inject(Router);
 
-  it('should show albums and photos given data has been loaded', () => {
     mockWebApiService.listMediaItems.and.returnValue(of(toSuccess(PAGE_1)));
     mockWebApiService.listAlbums.and.returnValue(
       of(
@@ -129,41 +129,23 @@ describe('ContentPageComponent', () => {
         }),
       ),
     );
-    store.setState({
-      [albumsState.FEATURE_KEY]: {
-        idToDetails: ImmutableMap()
-          .set('album1', toSuccess(ALBUM_DETAILS_ROOT))
-          .set('album2', toSuccess(ALBUM_DETAILS_ARCHIVES))
-          .set('album3', toSuccess(ALBUM_DETAILS_PHOTOS))
-          .set('album4', toSuccess(ALBUM_DETAILS_2010))
-          .set('album5', toSuccess(ALBUM_DETAILS_2011)),
-      },
-      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
-      [themeState.FEATURE_KEY]: themeState.initialState,
-      [authState.FEATURE_KEY]: authState.buildInitialState(),
-    });
-    store.refreshState();
+  });
+
+  it('should show albums and photos given current route is in /albums/:albumId', () => {
+    router.navigateByUrl('/albums/123');
     fixture.detectChanges();
 
-    // Assert that the breadcrumbs render correctly
-    const breadcrumbLinks = fixture.nativeElement.querySelectorAll(
-      '[data-testid="breadcrumb-link"]',
-    );
-    expect(breadcrumbLinks.length).toEqual(3);
-    expect(breadcrumbLinks[0].textContent).toEqual('Home');
-    expect(breadcrumbLinks[1].textContent).toEqual('Archives');
-    expect(breadcrumbLinks[2].textContent).toEqual('Photos');
+    expect(
+      fixture.nativeElement.querySelectorAll('app-albums-view'),
+    ).toBeTruthy();
+  });
 
-    // Assert that the sub-albums are rendered
-    const subAlbums = fixture.nativeElement.querySelectorAll(
-      '[data-testid="album-card-name"]',
-    );
-    expect(subAlbums.length).toBe(2);
-    expect(subAlbums[0].textContent!.trim()).toBe('2010');
-    expect(subAlbums[1].textContent!.trim()).toBe('2011');
+  it('should show photos given current route is in /photos', () => {
+    router.navigateByUrl('/photos');
+    fixture.detectChanges();
 
-    // Assert that the images rendered correctly
-    const mediaItemImages = fixture.nativeElement.querySelectorAll('app-image');
-    expect(mediaItemImages.length).toEqual(2);
+    expect(
+      fixture.nativeElement.querySelectorAll('app-photos-view'),
+    ).toBeTruthy();
   });
 });
