@@ -42,9 +42,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.router.events
         .pipe(filter((event) => event instanceof NavigationEnd))
         .subscribe(() => {
-          // Find out what the current route is
           let child = this.route.firstChild;
-          while (child?.firstChild) child = child.firstChild;
+          while (child?.firstChild) {
+            child = child.firstChild;
+          }
           const path = child?.snapshot.routeConfig?.path;
 
           if (path?.startsWith('albums/')) {
