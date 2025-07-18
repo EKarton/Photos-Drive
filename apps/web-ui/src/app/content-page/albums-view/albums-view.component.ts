@@ -7,11 +7,11 @@ import { map, Observable, Subscription, switchMap } from 'rxjs';
 import { HasFailedPipe } from '../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../shared/results/pipes/is-pending.pipe';
 import { Result } from '../../shared/results/results';
+import { ImagesViewComponent } from '../images-view/images-view.component';
 import { Album } from '../services/types/album';
 import { albumsActions, albumsState } from '../store/albums';
 import { AlbumsListComponent } from './albums-list/albums-list.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
-import { ImagesSectionComponent } from './images-section/images-section.component';
 
 @Component({
   standalone: true,
@@ -21,7 +21,7 @@ import { ImagesSectionComponent } from './images-section/images-section.componen
     IsPendingPipe,
     HasFailedPipe,
     AlbumsListComponent,
-    ImagesSectionComponent,
+    ImagesViewComponent,
     BreadcrumbsComponent,
   ],
   templateUrl: './albums-view.component.html',

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 import { AlbumsViewComponent } from './albums-view/albums-view.component';
 import { ContentPageComponent } from './content-page.component';
-import { PhotosViewComponent } from './photos-view/photos-view.component';
+import { ImagesViewComponent } from './images-view/images-view.component';
 
 export const routes: Routes = [
   {
@@ -10,7 +10,7 @@ export const routes: Routes = [
     component: ContentPageComponent,
     children: [
       { path: 'albums/:albumId', component: AlbumsViewComponent },
-      { path: 'photos', component: PhotosViewComponent },
+      { path: 'photos', component: ImagesViewComponent },
       { path: '', pathMatch: 'full', redirectTo: 'photos' },
     ],
   },
