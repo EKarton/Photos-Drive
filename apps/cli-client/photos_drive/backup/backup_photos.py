@@ -9,7 +9,6 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.media_items import MediaItem
 from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
 from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
