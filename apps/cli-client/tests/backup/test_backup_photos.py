@@ -2,6 +2,9 @@ from datetime import datetime, timezone
 from bson import Binary
 from bson.objectid import ObjectId
 from photos_drive.shared.llm.models.testing.fake_image_embedder import FAKE_EMBEDDING
+from photos_drive.shared.llm.vector_stores.testing.fake_vector_store import (
+    FakeVectorStore,
+)
 from unittest_parametrize import parametrize
 from unittest_parametrize import ParametrizedTestCase
 
@@ -73,6 +76,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the root album
         root_album_obj = albums_repo.create_album('', None)
@@ -142,6 +146,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             map_cells_repo,
+            vector_store,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -292,6 +297,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -346,6 +352,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             map_cells_repo,
+            vector_store,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -424,6 +431,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        vector_store = FakeVectorStore()
 
         # Test setup 3: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -506,6 +514,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             map_cells_repo,
+            vector_store,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -561,6 +570,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -617,6 +627,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             map_cells_repo,
+            vector_store,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -660,6 +671,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -740,6 +752,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             map_cells_repo,
+            vector_store,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,
@@ -788,6 +801,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
         media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums
         root_album = albums_repo.create_album('', None)
@@ -869,6 +883,7 @@ class TestPhotosBackup(ParametrizedTestCase):
             albums_repo,
             media_items_repo,
             map_cells_repo,
+            vector_store,
             gphotos_client_repo,
             mongodb_clients_repo,
             parallelize_uploads=use_parallel_uploads,

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.media_items import MediaItem
 
 
@@ -15,10 +16,10 @@ class MapCellsRepository(ABC):
         '''
 
     @abstractmethod
-    def remove_media_item(self, media_item: MediaItem):
+    def remove_media_item(self, media_item_id: MediaItemId):
         '''
         Removes a media item from the cells repository.
 
         Args:
-            media_item (MediaItem): The media item to remove
+            media_item_id (MediaItemId): The ID of the media item to remove
         '''

@@ -11,24 +11,26 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
 from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.media_items import MediaItem
-
-from ..shared.maps.map_cells_repository import MapCellsRepository
-from ..shared.metadata.albums_pruner import AlbumsPruner
-from ..shared.config.config import Config
-from ..shared.metadata.albums import Album
-from ..shared.metadata.albums_repository import (
+from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
+from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
+from photos_drive.shared.config.config import Config
+from photos_drive.shared.metadata.albums import Album
+from photos_drive.shared.metadata.albums_repository import (
     AlbumsRepository,
 )
-from ..shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
+    UpdateMediaItemRequest,
 )
-from ..shared.metadata.media_items_repository import CreateMediaItemRequest
-from ..shared.metadata.clients_repository import (
+from photos_drive.shared.metadata.media_items_repository import CreateMediaItemRequest
+from photos_drive.shared.metadata.clients_repository import (
     ClientsRepository,
 )
-from ..shared.metadata.transactions_context import TransactionsContext
-from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
+from photos_drive.shared.metadata.transactions_context import TransactionsContext
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
 
 from .processed_diffs import ProcessedDiff
 from .gphotos_uploader import GPhotosMediaItemParallelUploaderImpl
@@ -132,8 +134,8 @@ class PhotosBackup:
         logger.debug(f"Finished building missing albums: {total_num_albums_created}")
 
         # Step 5: Go through the tree and modify album's media item ids list
-        total_media_item_ids_to_delete: list[MediaItemId] = []
-        total_media_items_to_delete_from_tiles: list[MediaItem] = []
+        add_diffs_to_media_item: Dict[ProcessedDiff, MediaItem] = {}
+        total_media_items_to_delete: list[MediaItem] = []
         total_num_media_item_added = 0
         total_album_ids_to_prune: list[AlbumId] = []
         queue = deque([root_diffs_tree_node])
@@ -153,10 +155,7 @@ class PhotosBackup:
                 for media_item in self.__media_items_repo.find_media_items(
                     FindMediaItemRequest(album_id=cur_album.id, file_name=file_name)
                 ):
-                    total_media_item_ids_to_delete.append(media_item.id)
-
-                    if media_item.location is not None:
-                        total_media_items_to_delete_from_tiles.append(media_item)
+                    total_media_items_to_delete.append(media_item)
                     num_media_items -= 1
 
             # Step 5b: Find the media items to add to the album,
@@ -180,16 +179,7 @@ class PhotosBackup:
                     create_media_item_request
                 )
 
-                if media_item.location is not None:
-                    self.__map_cells_repo.add_media_item(media_item)
-
-                if add_diff.embedding:
-                    self.__vector_store.add_media_item_embeddings(
-                        CreateMediaItemEmbeddingRequest(
-                            embedding=add_diff.embedding, media_item_id=media_item.id
-                        )
-                    )
-
+                add_diffs_to_media_item[add_diff] = media_item
                 total_num_media_item_added += 1
                 num_media_items += 1
 
@@ -204,9 +194,9 @@ class PhotosBackup:
                 queue.append(child_diff_tree_node)
 
         # Step 6: Delete the media items marked for deletion
-        self.__media_items_repo.delete_many_media_items(total_media_item_ids_to_delete)
-        for media_item in total_media_items_to_delete_from_tiles:
-            self.__map_cells_repo.remove_media_item(media_item)
+        self.__media_items_repo.delete_many_media_items(
+            [media_item.id for media_item in total_media_items_to_delete]
+        )
 
         # Step 7: Delete albums with no child albums and no media items
         total_num_albums_deleted = 0
@@ -215,10 +205,46 @@ class PhotosBackup:
                 logger.debug(f"Pruning {album_id}")
                 total_num_albums_deleted += self.__albums_pruner.prune_album(album_id)
 
+        # Step 8: Delete items from the maps
+        for media_item in total_media_items_to_delete:
+            self.__map_cells_repo.remove_media_item(media_item.id)
+
+        # Step 9: Add items to the maps repo
+        for media_item in add_diffs_to_media_item.values():
+            if media_item.location:
+                self.__map_cells_repo.add_media_item(media_item)
+
+        # Step 10: Delete media items from vector store
+        self.__vector_store.delete_media_item_embeddings(
+            [media_item.embedding_id for media_item in total_media_items_to_delete]
+        )
+
+        # Step 11: Add media items with embeddings to vector store
+        create_media_item_embedding_requests: list[CreateMediaItemEmbeddingRequest] = []
+        for add_diff, media_item in add_diffs_to_media_item.items():
+            media_item = add_diffs_to_media_item[add_diff]
+            create_media_item_embedding_requests.append(
+                CreateMediaItemEmbeddingRequest(
+                    embedding=add_diff.embedding, media_item_id=media_item.id
+                )
+            )
+        media_item_embeddings = self.__vector_store.add_media_item_embeddings(
+            create_media_item_embedding_requests
+        )
+        update_media_items_requests: list[UpdateMediaItemRequest] = []
+        for media_item_embeddings in media_item_embeddings:
+            update_media_items_requests.append(
+                UpdateMediaItemRequest(
+                    media_item_id=media_item_embeddings.media_item_id,
+                    new_embedding_id=media_item_embeddings.id,
+                )
+            )
+        self.__media_items_repo.update_many_media_items(update_media_items_requests)
+
         # Step 8: Return the results of the backup
         return BackupResults(
             num_media_items_added=total_num_media_item_added,
-            num_media_items_deleted=len(total_media_item_ids_to_delete),
+            num_media_items_deleted=len(total_media_items_to_delete),
             num_albums_created=total_num_albums_created,
             num_albums_deleted=total_num_albums_deleted,
             total_elapsed_time=time.time() - start_time,
