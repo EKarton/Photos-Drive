@@ -104,7 +104,6 @@ class TokenRefreshCallback(ABC):
     @abstractmethod
     def before_refresh(self) -> None:
         '''Called before the token refreshes.'''
-        pass
 
     @abstractmethod
     def after_refresh(self, error: Optional[Exception]) -> None:
@@ -116,7 +115,6 @@ class TokenRefreshCallback(ABC):
         Args:
             error (Optional[Exception]): The error, if it exists.
         '''
-        pass
 
 
 class ListenableCredentials(Credentials):
@@ -134,7 +132,8 @@ class ListenableCredentials(Credentials):
             if self.__token_refresh_callback:
                 self.__token_refresh_callback.before_refresh()
             super().refresh(request)
-            self.__token_refresh_callback.after_refresh(None)
+            if self.__token_refresh_callback:
+                self.__token_refresh_callback.after_refresh(None)
 
         except Exception as e:
             if self.__token_refresh_callback:

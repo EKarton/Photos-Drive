@@ -1,5 +1,8 @@
 import logging
 from typing_extensions import Annotated
+from photos_drive.shared.llm.models.open_clip_image_embeddings import (
+    OpenCLIPImageEmbeddings,
+)
 from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
     MapCellsRepositoryImpl,
 )
@@ -98,7 +101,7 @@ def delete(
         return
 
     # Process the diffs with metadata
-    diff_processor = DiffsProcessor()
+    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings())
     processed_diffs = diff_processor.process_raw_diffs(diffs)
     for processed_diff in processed_diffs:
         logger.debug(f"Processed diff: {processed_diff}")

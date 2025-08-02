@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 from abc import ABC, abstractmethod
 from bson.objectid import ObjectId
+from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
 
 from .media_item_id import MediaItemId
 from .album_id import AlbumId
@@ -26,7 +27,9 @@ class CreateMediaItemRequest:
         album_id (AlbumId): The album that this media item belongs to.
         width (int): The width of the media item.
         height (int): The height of the media item.
-        new_date_taken (datetime): The date and time of when the media item was taken.
+        date_taken (datetime): The date and time of when the media item was taken.
+        embedding_id (Optional[MediaItemEmbeddingId]): An ID referring to its embedding,
+            if present.
     """
 
     file_name: str
@@ -38,6 +41,7 @@ class CreateMediaItemRequest:
     width: int
     height: int
     date_taken: datetime
+    embedding_id: Optional[MediaItemEmbeddingId]
 
 
 @dataclass(frozen=True)
@@ -63,6 +67,8 @@ class UpdateMediaItemRequest:
         new_height (Optional[int]): The new height.
         new_date_taken (Optional[datetime]): The new date and time of when the
             image / video was taken.
+        clear_embedding_id (bool): Whether to clear the embedding ID.
+        new_embedding_id (Optional[MediaItemEmbeddingId]): The new embedding ID.
     '''
 
     media_item_id: MediaItemId
@@ -76,6 +82,8 @@ class UpdateMediaItemRequest:
     new_width: Optional[int] = None
     new_height: Optional[int] = None
     new_date_taken: Optional[datetime] = None
+    clear_embedding_id: Optional[bool] = False
+    new_embedding_id: Optional[MediaItemEmbeddingId] = None
 
 
 @dataclass(frozen=True)
@@ -158,15 +166,6 @@ class MediaItemsRepository(ABC):
         Returns:
             MediaItem: The media item.
         """
-
-    @abstractmethod
-    def update_media_item(self, request: UpdateMediaItemRequest):
-        '''
-        Updates a media item in the database.
-
-        Args:
-            requests (UpdateMediaItemRequest): A request to update a media item.
-        '''
 
     @abstractmethod
     def update_many_media_items(self, requests: list[UpdateMediaItemRequest]):

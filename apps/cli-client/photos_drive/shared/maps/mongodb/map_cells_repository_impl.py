@@ -52,7 +52,6 @@ class MapCellsRepositoryImpl(MapCellsRepository):
 
             for i in range(len(free_spaces)):
                 client_id, free_space = free_spaces[i]
-                print(free_space)
                 if free_space <= 0:
                     continue
 

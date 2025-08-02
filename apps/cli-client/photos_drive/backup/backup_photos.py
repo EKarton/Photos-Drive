@@ -4,8 +4,11 @@ from typing import Optional, Dict, cast
 from collections import deque
 import logging
 from bson.objectid import ObjectId
-from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items import MediaItem
 
+from ..shared.maps.map_cells_repository import MapCellsRepository
 from ..shared.metadata.albums_pruner import AlbumsPruner
 from ..shared.config.config import Config
 from ..shared.metadata.albums import Album
@@ -123,10 +126,10 @@ class PhotosBackup:
         logger.debug(f"Finished building missing albums: {total_num_albums_created}")
 
         # Step 5: Go through the tree and modify album's media item ids list
-        total_media_item_ids_to_delete = []
-        total_media_items_to_delete_from_tiles = []
+        total_media_item_ids_to_delete: list[MediaItemId] = []
+        total_media_items_to_delete_from_tiles: list[MediaItem] = []
         total_num_media_item_added = 0
-        total_album_ids_to_prune = []
+        total_album_ids_to_prune: list[AlbumId] = []
         queue = deque([root_diffs_tree_node])
         while len(queue) > 0:
             cur_diffs_tree_node = queue.popleft()
@@ -165,6 +168,7 @@ class PhotosBackup:
                     width=add_diff.width,
                     height=add_diff.height,
                     date_taken=add_diff.date_taken,
+                    embedding_id=None,
                 )
                 media_item = self.__media_items_repo.create_media_item(
                     create_media_item_request

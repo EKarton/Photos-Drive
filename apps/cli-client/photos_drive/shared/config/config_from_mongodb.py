@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, cast, override
+from typing import Any, Dict, Mapping, cast, override
 from google.oauth2.credentials import Credentials
 from pymongo.mongo_client import MongoClient
 from bson.objectid import ObjectId
@@ -7,15 +7,23 @@ from bson.objectid import ObjectId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
+    AddMongoDbVectorStoreConfigRequest,
+    AddVectorStoreConfigRequest,
     Config,
     GPhotosConfig,
     MongoDbConfig,
+    MongoDbVectorStoreConfig,
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
+    UpdateMongoDbVectorStoreConfigRequest,
+    UpdateVectorStoreConfigRequest,
+    VectorStoreConfig,
 )
 from ..metadata.album_id import AlbumId
 
 logger = logging.getLogger(__name__)
+
+MONGODB_VECTOR_STORE_TYPE = 'mongodb-vector-store-type'
 
 
 class ConfigFromMongoDb(Config):
@@ -30,6 +38,9 @@ class ConfigFromMongoDb(Config):
               database
         """
         self.__mongodb_client = mongodb_client
+        self.__vector_store_collection = mongodb_client["photos_drive"][
+            "vector_store_configs"
+        ]
 
     @override
     def get_mongodb_configs(self) -> list[MongoDbConfig]:
@@ -204,3 +215,88 @@ class ConfigFromMongoDb(Config):
         self.__mongodb_client["photos_drive"]["root_album"].update_one(
             filter=filter_query, update=set_query, upsert=True
         )
+
+    @override
+    def get_vector_store_configs(self) -> list[VectorStoreConfig]:
+        configs: list[VectorStoreConfig] = []
+        for doc in self.__vector_store_collection.find({}):
+            if doc['type'] == MONGODB_VECTOR_STORE_TYPE:
+                configs.append(self.__parse_mongodb_vector_store_config(doc))
+        return configs
+
+    def __parse_mongodb_vector_store_config(
+        self, doc: Dict[str, Any]
+    ) -> MongoDbVectorStoreConfig:
+        return MongoDbVectorStoreConfig(
+            id=doc["_id"],
+            name=doc['name'],
+            read_write_connection_string=doc['read_write_connection_string'],
+            read_only_connection_string=doc['read_only_connection_string'],
+        )
+
+    @override
+    def add_vector_store_config(
+        self, request: AddVectorStoreConfigRequest
+    ) -> VectorStoreConfig:
+        if isinstance(request, AddMongoDbVectorStoreConfigRequest):
+            return self.__add_mongodb_vector_store_config(request)
+        else:
+            raise NotImplementedError(
+                f'Adding vector store config {type(request)} not supported'
+            )
+
+    def __add_mongodb_vector_store_config(
+        self, request: AddMongoDbVectorStoreConfigRequest
+    ) -> MongoDbVectorStoreConfig:
+        result = self.__vector_store_collection.insert_one(
+            {
+                "name": request.name,
+                "type": MONGODB_VECTOR_STORE_TYPE,
+                "read_write_connection_string": request.read_write_connection_string,
+                "read_only_connection_string": request.read_only_connection_string,
+            }
+        )
+
+        return MongoDbVectorStoreConfig(
+            id=cast(ObjectId, result.inserted_id),
+            name=request.name,
+            read_write_connection_string=request.read_write_connection_string,
+            read_only_connection_string=request.read_only_connection_string,
+        )
+
+    @override
+    def update_vector_store_config(self, request: UpdateVectorStoreConfigRequest):
+        if isinstance(request, UpdateMongoDbVectorStoreConfigRequest):
+            self.__update_mongodb_vector_store_config(request)
+        else:
+            raise NotImplementedError(
+                f'Updating vector store config {type(request)} not supported'
+            )
+
+    def __update_mongodb_vector_store_config(
+        self, request: UpdateMongoDbVectorStoreConfigRequest
+    ):
+        filter_query: Mapping = {"_id": request.id}
+        set_query: Mapping = {"$set": {}}
+
+        if request.new_name:
+            set_query["$set"]['name'] = request.new_name
+
+        if request.new_read_write_connection_string:
+            set_query["$set"][
+                'read_write_connection_string'
+            ] = request.new_read_write_connection_string
+
+        if request.new_read_only_connection_string:
+            set_query["$set"][
+                'read_only_connection_string'
+            ] = request.new_read_only_connection_string
+
+        result = self.__vector_store_collection.update_one(
+            filter=filter_query, update=set_query, upsert=False
+        )
+
+        if result.matched_count != 1:
+            raise ValueError(
+                f"Unable to update MongoDB Vector Store config {request.id}"
+            )

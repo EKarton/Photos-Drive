@@ -78,6 +78,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -141,6 +142,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         media_items_repo.create_media_item(
@@ -157,6 +159,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -218,6 +221,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -271,6 +275,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -325,6 +330,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         boat_upload_token = gphotos_client.media_items().upload_photo(
@@ -344,6 +350,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -408,6 +415,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         dog_upload_token = gphotos_client.media_items().upload_photo(
@@ -427,6 +435,7 @@ class FolderSyncDiffTests(TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 

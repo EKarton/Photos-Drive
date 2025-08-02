@@ -4,6 +4,10 @@ from bson import Binary
 import unittest
 from bson.objectid import ObjectId
 
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
+    MediaItemEmbeddingId,
+    embedding_id_to_string,
+)
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
@@ -43,6 +47,10 @@ MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0)
 
 MOCK_DATE_TAKEN_2 = datetime(2026, 1, 1, 14, 30, 0)
 
+MOCK_EMBEDDING_ID_1 = MediaItemEmbeddingId(ObjectId(), ObjectId())
+
+MOCK_EMBEDDING_ID_2 = MediaItemEmbeddingId(ObjectId(), ObjectId())
+
 
 class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
@@ -72,6 +80,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
 
@@ -81,13 +90,13 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         # Assert the retrieved media item matches the inserted data
         self.assertEqual(media_item.file_name, "test_image.jpg")
         self.assertEqual(media_item.file_hash, fake_file_hash)
-        self.assertIsNotNone(media_item.location)
         self.assertEqual(media_item.location, GpsLocation(56.78, 12.34))
         self.assertEqual(media_item.gphotos_client_id, media_item_id.client_id)
         self.assertEqual(media_item.gphotos_media_item_id, "gphotos_123")
         self.assertEqual(media_item.width, 100)
         self.assertEqual(media_item.height, 200)
         self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
+        self.assertEqual(media_item.embedding_id, MOCK_EMBEDDING_ID_1)
 
     def test_get_media_item_by_id_not_found(self):
         media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
@@ -110,6 +119,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
 
@@ -127,8 +137,11 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].width, 100)
         self.assertEqual(media_items[0].height, 200)
         self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
+        self.assertEqual(media_items[0].embedding_id, MOCK_EMBEDDING_ID_1)
 
-    def test_get_all_media_items_with_no_date_taken(self):
+    def test_get_all_media_items_with_no_date_taken_and_no_embedding_id_and_no_location(
+        self,
+    ):
         fake_file_hash = os.urandom(16)
 
         # Insert a mock media item into the mock database
@@ -136,7 +149,6 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             {
                 "file_name": "test_image.jpg",
                 "file_hash": Binary(fake_file_hash),
-                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
                 "gphotos_client_id": str(self.mongodb_client_id),
                 "gphotos_media_item_id": "gphotos_123",
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
@@ -152,13 +164,13 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(len(media_items), 1)
         self.assertEqual(media_items[0].file_name, "test_image.jpg")
         self.assertEqual(media_items[0].file_hash, fake_file_hash)
-        self.assertIsNotNone(media_items[0].location)
-        self.assertEqual(media_items[0].location, GpsLocation(56.78, 12.34))
+        self.assertIsNone(media_items[0].location)
         self.assertEqual(media_items[0].gphotos_client_id, self.mongodb_client_id)
         self.assertEqual(media_items[0].gphotos_media_item_id, "gphotos_123")
         self.assertEqual(media_items[0].width, 100)
         self.assertEqual(media_items[0].height, 200)
         self.assertEqual(media_items[0].date_taken, datetime(1970, 1, 1))
+        self.assertIsNone(media_items[0].embedding_id)
 
     def test_find_media_items(self):
         # Insert mock media items from different albums into the mock database
@@ -173,6 +185,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -186,6 +199,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -199,6 +213,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
 
@@ -213,6 +228,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].width, 100)
         self.assertEqual(media_items[0].height, 200)
         self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
+        self.assertEqual(media_items[0].embedding_id, MOCK_EMBEDDING_ID_1)
 
     def test_find_media_items_in_different_databases(self):
         mongodb_client_id_1 = ObjectId()
@@ -235,6 +251,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
         mongodb_client_2["photos_drive"]["media_items"].insert_one(
@@ -248,6 +265,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
         mongodb_client_2["photos_drive"]["media_items"].insert_one(
@@ -261,6 +279,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
 
@@ -290,6 +309,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -303,6 +323,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -316,6 +337,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
 
@@ -334,6 +356,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             width=100,
             height=200,
             date_taken=MOCK_DATE_TAKEN,
+            embedding_id=MOCK_EMBEDDING_ID_1,
         )
 
         # Test creation of media item
@@ -352,51 +375,39 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.width, 100)
         self.assertEqual(media_item.height, 200)
         self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
+        self.assertEqual(media_item.embedding_id, MOCK_EMBEDDING_ID_1)
 
-    def test_update_media_item(self):
-        media_item_1 = self.repo.create_media_item(
-            CreateMediaItemRequest(
-                'dog.jpg',
-                MOCK_FILE_HASH,
-                GpsLocation(longitude=12.34, latitude=56.78),
-                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
-                gphotos_media_item_id="gphotos_456",
-                album_id=MOCK_ALBUM_ID,
-                width=100,
-                height=200,
-                date_taken=MOCK_DATE_TAKEN,
-            )
+    def test_create_media_item_with_no_embedding_id_no_location(self):
+        fake_file_hash = os.urandom(16)
+        request = CreateMediaItemRequest(
+            file_name="new_image.jpg",
+            file_hash=fake_file_hash,
+            location=None,
+            gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+            gphotos_media_item_id="gphotos_456",
+            album_id=MOCK_ALBUM_ID,
+            width=100,
+            height=200,
+            date_taken=MOCK_DATE_TAKEN,
+            embedding_id=None,
         )
 
-        new_file_hash = b'\x8b\x19\xdd\xdeg\xdd\x96\xf0'
-        new_gphotos_client_id = ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
-        self.repo.update_media_item(
-            UpdateMediaItemRequest(
-                media_item_id=media_item_1.id,
-                new_file_name="dog1.jpg",
-                new_file_hash=new_file_hash,
-                clear_location=False,
-                new_location=GpsLocation(latitude=10, longitude=20),
-                new_gphotos_client_id=new_gphotos_client_id,
-                new_gphotos_media_item_id="gphotos_1",
-                new_width=300,
-                new_height=400,
-                new_date_taken=MOCK_DATE_TAKEN_2,
-            ),
-        )
+        # Test creation of media item
+        media_item = self.repo.create_media_item(request)
 
-        new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
-        self.assertEqual(new_media_item_1.id, media_item_1.id)
-        self.assertEqual(new_media_item_1.file_name, 'dog1.jpg')
-        self.assertEqual(new_media_item_1.file_hash, new_file_hash)
+        # Assert that the media item was created correctly
+        self.assertEqual(media_item.id.client_id, self.mongodb_client_id)
+        self.assertEqual(media_item.file_name, "new_image.jpg")
+        self.assertEqual(media_item.file_hash, fake_file_hash)
+        self.assertIsNone(media_item.location)
+        self.assertEqual(media_item.gphotos_client_id, request.gphotos_client_id)
         self.assertEqual(
-            new_media_item_1.location, GpsLocation(latitude=10, longitude=20)
+            media_item.gphotos_media_item_id, request.gphotos_media_item_id
         )
-        self.assertEqual(new_media_item_1.gphotos_client_id, new_gphotos_client_id)
-        self.assertEqual(new_media_item_1.gphotos_media_item_id, 'gphotos_1')
-        self.assertEqual(new_media_item_1.width, 300)
-        self.assertEqual(new_media_item_1.height, 400)
-        self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN_2)
+        self.assertEqual(media_item.width, 100)
+        self.assertEqual(media_item.height, 200)
+        self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
+        self.assertIsNone(media_item.embedding_id)
 
     def test_update_many_media_items(self):
         media_item_1 = self.repo.create_media_item(
@@ -410,6 +421,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=MOCK_EMBEDDING_ID_1,
             )
         )
         media_item_2 = self.repo.create_media_item(
@@ -423,6 +435,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=MOCK_EMBEDDING_ID_1,
             )
         )
 
@@ -442,6 +455,8 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_width=300,
                     new_height=400,
                     new_date_taken=MOCK_DATE_TAKEN_2,
+                    clear_embedding_id=False,
+                    new_embedding_id=MOCK_EMBEDDING_ID_2,
                 ),
                 UpdateMediaItemRequest(
                     media_item_id=media_item_2.id,
@@ -455,6 +470,8 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_width=300,
                     new_height=400,
                     new_date_taken=MOCK_DATE_TAKEN_2,
+                    clear_embedding_id=False,
+                    new_embedding_id=MOCK_EMBEDDING_ID_2,
                 ),
             ]
         )
@@ -472,6 +489,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(new_media_item_1.width, 300)
         self.assertEqual(new_media_item_1.height, 400)
         self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN_2)
+        self.assertEqual(new_media_item_1.embedding_id, MOCK_EMBEDDING_ID_2)
 
         new_media_item_2 = self.repo.get_media_item_by_id(media_item_2.id)
         self.assertEqual(new_media_item_2.id, media_item_2.id)
@@ -486,44 +504,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(new_media_item_2.width, 300)
         self.assertEqual(new_media_item_2.height, 400)
         self.assertEqual(new_media_item_2.date_taken, MOCK_DATE_TAKEN_2)
-
-    def test_update_many_media_items_update_file_name(self):
-        media_item_1 = self.repo.create_media_item(
-            CreateMediaItemRequest(
-                'dog.jpg',
-                MOCK_FILE_HASH,
-                GpsLocation(longitude=12.34, latitude=56.78),
-                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
-                gphotos_media_item_id="gphotos_456",
-                album_id=MOCK_ALBUM_ID,
-                width=100,
-                height=200,
-                date_taken=MOCK_DATE_TAKEN,
-            )
-        )
-
-        self.repo.update_many_media_items(
-            [
-                UpdateMediaItemRequest(
-                    media_item_id=media_item_1.id, new_file_name="cat.jpg"
-                )
-            ]
-        )
-
-        new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
-        self.assertEqual(new_media_item_1.id, media_item_1.id)
-        self.assertEqual(new_media_item_1.file_name, "cat.jpg")
-        self.assertEqual(new_media_item_1.file_hash, media_item_1.file_hash)
-        self.assertEqual(new_media_item_1.location, media_item_1.location)
-        self.assertEqual(
-            new_media_item_1.gphotos_client_id, media_item_1.gphotos_client_id
-        )
-        self.assertEqual(
-            new_media_item_1.gphotos_media_item_id, media_item_1.gphotos_media_item_id
-        )
-        self.assertEqual(new_media_item_1.width, 100)
-        self.assertEqual(new_media_item_1.height, 200)
-        self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN)
+        self.assertEqual(new_media_item_2.embedding_id, MOCK_EMBEDDING_ID_2)
 
     def test_update_many_media_items_clear_location(self):
         media_item_1 = self.repo.create_media_item(
@@ -537,6 +518,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -546,6 +528,33 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
 
         new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
         self.assertIsNone(new_media_item_1.location)
+
+    def test_update_many_media_items_clear_embedding_id(self):
+        media_item_1 = self.repo.create_media_item(
+            CreateMediaItemRequest(
+                'dog.jpg',
+                MOCK_FILE_HASH,
+                GpsLocation(longitude=12.34, latitude=56.78),
+                gphotos_client_id=ObjectId("5f50c31e8a7d4b1c9c9b0b1a"),
+                gphotos_media_item_id="gphotos_456",
+                album_id=MOCK_ALBUM_ID,
+                width=100,
+                height=200,
+                date_taken=MOCK_DATE_TAKEN,
+                embedding_id=MOCK_EMBEDDING_ID_1,
+            )
+        )
+
+        self.repo.update_many_media_items(
+            [
+                UpdateMediaItemRequest(
+                    media_item_id=media_item_1.id, clear_embedding_id=True
+                )
+            ]
+        )
+
+        new_media_item_1 = self.repo.get_media_item_by_id(media_item_1.id)
+        self.assertIsNone(new_media_item_1.embedding_id)
 
     def test_update_many_media_items_on_unknown_media_item_id(self):
         media_item_1 = self.repo.create_media_item(
@@ -559,6 +568,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 

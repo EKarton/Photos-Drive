@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 import unittest
 from unittest.mock import MagicMock
 from bson import ObjectId
+import numpy as np
 
 from photos_drive.backup.diffs_assignments import DiffsAssigner
 from photos_drive.backup.processed_diffs import ProcessedDiff
@@ -12,6 +13,8 @@ from photos_drive.shared.blob_store.gphotos.clients_repository import (
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
+
+MOCK_EMBEDDING = np.array([0.1, 0.5, -0.3])
 
 
 class TestDiffsAssigner(unittest.TestCase):
@@ -39,6 +42,8 @@ class TestDiffsAssigner(unittest.TestCase):
             width=100,
             height=200,
             date_taken=MOCK_DATE_TAKEN,
+            mime_type='image/jpeg',
+            embedding=MOCK_EMBEDDING,
         )
         diff2 = ProcessedDiff(
             modifier="+",
@@ -51,6 +56,8 @@ class TestDiffsAssigner(unittest.TestCase):
             width=100,
             height=200,
             date_taken=MOCK_DATE_TAKEN,
+            mime_type='image/jpeg',
+            embedding=MOCK_EMBEDDING,
         )
         assignments = diffs_assigner.get_diffs_assignments([diff1, diff2])
 
@@ -77,6 +84,8 @@ class TestDiffsAssigner(unittest.TestCase):
             width=100,
             height=200,
             date_taken=MOCK_DATE_TAKEN,
+            mime_type='image/jpeg',
+            embedding=MOCK_EMBEDDING,
         )
         with self.assertRaisesRegex(
             ValueError, "Cannot allocate .* to any GPhotos client"
@@ -107,6 +116,8 @@ class TestDiffsAssigner(unittest.TestCase):
             width=100,
             height=200,
             date_taken=MOCK_DATE_TAKEN,
+            mime_type='image/jpeg',
+            embedding=MOCK_EMBEDDING,
         )
         diff2 = ProcessedDiff(
             modifier="+",
@@ -119,6 +130,8 @@ class TestDiffsAssigner(unittest.TestCase):
             width=100,
             height=200,
             date_taken=MOCK_DATE_TAKEN,
+            mime_type='image/jpeg',
+            embedding=MOCK_EMBEDDING,
         )
         diff3 = ProcessedDiff(
             modifier="+",
@@ -131,6 +144,8 @@ class TestDiffsAssigner(unittest.TestCase):
             width=100,
             height=200,
             date_taken=MOCK_DATE_TAKEN,
+            mime_type='image/jpeg',
+            embedding=MOCK_EMBEDDING,
         )
 
         with self.assertRaisesRegex(

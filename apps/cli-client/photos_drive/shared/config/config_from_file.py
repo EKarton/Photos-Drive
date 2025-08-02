@@ -7,16 +7,25 @@ from ..metadata.album_id import AlbumId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
+    AddMongoDbVectorStoreConfigRequest,
+    AddVectorStoreConfigRequest,
     Config,
     GPhotosConfig,
     MongoDbConfig,
+    MongoDbVectorStoreConfig,
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
+    UpdateMongoDbVectorStoreConfigRequest,
+    UpdateVectorStoreConfigRequest,
+    VectorStoreConfig,
 )
 
 GPHOTOS_CONFIG_TYPE = "gphotos_config"
 MONGODB_CONFIG_TYPE = "mongodb_config"
 ROOT_ALBUM_TYPE = "root_album"
+
+VECTOR_STORE_TYPE = 'vector_store_config'
+MONGODB_VECTOR_STORE_TYPE = 'mongodb_vector_store'
 
 
 class ConfigFromFile(Config):
@@ -218,6 +227,104 @@ class ConfigFromFile(Config):
         self._config.set(client_id_str, "type", ROOT_ALBUM_TYPE)
         self._config.set(client_id_str, "client_id", str(album_id.client_id))
         self._config.set(client_id_str, "object_id", str(album_id.object_id))
+        self.flush()
+
+    @override
+    def get_vector_store_configs(self) -> list[VectorStoreConfig]:
+        configs: list[VectorStoreConfig] = []
+        for section_id in self._config.sections():
+            if self._config.get(section_id, "type") == MONGODB_VECTOR_STORE_TYPE:
+                configs.append(self.__parse_mongodb_vector_store_config(section_id))
+
+        return configs
+
+    def __parse_mongodb_vector_store_config(
+        self, section_id: str
+    ) -> MongoDbVectorStoreConfig:
+        return MongoDbVectorStoreConfig(
+            id=ObjectId(section_id.strip()),
+            name=self._config.get(section_id, "name"),
+            read_write_connection_string=self._config.get(
+                section_id, 'read_write_connection_string'
+            ),
+            read_only_connection_string=self._config.get(
+                section_id, 'read_only_connection_string'
+            ),
+        )
+
+    @override
+    def add_vector_store_config(
+        self, request: AddVectorStoreConfigRequest
+    ) -> VectorStoreConfig:
+        if isinstance(request, AddMongoDbVectorStoreConfigRequest):
+            return self.__add_mongodb_vector_store_config(request)
+        else:
+            raise NotImplementedError(
+                f'Adding vector store {type(request)} not supported'
+            )
+
+    def __add_mongodb_vector_store_config(
+        self, request: AddMongoDbVectorStoreConfigRequest
+    ) -> MongoDbVectorStoreConfig:
+        client_id = self.__generate_unique_object_id()
+        client_id_str = str(client_id)
+        self._config.add_section(client_id_str)
+        self._config.set(client_id_str, "type", MONGODB_VECTOR_STORE_TYPE)
+        self._config.set(client_id_str, 'name', request.name)
+        self._config.set(
+            client_id_str,
+            'read_write_connection_string',
+            request.read_write_connection_string,
+        )
+        self._config.set(
+            client_id_str,
+            'read_only_connection_string',
+            request.read_only_connection_string,
+        )
+        self.flush()
+
+        return MongoDbVectorStoreConfig(
+            id=client_id,
+            name=request.name,
+            read_write_connection_string=request.read_write_connection_string,
+            read_only_connection_string=request.read_only_connection_string,
+        )
+
+    @override
+    def update_vector_store_config(self, request: UpdateVectorStoreConfigRequest):
+        id_str = str(request.id)
+        if not self._config.has_section(id_str):
+            raise ValueError(f"Cannot find vector store config {request.id}")
+
+        if isinstance(request, UpdateMongoDbVectorStoreConfigRequest):
+            self.__update_mongodb_vector_store_config(request)
+        else:
+            raise NotImplementedError(
+                f'Updating vector store {type(request)} not supported'
+            )
+
+    def __update_mongodb_vector_store_config(
+        self, request: UpdateMongoDbVectorStoreConfigRequest
+    ):
+        id_str = str(request.id)
+
+        if self._config.get(id_str, "vector_store_type") != MONGODB_VECTOR_STORE_TYPE:
+            raise ValueError(f"ID {id_str} is not a MongoDB vector store config")
+
+        if request.new_read_write_connection_string:
+            self._config.set(
+                id_str,
+                "read_write_connection_string",
+                request.new_read_write_connection_string,
+            )
+
+        if request.new_read_only_connection_string:
+            self._config.set(
+                id_str,
+                "read_only_connection_string",
+                request.new_read_only_connection_string,
+            )
+
         self.flush()
 
     def flush(self):

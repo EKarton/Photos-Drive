@@ -33,6 +33,7 @@ class Diff:
         height (Optional[int]): The height of the image / video.
         date_taken (Optional[datetime]): The date and time for when the image / video
             was taken.
+        mime_type (Optional[str]): The mime type of the media item.
     """
 
     modifier: Modifier
@@ -44,3 +45,4 @@ class Diff:
     width: Optional[int] = None
     height: Optional[int] = None
     date_taken: Optional[datetime] = None
+    mime_type: Optional[str] = None

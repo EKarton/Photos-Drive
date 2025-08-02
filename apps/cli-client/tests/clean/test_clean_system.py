@@ -92,6 +92,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -171,6 +172,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -194,6 +196,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -290,6 +293,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -313,6 +317,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -458,6 +463,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -541,6 +547,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -556,6 +563,7 @@ class SystemCleanerTests(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 

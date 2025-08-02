@@ -2,6 +2,9 @@ import logging
 import math
 from typing import Generator
 from typing_extensions import Annotated
+from photos_drive.shared.llm.models.open_clip_image_embeddings import (
+    OpenCLIPImageEmbeddings,
+)
 from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
     MapCellsRepositoryImpl,
 )
@@ -118,7 +121,7 @@ def sync(
         print("No changes")
         return
 
-    diff_processor = DiffsProcessor()
+    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings())
     processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
 
     pretty_print_processed_diffs(processed_diffs)

@@ -266,7 +266,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unable to update album .*"):
             self.repo.update_album(album_id, updated_fields)
 
-    def test_update_albums__with_new_fields(self):
+    def test_update_many_albums(self):
         album_2010 = self.repo.create_album('2010', None)
         album_2011 = self.repo.create_album('2011', None)
         album_2012 = self.repo.create_album('2012', None)
@@ -274,25 +274,47 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         photo_album = self.repo.create_album('Photos', None)
 
         requests = [
-            UpdateAlbumRequest(album_2010.id, new_parent_album_id=photo_album.id),
-            UpdateAlbumRequest(album_2011.id, new_parent_album_id=photo_album.id),
-            UpdateAlbumRequest(album_2012.id, new_parent_album_id=photo_album.id),
-            UpdateAlbumRequest(album_2013.id, new_parent_album_id=photo_album.id),
+            UpdateAlbumRequest(
+                album_2010.id, new_name="1910", new_parent_album_id=photo_album.id
+            ),
+            UpdateAlbumRequest(
+                album_2011.id, new_name="1911", new_parent_album_id=photo_album.id
+            ),
+            UpdateAlbumRequest(
+                album_2012.id, new_name="1912", new_parent_album_id=photo_album.id
+            ),
+            UpdateAlbumRequest(
+                album_2013.id, new_name="1913", new_parent_album_id=photo_album.id
+            ),
         ]
         self.repo.update_many_albums(requests)
 
-        self.assertEqual(
-            self.repo.get_album_by_id(album_2010.id).parent_album_id, photo_album.id
-        )
-        self.assertEqual(
-            self.repo.get_album_by_id(album_2011.id).parent_album_id, photo_album.id
-        )
-        self.assertEqual(
-            self.repo.get_album_by_id(album_2012.id).parent_album_id, photo_album.id
-        )
-        self.assertEqual(
-            self.repo.get_album_by_id(album_2013.id).parent_album_id, photo_album.id
-        )
+        new_album_2010 = self.repo.get_album_by_id(album_2010.id)
+        self.assertEqual(new_album_2010.name, '1910')
+        self.assertEqual(new_album_2010.parent_album_id, photo_album.id)
+
+        new_album_2011 = self.repo.get_album_by_id(album_2011.id)
+        self.assertEqual(new_album_2011.name, '1911')
+        self.assertEqual(new_album_2011.parent_album_id, photo_album.id)
+
+        new_album_2012 = self.repo.get_album_by_id(album_2012.id)
+        self.assertEqual(new_album_2012.name, '1912')
+        self.assertEqual(new_album_2012.parent_album_id, photo_album.id)
+
+        new_album_2013 = self.repo.get_album_by_id(album_2013.id)
+        self.assertEqual(new_album_2013.name, '1913')
+        self.assertEqual(new_album_2013.parent_album_id, photo_album.id)
+
+    def test_update_many_albums_on_unknown_albums(self):
+        requests = [
+            UpdateAlbumRequest(
+                AlbumId(MONGO_CLIENT_ID, ObjectId()),
+                new_name="1910",
+            ),
+        ]
+
+        with self.assertRaisesRegex(ValueError, "Unable to update all albums: 0 vs 1"):
+            self.repo.update_many_albums(requests)
 
     def test_find_child_albums(self):
         parent_album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1a"))

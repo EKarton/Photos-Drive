@@ -165,3 +165,19 @@ def prompt_user_for_yes_no_answer(prompt_text: str) -> bool:
             return False
         else:
             print("Invalid input. Please enter \'y\' or \'n\'")
+
+
+def prompt_user_for_options(prompt_text: str, options: list[str]) -> str:
+    print(f'{prompt_text}: ')
+
+    for i in range(1, len(options) + 1):
+        print(f' {i} - {options[i - 1]}')
+
+    while True:
+        raw_input = input('Enter option: ')
+        user_input = raw_input.strip()
+
+        if user_input in options:
+            return user_input
+        else:
+            print(f"Invalid input. Please enter one of the options in {options}")

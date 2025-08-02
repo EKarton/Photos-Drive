@@ -1,5 +1,5 @@
+from photos_drive.cli.commands.db.generate_embeddings import generate_embeddings
 import typer
-
 from .set_media_item_width_height_date_taken_fields import (
     set_media_item_width_height_date_taken_fields,
 )
@@ -18,3 +18,4 @@ app.command()(set_media_item_width_height_date_taken_fields)
 app.command()(delete_child_album_ids_from_albums_db)
 app.command()(delete_media_items_without_album_id)
 app.command()(initialize_map_cells_db)
+app.command()(generate_embeddings)

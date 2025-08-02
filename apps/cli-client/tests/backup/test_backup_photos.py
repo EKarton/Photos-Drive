@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from bson import Binary
 from bson.objectid import ObjectId
+from photos_drive.shared.llm.models.testing.fake_image_embedder import FAKE_EMBEDDING
 from unittest_parametrize import parametrize
 from unittest_parametrize import ParametrizedTestCase
 
@@ -90,6 +91,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
             ProcessedDiff(
                 modifier='+',
@@ -102,6 +105,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
             ProcessedDiff(
                 modifier='+',
@@ -114,6 +119,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
             ProcessedDiff(
                 modifier='+',
@@ -126,6 +133,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
         ]
         backup = PhotosBackup(
@@ -311,6 +320,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -327,6 +337,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
         ]
         backup = PhotosBackup(
@@ -450,6 +462,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         map_cells_repo.add_media_item(dog_media_item)
@@ -466,6 +479,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         map_cells_repo.add_media_item(cat_media_item)
@@ -483,6 +497,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
         ]
         backup = PhotosBackup(
@@ -575,6 +591,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -591,6 +608,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
         ]
         backup = PhotosBackup(
@@ -679,6 +698,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         media_items_repo.create_media_item(
@@ -694,6 +714,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -710,6 +731,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
         ]
         backup = PhotosBackup(
@@ -804,6 +827,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
         media_items_repo.create_media_item(
@@ -819,6 +843,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 
@@ -835,6 +860,8 @@ class TestPhotosBackup(ParametrizedTestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
         ]
         backup = PhotosBackup(

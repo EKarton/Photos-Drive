@@ -31,7 +31,13 @@ This CLI will never delete content from your machine - it should only mirror the
 1. First, install a tool called [Exiftool](https://exiftool.org/)
    - It's a tool used to parse through exif metadata in your photos / videos.
 
-2. Second, install this Python package by running:
+2. Second, install torch and torchvision by running:
+
+   ```bash
+   pip3 install torch torchvision
+   ```
+
+3. Second, install this Python package by running:
 
    ```bash
    pip3 install photos_drive
@@ -250,31 +256,38 @@ It will delete all photos / videos from your system, and move all photos / video
    poetry install
    ```
 
-3. To lint your code, run:
+3. Install torch and torchvision by running:
+
+   ```bash
+   poetry env activate
+   pip install torch torchvision
+   ```
+
+4. To lint your code, run:
 
    ```bash
    poetry run mypy . && poetry run flake8 && poetry run black .
    ```
 
-4. To run all tests and code coverage, run:
+5. To run all tests and code coverage, run:
 
    ```bash
-   poetry run coverage run -m pytest && poetry run coverage report -m
+   poetry run coverage run  --source=photos_drive -m pytest tests/ && poetry run coverage report -m
    ```
 
-5. To run tests and code coverage for a particular test file, run:
+6. To run tests and code coverage for a particular test file, run:
 
    ```bash
-   poetry run coverage run -m pytest <insert-file-path> && poetry run coverage report -m
+   poetry run coverage run --source=photos_drive -m pytest <insert-file-path> && poetry run coverage report -m
    ```
 
    For example,
 
    ```bash
-   poetry run coverage run -m pytest tests/backup/test_backup_photos.py && poetry run coverage report -m
+   poetry run coverage run --source=photos_drive -m pytest tests/backup/test_backup_photos.py && poetry run coverage report -m
    ```
 
-6. To publish a new version of the app:
+7. To publish a new version of the app:
 
    1. First, bump up the package version by running:
 
