@@ -4,6 +4,10 @@ from typing import Optional, Dict, cast
 from collections import deque
 import logging
 from bson.objectid import ObjectId
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
+    BaseVectorStore,
+    CreateMediaItemEmbeddingRequest,
+)
 from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.media_items import MediaItem
@@ -71,6 +75,7 @@ class PhotosBackup:
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
         map_cells_repo: MapCellsRepository,
+        vector_store: BaseVectorStore,
         gphotos_client_repo: GPhotosClientsRepository,
         clients_repo: ClientsRepository,
         parallelize_uploads: bool = False,
@@ -79,6 +84,7 @@ class PhotosBackup:
         self.__albums_repo = albums_repo
         self.__media_items_repo = media_items_repo
         self.__map_cells_repo = map_cells_repo
+        self.__vector_store = vector_store
         self.__diffs_assigner = DiffsAssigner(gphotos_client_repo)
         self.__albums_pruner = AlbumsPruner(
             config.get_root_album_id(), albums_repo, media_items_repo
@@ -176,6 +182,14 @@ class PhotosBackup:
 
                 if media_item.location is not None:
                     self.__map_cells_repo.add_media_item(media_item)
+
+                if add_diff.embedding:
+                    self.__vector_store.add_media_item_embeddings(
+                        CreateMediaItemEmbeddingRequest(
+                            embedding=add_diff.embedding, media_item_id=media_item.id
+                        )
+                    )
+
                 total_num_media_item_added += 1
                 num_media_items += 1
 
