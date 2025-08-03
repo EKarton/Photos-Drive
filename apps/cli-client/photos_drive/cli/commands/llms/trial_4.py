@@ -77,12 +77,17 @@ def trial_4(config: Config):
         Tool(
             name="SearchPhotosByText",
             func=search_photos_by_text_with_reranking,
-            description="Search for photos matching a natural language text query. Input: a text string describing what to find (e.g., 'sunset in Santorini'). Returns a list of matching images with captions and file paths.",
+            description="Search for photos matching a natural language text query. "
+            + "Input: a text string describing what to find (e.g., "
+            + "'sunset in Santorini'). Returns a list of matching images with captions "
+            + "and file paths.",
         ),
         Tool(
             name="FindImageFilePathFromCaption",
             func=find_path_by_caption_snippet,
-            description="Given a short description or snippet from a photo caption, returns the exact file path of the matching image. Useful for resolving vague references like 'pine tree photo' to a file path.",
+            description="Given a short description or snippet from a photo caption, "
+            + "returns the exact file path of the matching image. Useful for resolving "
+            + "vague references like 'pine tree photo' to a file path.",
         ),
     ]
 
