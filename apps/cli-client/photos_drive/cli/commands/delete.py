@@ -3,6 +3,10 @@ from typing_extensions import Annotated
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
+from photos_drive.shared.llm.vector_stores import vector_store_builder
+from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
+    DistributedVectorStore,
+)
 from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
     MapCellsRepositoryImpl,
 )
@@ -87,6 +91,12 @@ def delete(
     albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
     media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
     map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
+    vector_store = DistributedVectorStore(
+        [
+            vector_store_builder.config_to_vector_store(vector_store_config)
+            for vector_store_config in config.get_vector_store_configs()
+        ]
+    )
 
     # Get the diffs
     diffs = [
@@ -112,6 +122,7 @@ def delete(
         albums_repo,
         media_items_repo,
         map_cells_repository,
+        vector_store,
         gphoto_clients_repo,
         mongodb_clients_repo,
     )

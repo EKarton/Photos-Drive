@@ -215,7 +215,11 @@ class PhotosBackup:
 
         # Step 10: Delete media items from vector store
         self.__vector_store.delete_media_item_embeddings(
-            [media_item.embedding_id for media_item in total_media_items_to_delete]
+            [
+                media_item.embedding_id
+                for media_item in total_media_items_to_delete
+                if media_item.embedding_id is not None
+            ]
         )
 
         # Step 11: Add media items with embeddings to vector store
@@ -231,11 +235,11 @@ class PhotosBackup:
             create_media_item_embedding_requests
         )
         update_media_items_requests: list[UpdateMediaItemRequest] = []
-        for media_item_embeddings in media_item_embeddings:
+        for media_item_embedding in media_item_embeddings:
             update_media_items_requests.append(
                 UpdateMediaItemRequest(
-                    media_item_id=media_item_embeddings.media_item_id,
-                    new_embedding_id=media_item_embeddings.id,
+                    media_item_id=media_item_embedding.media_item_id,
+                    new_embedding_id=media_item_embedding.id,
                 )
             )
         self.__media_items_repo.update_many_media_items(update_media_items_requests)
