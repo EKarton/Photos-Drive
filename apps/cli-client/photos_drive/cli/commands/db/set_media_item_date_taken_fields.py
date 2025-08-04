@@ -5,27 +5,18 @@ from typing import cast
 from typing_extensions import Annotated
 import typer
 from exiftool import ExifToolHelper
+from tqdm import tqdm
 
 from ....shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from ....cli.shared.config import build_config_from_options
-from ....cli.shared.inputs import (
+from ...shared.config import build_config_from_options
+from ...shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from ....cli.shared.logging import setup_logging
-from ....cli.shared.typer import (
+from ...shared.logging import setup_logging
+from ...shared.typer import (
     createMutuallyExclusiveGroup,
-)
-from ....shared.utils.dimensions.cv2_video_dimensions import (
-    get_width_height_of_video,
-)
-from ....shared.utils.dimensions.pillow_image_dimensions import (
-    get_width_height_of_image,
-)
-from ....shared.blob_store.gphotos.valid_file_extensions import (
-    IMAGE_FILE_EXTENSIONS,
-    VIDEO_FILE_EXTENSIONS,
 )
 from ....shared.metadata.album_id import AlbumId
 from ....shared.metadata.mongodb.albums_repository_impl import (
@@ -91,65 +82,48 @@ def set_media_item_width_height_date_taken_fields(
     root_album_id = config.get_root_album_id()
     albums_queue: deque[tuple[AlbumId, list[str]]] = deque([(root_album_id, [])])
 
-    while len(albums_queue) > 0:
-        album_id, prev_albums_path = albums_queue.popleft()
-        album = albums_repo.get_album_by_id(album_id)
+    with tqdm(desc="Finding media items") as pbar:
+        while len(albums_queue) > 0:
+            album_id, prev_albums_path = albums_queue.popleft()
+            album = albums_repo.get_album_by_id(album_id)
 
-        for child_album in albums_repo.find_child_albums(album.id):
-            if album_id == root_album_id:
-                albums_queue.append((child_album.id, prev_albums_path + ['.']))
-            else:
-                albums_queue.append(
-                    (child_album.id, prev_albums_path + [cast(str, album.name)])
-                )
-
-        for media_item in media_items_repo.find_media_items(
-            FindMediaItemRequest(album_id=album_id)
-        ):
-            if album_id == root_album_id:
-                file_path = '/'.join(prev_albums_path + [media_item.file_name])
-            else:
-                file_path = '/'.join(
-                    prev_albums_path + [cast(str, album.name), media_item.file_name]
-                )
-
-            if (
-                media_item.width != 0
-                and media_item.height != 0
-                and media_item.date_taken != datetime(1970, 1, 1)
-            ):
-                continue
-
-            try:
-                width, height = None, None
-                if file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
-                    width, height = get_width_height_of_image(file_path)
-                elif file_path.lower().endswith(VIDEO_FILE_EXTENSIONS):
-                    width, height = get_width_height_of_video(file_path)
+            for child_album in albums_repo.find_child_albums(album.id):
+                if album_id == root_album_id:
+                    albums_queue.append((child_album.id, prev_albums_path + ['.']))
                 else:
-                    raise ValueError(f'{file_path} is not image or video')
-            except Exception as e:
-                print(f"get_width_height() error for {file_path}:")
-                print(e)
-                continue
+                    albums_queue.append(
+                        (child_album.id, prev_albums_path + [cast(str, album.name)])
+                    )
 
-            try:
-                date_taken = get_date_taken(file_path)
-            except Exception as e:
-                print(f"get_date_taken() error for {file_path}:")
-                print(e)
-                continue
+            for media_item in media_items_repo.find_media_items(
+                FindMediaItemRequest(album_id=album_id)
+            ):
+                if album_id == root_album_id:
+                    file_path = '/'.join(prev_albums_path + [media_item.file_name])
+                else:
+                    file_path = '/'.join(
+                        prev_albums_path + [cast(str, album.name), media_item.file_name]
+                    )
+                pbar.update(1)
 
-            print(f'{file_path}: {width}x{height} from {date_taken}')
+                if media_item.date_taken != datetime(1970, 1, 1):
+                    continue
 
-            update_media_item_requests.append(
-                UpdateMediaItemRequest(
-                    media_item_id=media_item.id,
-                    new_width=width,
-                    new_height=height,
-                    new_date_taken=date_taken,
+                try:
+                    date_taken = get_date_taken(file_path)
+                except Exception as e:
+                    print(f"get_date_taken() error for {file_path}:")
+                    print(e)
+                    continue
+
+                print(f'{file_path}: taken at {date_taken}')
+
+                update_media_item_requests.append(
+                    UpdateMediaItemRequest(
+                        media_item_id=media_item.id,
+                        new_date_taken=date_taken,
+                    )
                 )
-            )
 
     if prompt_user_for_yes_no_answer('Is this correct? [Y/N]:'):
         media_items_repo.update_many_media_items(update_media_item_requests)
