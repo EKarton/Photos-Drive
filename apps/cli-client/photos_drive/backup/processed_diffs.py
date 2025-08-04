@@ -192,6 +192,9 @@ class DiffsProcessor:
         if diff.modifier == '-':
             return 0, 0
 
+        if diff.width is not None and diff.height is not None:
+            return diff.width and diff.height
+
         if is_image(mime_type):
             return get_width_height_of_image(diff.file_path)
         else:

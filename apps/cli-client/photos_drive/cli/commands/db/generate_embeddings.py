@@ -131,7 +131,15 @@ def generate_embeddings(
                         prev_albums_path + [cast(str, album.name), media_item.file_name]
                     )
 
-                diffs.append(Diff(modifier='+', file_path=file_path))
+                diffs.append(
+                    Diff(
+                        modifier='+',
+                        file_path=file_path,
+                        width=media_item.width,
+                        height=media_item.height,
+                        date_taken=media_item.date_taken,
+                    )
+                )
                 media_item_ids.append(media_item.id)
                 pbar.update(1)
 
