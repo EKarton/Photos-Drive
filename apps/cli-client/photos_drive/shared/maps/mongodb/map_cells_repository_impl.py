@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
 from photos_drive.shared.metadata.album_id import album_id_to_string
 from photos_drive.shared.metadata.media_item_id import (
+    MediaItemId,
     media_item_id_to_string,
 )
 from photos_drive.shared.metadata.media_items import MediaItem
@@ -52,7 +53,6 @@ class MapCellsRepositoryImpl(MapCellsRepository):
 
             for i in range(len(free_spaces)):
                 client_id, free_space = free_spaces[i]
-                print(free_space)
                 if free_space <= 0:
                     continue
 
@@ -94,14 +94,14 @@ class MapCellsRepositoryImpl(MapCellsRepository):
                 session=session,
             )
 
-    def remove_media_item(self, media_item: MediaItem):
+    def remove_media_item(self, media_item_id: MediaItemId):
         for client_id, client in self.mongodb_clients_repository.get_all_clients():
             session = self.mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
             client['photos_drive']['map_cells'].delete_many(
                 filter={
-                    "media_item_id": media_item_id_to_string(media_item.id),
+                    "media_item_id": media_item_id_to_string(media_item_id),
                 },
                 session=session,
             )

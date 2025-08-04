@@ -5,6 +5,10 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, Mapping, cast
 
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
+    embedding_id_to_string,
+    parse_string_to_embedding_id,
+)
 from photos_drive.shared.metadata.album_id import (
     AlbumId,
     album_id_to_string,
@@ -140,6 +144,9 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                 "coordinates": [request.location.longitude, request.location.latitude],
             }
 
+        if request.embedding_id:
+            data_object["embedding_id"] = embedding_id_to_string(request.embedding_id)
+
         insert_result = client["photos_drive"]["media_items"].insert_one(
             document=data_object, session=session
         )
@@ -155,10 +162,8 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             width=request.width,
             height=request.height,
             date_taken=request.date_taken,
+            embedding_id=request.embedding_id,
         )
-
-    def update_media_item(self, request: UpdateMediaItemRequest):
-        self.update_many_media_items([request])
 
     def update_many_media_items(self, requests: list[UpdateMediaItemRequest]):
         client_id_to_operations: Dict[ObjectId, list[pymongo.UpdateOne]] = defaultdict(
@@ -203,6 +208,13 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
                         request.new_location.latitude,
                     ],
                 }
+
+            if request.clear_embedding_id:
+                set_query["$set"]['embedding_id'] = None
+            elif request.new_embedding_id is not None:
+                set_query["$set"]['embedding_id'] = embedding_id_to_string(
+                    request.new_embedding_id
+                )
 
             operation = pymongo.UpdateOne(
                 filter=filter_query, update=set_query, upsert=False
@@ -280,6 +292,10 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         if 'height' in raw_item and raw_item['height']:
             height = cast(int, raw_item['height'])
 
+        embedding_id = None
+        if "embedding_id" in raw_item and raw_item["embedding_id"]:
+            embedding_id = parse_string_to_embedding_id(raw_item["embedding_id"])
+
         return MediaItem(
             id=MediaItemId(client_id, cast(ObjectId, raw_item["_id"])),
             file_name=raw_item["file_name"],
@@ -291,4 +307,5 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             width=width,
             height=height,
             date_taken=date_taken,
+            embedding_id=embedding_id,
         )

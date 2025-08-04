@@ -27,7 +27,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -50,7 +50,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -62,4 +62,4 @@ jobs:
         run: |
           cd ./apps/cli-client
           poetry install --no-interaction
-          poetry run coverage run -m pytest && poetry run coverage report -m
+          poetry run coverage run --source=photos_drive -m pytest && poetry run coverage report -m

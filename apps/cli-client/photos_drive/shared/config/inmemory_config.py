@@ -5,11 +5,15 @@ from ..metadata.album_id import AlbumId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
+    AddMongoDbVectorStoreConfigRequest,
+    AddVectorStoreConfigRequest,
     Config,
     GPhotosConfig,
     MongoDbConfig,
+    MongoDbVectorStoreConfig,
     UpdateGPhotosConfigRequest,
     UpdateMongoDbConfigRequest,
+    VectorStoreConfig,
 )
 
 
@@ -19,6 +23,7 @@ class InMemoryConfig(Config):
     def __init__(self) -> None:
         self.__id_to_mongodb_config: Dict[ObjectId, MongoDbConfig] = {}
         self.__id_to_gphotos_config: Dict[ObjectId, GPhotosConfig] = {}
+        self.__id_to_vector_store_config: Dict[ObjectId, VectorStoreConfig] = {}
         self.__root_album_id: AlbumId | None = None
 
     @override
@@ -109,6 +114,66 @@ class InMemoryConfig(Config):
     @override
     def set_root_album_id(self, album_id: AlbumId):
         self.__root_album_id = album_id
+
+    @override
+    def get_vector_store_configs(self) -> list[VectorStoreConfig]:
+        return [item for _, item in self.__id_to_vector_store_config.items()]
+
+    @override
+    def add_vector_store_config(
+        self, request: AddVectorStoreConfigRequest
+    ) -> VectorStoreConfig:
+        if isinstance(request, AddMongoDbVectorStoreConfigRequest):
+            return self._add_mongodb_vector_store_config(request)
+        else:
+            raise NotImplementedError(f'Adding {request} vector store not supported!')
+
+    def _add_mongodb_vector_store_config(
+        self, request: AddMongoDbVectorStoreConfigRequest
+    ) -> MongoDbVectorStoreConfig:
+        new_id = self.__generate_unique_object_id()
+        config = MongoDbVectorStoreConfig(
+            id=new_id,
+            name=request.name,
+            read_write_connection_string=request.read_write_connection_string,
+            read_only_connection_string=request.read_only_connection_string,
+        )
+        self.__id_to_vector_store_config[new_id] = config
+        return config
+
+    @override
+    def update_vector_store_config(self, request):
+        if isinstance(request, UpdateMongoDbConfigRequest):
+            self._update_mongodb_vector_store_config(request)
+        else:
+            raise NotImplementedError(f'Adding {request} vector store not supported!')
+
+    def _update_mongodb_vector_store_config(self, request: UpdateMongoDbConfigRequest):
+        if request.id not in self.__id_to_vector_store_config:
+            raise ValueError(f"Vector config {request.id} does not exist")
+
+        old_config = self.__id_to_vector_store_config[request.id]
+        if not isinstance(old_config, MongoDbVectorStoreConfig):
+            raise ValueError(
+                f'Vector config {request.id} is not a MongoDB Vector Store config'
+            )
+
+        new_config = MongoDbVectorStoreConfig(
+            id=old_config.id,
+            name=request.new_name if request.new_name else old_config.name,
+            read_write_connection_string=(
+                request.new_read_write_connection_string
+                if request.new_read_write_connection_string
+                else old_config.read_write_connection_string
+            ),
+            read_only_connection_string=(
+                request.new_read_only_connection_string
+                if request.new_read_only_connection_string
+                else old_config.read_only_connection_string
+            ),
+        )
+
+        self.__id_to_vector_store_config[request.id] = new_config
 
     def __generate_unique_object_id(self) -> ObjectId:
         id = ObjectId()

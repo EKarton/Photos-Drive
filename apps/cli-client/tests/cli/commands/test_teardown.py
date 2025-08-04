@@ -88,6 +88,7 @@ class TestTeardownCli(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
             )
         )
 

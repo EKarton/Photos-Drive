@@ -11,7 +11,6 @@ class ClientsRepository(ABC):
         Returns:
             ObjectId: the client ID with the most amount of space.
         """
-        pass
 
     @abstractmethod
     def get_free_space_for_all_clients(self) -> list[tuple[ObjectId, int]]:
@@ -33,7 +32,6 @@ class ClientsRepository(ABC):
         A call to abort_and_end_transactions() will abort and roll back all
         transactions.
         '''
-        pass
 
     @abstractmethod
     def abort_and_end_transactions(self):
@@ -41,7 +39,6 @@ class ClientsRepository(ABC):
         Aborts the transactions and ends the session.
         Note: it must call start_transactions() first before calling this method.
         '''
-        pass
 
     @abstractmethod
     def commit_and_end_transactions(self):
@@ -49,4 +46,3 @@ class ClientsRepository(ABC):
         Commits the transactions and ends the session.
         Note: it must call start_transactions() first before calling this method.
         '''
-        pass

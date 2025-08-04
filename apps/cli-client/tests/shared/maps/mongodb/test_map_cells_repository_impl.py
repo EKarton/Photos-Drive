@@ -38,6 +38,7 @@ MEDIA_ITEM = MediaItem(
     width=4000,
     height=3000,
     date_taken=datetime(2026, 1, 1, 14, 30, 0),
+    embedding_id=None,
 )
 
 
@@ -87,6 +88,7 @@ class TestMapCellsRepositoryImpl(unittest.TestCase):
             width=4000,
             height=3000,
             date_taken=datetime(2026, 1, 1, 14, 30, 0),
+            embedding_id=None,
         )
 
         with self.assertRaises(ValueError) as context:
@@ -102,7 +104,7 @@ class TestMapCellsRepositoryImpl(unittest.TestCase):
         self.assertGreater(len(inserted), 0)
 
         # Now, remove the media item
-        self.repo.remove_media_item(MEDIA_ITEM)
+        self.repo.remove_media_item(MEDIA_ITEM.id)
 
         # Check that cells were deleted
         deleted = list(self.mongo_client["photos_drive"]["map_cells"].find())

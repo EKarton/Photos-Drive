@@ -123,6 +123,91 @@ class UpdateGPhotosConfigRequest:
     new_read_only_credentials: Optional[Credentials] = None
 
 
+@dataclass(frozen=True)
+class VectorStoreConfig:
+    '''
+    A data class that represents a vector store config
+
+    Attributes:
+        id (ObjectId): A unique ID representing this vector store.
+        name (str): A name for this vector store
+    '''
+
+    id: ObjectId
+    name: str
+
+
+@dataclass(frozen=True)
+class MongoDbVectorStoreConfig(VectorStoreConfig):
+    '''
+    A data class that represents a MongoDB Vector Store config
+
+    Attributes:
+        read_write_connection_string (str): The connection string to the account,
+            with read-write permissions
+        read_only_connection_string (str): The connection string to the account,
+            with read-only access.
+    '''
+
+    read_write_connection_string: str
+    read_only_connection_string: str
+
+
+@dataclass(frozen=True)
+class AddVectorStoreConfigRequest:
+    '''
+    A data class that represents a request to add a Vector Store config
+    '''
+
+    name: str
+
+
+@dataclass(frozen=True)
+class AddMongoDbVectorStoreConfigRequest(AddVectorStoreConfigRequest):
+    '''
+    A data class that represents a MongoDB Vector Store config
+
+    Attributes:
+        read_write_connection_string (str): The connection string to the account,
+            with read-write permissions
+        read_only_connection_string (str): The connection string to the account,
+            with read-only access.
+    '''
+
+    read_write_connection_string: str
+    read_only_connection_string: str
+
+
+@dataclass(frozen=True)
+class UpdateVectorStoreConfigRequest:
+    '''
+    A data class that represents the request to update an existing vector store config.
+
+    Attributes:
+        id (ObjectId): The ID of the vector store config
+    '''
+
+    id: ObjectId
+
+
+@dataclass(frozen=True)
+class UpdateMongoDbVectorStoreConfigRequest(UpdateVectorStoreConfigRequest):
+    '''
+    A data class that represents a request to update an existing MongoDB configuration.
+
+    Attributes:
+        new_name (Optional[str]): The new name of the account, if present.
+        new_read_write_connection_string (Optional[str]): The new connection string to
+            the MongoDB instance with read-write permissions, if present.
+        new_read_connection_string (Optional[str]): The new connection string to the
+            MongoDB instance with only read permissions, if present.
+    '''
+
+    new_name: Optional[str] = None
+    new_read_write_connection_string: Optional[str] = None
+    new_read_only_connection_string: Optional[str] = None
+
+
 class Config(ABC):
     @abstractmethod
     def get_mongodb_configs(self) -> list[MongoDbConfig]:
@@ -178,6 +263,40 @@ class Config(ABC):
         Args:
             request (UpdateGPhotosConfigRequest): A request to update an existing
                 GPhotos config.
+        '''
+
+    @abstractmethod
+    def get_vector_store_configs(self) -> list[VectorStoreConfig]:
+        '''
+        Returns a list of all vector store configs in the config.
+
+        Returns:
+            list[VectorStoreConfig]: A list of all vector store configs.
+        '''
+
+    @abstractmethod
+    def add_vector_store_config(
+        self, request: AddVectorStoreConfigRequest
+    ) -> VectorStoreConfig:
+        '''
+        Adds a vector store config to the config
+
+        Args:
+            request (AddVectorStoreConfigRequest): The request to add a vector store
+                to the config.
+
+        Returns:
+            VectorStoreConfig: A new vector store config with an assigned ID.
+        '''
+
+    @abstractmethod
+    def update_vector_store_config(self, request: UpdateVectorStoreConfigRequest):
+        '''
+        Updates an existing vector store config in the configs
+
+        Args:
+            request (UpdateVectorStoreConfigRequest): The request to update an vector
+                store in the config
         '''
 
     @abstractmethod

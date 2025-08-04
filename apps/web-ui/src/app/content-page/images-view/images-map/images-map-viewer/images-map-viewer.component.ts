@@ -381,7 +381,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         maxzoom: 22,
         paint: {
           // Customize heatmap style as you want
-          'heatmap-weight': 1,
+          'heatmap-weight': ['get', 'count'],
           'heatmap-intensity': 1,
           'heatmap-color': [
             'interpolate',

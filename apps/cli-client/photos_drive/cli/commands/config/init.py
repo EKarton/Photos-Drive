@@ -8,11 +8,14 @@ from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,
     prompt_user_for_gphotos_credentials,
     prompt_user_for_mongodb_connection_string,
+    prompt_user_for_non_empty_input_string,
+    prompt_user_for_options,
 )
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
+    AddMongoDbVectorStoreConfigRequest,
     Config,
 )
 from photos_drive.shared.config.config_from_file import (
@@ -53,15 +56,12 @@ def init(
     # Step 1: Ask for Mongo DB account
     print("First, let's log into your first Mongo DB account.")
     mongodb_name = __get_non_empty_name_for_mongodb()
-
     mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
-        "Enter your read+write connection string: "
+        "Enter your admin connection string: "
     )
-
     mongodb_r_connection_string = prompt_user_for_mongodb_connection_string(
         "Enter your read-only connection string: "
     )
-
     config.add_mongodb_config(
         AddMongoDbConfigRequest(
             name=mongodb_name,
@@ -73,13 +73,10 @@ def init(
     # Step 2: Ask for Google Photo account
     print("Now it's time to log in to your first Google Photos account.")
     gphotos_name = __get_non_empty_name_for_gphotos()
-
     print("Now, time to log into your Google account for read+write access\n")
     gphotos_rw_credentials = prompt_user_for_gphotos_credentials()
-
     print("Now, time to log into your Google account for read-only access\n")
     gphotos_r_credentials = prompt_user_for_gphotos_credentials(READ_ONLY_SCOPES)
-
     config.add_gphotos_config(
         AddGPhotosConfigRequest(
             name=gphotos_name,
@@ -87,6 +84,30 @@ def init(
             read_only_credentials=gphotos_r_credentials,
         )
     )
+
+    # Step 3: Ask for the vector store config
+    print("Now it's time to add your vector store account")
+    vector_store_name = prompt_user_for_non_empty_input_string(
+        "Enter name of your vector store: "
+    )
+    options = prompt_user_for_options(
+        "Which type of vector store do you want to add?", ['MongoDB']
+    )
+    if options == 'MongoDB':
+        mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
+            "Enter your admin connection string: "
+        )
+        mongodb_r_connection_string = prompt_user_for_mongodb_connection_string(
+            "Enter your read-only connection string: "
+        )
+
+        config.add_vector_store_config(
+            AddMongoDbVectorStoreConfigRequest(
+                name=vector_store_name,
+                read_write_connection_string=mongodb_rw_connection_string,
+                read_only_connection_string=mongodb_r_connection_string,
+            )
+        )
 
     # Step 3: Create root album in Mongo DB account
     print("Perfect! Setting up your accounts...")
@@ -123,6 +144,13 @@ def init(
         print(f"      {get_config_add_gphotos_config_file_cli()}")
     else:
         print(f"      {get_config_add_gphotos_config_file_cli()}")
+    print(
+        "\nMoreover, you can add more vector stores storage by: \n" + "  1. Running:\n"
+    )
+    if type(config) is ConfigFromFile:
+        print(f"      {get_config_add_vector_store_config_file_cli()}")
+    else:
+        print(f"      {get_config_add_vector_store_config_mongodb_cli()}")
 
     print("\nThat's it! Have fun uploading photos!")
 
@@ -173,7 +201,7 @@ def __prompt_which_config_type() -> str:
 
 def __prompt_mongodb_config() -> ConfigFromMongoDb:
     connection_string = prompt_user_for_mongodb_connection_string(
-        "Enter your read+write connection string: "
+        "Enter your admin connection string: "
     )
     return ConfigFromMongoDb(MongoClient(connection_string))
 
@@ -229,9 +257,17 @@ def get_config_add_mongodb_config_file_cli():
     return "photos_drive_cli config add mongodb --config-file <file-path>"
 
 
+def get_config_add_vector_store_config_file_cli():
+    return "photos_drive_cli config add vector-store --config-file <file-path>"
+
+
 def get_config_add_gphotos_config_mongodb_cli():
     return "photos_drive_cli config add gphotos --config-mongodb <file-path>"
 
 
 def get_config_add_mongodb_config_mongodb_cli():
     return "photos_drive_cli config add mongodb --config-mongodb <file-path>"
+
+
+def get_config_add_vector_store_config_mongodb_cli():
+    return "photos_drive_cli config add vector-store --config-mongodb <file-path>"

@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "photos_drive"
-version = "7.0.0"
+version = "8.0.0"
 description = ""
 authors = ["Emilio Kartono <e.kartonoe@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = ">=3.12,<3.13"
 exifread = "^3.0.0"
 typer = "^0.15.1"
 backoff = "^2.2.1"
@@ -18,7 +18,7 @@ tqdm = "^4.67.1"
 event-bus = "^1.0.2"
 dacite = "^1.8.1"
 types-exifread = "^3.0.0.20240806"
-pymongo = "^4.10.1"
+pymongo = "<4.11"
 prettytable = "^3.12.0"
 termcolor = "^2.5.0"
 xxhash = "^3.5.0"
@@ -27,7 +27,20 @@ pillow = "^11.2.1"
 pillow-heif = "^0.22.0"
 opencv-python-headless = "^4.11.0.86"
 h3 = "^4.3.0"
-
+langchain = "^0.3.26"
+faiss-cpu = "^1.11.0.post1"
+langchain-google-vertexai = "^2.0.27"
+langchain-community = "^0.3.27"
+langchain-experimental = "^0.3.4"
+torch = "=2.2.2"
+numpy = "<2"
+open-clip-torch = "^2.32.0"
+langchain-google-genai = "^2.1.8"
+transformers = "^4.53.2"
+pydantic = "^2.11.7"
+langgraph = "^0.5.4"
+langmem = "^0.0.28"
+rich = "^14.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"
@@ -42,6 +55,11 @@ freezegun = "^1.5.1"
 mongomock = "^4.3.0"
 pyfakefs = "^5.7.4"
 unittest-parametrize = "^1.6.0"
+
+[[tool.poetry.source]]
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
 
 [build-system]
 requires = ["poetry-core"]

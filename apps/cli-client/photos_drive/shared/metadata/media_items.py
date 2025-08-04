@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 from bson.objectid import ObjectId
 
+from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.album_id import AlbumId
 
@@ -40,6 +41,8 @@ class MediaItem:
         width: (int): The width of the image / video.
         height (int): The height of the image / video.
         date_taken (datetime): The date and time for when the image / video was taken.
+        embedding_id (Optional[MediaItemEmbeddingId]): The ID referring to its embedding
+            in the vector store.
     """
 
     id: MediaItemId
@@ -52,3 +55,4 @@ class MediaItem:
     width: int
     height: int
     date_taken: datetime
+    embedding_id: Optional[MediaItemEmbeddingId]

@@ -9,6 +9,7 @@ from photos_drive.cli.shared.printer import (
     pretty_print_diffs,
     pretty_print_processed_diffs,
 )
+from photos_drive.shared.llm.models.testing.fake_image_embedder import FAKE_EMBEDDING
 from photos_drive.shared.metadata.media_items import GpsLocation
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
@@ -30,6 +31,8 @@ class TestPrettyPrintProcessedDiffs(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/jpeg',
+                embedding=FAKE_EMBEDDING,
             ),
             ProcessedDiff(
                 modifier='-',
@@ -42,6 +45,8 @@ class TestPrettyPrintProcessedDiffs(unittest.TestCase):
                 width=100,
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
+                mime_type='image/png',
+                embedding=FAKE_EMBEDDING,
             ),
         ]
 
