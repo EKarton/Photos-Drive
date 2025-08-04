@@ -18,9 +18,6 @@ from photos_drive.shared.utils.dimensions.cv2_video_dimensions import (
 from photos_drive.shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
-from photos_drive.shared.blob_store.gphotos.valid_file_extensions import (
-    IMAGE_FILE_EXTENSIONS,
-)
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
 from photos_drive.shared.metadata.media_items import GpsLocation
 from photos_drive.backup.diffs import Diff, Modifier
@@ -117,7 +114,8 @@ class DiffsProcessor:
             if diff.modifier == "+" and not os.path.exists(diff.file_path):
                 raise ValueError(f"File {diff.file_path} does not exist.")
 
-            width, height = self.__get_width_height(diff)
+            mime_type = self.__get_mime_type(diff)
+            width, height = self.__get_width_height(diff, mime_type)
 
             return ProcessedDiff(
                 modifier=diff.modifier,
@@ -190,11 +188,11 @@ class DiffsProcessor:
 
         return os.path.getsize(diff.file_path)
 
-    def __get_width_height(self, diff: Diff) -> tuple[int, int]:
+    def __get_width_height(self, diff: Diff, mime_type: str) -> tuple[int, int]:
         if diff.modifier == '-':
             return 0, 0
 
-        if diff.file_path.lower().endswith(IMAGE_FILE_EXTENSIONS):
+        if is_image(mime_type):
             return get_width_height_of_image(diff.file_path)
         else:
             return get_width_height_of_video(diff.file_path)
