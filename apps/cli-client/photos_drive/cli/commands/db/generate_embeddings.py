@@ -18,6 +18,7 @@ from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
 from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items import GpsLocation
 import typer
 from ....shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
@@ -138,6 +139,7 @@ def generate_embeddings(
                         width=media_item.width,
                         height=media_item.height,
                         date_taken=media_item.date_taken,
+                        location=media_item.location,
                     )
                 )
                 media_item_ids.append(media_item.id)
