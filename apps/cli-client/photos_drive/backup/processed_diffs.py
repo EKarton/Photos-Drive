@@ -24,6 +24,8 @@ from photos_drive.backup.diffs import Diff, Modifier
 
 logger = logging.getLogger(__name__)
 
+Image.MAX_IMAGE_PIXELS = None
+
 DEFAULT_DATE_TIME = datetime(1970, 1, 1)
 
 EMPTY_EMBEDDING = np.empty((1,), dtype=np.float32)
