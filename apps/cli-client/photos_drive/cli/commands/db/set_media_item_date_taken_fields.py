@@ -37,7 +37,7 @@ config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 
 
 @app.command()
-def set_media_item_width_height_date_taken_fields(
+def set_media_item_date_taken_fields(
     config_file: Annotated[
         str | None,
         typer.Option(
@@ -73,7 +73,7 @@ def set_media_item_width_height_date_taken_fields(
     setup_logging(verbose)
 
     logger.debug(
-        "Called db set-media-item-width-height-date-taken-fields handler with args:\n"
+        "Called db set-media-item-date-taken-fields handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
         + f" rewrite={rewrite}\n"
