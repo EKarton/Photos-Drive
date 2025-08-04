@@ -18,7 +18,6 @@ from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
 from photos_drive.shared.metadata.media_item_id import MediaItemId
-from photos_drive.shared.metadata.media_items import GpsLocation
 import typer
 from ....shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
