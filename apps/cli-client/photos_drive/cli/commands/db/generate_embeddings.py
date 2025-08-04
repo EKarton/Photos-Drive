@@ -2,6 +2,7 @@ from collections import deque
 import logging
 from typing import cast
 from typing_extensions import Annotated
+from tqdm import tqdm
 from photos_drive.backup.diffs import Diff
 from photos_drive.backup.processed_diffs import DiffsProcessor
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
@@ -107,30 +108,32 @@ def generate_embeddings(
     diffs: list[Diff] = []
     media_item_ids: list[MediaItemId] = []
 
-    while len(albums_queue) > 0:
-        album_id, prev_albums_path = albums_queue.popleft()
-        album = albums_repo.get_album_by_id(album_id)
+    with tqdm(desc="Finding media items") as pbar:
+        while len(albums_queue) > 0:
+            album_id, prev_albums_path = albums_queue.popleft()
+            album = albums_repo.get_album_by_id(album_id)
 
-        for child_album in albums_repo.find_child_albums(album.id):
-            if album_id == root_album_id:
-                albums_queue.append((child_album.id, prev_albums_path + ['.']))
-            else:
-                albums_queue.append(
-                    (child_album.id, prev_albums_path + [cast(str, album.name)])
-                )
+            for child_album in albums_repo.find_child_albums(album.id):
+                if album_id == root_album_id:
+                    albums_queue.append((child_album.id, prev_albums_path + ['.']))
+                else:
+                    albums_queue.append(
+                        (child_album.id, prev_albums_path + [cast(str, album.name)])
+                    )
 
-        for media_item in media_items_repo.find_media_items(
-            FindMediaItemRequest(album_id=album_id)
-        ):
-            if album_id == root_album_id:
-                file_path = '/'.join(prev_albums_path + [media_item.file_name])
-            else:
-                file_path = '/'.join(
-                    prev_albums_path + [cast(str, album.name), media_item.file_name]
-                )
+            for media_item in media_items_repo.find_media_items(
+                FindMediaItemRequest(album_id=album_id)
+            ):
+                if album_id == root_album_id:
+                    file_path = '/'.join(prev_albums_path + [media_item.file_name])
+                else:
+                    file_path = '/'.join(
+                        prev_albums_path + [cast(str, album.name), media_item.file_name]
+                    )
 
-            diffs.append(Diff(modifier='+', file_path=file_path))
-            media_item_ids.append(media_item.id)
+                diffs.append(Diff(modifier='+', file_path=file_path))
+                media_item_ids.append(media_item.id)
+                pbar.update(1)
 
     print(f"Need to generate {len(diffs)} embeddings")
 
