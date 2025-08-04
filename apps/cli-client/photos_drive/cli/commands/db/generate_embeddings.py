@@ -132,40 +132,33 @@ def generate_embeddings(
             diffs.append(Diff(modifier='+', file_path=file_path))
             media_item_ids.append(media_item.id)
 
-    print("Got diffs:")
-    print(diffs)
+    print(f"Need to generate {len(diffs)} embeddings")
 
     diffs_processor = DiffsProcessor(image_embedder=image_embedder)
     processed_diffs = diffs_processor.process_raw_diffs(diffs)
-
-    print("Processed diffs:")
-    print(processed_diffs)
 
     assert len(media_item_ids) == len(diffs) == len(processed_diffs)
 
     if not prompt_user_for_yes_no_answer('Add embeddings to metadata db? [Y/N]:'):
         raise ValueError("Operation cancelled")
 
-    create_media_item_embedding_req: list[CreateMediaItemEmbeddingRequest] = []
-    for media_item_id, processed_diff in zip(media_item_ids, processed_diffs):
-        create_media_item_embedding_req.append(
-            CreateMediaItemEmbeddingRequest(
-                embedding=processed_diff.embedding, media_item_id=media_item_id
-            )
+    create_media_item_embedding_req: list[CreateMediaItemEmbeddingRequest] = [
+        CreateMediaItemEmbeddingRequest(
+            embedding=processed_diff.embedding, media_item_id=media_item_id
         )
-
+        for media_item_id, processed_diff in zip(media_item_ids, processed_diffs)
+    ]
     media_item_embeddings = vector_store.add_media_item_embeddings(
         create_media_item_embedding_req
     )
     print("Added embeddings to vector store")
 
-    update_media_item_requests: list[UpdateMediaItemRequest] = []
-    for media_item_embedding in media_item_embeddings:
-        update_media_item_requests.append(
-            UpdateMediaItemRequest(
-                media_item_id=media_item.id, new_embedding_id=media_item_embedding.id
-            )
+    update_media_item_requests: list[UpdateMediaItemRequest] = [
+        UpdateMediaItemRequest(
+            media_item_id=media_item_embedding.media_item_id,
+            new_embedding_id=media_item_embedding.id,
         )
-
+        for media_item_embedding in media_item_embeddings
+    ]
     media_items_repo.update_many_media_items(update_media_item_requests)
     print("Updated media items store with embedding references")

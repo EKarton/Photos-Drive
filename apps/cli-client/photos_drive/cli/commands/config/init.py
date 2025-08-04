@@ -57,7 +57,7 @@ def init(
     print("First, let's log into your first Mongo DB account.")
     mongodb_name = __get_non_empty_name_for_mongodb()
     mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
-        "Enter your read+write connection string: "
+        "Enter your admin connection string: "
     )
     mongodb_r_connection_string = prompt_user_for_mongodb_connection_string(
         "Enter your read-only connection string: "
@@ -95,7 +95,7 @@ def init(
     )
     if options == 'MongoDB':
         mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
-            "Enter your read+write connection string: "
+            "Enter your admin connection string: "
         )
         mongodb_r_connection_string = prompt_user_for_mongodb_connection_string(
             "Enter your read-only connection string: "
@@ -201,7 +201,7 @@ def __prompt_which_config_type() -> str:
 
 def __prompt_mongodb_config() -> ConfigFromMongoDb:
     connection_string = prompt_user_for_mongodb_connection_string(
-        "Enter your read+write connection string: "
+        "Enter your admin connection string: "
     )
     return ConfigFromMongoDb(MongoClient(connection_string))
 

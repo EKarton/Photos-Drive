@@ -126,7 +126,7 @@ def mongodb(
     )
 
     read_write_connection_string = prompt_user_for_mongodb_connection_string(
-        "Enter your read+write connection string: "
+        "Enter your admin connection string: "
     )
 
     read_only_connection_string = prompt_user_for_mongodb_connection_string(
@@ -188,7 +188,7 @@ def vector_store(
 
     if option == 'MongoDB':
         read_write_connection_string = prompt_user_for_mongodb_connection_string(
-            "Enter your read+write connection string: "
+            "Enter your admin connection string: "
         )
 
         read_only_connection_string = prompt_user_for_mongodb_connection_string(
