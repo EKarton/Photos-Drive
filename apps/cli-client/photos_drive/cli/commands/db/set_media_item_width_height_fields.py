@@ -63,6 +63,13 @@ def set_media_item_width_height_date_taken_fields(
             callback=config_exclusivity_callback,
         ),
     ] = None,
+    rewrite: Annotated[
+        bool,
+        typer.Option(
+            "--rewrite",
+            help="Whether to rewrite all the existing width and height data",
+        ),
+    ] = False,
     verbose: Annotated[
         bool,
         typer.Option(
@@ -77,6 +84,7 @@ def set_media_item_width_height_date_taken_fields(
         "Called db set-media-item-width-height-date-taken-fields handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
+        + f" rewrite={rewrite}\n"
         + f" verbose={verbose}"
     )
 
@@ -114,7 +122,7 @@ def set_media_item_width_height_date_taken_fields(
                     )
                 pbar.update(1)
 
-                if media_item.width != 0 and media_item.height != 0:
+                if not rewrite and media_item.width != 0 and media_item.height != 0:
                     continue
 
                 try:
