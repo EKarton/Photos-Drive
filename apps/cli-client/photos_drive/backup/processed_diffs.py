@@ -128,7 +128,7 @@ class DiffsProcessor:
                 width=width,
                 height=height,
                 date_taken=DEFAULT_DATE_TIME,  # Placeholder; will be updated later
-                mime_type=self.__get_mime_type(diff),
+                mime_type=mime_type,
                 embedding=EMPTY_EMBEDDING,
             )
 

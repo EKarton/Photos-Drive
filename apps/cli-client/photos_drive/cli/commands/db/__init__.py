@@ -1,7 +1,10 @@
 from photos_drive.cli.commands.db.generate_embeddings import generate_embeddings
 import typer
-from .set_media_item_width_height_date_taken_fields import (
-    set_media_item_width_height_date_taken_fields,
+from .set_media_item_date_taken_fields import (
+    set_media_item_date_taken_fields,
+)
+from .set_media_item_width_height_fields import (
+    set_media_item_width_height_fields,
 )
 from .dump import dump
 from .restore import restore
@@ -14,7 +17,8 @@ app = typer.Typer()
 app.command()(dump)
 app.command()(restore)
 app.command()(delete_media_item_ids_from_albums_db)
-app.command()(set_media_item_width_height_date_taken_fields)
+app.command()(set_media_item_width_height_fields)
+app.command()(set_media_item_date_taken_fields)
 app.command()(delete_child_album_ids_from_albums_db)
 app.command()(delete_media_items_without_album_id)
 app.command()(initialize_map_cells_db)
