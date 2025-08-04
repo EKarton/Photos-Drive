@@ -8,7 +8,7 @@ from tqdm import tqdm
 import magic
 from exiftool import ExifToolHelper
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFile
 
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 from photos_drive.shared.utils.mime_type.utils import is_image
@@ -25,6 +25,7 @@ from photos_drive.backup.diffs import Diff, Modifier
 logger = logging.getLogger(__name__)
 
 Image.MAX_IMAGE_PIXELS = None
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 DEFAULT_DATE_TIME = datetime(1970, 1, 1)
 
@@ -316,7 +317,7 @@ class DiffsProcessor:
             images = []
             for _, diff in diff_batch:
                 with Image.open(diff.file_path) as img:
-                    images.append(img.convert("RGB"))
+                    images.append(img.convert("RGB").copy())
             return images
 
         with tqdm(

@@ -27,6 +27,7 @@ class TestDiffsProcessor(unittest.TestCase):
             "image-without-location.jpg",
             "heic-image-2.heic",
             "video.mov",
+            "large_image.jpg",
         ]
         diffs = [
             Diff(
@@ -40,6 +41,7 @@ class TestDiffsProcessor(unittest.TestCase):
 
         processor = DiffsProcessor(FakeImageEmbedder())
         processed_diffs = processor.process_raw_diffs(diffs)
+        self.assertEqual(len(processed_diffs), 7)
         self.assertEqual(
             processed_diffs[0],
             ProcessedDiff(
@@ -145,6 +147,26 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=1308,
                 date_taken=datetime(2022, 5, 29, 11, 19, 1),
                 mime_type='video/quicktime',
+                embedding=EMPTY_EMBEDDING,
+            ),
+        )
+        # self.assertIsNone(processed_diffs[6])
+        self.assertEqual(
+            processed_diffs[6],
+            ProcessedDiff(
+                modifier='+',
+                file_path=diffs[6].file_path,
+                album_name='tests/backup/resources/test_processed_diffs_files',
+                file_name='large_image.jpg',
+                file_size=53020032,
+                file_hash=b'\xd8\xc5\xc2\xfa\xcf\xe8\xce?',
+                location=GpsLocation(
+                    latitude=46.8118727000028, longitude=-71.2053023999556
+                ),
+                width=10016,
+                height=3872,
+                date_taken=datetime(2018, 12, 25, 13, 15, 27),
+                mime_type='image/jpeg',
                 embedding=EMPTY_EMBEDDING,
             ),
         )
