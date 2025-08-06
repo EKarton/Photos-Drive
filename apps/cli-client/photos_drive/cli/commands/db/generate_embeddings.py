@@ -100,9 +100,6 @@ def generate_embeddings(
         ]
     )
 
-    vector_store.delete_all_media_item_embeddings()
-    print("Deleted all embeddings in vector store")
-
     root_album_id = config.get_root_album_id()
     albums_queue: deque[tuple[AlbumId, list[str]]] = deque([(root_album_id, [])])
     diffs: list[Diff] = []
@@ -153,6 +150,9 @@ def generate_embeddings(
 
     if not prompt_user_for_yes_no_answer('Add embeddings to metadata db? [Y/N]:'):
         raise ValueError("Operation cancelled")
+
+    vector_store.delete_all_media_item_embeddings()
+    print("Deleted all existing embeddings in vector store")
 
     create_media_item_embedding_req: list[CreateMediaItemEmbeddingRequest] = [
         CreateMediaItemEmbeddingRequest(

@@ -98,8 +98,8 @@ def trial_4(config: Config):
         structured_response: ResponseFormatter
 
     model = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=0,
+        model="gemini-2.5-flash",
+        temperature=0.3,
     )
     print("Loaded llm")
 
