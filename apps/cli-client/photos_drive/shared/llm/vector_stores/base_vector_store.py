@@ -135,6 +135,20 @@ class BaseVectorStore(ABC):
         '''
 
     @abstractmethod
+    def get_embedding_by_id(
+        self, embedding_id: MediaItemEmbeddingId
+    ) -> MediaItemEmbedding:
+        '''
+        Returns the embeddings from an embedding ID
+
+        Args:
+            embedding_id (MediaItemEmbeddingId): The embedding ID
+
+        Returns:
+            MediaItemEmbedding: the embedding
+        '''
+
+    @abstractmethod
     def delete_all_media_item_embeddings(self):
         '''
         Deletes all media item embeddings

@@ -13,3 +13,6 @@ def setup_logging(is_verbose: bool):
         logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     else:
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
+    # Suppress pymongo
+    logging.getLogger("pymongo").setLevel(logging.WARNING)

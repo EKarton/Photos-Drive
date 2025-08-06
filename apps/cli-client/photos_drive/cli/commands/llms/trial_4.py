@@ -1,3 +1,11 @@
+from photos_drive.cli.commands.llms.tools.find_similar_photos import (
+    FindSimilarPhotosInput,
+    FindSimilarPhotosTool,
+)
+from photos_drive.cli.commands.llms.tools.search_photos_by_text import (
+    SearchPhotosByTextToolInput,
+    SearchPhotosByTextTool,
+)
 from photos_drive.shared.config.config import Config
 from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
@@ -11,7 +19,6 @@ from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
 from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-import json
 from langchain.agents import Tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field
@@ -32,7 +39,7 @@ class ResponseFormatter(BaseModel):
 
     output: str = Field(description="The answer to the user's question")
     image_paths: list[str] = Field(
-        description="A list of file paths of images to display to the user"
+        description="A list of media item IDs in the form clientId:objectId to display to the user"
     )
 
 
@@ -52,42 +59,27 @@ def trial_4(config: Config):
         ]
     )
 
-    def search_photos_by_text_with_reranking(query: str, top_k=5):
-        print('search_photos_by_text_with_reranking:', query)
-        embedding = image_embedder.embed_texts([query])[0]
-        embeddings = vector_store.get_relevent_media_item_embeddings(embedding, k=top_k)
-        media_items = [
-            str(media_items_repo.get_media_item_by_id(embedding.media_item_id))
-            for embedding in embeddings
-        ]
-        print('results_data:', media_items)
-
-        return json.dumps(media_items)
-
-    def find_path_by_caption_snippet(caption: str) -> str:
-        print('find_path_by_caption_snippet:', caption)
-        embedding = image_embedder.embed_texts([caption])[0]
-        embeddings = vector_store.get_relevent_media_item_embeddings(embedding, k=1)
-        media_item = media_items_repo.get_media_item_by_id(embeddings[0].media_item_id)
-        print('results_data:', media_item)
-
-        return json.dumps(str(media_item))
+    search_by_text_tool = SearchPhotosByTextTool(
+        image_embedder, vector_store, media_items_repo
+    )
+    find_similar_photos_tool = FindSimilarPhotosTool(
+        image_embedder, vector_store, media_items_repo
+    )
 
     tools = [
         Tool(
             name="SearchPhotosByText",
-            func=search_photos_by_text_with_reranking,
-            description="Search for photos matching a natural language text query. "
-            + "Input: a text string describing what to find (e.g., "
-            + "'sunset in Santorini'). Returns a list of matching images with captions "
-            + "and file paths.",
+            func=search_by_text_tool.search_photos_by_text,
+            description=search_by_text_tool.get_prompt(),
+            args_schema=SearchPhotosByTextToolInput,
+            return_direct=True,
         ),
         Tool(
-            name="FindImageFilePathFromCaption",
-            func=find_path_by_caption_snippet,
-            description="Given a short description or snippet from a photo caption, "
-            + "returns the exact file path of the matching image. Useful for resolving "
-            + "vague references like 'pine tree photo' to a file path.",
+            name="FindSimilarPhotos",
+            func=find_similar_photos_tool.find_similar_photos,
+            description=find_similar_photos_tool.get_prompt(),
+            args_schema=FindSimilarPhotosInput,
+            return_direct=True,
         ),
     ]
 

@@ -131,6 +131,24 @@ class MongoDbVectorStore(BaseVectorStore):
         self._collection.delete_many({"_id": {"$in": object_ids}})
 
     @override
+    def get_embedding_by_id(
+        self, embedding_id: MediaItemEmbeddingId
+    ) -> MediaItemEmbedding:
+        doc = self._collection.find_one(
+            {
+                "_id": embedding_id.vector_store_id,
+            }
+        )
+        if doc is None:
+            raise ValueError(f"Cannot find embedding for {embedding_id}")
+
+        return MediaItemEmbedding(
+            id=embedding_id,
+            embedding=self.__get_embedding_np_from_mongo(doc["embedding"]),
+            media_item_id=parse_string_to_media_item_id(doc.get("media_item_id")),
+        )
+
+    @override
     def get_relevent_media_item_embeddings(
         self, embedding: np.ndarray, k: int
     ) -> list[MediaItemEmbedding]:

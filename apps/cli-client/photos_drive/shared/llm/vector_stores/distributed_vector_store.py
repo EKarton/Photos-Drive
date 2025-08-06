@@ -116,6 +116,17 @@ class DistributedVectorStore(BaseVectorStore):
         return top_docs
 
     @override
+    def get_embedding_by_id(
+        self, embedding_id: MediaItemEmbeddingId
+    ) -> MediaItemEmbedding:
+        for store in self.stores:
+            try:
+                return store.get_embedding_by_id(embedding_id)
+            except Exception:
+                pass
+        raise ValueError(f'Unable to find embedding {embedding_id}')
+
+    @override
     def delete_all_media_item_embeddings(self):
         for store in self.stores:
             store.delete_all_media_item_embeddings()
