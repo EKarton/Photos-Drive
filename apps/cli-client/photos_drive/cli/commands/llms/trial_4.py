@@ -1,9 +1,7 @@
 from photos_drive.cli.commands.llms.tools.find_similar_photos import (
-    FindSimilarPhotosInput,
     FindSimilarPhotosTool,
 )
 from photos_drive.cli.commands.llms.tools.search_photos_by_text import (
-    SearchPhotosByTextToolInput,
     SearchPhotosByTextTool,
 )
 from photos_drive.shared.config.config import Config
@@ -19,7 +17,6 @@ from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
 from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from langchain.agents import Tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field
 from langgraph.prebuilt.chat_agent_executor import AgentState
@@ -66,22 +63,7 @@ def trial_4(config: Config):
         image_embedder, vector_store, media_items_repo
     )
 
-    tools = [
-        Tool(
-            name="SearchPhotosByText",
-            func=search_by_text_tool.search_photos_by_text,
-            description=search_by_text_tool.get_prompt(),
-            args_schema=SearchPhotosByTextToolInput,
-            return_direct=True,
-        ),
-        Tool(
-            name="FindSimilarPhotos",
-            func=find_similar_photos_tool.find_similar_photos,
-            description=find_similar_photos_tool.get_prompt(),
-            args_schema=FindSimilarPhotosInput,
-            return_direct=True,
-        ),
-    ]
+    tools = [search_by_text_tool, find_similar_photos_tool]
 
     class State(AgentState):
         # NOTE: we're adding this key to keep track of previous summary information

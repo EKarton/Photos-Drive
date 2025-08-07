@@ -75,3 +75,6 @@ class FakeVectorStore(BaseVectorStore):
             id = MediaItemEmbeddingId(ObjectId(), ObjectId())
 
         return id
+
+    def get_embedding_by_id(self, embedding_id):
+        return self.__id_to_embeddings[embedding_id]

@@ -120,10 +120,9 @@ class DistributedVectorStore(BaseVectorStore):
         self, embedding_id: MediaItemEmbeddingId
     ) -> MediaItemEmbedding:
         for store in self.stores:
-            try:
+            if store.get_store_id() == embedding_id.vector_store_id:
+                print("Hehehe")
                 return store.get_embedding_by_id(embedding_id)
-            except Exception:
-                pass
         raise ValueError(f'Unable to find embedding {embedding_id}')
 
     @override

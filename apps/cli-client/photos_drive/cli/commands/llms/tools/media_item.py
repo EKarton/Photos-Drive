@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 from photos_drive.shared.metadata import album_id
 from photos_drive.shared.metadata.media_item_id import media_item_id_to_string
@@ -29,9 +28,7 @@ class MediaItemModel(BaseModel):
     album_id: str = Field(..., description="Album ID that this media item belongs to")
     width: int = Field(..., description="Width of image/video in pixels")
     height: int = Field(..., description="Height of image/video in pixels")
-    date_taken: datetime = Field(
-        ..., description="Timestamp when the image/video was taken"
-    )
+    date_taken: str = Field(..., description="Timestamp when the image/video was taken")
 
     class Config:
         schema_extra = {
@@ -58,8 +55,8 @@ def dataclass_to_pydantic_media_item(media_item_dc: MediaItem) -> MediaItemModel
             if media_item_dc.location
             else None
         ),
-        gphotos_client_id=media_item_dc.gphotos_client_id,
-        gphotos_media_item_id=media_item_dc.gphotos_media_item_id,
+        gphotos_client_id=str(media_item_dc.gphotos_client_id),
+        gphotos_media_item_id=str(media_item_dc.gphotos_media_item_id),
         album_id=album_id.album_id_to_string(media_item_dc.album_id),
         width=media_item_dc.width,
         height=media_item_dc.height,

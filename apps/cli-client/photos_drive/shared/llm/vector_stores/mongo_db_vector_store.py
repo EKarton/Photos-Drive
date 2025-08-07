@@ -136,7 +136,7 @@ class MongoDbVectorStore(BaseVectorStore):
     ) -> MediaItemEmbedding:
         doc = self._collection.find_one(
             {
-                "_id": embedding_id.vector_store_id,
+                "_id": embedding_id.object_id,
             }
         )
         if doc is None:
