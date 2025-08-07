@@ -32,6 +32,9 @@ class FakeGPhotosMediaItemsClient(GPhotosMediaItemsClient):
             self.id, album_id, filters, order_by
         )
 
+    def get_media_item_by_id(self, media_item_id: str) -> MediaItem:
+        return self.repository.get_media_item_by_id(self.id, media_item_id)
+
     def upload_photo(self, photo_file_path: str, file_name: str) -> str:
         return self.repository.upload_photo(self.id, photo_file_path, file_name)
 

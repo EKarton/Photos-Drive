@@ -197,6 +197,16 @@ class FakeItemsRepository:
             all_media_items = list(self.__media_item_id_to_media_item.values())
             return [from_dict(MediaItem, a) for a in filter(is_valid, all_media_items)]
 
+    def get_media_item_by_id(self, client_id: str, media_item_id: str) -> MediaItem:
+        if media_item_id not in self.__media_item_id_to_media_item:
+            raise ValueError(f"Unable to find media item {media_item_id}")
+
+        media_item = self.__media_item_id_to_media_item[media_item_id]
+        if client_id != self.__media_item_ids_to_owned_client_id[media_item["id"]]:
+            raise ValueError(f"Media item {media_item_id} is not owned by this client")
+
+        return media_item
+
     @synchronized(_lock)
     def update_album(
         self,

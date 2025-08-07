@@ -230,6 +230,28 @@ class GPhotosMediaItemsClient:
         return res
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
+    def get_media_item_by_id(self, media_item_id: str) -> MediaItem:
+        """
+        Retrieves a media item given its ID.
+
+        Args:
+            media_item_id (str): The ID of the media item to retrieve.
+
+        Returns:
+            MediaItem: The media item with the given ID.
+
+        Raises:
+            HTTPError if the request fails or the media item does not exist.
+        """
+        url = f"https://photoslibrary.googleapis.com/v1/mediaItems/{media_item_id}"
+        res = self._session.get(url)
+        res.raise_for_status()
+        res_body = res.json()
+        return from_dict(
+            MediaItem, res_body, config=dacite.Config(cast=[VideoProcessingStatus])
+        )
+
+    @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
     def upload_photo(self, photo_file_path: str, file_name: str) -> str:
         """
         Uploads a photo not in chunks.

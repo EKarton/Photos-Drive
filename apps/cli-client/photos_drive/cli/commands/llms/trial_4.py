@@ -35,8 +35,8 @@ class ResponseFormatter(BaseModel):
     """Always use this tool to structure your response to the user."""
 
     output: str = Field(description="The answer to the user's question")
-    image_paths: list[str] = Field(
-        description="A list of media item IDs in the form clientId:objectId to display to the user"
+    media_item_ids: list[str] = Field(
+        description="A list of media item IDs to display to the user viewable on the browser"
     )
 
 
@@ -91,7 +91,7 @@ def trial_4(config: Config):
         model=model,
         tools=tools,
         response_format=ResponseFormatter,
-        # debug=True,
+        debug=True,
         pre_model_hook=summarization_node,
         state_schema=State,
         checkpointer=checkpointer,
@@ -104,6 +104,8 @@ def trial_4(config: Config):
         user_input = input("You: ")
         if user_input.lower() in {"exit", "quit"}:
             break
+        if not user_input:
+            continue
         raw_response = agent.invoke(
             {"messages": [{"role": "user", "content": user_input}]}, llm_config
         )
@@ -113,5 +115,5 @@ def trial_4(config: Config):
         print('===== End of raw response ====')
         print(raw_response['structured_response'].output)
 
-        for image_path in raw_response['structured_response'].image_paths:
-            print(' - ', image_path)
+        for media_item_id in raw_response['structured_response'].media_item_ids:
+            print(' - ', media_item_id)
