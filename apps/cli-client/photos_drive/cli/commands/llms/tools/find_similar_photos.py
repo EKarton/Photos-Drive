@@ -37,15 +37,20 @@ class FindSimilarPhotosInput(BaseModel):
     )
     earliest_date_taken: str = Field(
         '',
-        description="Earliest photo date (YYYY-MM-DD) to include in search. If empty (''), no lower bound for when the photo should be taken will be applied. Can be used alone or with latest_date_taken.",
+        description="Earliest photo date (YYYY-MM-DD) to include in search. "
+        + "If empty (''), no lower bound for when the photo should be taken will be "
+        + "applied. Can be used alone or with latest_date_taken.",
     )
     latest_date_taken: str = Field(
         '',
-        description="Latest photo date (YYYY-MM-DD) to include in search. If empty (''), no upper bound for when the photo should be taken will be applied. Can be used alone or with earliest_date_taken.",
+        description="Latest photo date (YYYY-MM-DD) to include in search. "
+        + "If empty (''), no upper bound for when the photo should be taken "
+        + "will be applied. Can be used alone or with earliest_date_taken.",
     )
     within_media_item_ids: str = Field(
         '',
-        description="A list of media item IDs to include in the search, delimited with commas (','). If empty (''), we will consider all photos.",
+        description="A list of media item IDs to include in the search, "
+        + "delimited with commas (','). If empty (''), we will consider all photos.",
     )
     top_k: Optional[int] = Field(
         5, description="Maximum number of similar photos to retrieve."
