@@ -101,12 +101,17 @@ class MongoDbVectorStore(BaseVectorStore):
     ) -> list[MediaItemEmbedding]:
         documents_to_insert = []
         for req in requests:
-            documents_to_insert.append(
-                {
-                    "embedding": self.__get_mongodb_vector(req.embedding),
-                    "media_item_id": media_item_id_to_string(req.media_item_id),
+            data_object = {
+                "embedding": self.__get_mongodb_vector(req.embedding),
+                "media_item_id": media_item_id_to_string(req.media_item_id),
+                "date_taken": req.date_taken,
+            }
+            if req.location:
+                data_object["location"] = {
+                    "type": "Point",
+                    "coordinates": [req.location.longitude, req.location.latitude],
                 }
-            )
+            documents_to_insert.append(data_object)
         result = self._collection.insert_many(documents_to_insert)
 
         # Build the return values
@@ -213,7 +218,9 @@ class MongoDbVectorStore(BaseVectorStore):
                 pymongo.UpdateOne(filter=filter_query, update=set_query, upsert=False)
             )
 
-        result = self._collection.bulk_write(requests=operations)
+        print(operations)
+
+        result = self._collection.bulk_write(operations)
         if result.matched_count != len(operations):
             raise ValueError(
                 f"Unable to update all embeddings: {result.matched_count} "
