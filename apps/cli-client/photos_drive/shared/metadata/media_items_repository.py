@@ -6,11 +6,10 @@ from typing import Optional
 from bson.objectid import ObjectId
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
-
-from .album_id import AlbumId
-from .gps_location import GpsLocation
-from .media_item_id import MediaItemId
-from .media_items import MediaItem
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.gps_location import GpsLocation
+from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items import MediaItem
 
 
 @dataclass(frozen=True)

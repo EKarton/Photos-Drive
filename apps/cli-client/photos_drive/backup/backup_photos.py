@@ -6,6 +6,13 @@ from typing import Dict, Optional, cast
 
 from bson.objectid import ObjectId
 
+from photos_drive.backup.diffs_assignments import DiffsAssigner
+from photos_drive.backup.gphotos_uploader import (
+    GPhotosMediaItemParallelUploaderImpl,
+    GPhotosMediaItemUploaderImpl,
+    UploadRequest,
+)
+from photos_drive.backup.processed_diffs import ProcessedDiff
 from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
@@ -32,14 +39,6 @@ from photos_drive.shared.metadata.media_items_repository import (
     UpdateMediaItemRequest,
 )
 from photos_drive.shared.metadata.transactions_context import TransactionsContext
-
-from .diffs_assignments import DiffsAssigner
-from .gphotos_uploader import (
-    GPhotosMediaItemParallelUploaderImpl,
-    GPhotosMediaItemUploaderImpl,
-    UploadRequest,
-)
-from .processed_diffs import ProcessedDiff
 
 logger = logging.getLogger(__name__)
 

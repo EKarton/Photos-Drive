@@ -7,8 +7,10 @@ from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 from requests.exceptions import RequestException
 
-from .albums_client import GPhotosAlbumsClient
-from .media_items_client import GPhotosMediaItemsClient
+from photos_drive.shared.blob_store.gphotos.albums_client import GPhotosAlbumsClient
+from photos_drive.shared.blob_store.gphotos.media_items_client import (
+    GPhotosMediaItemsClient,
+)
 
 
 @dataclass(frozen=True)

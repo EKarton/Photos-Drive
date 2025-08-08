@@ -5,8 +5,16 @@ from bson.objectid import ObjectId
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 
-from ...config.config import Config, GPhotosConfig, UpdateGPhotosConfigRequest
-from .client import GPhotosClientV2, ListenableCredentials, TokenRefreshCallback
+from photos_drive.shared.blob_store.gphotos.client import (
+    GPhotosClientV2,
+    ListenableCredentials,
+    TokenRefreshCallback,
+)
+from photos_drive.shared.config.config import (
+    Config,
+    GPhotosConfig,
+    UpdateGPhotosConfigRequest,
+)
 
 logger = logging.getLogger(__name__)
 

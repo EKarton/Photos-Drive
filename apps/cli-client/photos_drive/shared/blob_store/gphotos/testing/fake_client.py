@@ -2,12 +2,23 @@ import sys
 from typing import Optional
 import uuid
 
-from ..albums_client import GPhotosAlbumsClient
-from ..client import GPhotosClientV2, GPhotosStorageQuota
-from ..media_items_client import GPhotosMediaItemsClient
-from .fake_albums_client import FakeGPhotosAlbumsClient
-from .fake_items_repository import FakeItemsRepository
-from .fake_media_items_client import FakeGPhotosMediaItemsClient
+from photos_drive.shared.blob_store.gphotos.albums_client import GPhotosAlbumsClient
+from photos_drive.shared.blob_store.gphotos.client import (
+    GPhotosClientV2,
+    GPhotosStorageQuota,
+)
+from photos_drive.shared.blob_store.gphotos.media_items_client import (
+    GPhotosMediaItemsClient,
+)
+from photos_drive.shared.blob_store.gphotos.testing.fake_albums_client import (
+    FakeGPhotosAlbumsClient,
+)
+from photos_drive.shared.blob_store.gphotos.testing.fake_items_repository import (
+    FakeItemsRepository,
+)
+from photos_drive.shared.blob_store.gphotos.testing.fake_media_items_client import (
+    FakeGPhotosMediaItemsClient,
+)
 
 
 class FakeGPhotosClient(GPhotosClientV2):

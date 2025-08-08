@@ -7,11 +7,10 @@ from pymongo.mongo_client import MongoClient
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 
+from photos_drive.shared.config.config import Config
 from photos_drive.shared.metadata.clients_repository import (
     ClientsRepository,
 )
-
-from ...config.config import Config
 
 logger = logging.getLogger(__name__)
 

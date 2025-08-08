@@ -4,10 +4,12 @@ import uuid
 
 from dacite import from_dict
 
+from photos_drive.shared.blob_store.gphotos.albums import Album
+from photos_drive.shared.blob_store.gphotos.media_items import (
+    MediaItem,
+    UploadedPhotosToGPhotosResult,
+)
 from photos_drive.shared.utils.synchronized import synchronized
-
-from ..albums import Album
-from ..media_items import MediaItem, UploadedPhotosToGPhotosResult
 
 
 class FakeItemsRepository:

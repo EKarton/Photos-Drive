@@ -1,8 +1,15 @@
 from typing import Optional
 
-from ..media_items import MediaItem, UploadedPhotosToGPhotosResult
-from ..media_items_client import GPhotosMediaItemsClient
-from .fake_items_repository import FakeItemsRepository
+from photos_drive.shared.blob_store.gphotos.media_items import (
+    MediaItem,
+    UploadedPhotosToGPhotosResult,
+)
+from photos_drive.shared.blob_store.gphotos.media_items_client import (
+    GPhotosMediaItemsClient,
+)
+from photos_drive.shared.blob_store.gphotos.testing.fake_items_repository import (
+    FakeItemsRepository,
+)
 
 
 class FakeGPhotosMediaItemsClient(GPhotosMediaItemsClient):

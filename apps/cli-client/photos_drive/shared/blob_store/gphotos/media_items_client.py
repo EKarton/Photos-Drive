@@ -12,7 +12,11 @@ import magic
 from requests import Response
 from requests.exceptions import HTTPError, RequestException
 
-from .media_items import MediaItem, UploadedPhotosToGPhotosResult, VideoProcessingStatus
+from photos_drive.shared.blob_store.gphotos.media_items import (
+    MediaItem,
+    UploadedPhotosToGPhotosResult,
+    VideoProcessingStatus,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -6,36 +6,36 @@ from tqdm import tqdm
 import typer
 from typing_extensions import Annotated
 
-from ....cli.shared.config import build_config_from_options
-from ....cli.shared.inputs import (
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from ....cli.shared.logging import setup_logging
-from ....cli.shared.typer import (
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from ....shared.blob_store.gphotos.valid_file_extensions import (
+from photos_drive.shared.blob_store.gphotos.valid_file_extensions import (
     IMAGE_FILE_EXTENSIONS,
     VIDEO_FILE_EXTENSIONS,
 )
-from ....shared.metadata.album_id import AlbumId
-from ....shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     UpdateMediaItemRequest,
 )
-from ....shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from ....shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from ....shared.metadata.mongodb.media_items_repository_impl import (
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from ....shared.utils.dimensions.cv2_video_dimensions import (
+from photos_drive.shared.utils.dimensions.cv2_video_dimensions import (
     get_width_height_of_video,
 )
-from ....shared.utils.dimensions.pillow_image_dimensions import (
+from photos_drive.shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
 

@@ -5,7 +5,9 @@ import logging
 
 from bson.objectid import ObjectId
 
-from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
 
 logger = logging.getLogger(__name__)
 

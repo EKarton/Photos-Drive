@@ -5,22 +5,24 @@ from typing import Dict, Optional
 
 from bson.objectid import ObjectId
 
-from ..shared.blob_store.gphotos.albums import Album as GAlbum
-from ..shared.blob_store.gphotos.client import GPhotosClientV2
-from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
-from ..shared.config.config import Config
-from ..shared.metadata.album_id import AlbumId
-from ..shared.metadata.albums_pruner import AlbumsPruner
-from ..shared.metadata.albums_repository import AlbumsRepository
-from ..shared.metadata.media_item_id import MediaItemId
-from ..shared.metadata.media_items_repository import (
+from photos_drive.shared.blob_store.gphotos.albums import Album as GAlbum
+from photos_drive.shared.blob_store.gphotos.client import GPhotosClientV2
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.config.config import Config
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
+from photos_drive.shared.metadata.albums_repository import AlbumsRepository
+from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
 )
-from ..shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from ..shared.metadata.transactions_context import TransactionsContext
+from photos_drive.shared.metadata.transactions_context import TransactionsContext
 
 logger = logging.getLogger(__name__)
 

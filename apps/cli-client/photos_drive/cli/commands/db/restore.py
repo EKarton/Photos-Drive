@@ -3,8 +3,8 @@ import logging
 import typer
 from typing_extensions import Annotated
 
-from ...shared.logging import setup_logging
-from ...shared.typer import createMutuallyExclusiveGroup
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import createMutuallyExclusiveGroup
 
 logger = logging.getLogger(__name__)
 

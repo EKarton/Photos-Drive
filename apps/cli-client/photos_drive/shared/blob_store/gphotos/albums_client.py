@@ -7,7 +7,7 @@ from dacite import from_dict
 from google.auth.transport.requests import AuthorizedSession
 from requests.exceptions import RequestException
 
-from .albums import Album
+from photos_drive.shared.blob_store.gphotos.albums import Album
 
 logger = logging.getLogger(__name__)
 
