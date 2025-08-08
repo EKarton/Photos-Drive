@@ -48,7 +48,7 @@ class FindSimilarPhotosInput(BaseModel):
     )
     around_radius: int = Field(
         0,
-        description="Search radius (in integer meters) around 'around_location'. Use 0 for no location filter.",
+        description="Search radius (in meters) around 'around_location'. Use 0 for no location filter.",
     )
     top_k: Optional[int] = Field(
         5, description="Maximum number of similar photos to retrieve."
@@ -114,10 +114,10 @@ class FindSimilarPhotosTool(BaseTool):
         if around_location != '' and around_radius > 0:
             around_location_parts = around_location.split(',')
             around_location_obj = GpsLocation(
-                latitude=int(around_location_parts[0]),
-                longitude=int(around_location_parts[1]),
+                latitude=float(around_location_parts[0]),
+                longitude=float(around_location_parts[1]),
             )
-            around_radius_obj = int(around_radius)
+            around_radius_obj = float(around_radius)
 
         query = QueryMediaItemEmbeddingRequest(
             embedding=embedding.embedding,

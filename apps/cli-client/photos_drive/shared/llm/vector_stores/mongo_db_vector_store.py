@@ -73,12 +73,8 @@ class MongoDbVectorStore(BaseVectorStore):
                         'quantization': 'binary',
                     },
                     {
-                        "type": "filter",
-                        "path": "date_taken",
-                    },
-                    {
-                        "type": "filter",
-                        "path": "location",
+                        'type': 'filter',
+                        'path': 'date_taken',
                     },
                 ]
             },
@@ -167,43 +163,49 @@ class MongoDbVectorStore(BaseVectorStore):
     def get_relevent_media_item_embeddings(
         self, query: QueryMediaItemEmbeddingRequest
     ) -> list[MediaItemEmbedding]:
-        filters_obj: dict[str, Any] = {}
+        pipeline = []
 
-        # Date filtering
+        filter_obj: dict[str, Any] = {}
         if query.start_date_taken or query.end_date_taken:
             date_filter = {}
             if query.start_date_taken:
                 date_filter["$gte"] = query.start_date_taken
             if query.end_date_taken:
                 date_filter["$lte"] = query.end_date_taken
-            filters_obj["date_taken"] = date_filter
+            filter_obj['date_taken'] = date_filter
+            pipeline.append({"$match": {"date_taken": date_filter}})
 
-        # Geo filtering
-        if query.around_location and query.around_radius is not None:
-            filters_obj["location"] = {
-                "$geoWithin": {
-                    "$centerSphere": [
-                        [
-                            query.around_location.longitude,
-                            query.around_location.latitude,
-                        ],
-                        query.around_radius / 6378137.0,
-                    ]
-                }
-            }
-
-        pipeline = [
+        # First do vector search
+        pipeline.append(
             {
                 "$vectorSearch": {
                     "queryVector": self.__get_mongodb_vector(query.embedding),
                     "path": "embedding",
-                    "numCandidates": query.top_k * 5,  # can tune
+                    "numCandidates": query.top_k * 5,
                     "limit": query.top_k,
                     "index": self._embedding_index_name,
-                    "filter": filters_obj,
+                    "filter": filter_obj,
                 }
             }
-        ]
+        )
+
+        # Then, filter by geo using $match
+        if query.around_location and query.around_radius is not None:
+            geo_filter = {
+                "location": {
+                    "$geoWithin": {
+                        "$centerSphere": [
+                            [
+                                query.around_location.longitude,
+                                query.around_location.latitude,
+                            ],
+                            query.around_radius / 6378137.0,
+                        ]
+                    }
+                }
+            }
+            pipeline.append({"$match": geo_filter})
+
         docs = []
         for doc in self._collection.aggregate(pipeline):
             docs.append(self.__parse_raw_document_to_media_item_embedding_obj(doc))
