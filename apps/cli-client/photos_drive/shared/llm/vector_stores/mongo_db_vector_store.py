@@ -76,6 +76,10 @@ class MongoDbVectorStore(BaseVectorStore):
                         'type': 'filter',
                         'path': 'date_taken',
                     },
+                    {
+                        'type': 'filter',
+                        'path': 'media_item_id',
+                    },
                 ]
             },
             name=self._embedding_index_name,
@@ -173,7 +177,14 @@ class MongoDbVectorStore(BaseVectorStore):
             if query.end_date_taken:
                 date_filter["$lte"] = query.end_date_taken
             filter_obj['date_taken'] = date_filter
-            pipeline.append({"$match": {"date_taken": date_filter}})
+
+        if query.within_media_item_ids:
+            filter_obj['media_item_id'] = {
+                "$in": [
+                    media_item_id_to_string(media_item_id)
+                    for media_item_id in query.within_media_item_ids
+                ]
+            }
 
         # First do vector search
         pipeline.append(
@@ -188,23 +199,6 @@ class MongoDbVectorStore(BaseVectorStore):
                 }
             }
         )
-
-        # Then, filter by geo using $match
-        if query.around_location and query.around_radius is not None:
-            geo_filter = {
-                "location": {
-                    "$geoWithin": {
-                        "$centerSphere": [
-                            [
-                                query.around_location.longitude,
-                                query.around_location.latitude,
-                            ],
-                            query.around_radius / 6378137.0,
-                        ]
-                    }
-                }
-            }
-            pipeline.append({"$match": geo_filter})
 
         docs = []
         for doc in self._collection.aggregate(pipeline):

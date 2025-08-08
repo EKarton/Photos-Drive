@@ -10,6 +10,7 @@ from photos_drive.shared.llm.vector_stores.mongo_db_vector_store import (
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     MediaItemEmbeddingId,
     CreateMediaItemEmbeddingRequest,
+    QueryMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
@@ -140,7 +141,9 @@ class TestMongoDbVectorStore(unittest.TestCase):
         self.store.add_media_item_embeddings(reqs)
 
         query_embedding = self._make_embedding(3)
-        results = self.store.get_relevent_media_item_embeddings(query_embedding, k=5)
+        results = self.store.get_relevent_media_item_embeddings(
+            QueryMediaItemEmbeddingRequest(query_embedding, top_k=5)
+        )
         self.assertEqual(len(results), 5)
 
     def test_get_relevent_documents_returns_data_correctly(self):
@@ -156,7 +159,9 @@ class TestMongoDbVectorStore(unittest.TestCase):
             ]
         )
 
-        results = self.store.get_relevent_media_item_embeddings(embedding, k=1)
+        results = self.store.get_relevent_media_item_embeddings(
+            QueryMediaItemEmbeddingRequest(embedding, top_k=1)
+        )
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].id, added_doc[0].id)
         np.testing.assert_array_almost_equal(results[0].embedding, embedding, decimal=6)

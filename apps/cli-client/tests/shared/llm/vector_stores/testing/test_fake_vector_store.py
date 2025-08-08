@@ -8,6 +8,7 @@ from photos_drive.shared.llm.vector_stores.testing.fake_vector_store import (
 )
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
+    QueryMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 
@@ -53,7 +54,7 @@ class TestFakeVectorStore(unittest.TestCase):
         added = self.store.add_media_item_embeddings([req])
         self.store.delete_media_item_embeddings([added[0].id])
         results = self.store.get_relevent_media_item_embeddings(
-            embedding=self._make_embedding(1.0), k=1
+            QueryMediaItemEmbeddingRequest(embedding=self._make_embedding(1.0), top_k=1)
         )
         self.assertEqual(results, [])
 
@@ -71,7 +72,9 @@ class TestFakeVectorStore(unittest.TestCase):
         self.store.delete_all_media_item_embeddings()
         self.assertEqual(
             self.store.get_relevent_media_item_embeddings(
-                self._make_embedding(1.0), k=3
+                QueryMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(1.0), top_k=3
+                )
             ),
             [],
         )
@@ -101,7 +104,9 @@ class TestFakeVectorStore(unittest.TestCase):
         self.store.add_media_item_embeddings(reqs)
 
         query = np.array([1.0, 0.0])
-        results = self.store.get_relevent_media_item_embeddings(query, k=2)
+        results = self.store.get_relevent_media_item_embeddings(
+            QueryMediaItemEmbeddingRequest(embedding=query, top_k=2)
+        )
 
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0].media_item_id, MOCK_MEDIA_ITEM_ID_1)
@@ -116,7 +121,9 @@ class TestFakeVectorStore(unittest.TestCase):
         )
         self.store.add_media_item_embeddings([req])
         zero_vector = np.zeros(self.embedding_dim)
-        results = self.store.get_relevent_media_item_embeddings(zero_vector, k=1)
+        results = self.store.get_relevent_media_item_embeddings(
+            QueryMediaItemEmbeddingRequest(embedding=zero_vector, top_k=1)
+        )
         self.assertEqual(results, [])
 
     def _make_embedding(self, val=1.0):

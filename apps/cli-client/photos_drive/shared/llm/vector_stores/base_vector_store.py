@@ -123,18 +123,15 @@ class QueryMediaItemEmbeddingRequest:
             vector search
         end_date_taken (Optional[datetime]): The latest date to consider in the
             vector search
-        around_location (Optional[GpsLocation]): The GPS location the media items
-            should be close to
-        around_radius (Optional[number]): The radius around {around_location} to
-            consider, in meters
+        within_media_item_ids (Optional[list[MediaItemId]]): The list of media item IDs to
+            consider in the vector search
         top_k (int): The number of candidates to return
     '''
 
     embedding: np.ndarray
     start_date_taken: Optional[datetime] = None
     end_date_taken: Optional[datetime] = None
-    around_location: Optional[GpsLocation] = None
-    around_radius: Optional[int] = None
+    within_media_item_ids: Optional[list[MediaItemId]] = None
     top_k: int = 5
 
 

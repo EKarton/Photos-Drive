@@ -11,6 +11,7 @@ from photos_drive.shared.llm.vector_stores.mongo_db_vector_store import (
 )
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
+    QueryMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
@@ -231,7 +232,10 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
         )[0]
 
         results = self.distributed_store.get_relevent_media_item_embeddings(
-            np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32), k=2
+            QueryMediaItemEmbeddingRequest(
+                embedding=np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32),
+                top_k=2,
+            )
         )
 
         self.assertEqual(len(results), 2)
@@ -243,6 +247,8 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
     def test_get_relevent_documents_empty(self):
         # Query with no docs in stores should return empty list without error
         results = self.distributed_store.get_relevent_media_item_embeddings(
-            np.ones(self.embedding_dim, dtype=np.float32), k=3
+            QueryMediaItemEmbeddingRequest(
+                embedding=np.ones(self.embedding_dim, dtype=np.float32), top_k=3
+            )
         )
         self.assertEqual(results, [])

@@ -10,7 +10,6 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-from photos_drive.shared.metadata.gps_location import GpsLocation
 from pydantic import BaseModel, Field
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
@@ -42,13 +41,9 @@ class FindSimilarPhotosInput(BaseModel):
         '',
         description="Latest photo date (YYYY-MM-DD) to include in search. If empty (''), no upper bound for when the photo should be taken will be applied. Can be used alone or with earliest_date_taken.",
     )
-    around_location: str = Field(
+    within_media_item_ids: str = Field(
         '',
-        description="GPS coordinates in 'latitude,longitude' format. Leave empty string for no location filter.",
-    )
-    around_radius: int = Field(
-        0,
-        description="Search radius (in meters) around 'around_location'. Use 0 for no location filter.",
+        description="A list of media item IDs to include in the search, delimited with commas (','). If empty (''), we will consider all photos.",
     )
     top_k: Optional[int] = Field(
         5, description="Maximum number of similar photos to retrieve."
@@ -88,8 +83,7 @@ class FindSimilarPhotosTool(BaseTool):
         media_item_id: str,
         earliest_date_taken: str = '',
         latest_date_taken: str = '',
-        around_location: str = '',
-        around_radius: int = 0,
+        within_media_item_ids: str = '',
         top_k: int = 5,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> FindSimilarPhotosOutput:
@@ -109,22 +103,18 @@ class FindSimilarPhotosTool(BaseTool):
         if latest_date_taken != '':
             latest_date_obj = datetime.strptime(latest_date_taken, "%Y-%m-%d")
 
-        around_location_obj = None
-        around_radius_obj = None
-        if around_location != '' and around_radius > 0:
-            around_location_parts = around_location.split(',')
-            around_location_obj = GpsLocation(
-                latitude=float(around_location_parts[0]),
-                longitude=float(around_location_parts[1]),
-            )
-            around_radius_obj = float(around_radius)
+        within_media_item_id_objs = None
+        if within_media_item_ids != '':
+            within_media_item_id_objs = [
+                parse_string_to_media_item_id(raw_media_item_id)
+                for raw_media_item_id in within_media_item_ids.split(',')
+            ]
 
         query = QueryMediaItemEmbeddingRequest(
             embedding=embedding.embedding,
             start_date_taken=earliest_date_obj,
             end_date_taken=latest_date_obj,
-            around_location=around_location_obj,
-            around_radius=around_radius_obj,
+            within_media_item_ids=within_media_item_id_objs,
             top_k=top_k,
         )
         rel_embeddings = self.vector_store.get_relevent_media_item_embeddings(query)
@@ -143,12 +133,18 @@ class FindSimilarPhotosTool(BaseTool):
     async def _arun(
         self,
         media_item_id: str,
+        earliest_date_taken: str = '',
+        latest_date_taken: str = '',
+        within_media_item_ids: str = '',
         top_k: int = 5,
         run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> FindSimilarPhotosOutput:
         """Use the tool asynchronously."""
         return self._run(
             media_item_id,
+            earliest_date_taken,
+            latest_date_taken,
+            within_media_item_ids,
             top_k,
             run_manager=run_manager.get_sync() if run_manager else None,
         )
