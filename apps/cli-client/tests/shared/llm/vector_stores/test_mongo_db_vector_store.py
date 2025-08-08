@@ -1,14 +1,17 @@
+from datetime import datetime, timezone
 import unittest
-import numpy as np
-from bson.objectid import ObjectId
-from bson.binary import Binary
 
+from bson.binary import Binary
+from bson.objectid import ObjectId
+import numpy as np
+
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
+    CreateMediaItemEmbeddingRequest,
+    MediaItemEmbeddingId,
+    QueryMediaItemEmbeddingRequest,
+)
 from photos_drive.shared.llm.vector_stores.mongo_db_vector_store import (
     MongoDbVectorStore,
-)
-from photos_drive.shared.llm.vector_stores.base_vector_store import (
-    MediaItemEmbeddingId,
-    CreateMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
@@ -16,6 +19,7 @@ from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 
 MOCK_MEDIA_ITEM_ID_1 = MediaItemId(ObjectId(), ObjectId())
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class TestMongoDbVectorStore(unittest.TestCase):
@@ -69,7 +73,9 @@ class TestMongoDbVectorStore(unittest.TestCase):
     def test_add_documents_and_verify_stored(self):
         embedding = self._make_embedding(0.5)
         req = CreateMediaItemEmbeddingRequest(
-            embedding=embedding, media_item_id=MOCK_MEDIA_ITEM_ID_1
+            embedding=embedding,
+            media_item_id=MOCK_MEDIA_ITEM_ID_1,
+            date_taken=MOCK_DATE_TAKEN,
         )
 
         # Add document
@@ -91,7 +97,9 @@ class TestMongoDbVectorStore(unittest.TestCase):
     def test_delete_documents_removes_from_mock(self):
         embedding = self._make_embedding(1.2)
         req = CreateMediaItemEmbeddingRequest(
-            embedding=embedding, media_item_id=MOCK_MEDIA_ITEM_ID_1
+            embedding=embedding,
+            media_item_id=MOCK_MEDIA_ITEM_ID_1,
+            date_taken=MOCK_DATE_TAKEN,
         )
         added_doc = self.store.add_media_item_embeddings([req])[0]
 
@@ -105,7 +113,9 @@ class TestMongoDbVectorStore(unittest.TestCase):
     def test_delete_documents_wrong_store_id_raises(self):
         embedding = self._make_embedding(2.12)
         req = CreateMediaItemEmbeddingRequest(
-            embedding=embedding, media_item_id=MOCK_MEDIA_ITEM_ID_1
+            embedding=embedding,
+            media_item_id=MOCK_MEDIA_ITEM_ID_1,
+            date_taken=MOCK_DATE_TAKEN,
         )
         added_doc = self.store.add_media_item_embeddings([req])[0]
 
@@ -119,14 +129,18 @@ class TestMongoDbVectorStore(unittest.TestCase):
         num_docs = 10
         reqs = [
             CreateMediaItemEmbeddingRequest(
-                embedding=self._make_embedding(i), media_item_id=MOCK_MEDIA_ITEM_ID_1
+                embedding=self._make_embedding(i),
+                media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                date_taken=MOCK_DATE_TAKEN,
             )
             for i in range(num_docs)
         ]
         self.store.add_media_item_embeddings(reqs)
 
         query_embedding = self._make_embedding(3)
-        results = self.store.get_relevent_media_item_embeddings(query_embedding, k=5)
+        results = self.store.get_relevent_media_item_embeddings(
+            QueryMediaItemEmbeddingRequest(query_embedding, top_k=5)
+        )
         self.assertEqual(len(results), 5)
 
     def test_get_relevent_documents_returns_data_correctly(self):
@@ -134,12 +148,16 @@ class TestMongoDbVectorStore(unittest.TestCase):
         added_doc = self.store.add_media_item_embeddings(
             [
                 CreateMediaItemEmbeddingRequest(
-                    embedding=embedding, media_item_id=MOCK_MEDIA_ITEM_ID_1
+                    embedding=embedding,
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
                 )
             ]
         )
 
-        results = self.store.get_relevent_media_item_embeddings(embedding, k=1)
+        results = self.store.get_relevent_media_item_embeddings(
+            QueryMediaItemEmbeddingRequest(embedding, top_k=1)
+        )
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].id, added_doc[0].id)
         np.testing.assert_array_almost_equal(results[0].embedding, embedding, decimal=6)

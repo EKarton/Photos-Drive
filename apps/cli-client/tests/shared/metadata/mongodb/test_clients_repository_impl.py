@@ -1,17 +1,18 @@
 from typing import cast
 import unittest
 from unittest.mock import Mock, patch
+
 from bson.objectid import ObjectId
 import mongomock
 from pymongo import MongoClient
 
+from photos_drive.shared.config.config import (
+    AddMongoDbConfigRequest,
+)
 from photos_drive.shared.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     BYTES_512MB,
     MongoDbClientsRepository,
-)
-from photos_drive.shared.config.config import (
-    AddMongoDbConfigRequest,
 )
 from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,

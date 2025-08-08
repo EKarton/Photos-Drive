@@ -1,10 +1,8 @@
 import typer
 
-from . import add
-from . import reauthorize
-from .view import view
-from .init import init
-
+from photos_drive.cli.commands.config import add, reauthorize
+from photos_drive.cli.commands.config.init import init
+from photos_drive.cli.commands.config.view import view
 
 app = typer.Typer()
 app.command()(view)

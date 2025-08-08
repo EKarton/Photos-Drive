@@ -1,8 +1,11 @@
 import logging
+
+from langchain.globals import set_debug
+import typer
 from typing_extensions import Annotated
+
 from photos_drive.cli.commands.llms.trial_4 import trial_4
 from photos_drive.cli.shared.config import build_config_from_options
-import typer
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
@@ -42,6 +45,8 @@ def llm(
     ] = False,
 ):
     setup_logging(verbose)
+    if verbose:
+        set_debug(True)
 
     logger.debug(
         "Called llm handler with args:\n"

@@ -1,19 +1,20 @@
 import json
 import unittest
 from unittest.mock import Mock
+
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 
-from photos_drive.shared.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
 from photos_drive.shared.blob_store.gphotos.client import (
     GPhotosClientV2,
+)
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
 )
 from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
 )
+from photos_drive.shared.config.inmemory_config import InMemoryConfig
 
 
 class TestGPhotosClientsRepository(unittest.TestCase):

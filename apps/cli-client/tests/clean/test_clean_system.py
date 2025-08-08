@@ -1,5 +1,6 @@
 from datetime import datetime
 import unittest
+
 from bson import ObjectId
 
 from photos_drive.clean.clean_system import (
@@ -7,28 +8,28 @@ from photos_drive.clean.clean_system import (
     GPhotosMediaItemKey,
     SystemCleaner,
 )
-from photos_drive.shared.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
-)
-from photos_drive.shared.blob_store.gphotos.testing.fake_client import (
-    FakeGPhotosClient,
 )
 from photos_drive.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
 )
+from photos_drive.shared.blob_store.gphotos.testing.fake_client import (
+    FakeGPhotosClient,
+)
+from photos_drive.shared.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.media_items_repository import (
+    CreateMediaItemRequest,
+)
 from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
-)
-from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.media_items_repository import (
-    CreateMediaItemRequest,
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
+    MediaItemsRepositoryImpl,
 )
 from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,

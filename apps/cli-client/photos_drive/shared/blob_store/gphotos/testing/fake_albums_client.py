@@ -1,7 +1,10 @@
 from typing import Optional
-from ..albums_client import GPhotosAlbumsClient
-from ..albums import Album
-from .fake_items_repository import FakeItemsRepository
+
+from photos_drive.shared.blob_store.gphotos.albums import Album
+from photos_drive.shared.blob_store.gphotos.albums_client import GPhotosAlbumsClient
+from photos_drive.shared.blob_store.gphotos.testing.fake_items_repository import (
+    FakeItemsRepository,
+)
 
 
 class FakeGPhotosAlbumsClient(GPhotosAlbumsClient):

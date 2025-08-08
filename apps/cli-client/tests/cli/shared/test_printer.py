@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
-import unittest
 from io import StringIO
+import unittest
 from unittest.mock import patch
 
 from photos_drive.backup.diffs import Diff
@@ -10,7 +10,7 @@ from photos_drive.cli.shared.printer import (
     pretty_print_processed_diffs,
 )
 from photos_drive.shared.llm.models.testing.fake_image_embedder import FAKE_EMBEDDING
-from photos_drive.shared.metadata.media_items import GpsLocation
+from photos_drive.shared.metadata.gps_location import GpsLocation
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 

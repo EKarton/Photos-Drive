@@ -1,8 +1,11 @@
 from typing import Dict
+
 from bson import ObjectId
 
-from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
-from .processed_diffs import ProcessedDiff
+from photos_drive.backup.processed_diffs import ProcessedDiff
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
 
 
 class DiffsAssigner:

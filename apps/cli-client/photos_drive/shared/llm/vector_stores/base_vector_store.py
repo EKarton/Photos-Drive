@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import numpy as np
+from datetime import datetime
+from typing import Optional
+
 from bson.objectid import ObjectId
+import numpy as np
+
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 
 
@@ -51,31 +55,76 @@ def embedding_id_to_string(embedding_id: MediaItemEmbeddingId) -> str:
 @dataclass(frozen=True)
 class MediaItemEmbedding:
     '''
-    Represents an embedding for a media item
+    Represents an embedding for a media item.
 
     Attributes:
-        id (DocumentId): The document ID
-        embedding (np.ndarray): The embedding
-        media_item_id (MediaItemId): The ID of the media item
+        id (DocumentId): The document ID.
+        embedding (np.ndarray): The embedding.
+        media_item_id (MediaItemId): The ID of the media item.
+        date_taken (datetime): The date of which this media item was taken.
     '''
 
     id: MediaItemEmbeddingId
     embedding: np.ndarray
     media_item_id: MediaItemId
+    date_taken: datetime
 
 
 @dataclass(frozen=True)
 class CreateMediaItemEmbeddingRequest:
     '''
-    Represents a request to add a media item embedding in the vector store
+    Represents a request to add a media item embedding in the vector store.
 
     Attributes:
-        embedding (np.ndarray): The embedding
-        media_item_id (MediaItemId): The ID of the media item
+        embedding (np.ndarray): The embedding.
+        media_item_id (MediaItemId): The ID of the media item.
+        date_taken (datetime): The date of which the media item was taken.
     '''
 
     embedding: np.ndarray
     media_item_id: MediaItemId
+    date_taken: datetime
+
+
+@dataclass(frozen=True)
+class UpdateMediaItemEmbeddingRequest:
+    '''
+    Represents a request to update a media item embedding in the vector store
+
+    Attributes:
+        embedding_id (MediaItemEmbeddingId): The ID to the media item embedding
+        new_embedding Optional[np.ndarray]: A new embedding, if it is set
+        new_media_item_id (Optional[MediaItemId]): The new MediaItemId, if it is set
+        new_date_taken (Optional[datetime]): The new date taken, if it is set
+    '''
+
+    embedding_id: MediaItemEmbeddingId
+    new_embedding: Optional[np.ndarray] = None
+    new_media_item_id: Optional[MediaItemId] = None
+    new_date_taken: Optional[datetime] = None
+
+
+@dataclass(frozen=True)
+class QueryMediaItemEmbeddingRequest:
+    '''
+    Represents a request to query the vector store
+
+    Attributes:
+        embedding (np.darray): The embedding to vector search in the vector store
+        start_date_taken (Optional[datetime]): The earliest date to consider in the
+            vector search
+        end_date_taken (Optional[datetime]): The latest date to consider in the
+            vector search
+        within_media_item_ids (Optional[list[MediaItemId]]): The list of media item IDs
+            to consider in the vector search
+        top_k (int): The number of candidates to return
+    '''
+
+    embedding: np.ndarray
+    start_date_taken: Optional[datetime] = None
+    end_date_taken: Optional[datetime] = None
+    within_media_item_ids: Optional[list[MediaItemId]] = None
+    top_k: int = 5
 
 
 class BaseVectorStore(ABC):
@@ -110,6 +159,18 @@ class BaseVectorStore(ABC):
         '''
 
     @abstractmethod
+    def update_media_item_embeddings(
+        self, requests: list[UpdateMediaItemEmbeddingRequest]
+    ):
+        '''
+        Updates a list of embeddings
+
+        Args:
+            request (list[UpdateMediaItemEmbeddingRequest]): A list of
+                embeddings to update in the store
+        '''
+
+    @abstractmethod
     def delete_media_item_embeddings(self, ids: list[MediaItemEmbeddingId]):
         '''
         Deletes a list of media item embeddings
@@ -121,17 +182,30 @@ class BaseVectorStore(ABC):
 
     @abstractmethod
     def get_relevent_media_item_embeddings(
-        self, embedding: np.ndarray, k: int
+        self, query: QueryMediaItemEmbeddingRequest
     ) -> list[MediaItemEmbedding]:
         '''
         Returns the top K relevent media item embeddings given an embedding.
 
         Args:
-            embedding (np.ndarray): An embedding
-            k (int): The top K media item embeddings to fetch
+            query (QueryMediaItemEmbeddingRequest): The query
 
         Returns:
             list[MediaItemEmbedding]: A list of media item embeddings
+        '''
+
+    @abstractmethod
+    def get_embedding_by_id(
+        self, embedding_id: MediaItemEmbeddingId
+    ) -> MediaItemEmbedding:
+        '''
+        Returns the embeddings from an embedding ID
+
+        Args:
+            embedding_id (MediaItemEmbeddingId): The embedding ID
+
+        Returns:
+            MediaItemEmbedding: the embedding
         '''
 
     @abstractmethod

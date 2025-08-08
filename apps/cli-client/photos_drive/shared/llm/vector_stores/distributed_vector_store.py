@@ -1,13 +1,16 @@
 import logging
 from typing import List, Tuple, override
-import numpy as np
-from bson.objectid import ObjectId
 
-from .base_vector_store import (
+from bson.objectid import ObjectId
+import numpy as np
+
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
+    CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
     MediaItemEmbeddingId,
-    CreateMediaItemEmbeddingRequest,
+    QueryMediaItemEmbeddingRequest,
+    UpdateMediaItemEmbeddingRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,6 +21,9 @@ class DistributedVectorStore(BaseVectorStore):
 
     def __init__(self, stores: List[BaseVectorStore]):
         self.stores = stores
+        self._store_id_to_store: dict[ObjectId, BaseVectorStore] = {
+            store.get_store_id(): store for store in stores
+        }
 
     @override
     def get_store_id(self) -> ObjectId:
@@ -95,11 +101,11 @@ class DistributedVectorStore(BaseVectorStore):
 
     @override
     def get_relevent_media_item_embeddings(
-        self, embedding: np.ndarray, k: int
+        self, query: QueryMediaItemEmbeddingRequest
     ) -> List[MediaItemEmbedding]:
         all_results: list[MediaItemEmbedding] = []
         for store in self.stores:
-            docs = store.get_relevent_media_item_embeddings(embedding, k)
+            docs = store.get_relevent_media_item_embeddings(query)
             all_results.extend(docs)
 
         # Compute similarities (cosine) and return top K
@@ -107,15 +113,40 @@ class DistributedVectorStore(BaseVectorStore):
         doc_sims: list[Tuple[float, MediaItemEmbedding]] = []
         for doc in all_results:
             doc_emb = doc.embedding
-            sim = np.dot(embedding, doc_emb) / (
-                np.linalg.norm(embedding) * np.linalg.norm(doc_emb) + 1e-10
+            sim = np.dot(query.embedding, doc_emb) / (
+                np.linalg.norm(query.embedding) * np.linalg.norm(doc_emb) + 1e-10
             )
             doc_sims.append((sim, doc))
         doc_sims.sort(reverse=True, key=lambda t: t[0])
-        top_docs = [t[1] for t in doc_sims[:k]]
+        top_docs = [t[1] for t in doc_sims[: query.top_k]]
         return top_docs
+
+    @override
+    def get_embedding_by_id(
+        self, embedding_id: MediaItemEmbeddingId
+    ) -> MediaItemEmbedding:
+        for store in self.stores:
+            if store.get_store_id() == embedding_id.vector_store_id:
+                print("Hehehe")
+                return store.get_embedding_by_id(embedding_id)
+        raise ValueError(f'Unable to find embedding {embedding_id}')
 
     @override
     def delete_all_media_item_embeddings(self):
         for store in self.stores:
             store.delete_all_media_item_embeddings()
+
+    @override
+    def update_media_item_embeddings(
+        self, requests: list[UpdateMediaItemEmbeddingRequest]
+    ):
+        client_id_to_reqs: dict[ObjectId, list[UpdateMediaItemEmbeddingRequest]] = {}
+        for request in requests:
+            if request.embedding_id.vector_store_id not in client_id_to_reqs:
+                client_id_to_reqs[request.embedding_id.vector_store_id] = []
+            client_id_to_reqs[request.embedding_id.vector_store_id].append(request)
+
+        for client_id in client_id_to_reqs:
+            self._store_id_to_store[client_id].update_media_item_embeddings(
+                client_id_to_reqs[client_id]
+            )

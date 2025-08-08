@@ -1,15 +1,18 @@
+from datetime import datetime, timezone
 import unittest
-import numpy as np
-from bson.objectid import ObjectId
 
+from bson.objectid import ObjectId
+import numpy as np
+
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
+    CreateMediaItemEmbeddingRequest,
+    QueryMediaItemEmbeddingRequest,
+)
 from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
 from photos_drive.shared.llm.vector_stores.mongo_db_vector_store import (
     MongoDbVectorStore,
-)
-from photos_drive.shared.llm.vector_stores.base_vector_store import (
-    CreateMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
@@ -21,6 +24,8 @@ MOCK_MEDIA_ITEM_ID_1 = MediaItemId(ObjectId(), ObjectId())
 MOCK_MEDIA_ITEM_ID_2 = MediaItemId(ObjectId(), ObjectId())
 
 MOCK_MEDIA_ITEM_ID_3 = MediaItemId(ObjectId(), ObjectId())
+
+MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 
 class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
@@ -90,7 +95,9 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
 
         requests = [
             CreateMediaItemEmbeddingRequest(
-                embedding=self._make_embedding(i), media_item_id=MOCK_MEDIA_ITEM_ID_1
+                embedding=self._make_embedding(i),
+                media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                date_taken=MOCK_DATE_TAKEN,
             )
             for i in range(5)
         ]
@@ -141,7 +148,9 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
 
         requests = [
             CreateMediaItemEmbeddingRequest(
-                embedding=self._make_embedding(i), media_item_id=MOCK_MEDIA_ITEM_ID_1
+                embedding=self._make_embedding(i),
+                media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                date_taken=MOCK_DATE_TAKEN,
             )
             for i in range(3)
         ]  # 3 docs > 2 spaces
@@ -155,6 +164,7 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
                 CreateMediaItemEmbeddingRequest(
                     embedding=self._make_embedding(0),
                     media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
                 )
             ]
         )[0]
@@ -163,6 +173,7 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
                 CreateMediaItemEmbeddingRequest(
                     embedding=self._make_embedding(1),
                     media_item_id=MOCK_MEDIA_ITEM_ID_2,
+                    date_taken=MOCK_DATE_TAKEN,
                 )
             ]
         )[0]
@@ -189,27 +200,36 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
         self.store1.add_media_item_embeddings(
             [
                 CreateMediaItemEmbeddingRequest(
-                    embedding=embed1, media_item_id=MOCK_MEDIA_ITEM_ID_1
+                    embedding=embed1,
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
                 )
             ]
         )[0]
         self.store2.add_media_item_embeddings(
             [
                 CreateMediaItemEmbeddingRequest(
-                    embedding=embed2, media_item_id=MOCK_MEDIA_ITEM_ID_2
+                    embedding=embed2,
+                    media_item_id=MOCK_MEDIA_ITEM_ID_2,
+                    date_taken=MOCK_DATE_TAKEN,
                 )
             ]
         )[0]
         self.store2.add_media_item_embeddings(
             [
                 CreateMediaItemEmbeddingRequest(
-                    embedding=embed3, media_item_id=MOCK_MEDIA_ITEM_ID_3
+                    embedding=embed3,
+                    media_item_id=MOCK_MEDIA_ITEM_ID_3,
+                    date_taken=MOCK_DATE_TAKEN,
                 )
             ]
         )[0]
 
         results = self.distributed_store.get_relevent_media_item_embeddings(
-            np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32), k=2
+            QueryMediaItemEmbeddingRequest(
+                embedding=np.array([1, 0, 0, 0, 0, 0, 0, 0], dtype=np.float32),
+                top_k=2,
+            )
         )
 
         self.assertEqual(len(results), 2)
@@ -221,6 +241,8 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
     def test_get_relevent_documents_empty(self):
         # Query with no docs in stores should return empty list without error
         results = self.distributed_store.get_relevent_media_item_embeddings(
-            np.ones(self.embedding_dim, dtype=np.float32), k=3
+            QueryMediaItemEmbeddingRequest(
+                embedding=np.ones(self.embedding_dim, dtype=np.float32), top_k=3
+            )
         )
         self.assertEqual(results, [])

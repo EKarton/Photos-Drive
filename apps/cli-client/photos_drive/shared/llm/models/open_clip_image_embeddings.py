@@ -1,11 +1,12 @@
 import logging
 from typing import override
-import torch
-from transformers import CLIPProcessor, CLIPModel
-import numpy as np
-from PIL import Image
 
-from .image_embeddings import ImageEmbeddings
+from PIL import Image
+import numpy as np
+import torch
+from transformers import CLIPModel, CLIPProcessor
+
+from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 
 logger = logging.getLogger(__name__)
 

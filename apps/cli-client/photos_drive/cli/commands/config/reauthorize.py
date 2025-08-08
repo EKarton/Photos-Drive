@@ -1,9 +1,11 @@
 import logging
-from bson import ObjectId
-from typing_extensions import Annotated
-import typer
-from google.oauth2.credentials import Credentials
 
+from bson import ObjectId
+from google.oauth2.credentials import Credentials
+import typer
+from typing_extensions import Annotated
+
+from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
@@ -12,7 +14,6 @@ from photos_drive.cli.shared.inputs import (
     prompt_user_for_non_empty_input_string,
     prompt_user_for_yes_no_answer,
 )
-from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,

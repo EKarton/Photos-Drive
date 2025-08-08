@@ -1,16 +1,16 @@
 import logging
 from typing import Dict
-from pymongo.mongo_client import MongoClient
+
+from bson.objectid import ObjectId
 from pymongo.client_session import ClientSession
+from pymongo.mongo_client import MongoClient
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
-from bson.objectid import ObjectId
 
+from photos_drive.shared.config.config import Config
 from photos_drive.shared.metadata.clients_repository import (
     ClientsRepository,
 )
-
-from ...config.config import Config
 
 logger = logging.getLogger(__name__)
 

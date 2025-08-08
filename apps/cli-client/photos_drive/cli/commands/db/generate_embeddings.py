@@ -1,45 +1,47 @@
 from collections import deque
 import logging
 from typing import cast
-from typing_extensions import Annotated
+
 from tqdm import tqdm
+import typer
+from typing_extensions import Annotated
+
 from photos_drive.backup.diffs import Diff
 from photos_drive.backup.processed_diffs import DiffsProcessor
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.inputs import (
+    prompt_user_for_yes_no_answer,
+)
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
+    createMutuallyExclusiveGroup,
+)
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
 )
-from photos_drive.shared.llm.vector_stores.vector_store_builder import (
-    config_to_vector_store,
-)
 from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
+from photos_drive.shared.llm.vector_stores.vector_store_builder import (
+    config_to_vector_store,
+)
+from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.media_item_id import MediaItemId
-import typer
-from ....shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
-)
-from ....cli.shared.config import build_config_from_options
-from ....cli.shared.inputs import (
-    prompt_user_for_yes_no_answer,
-)
-from ....cli.shared.logging import setup_logging
-from ....cli.shared.typer import (
-    createMutuallyExclusiveGroup,
-)
-from ....shared.metadata.album_id import AlbumId
-from ....shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from ....shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
-)
-from ....shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     UpdateMediaItemRequest,
+)
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
+    AlbumsRepositoryImpl,
+)
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+    MongoDbClientsRepository,
+)
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
+    MediaItemsRepositoryImpl,
 )
 
 logger = logging.getLogger(__name__)
@@ -100,9 +102,6 @@ def generate_embeddings(
         ]
     )
 
-    vector_store.delete_all_media_item_embeddings()
-    print("Deleted all embeddings in vector store")
-
     root_album_id = config.get_root_album_id()
     albums_queue: deque[tuple[AlbumId, list[str]]] = deque([(root_album_id, [])])
     diffs: list[Diff] = []
@@ -154,9 +153,14 @@ def generate_embeddings(
     if not prompt_user_for_yes_no_answer('Add embeddings to metadata db? [Y/N]:'):
         raise ValueError("Operation cancelled")
 
+    vector_store.delete_all_media_item_embeddings()
+    print("Deleted all existing embeddings in vector store")
+
     create_media_item_embedding_req: list[CreateMediaItemEmbeddingRequest] = [
         CreateMediaItemEmbeddingRequest(
-            embedding=processed_diff.embedding, media_item_id=media_item_id
+            embedding=processed_diff.embedding,
+            media_item_id=media_item_id,
+            date_taken=processed_diff.date_taken,
         )
         for media_item_id, processed_diff in zip(media_item_ids, processed_diffs)
     ]

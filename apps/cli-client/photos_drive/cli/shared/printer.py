@@ -1,10 +1,11 @@
-from photos_drive.clean.clean_system import ItemsToDelete
+from typing import Literal
+
 from prettytable import HRuleStyle, PrettyTable, VRuleStyle
 from termcolor import colored
-from typing import Literal
 
 from photos_drive.backup.diffs import Diff
 from photos_drive.backup.processed_diffs import ProcessedDiff
+from photos_drive.clean.clean_system import ItemsToDelete
 
 
 def pretty_print_processed_diffs(processed_diffs: list[ProcessedDiff]):

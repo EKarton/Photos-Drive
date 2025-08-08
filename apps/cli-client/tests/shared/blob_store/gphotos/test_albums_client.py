@@ -1,14 +1,15 @@
 import unittest
-import requests_mock
-from freezegun import freeze_time
+
 from dacite import from_dict
+from freezegun import freeze_time
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
+import requests_mock
 
+from photos_drive.shared.blob_store.gphotos.albums import Album
 from photos_drive.shared.blob_store.gphotos.client import (
     GPhotosClientV2,
 )
-from photos_drive.shared.blob_store.gphotos.albums import Album
 
 MOCK_CREDENTIALS = Credentials(
     token="token123",

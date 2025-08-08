@@ -1,18 +1,22 @@
 import json
 import logging
 import os
+from typing import Optional
+
 import backoff
 import dacite
+from dacite import from_dict
+from google.auth.transport import DEFAULT_RETRYABLE_STATUS_CODES
+from google.auth.transport.requests import AuthorizedSession
 import magic
-from typing import Optional
 from requests import Response
 from requests.exceptions import HTTPError, RequestException
 
-from dacite import from_dict
-from google.auth.transport.requests import AuthorizedSession
-from google.auth.transport import DEFAULT_RETRYABLE_STATUS_CODES
-
-from .media_items import UploadedPhotosToGPhotosResult, MediaItem, VideoProcessingStatus
+from photos_drive.shared.blob_store.gphotos.media_items import (
+    MediaItem,
+    UploadedPhotosToGPhotosResult,
+    VideoProcessingStatus,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -228,6 +232,28 @@ class GPhotosMediaItemsClient:
         )
         res.raise_for_status()
         return res
+
+    @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
+    def get_media_item_by_id(self, media_item_id: str) -> MediaItem:
+        """
+        Retrieves a media item given its ID.
+
+        Args:
+            media_item_id (str): The ID of the media item to retrieve.
+
+        Returns:
+            MediaItem: The media item with the given ID.
+
+        Raises:
+            HTTPError if the request fails or the media item does not exist.
+        """
+        url = f"https://photoslibrary.googleapis.com/v1/mediaItems/{media_item_id}"
+        res = self._session.get(url)
+        res.raise_for_status()
+        res_body = res.json()
+        return from_dict(
+            MediaItem, res_body, config=dacite.Config(cast=[VideoProcessingStatus])
+        )
 
     @backoff.on_exception(backoff.expo, (RequestException), max_time=60)
     def upload_photo(self, photo_file_path: str, file_name: str) -> str:

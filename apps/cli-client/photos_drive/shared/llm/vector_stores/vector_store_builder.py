@@ -1,4 +1,5 @@
 from pymongo.mongo_client import MongoClient
+
 from photos_drive.shared.config.config import (
     MongoDbVectorStoreConfig,
     VectorStoreConfig,

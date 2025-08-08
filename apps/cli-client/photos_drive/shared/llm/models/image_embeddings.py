@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from PIL import Image
 import numpy as np
 

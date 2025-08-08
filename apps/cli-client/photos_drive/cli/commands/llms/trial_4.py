@@ -1,4 +1,22 @@
+from langchain_core.messages.utils import count_tokens_approximately
+from langchain_core.runnables.config import RunnableConfig
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.prebuilt import create_react_agent
+from langgraph.prebuilt.chat_agent_executor import AgentState
+from langmem.short_term import RunningSummary, SummarizationNode
+from pydantic import BaseModel, Field
+
+from photos_drive.cli.commands.llms.tools.find_similar_photos import (
+    FindSimilarPhotosTool,
+)
+from photos_drive.cli.commands.llms.tools.search_photos_by_text import (
+    SearchPhotosByTextTool,
+)
 from photos_drive.shared.config.config import Config
+from photos_drive.shared.llm.models.open_clip_image_embeddings import (
+    OpenCLIPImageEmbeddings,
+)
 from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
@@ -11,28 +29,14 @@ from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
 from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-import json
-from langchain.agents import Tool
-from langchain_google_genai import ChatGoogleGenerativeAI
-from pydantic import BaseModel, Field
-from langgraph.prebuilt.chat_agent_executor import AgentState
-from langgraph.prebuilt import create_react_agent
-from langgraph.checkpoint.memory import InMemorySaver
-from langchain_core.messages.utils import count_tokens_approximately
-from langmem.short_term import SummarizationNode, RunningSummary
-from langchain_core.runnables.config import RunnableConfig
-
-from photos_drive.shared.llm.models.open_clip_image_embeddings import (
-    OpenCLIPImageEmbeddings,
-)
 
 
 class ResponseFormatter(BaseModel):
     """Always use this tool to structure your response to the user."""
 
     output: str = Field(description="The answer to the user's question")
-    image_paths: list[str] = Field(
-        description="A list of file paths of images to display to the user"
+    file_paths: list[str] = Field(
+        description="A list of file paths for each media item to show to the user"
     )
 
 
@@ -52,44 +56,14 @@ def trial_4(config: Config):
         ]
     )
 
-    def search_photos_by_text_with_reranking(query: str, top_k=5):
-        print('search_photos_by_text_with_reranking:', query)
-        embedding = image_embedder.embed_texts([query])[0]
-        embeddings = vector_store.get_relevent_media_item_embeddings(embedding, k=top_k)
-        media_items = [
-            str(media_items_repo.get_media_item_by_id(embedding.media_item_id))
-            for embedding in embeddings
-        ]
-        print('results_data:', media_items)
+    search_by_text_tool = SearchPhotosByTextTool(
+        image_embedder, vector_store, media_items_repo
+    )
+    find_similar_photos_tool = FindSimilarPhotosTool(
+        image_embedder, vector_store, media_items_repo
+    )
 
-        return json.dumps(media_items)
-
-    def find_path_by_caption_snippet(caption: str) -> str:
-        print('find_path_by_caption_snippet:', caption)
-        embedding = image_embedder.embed_texts([caption])[0]
-        embeddings = vector_store.get_relevent_media_item_embeddings(embedding, k=1)
-        media_item = media_items_repo.get_media_item_by_id(embeddings[0].media_item_id)
-        print('results_data:', media_item)
-
-        return json.dumps(str(media_item))
-
-    tools = [
-        Tool(
-            name="SearchPhotosByText",
-            func=search_photos_by_text_with_reranking,
-            description="Search for photos matching a natural language text query. "
-            + "Input: a text string describing what to find (e.g., "
-            + "'sunset in Santorini'). Returns a list of matching images with captions "
-            + "and file paths.",
-        ),
-        Tool(
-            name="FindImageFilePathFromCaption",
-            func=find_path_by_caption_snippet,
-            description="Given a short description or snippet from a photo caption, "
-            + "returns the exact file path of the matching image. Useful for resolving "
-            + "vague references like 'pine tree photo' to a file path.",
-        ),
-    ]
+    tools = [search_by_text_tool, find_similar_photos_tool]
 
     class State(AgentState):
         # NOTE: we're adding this key to keep track of previous summary information
@@ -98,8 +72,8 @@ def trial_4(config: Config):
         structured_response: ResponseFormatter
 
     model = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=0,
+        model="gemini-2.5-flash",
+        temperature=0.3,
     )
     print("Loaded llm")
 
@@ -117,7 +91,7 @@ def trial_4(config: Config):
         model=model,
         tools=tools,
         response_format=ResponseFormatter,
-        # debug=True,
+        debug=True,
         pre_model_hook=summarization_node,
         state_schema=State,
         checkpointer=checkpointer,
@@ -130,6 +104,8 @@ def trial_4(config: Config):
         user_input = input("You: ")
         if user_input.lower() in {"exit", "quit"}:
             break
+        if not user_input:
+            continue
         raw_response = agent.invoke(
             {"messages": [{"role": "user", "content": user_input}]}, llm_config
         )
@@ -139,5 +115,5 @@ def trial_4(config: Config):
         print('===== End of raw response ====')
         print(raw_response['structured_response'].output)
 
-        for image_path in raw_response['structured_response'].image_paths:
-            print(' - ', image_path)
+        for file_path in raw_response['structured_response'].file_paths:
+            print(' - ', file_path)

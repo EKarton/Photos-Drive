@@ -1,14 +1,16 @@
 import typer
 
-from photos_drive.cli.commands import config
-from photos_drive.cli.commands import db
-from photos_drive.cli.commands import add
-from photos_drive.cli.commands import clean
-from photos_drive.cli.commands import delete
-from photos_drive.cli.commands import sync
-from photos_drive.cli.commands import teardown
-from photos_drive.cli.commands import usage
-from photos_drive.cli.commands import llm
+from photos_drive.cli.commands import (
+    add,
+    clean,
+    config,
+    db,
+    delete,
+    llm,
+    sync,
+    teardown,
+    usage,
+)
 
 
 def build_app() -> typer.Typer:

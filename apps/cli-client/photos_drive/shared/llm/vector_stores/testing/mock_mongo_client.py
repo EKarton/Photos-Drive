@@ -1,5 +1,6 @@
 from collections import defaultdict
 from typing import Any
+
 from bson.objectid import ObjectId
 from pymongo.errors import CollectionInvalid
 

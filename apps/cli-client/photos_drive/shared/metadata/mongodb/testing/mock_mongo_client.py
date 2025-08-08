@@ -1,5 +1,6 @@
-import mongomock
 from unittest.mock import Mock
+
+import mongomock
 
 
 def create_mock_mongo_client(

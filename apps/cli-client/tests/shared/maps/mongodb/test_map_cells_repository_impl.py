@@ -1,23 +1,23 @@
 from datetime import datetime
 import unittest
+
 from bson import ObjectId
 
 from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
-    MapCellsRepositoryImpl,
     MAX_CELL_RESOLUTION,
+    MapCellsRepositoryImpl,
 )
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
-)
-from photos_drive.shared.metadata.mongodb.testing import create_mock_mongo_client
 from photos_drive.shared.metadata.album_id import AlbumId, album_id_to_string
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.metadata.media_item_id import (
     MediaItemId,
     media_item_id_to_string,
 )
 from photos_drive.shared.metadata.media_items import MediaItem
-from photos_drive.shared.metadata.media_items import GpsLocation
-
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+    MongoDbClientsRepository,
+)
+from photos_drive.shared.metadata.mongodb.testing import create_mock_mongo_client
 
 MONGO_CLIENT_ID = ObjectId("5f50c31e8a7d4b1c9c9b0b1a")
 

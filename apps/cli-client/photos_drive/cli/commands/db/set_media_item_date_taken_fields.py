@@ -2,32 +2,33 @@ from collections import deque
 from datetime import datetime
 import logging
 from typing import cast
-from typing_extensions import Annotated
-import typer
+
 from exiftool import ExifToolHelper
 from tqdm import tqdm
+import typer
+from typing_extensions import Annotated
 
-from ....shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
-)
-from ...shared.config import build_config_from_options
-from ...shared.inputs import (
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from ...shared.logging import setup_logging
-from ...shared.typer import (
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from ....shared.metadata.album_id import AlbumId
-from ....shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from ....shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
-)
-from ....shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     UpdateMediaItemRequest,
+)
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
+    AlbumsRepositoryImpl,
+)
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+    MongoDbClientsRepository,
+)
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
+    MediaItemsRepositoryImpl,
 )
 
 logger = logging.getLogger(__name__)

@@ -1,20 +1,21 @@
 import logging
-from typing_extensions import Annotated
-import typer
 
-from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
-    MapCellsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
-)
+import typer
+from typing_extensions import Annotated
+
 from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
+from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
+    MapCellsRepositoryImpl,
+)
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
+)
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
+    MediaItemsRepositoryImpl,
 )
 
 logger = logging.getLogger(__name__)

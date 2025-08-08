@@ -1,6 +1,7 @@
 from io import StringIO
 import unittest
 from unittest.mock import Mock, patch
+
 from pymongo import MongoClient
 
 from photos_drive.cli.shared.inputs import (

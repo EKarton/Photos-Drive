@@ -1,10 +1,10 @@
-import logging
-from dataclasses import dataclass
-from typing import Optional
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+import logging
+from typing import Optional
 
-from .album_id import AlbumId
-from .albums import Album
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.albums import Album
 
 logger = logging.getLogger(__name__)
 

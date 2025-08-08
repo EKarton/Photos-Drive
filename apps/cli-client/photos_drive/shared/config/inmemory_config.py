@@ -1,8 +1,8 @@
 from typing import Dict, override
+
 from bson.objectid import ObjectId
 
-from ..metadata.album_id import AlbumId
-from .config import (
+from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     AddMongoDbVectorStoreConfigRequest,
@@ -15,6 +15,7 @@ from .config import (
     UpdateMongoDbConfigRequest,
     VectorStoreConfig,
 )
+from photos_drive.shared.metadata.album_id import AlbumId
 
 
 class InMemoryConfig(Config):

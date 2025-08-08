@@ -1,10 +1,13 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
-import logging
-from bson.objectid import ObjectId
 import concurrent
+from dataclasses import dataclass
+import logging
 
-from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
+from bson.objectid import ObjectId
+
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
 
 logger = logging.getLogger(__name__)
 

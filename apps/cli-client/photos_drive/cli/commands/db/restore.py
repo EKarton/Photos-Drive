@@ -1,9 +1,10 @@
 import logging
-from typing_extensions import Annotated
-import typer
 
-from ...shared.logging import setup_logging
-from ...shared.typer import createMutuallyExclusiveGroup
+import typer
+from typing_extensions import Annotated
+
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import createMutuallyExclusiveGroup
 
 logger = logging.getLogger(__name__)
 

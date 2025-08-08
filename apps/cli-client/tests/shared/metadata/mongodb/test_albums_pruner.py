@@ -1,23 +1,24 @@
 from datetime import datetime, timezone
 import unittest
+
 from bson.objectid import ObjectId
 
 from photos_drive.shared.blob_store.gphotos.testing import (
-    FakeItemsRepository,
     FakeGPhotosClient,
+    FakeItemsRepository,
+)
+from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
+from photos_drive.shared.metadata.media_items_repository import (
+    CreateMediaItemRequest,
 )
 from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
-)
-from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.media_items_repository import (
-    CreateMediaItemRequest,
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
+    MediaItemsRepositoryImpl,
 )
 from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,

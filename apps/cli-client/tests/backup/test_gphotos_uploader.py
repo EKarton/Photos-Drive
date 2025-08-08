@@ -1,10 +1,7 @@
 import unittest
+
 from bson.objectid import ObjectId
 
-from photos_drive.shared.blob_store.gphotos.testing import (
-    FakeItemsRepository,
-    FakeGPhotosClient,
-)
 from photos_drive.backup.gphotos_uploader import (
     GPhotosMediaItemParallelUploaderImpl,
     GPhotosMediaItemUploaderImpl,
@@ -12,6 +9,10 @@ from photos_drive.backup.gphotos_uploader import (
 )
 from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
+)
+from photos_drive.shared.blob_store.gphotos.testing import (
+    FakeGPhotosClient,
+    FakeItemsRepository,
 )
 
 

@@ -1,10 +1,10 @@
 import configparser
 from typing import override
-from google.oauth2.credentials import Credentials
-from bson.objectid import ObjectId
 
-from ..metadata.album_id import AlbumId
-from .config import (
+from bson.objectid import ObjectId
+from google.oauth2.credentials import Credentials
+
+from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     AddMongoDbVectorStoreConfigRequest,
@@ -19,6 +19,7 @@ from .config import (
     UpdateVectorStoreConfigRequest,
     VectorStoreConfig,
 )
+from photos_drive.shared.metadata.album_id import AlbumId
 
 GPHOTOS_CONFIG_TYPE = "gphotos_config"
 MONGODB_CONFIG_TYPE = "mongodb_config"

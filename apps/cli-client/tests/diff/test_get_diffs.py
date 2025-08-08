@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
-from pyfakefs.fake_filesystem_unittest import TestCase
+
 from bson.objectid import ObjectId
+from pyfakefs.fake_filesystem_unittest import TestCase
 
 from photos_drive.diff.get_diffs import (
     DiffResults,
@@ -8,27 +9,27 @@ from photos_drive.diff.get_diffs import (
     LocalFile,
     RemoteFile,
 )
-from photos_drive.shared.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.blob_store.gphotos.testing import (
-    FakeItemsRepository,
     FakeGPhotosClient,
+    FakeItemsRepository,
+)
+from photos_drive.shared.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.metadata.media_items_repository import (
+    CreateMediaItemRequest,
 )
 from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
-)
-from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.media_items_repository import (
-    CreateMediaItemRequest,
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
+    MediaItemsRepositoryImpl,
 )
 from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,
 )
+from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 

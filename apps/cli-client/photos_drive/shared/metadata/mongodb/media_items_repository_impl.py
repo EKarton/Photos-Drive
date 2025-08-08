@@ -1,9 +1,10 @@
-import pymongo
-from bson import Binary
-from bson.objectid import ObjectId
 from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, Mapping, cast
+
+from bson import Binary
+from bson.objectid import ObjectId
+import pymongo
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     embedding_id_to_string,
@@ -14,12 +15,9 @@ from photos_drive.shared.metadata.album_id import (
     album_id_to_string,
     parse_string_to_album_id,
 )
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
-)
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.media_items import (
-    GpsLocation,
     MediaItem,
 )
 from photos_drive.shared.metadata.media_items_repository import (
@@ -27,6 +25,9 @@ from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
     UpdateMediaItemRequest,
+)
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+    MongoDbClientsRepository,
 )
 
 

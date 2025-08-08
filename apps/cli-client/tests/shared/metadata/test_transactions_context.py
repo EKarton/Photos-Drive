@@ -1,7 +1,8 @@
-from bson.objectid import ObjectId
-import unittest
 from typing import cast
+import unittest
 from unittest.mock import Mock
+
+from bson.objectid import ObjectId
 
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,

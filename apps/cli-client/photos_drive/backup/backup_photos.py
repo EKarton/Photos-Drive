@@ -1,41 +1,44 @@
-from dataclasses import dataclass, field
-import time
-from typing import Optional, Dict, cast
 from collections import deque
+from dataclasses import dataclass, field
 import logging
+import time
+from typing import Dict, Optional, cast
+
 from bson.objectid import ObjectId
+
+from photos_drive.backup.diffs_assignments import DiffsAssigner
+from photos_drive.backup.gphotos_uploader import (
+    GPhotosMediaItemParallelUploaderImpl,
+    GPhotosMediaItemUploaderImpl,
+    UploadRequest,
+)
+from photos_drive.backup.processed_diffs import ProcessedDiff
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.config.config import Config
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.media_items import MediaItem
 from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
-from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
-from photos_drive.shared.config.config import Config
+from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.albums import Album
+from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
 from photos_drive.shared.metadata.albums_repository import (
     AlbumsRepository,
 )
+from photos_drive.shared.metadata.clients_repository import (
+    ClientsRepository,
+)
+from photos_drive.shared.metadata.media_items import MediaItem
 from photos_drive.shared.metadata.media_items_repository import (
+    CreateMediaItemRequest,
     FindMediaItemRequest,
     MediaItemsRepository,
     UpdateMediaItemRequest,
 )
-from photos_drive.shared.metadata.media_items_repository import CreateMediaItemRequest
-from photos_drive.shared.metadata.clients_repository import (
-    ClientsRepository,
-)
 from photos_drive.shared.metadata.transactions_context import TransactionsContext
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
-
-from .processed_diffs import ProcessedDiff
-from .gphotos_uploader import GPhotosMediaItemParallelUploaderImpl
-from .gphotos_uploader import GPhotosMediaItemUploaderImpl
-from .gphotos_uploader import UploadRequest
-from .diffs_assignments import DiffsAssigner
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +231,9 @@ class PhotosBackup:
             media_item = add_diffs_to_media_item[add_diff]
             create_media_item_embedding_requests.append(
                 CreateMediaItemEmbeddingRequest(
-                    embedding=add_diff.embedding, media_item_id=media_item.id
+                    embedding=add_diff.embedding,
+                    media_item_id=media_item.id,
+                    date_taken=add_diff.date_taken,
                 )
             )
         media_item_embeddings = self.__vector_store.add_media_item_embeddings(

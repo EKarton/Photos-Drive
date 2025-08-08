@@ -1,6 +1,7 @@
 import logging
-from typing_extensions import Annotated
+
 import typer
+from typing_extensions import Annotated
 
 from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.logging import setup_logging

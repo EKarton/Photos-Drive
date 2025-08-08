@@ -1,20 +1,21 @@
 import logging
-from typing_extensions import Annotated
-import typer
 
-from ...cli.shared.inputs import (
+import typer
+from typing_extensions import Annotated
+
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from ...cli.shared.config import build_config_from_options
-from ...cli.shared.logging import setup_logging
-from ...cli.shared.typer import (
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from ...shared.blob_store.gphotos.client import GPhotosClientV2
-from ...shared.blob_store.gphotos.clients_repository import (
+from photos_drive.shared.blob_store.gphotos.client import GPhotosClientV2
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from ...shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 

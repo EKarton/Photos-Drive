@@ -1,7 +1,15 @@
 from typing import Optional
-from .fake_items_repository import FakeItemsRepository
-from ..media_items_client import GPhotosMediaItemsClient
-from ..media_items import UploadedPhotosToGPhotosResult, MediaItem
+
+from photos_drive.shared.blob_store.gphotos.media_items import (
+    MediaItem,
+    UploadedPhotosToGPhotosResult,
+)
+from photos_drive.shared.blob_store.gphotos.media_items_client import (
+    GPhotosMediaItemsClient,
+)
+from photos_drive.shared.blob_store.gphotos.testing.fake_items_repository import (
+    FakeItemsRepository,
+)
 
 
 class FakeGPhotosMediaItemsClient(GPhotosMediaItemsClient):
@@ -31,6 +39,9 @@ class FakeGPhotosMediaItemsClient(GPhotosMediaItemsClient):
         return self.repository.search_for_media_items(
             self.id, album_id, filters, order_by
         )
+
+    def get_media_item_by_id(self, media_item_id: str) -> MediaItem:
+        return self.repository.get_media_item_by_id(self.id, media_item_id)
 
     def upload_photo(self, photo_file_path: str, file_name: str) -> str:
         return self.repository.upload_photo(self.id, photo_file_path, file_name)
