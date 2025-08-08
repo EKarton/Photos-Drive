@@ -5,7 +5,7 @@ from transformers import CLIPProcessor, CLIPModel
 import numpy as np
 from PIL import Image
 
-from .image_embeddings import ImageEmbeddings
+from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 
 logger = logging.getLogger(__name__)
 

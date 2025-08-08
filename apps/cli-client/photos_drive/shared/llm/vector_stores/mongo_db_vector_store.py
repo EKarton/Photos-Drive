@@ -13,8 +13,10 @@ from pymongo.operations import SearchIndexModel
 from pymongo.errors import CollectionInvalid
 from bson.binary import Binary, BinaryVectorDtype
 
-from .testing.mock_mongo_client import MockMongoClient
-from .base_vector_store import (
+from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
+    MockMongoClient,
+)
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
@@ -212,7 +214,7 @@ class MongoDbVectorStore(BaseVectorStore):
                 "_id": request.embedding_id.object_id,
             }
 
-            set_query: Mapping = {"$set": {}, "$unset": {}}
+            set_query: Mapping = {"$set": {}, "$unset": {"location": ""}}
 
             if request.new_embedding:
                 set_query["$set"]['embedding'] = self.__get_mongodb_vector(
@@ -230,8 +232,6 @@ class MongoDbVectorStore(BaseVectorStore):
             operations.append(
                 pymongo.UpdateOne(filter=filter_query, update=set_query, upsert=False)
             )
-
-        print(operations)
 
         result = self._collection.bulk_write(operations)
         if result.matched_count != len(operations):
