@@ -8,6 +8,7 @@ from .base_vector_store import (
     MediaItemEmbedding,
     MediaItemEmbeddingId,
     CreateMediaItemEmbeddingRequest,
+    QueryMediaItemEmbeddingRequest,
     UpdateMediaItemEmbeddingRequest,
 )
 
@@ -99,11 +100,11 @@ class DistributedVectorStore(BaseVectorStore):
 
     @override
     def get_relevent_media_item_embeddings(
-        self, embedding: np.ndarray, k: int
+        self, query: QueryMediaItemEmbeddingRequest
     ) -> List[MediaItemEmbedding]:
         all_results: list[MediaItemEmbedding] = []
         for store in self.stores:
-            docs = store.get_relevent_media_item_embeddings(embedding, k)
+            docs = store.get_relevent_media_item_embeddings(query)
             all_results.extend(docs)
 
         # Compute similarities (cosine) and return top K
@@ -111,12 +112,12 @@ class DistributedVectorStore(BaseVectorStore):
         doc_sims: list[Tuple[float, MediaItemEmbedding]] = []
         for doc in all_results:
             doc_emb = doc.embedding
-            sim = np.dot(embedding, doc_emb) / (
-                np.linalg.norm(embedding) * np.linalg.norm(doc_emb) + 1e-10
+            sim = np.dot(query.embedding, doc_emb) / (
+                np.linalg.norm(query.embedding) * np.linalg.norm(doc_emb) + 1e-10
             )
             doc_sims.append((sim, doc))
         doc_sims.sort(reverse=True, key=lambda t: t[0])
-        top_docs = [t[1] for t in doc_sims[:k]]
+        top_docs = [t[1] for t in doc_sims[: query.top_k]]
         return top_docs
 
     @override

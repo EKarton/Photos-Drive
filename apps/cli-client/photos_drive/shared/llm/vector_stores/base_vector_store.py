@@ -112,6 +112,32 @@ class UpdateMediaItemEmbeddingRequest:
     new_date_taken: Optional[datetime] = None
 
 
+@dataclass(frozen=True)
+class QueryMediaItemEmbeddingRequest:
+    '''
+    Represents a request to query the vector store
+
+    Attributes:
+        embedding (np.darray): The embedding to vector search in the vector store
+        start_date_taken (Optional[datetime]): The earliest date to consider in the
+            vector search
+        end_date_taken (Optional[datetime]): The latest date to consider in the
+            vector search
+        around_location (Optional[GpsLocation]): The GPS location the media items
+            should be close to
+        around_radius (Optional[number]): The radius around {around_location} to
+            consider, in meters
+        top_k (int): The number of candidates to return
+    '''
+
+    embedding: np.ndarray
+    start_date_taken: Optional[datetime] = None
+    end_date_taken: Optional[datetime] = None
+    around_location: Optional[GpsLocation] = None
+    around_radius: Optional[int] = None
+    top_k: int = 5
+
+
 class BaseVectorStore(ABC):
     '''
     Represents the base vector store.
@@ -167,14 +193,13 @@ class BaseVectorStore(ABC):
 
     @abstractmethod
     def get_relevent_media_item_embeddings(
-        self, embedding: np.ndarray, k: int
+        self, query: QueryMediaItemEmbeddingRequest
     ) -> list[MediaItemEmbedding]:
         '''
         Returns the top K relevent media item embeddings given an embedding.
 
         Args:
-            embedding (np.ndarray): An embedding
-            k (int): The top K media item embeddings to fetch
+            query (QueryMediaItemEmbeddingRequest): The query
 
         Returns:
             list[MediaItemEmbedding]: A list of media item embeddings

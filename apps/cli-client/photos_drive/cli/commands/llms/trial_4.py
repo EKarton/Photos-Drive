@@ -35,8 +35,8 @@ class ResponseFormatter(BaseModel):
     """Always use this tool to structure your response to the user."""
 
     output: str = Field(description="The answer to the user's question")
-    media_item_ids: list[str] = Field(
-        description="A list of media item IDs to display to the user viewable on the browser"
+    file_paths: list[str] = Field(
+        description="A list of file paths for each media item to show to the user"
     )
 
 
@@ -115,5 +115,5 @@ def trial_4(config: Config):
         print('===== End of raw response ====')
         print(raw_response['structured_response'].output)
 
-        for media_item_id in raw_response['structured_response'].media_item_ids:
-            print(' - ', media_item_id)
+        for file_path in raw_response['structured_response'].file_paths:
+            print(' - ', file_path)

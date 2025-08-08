@@ -6,6 +6,7 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
     MediaItemEmbeddingId,
+    QueryMediaItemEmbeddingRequest,
 )
 
 DEFAULT_VECTOR_STORE_ID = ObjectId()
@@ -51,12 +52,12 @@ class FakeVectorStore(BaseVectorStore):
 
     @override
     def get_relevent_media_item_embeddings(
-        self, embedding: np.ndarray, k: int
+        self, query: QueryMediaItemEmbeddingRequest
     ) -> list[MediaItemEmbedding]:
         if not self.__id_to_embeddings:
             return []
 
-        query_vec = embedding
+        query_vec = query.embedding
         query_norm = np.linalg.norm(query_vec)
         if query_norm == 0:
             return []
@@ -72,7 +73,9 @@ class FakeVectorStore(BaseVectorStore):
             scored_embeddings.append((cosine_sim, media_embedding))
 
         # Get top k by descending similarity
-        top_k = sorted(scored_embeddings, key=lambda x: x[0], reverse=True)[:k]
+        top_k = sorted(scored_embeddings, key=lambda x: x[0], reverse=True)[
+            : query.top_k
+        ]
 
         return [embedding for _, embedding in top_k]
 

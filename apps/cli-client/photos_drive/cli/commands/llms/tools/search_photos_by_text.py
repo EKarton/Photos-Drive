@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 from photos_drive.cli.commands.llms.tools.media_item import (
     MediaItemModel,
@@ -9,9 +10,13 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from pydantic import BaseModel, Field
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
-from photos_drive.shared.llm.vector_stores.base_vector_store import BaseVectorStore
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
+    BaseVectorStore,
+    QueryMediaItemEmbeddingRequest,
+)
 from photos_drive.shared.metadata.media_items_repository import MediaItemsRepository
 
 DEFAULT_PROMPT = '''
@@ -27,7 +32,25 @@ from the photo library based on semantic similarity.
 
 class SearchPhotosByTextToolInput(BaseModel):
     query: str = Field(..., description="A text string describing what to find")
-    top_k: Optional[int] = Field(5, description="Number of photos to retrieve")
+    earliest_date_taken: str = Field(
+        '',
+        description="Earliest photo date (YYYY-MM-DD) to include in search. If empty (''), no lower bound for when the photo should be taken will be applied. Can be used alone or with latest_date_taken.",
+    )
+    latest_date_taken: str = Field(
+        '',
+        description="Latest photo date (YYYY-MM-DD) to include in search. If empty (''), no upper bound for when the photo should be taken will be applied. Can be used alone or with earliest_date_taken.",
+    )
+    around_location: str = Field(
+        '',
+        description="GPS coordinates in 'latitude,longitude' format. Leave empty string for no location filter.",
+    )
+    around_radius: int = Field(
+        0,
+        description="Search radius (in integer meters) around 'around_location'. Use 0 for no location filter.",
+    )
+    top_k: Optional[int] = Field(
+        5, description="Maximum number of similar photos to retrieve."
+    )
 
 
 class SearchPhotosByTextToolOutput(BaseModel):
@@ -59,15 +82,42 @@ class SearchPhotosByTextTool(BaseTool):
     def _run(
         self,
         query: str,
+        earliest_date_taken: str = '',
+        latest_date_taken: str = '',
+        around_location: str = '',
+        around_radius: int = 0,
         top_k: int = 5,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> SearchPhotosByTextToolOutput:
-        print('search_photos_by_text:', query)
+        query_embedding = self.image_embedder.embed_texts([query])[0]
 
-        embedding = self.image_embedder.embed_texts([query])[0]
-        embeddings = self.vector_store.get_relevent_media_item_embeddings(
-            embedding, k=top_k
+        earliest_date_obj = None
+        if earliest_date_taken != '':
+            earliest_date_obj = datetime.strptime(earliest_date_taken, "%Y-%m-%d")
+
+        latest_date_obj = None
+        if latest_date_taken != '':
+            latest_date_obj = datetime.strptime(latest_date_taken, "%Y-%m-%d")
+
+        around_location_obj = None
+        around_radius_obj = None
+        if around_location != '' and around_radius > 0:
+            around_location_parts = around_location.split(',')
+            around_location_obj = GpsLocation(
+                latitude=int(around_location_parts[0]),
+                longitude=int(around_location_parts[1]),
+            )
+            around_radius_obj = int(around_radius)
+
+        query = QueryMediaItemEmbeddingRequest(
+            embedding=query_embedding,
+            start_date_taken=earliest_date_obj,
+            end_date_taken=latest_date_obj,
+            around_location=around_location_obj,
+            around_radius=around_radius_obj,
+            top_k=top_k,
         )
+        embeddings = self.vector_store.get_relevent_media_item_embeddings(query)
 
         return SearchPhotosByTextToolOutput(
             media_items=[

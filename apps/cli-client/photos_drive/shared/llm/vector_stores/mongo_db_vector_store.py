@@ -20,6 +20,7 @@ from .base_vector_store import (
     CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
     MediaItemEmbeddingId,
+    QueryMediaItemEmbeddingRequest,
     UpdateMediaItemEmbeddingRequest,
 )
 
@@ -70,7 +71,15 @@ class MongoDbVectorStore(BaseVectorStore):
                         "similarity": "dotProduct",
                         "numDimensions": self._embedding_dimensions,
                         'quantization': 'binary',
-                    }
+                    },
+                    {
+                        "type": "filter",
+                        "path": "date_taken",
+                    },
+                    {
+                        "type": "filter",
+                        "path": "location",
+                    },
                 ]
             },
             name=self._embedding_index_name,
@@ -156,16 +165,42 @@ class MongoDbVectorStore(BaseVectorStore):
 
     @override
     def get_relevent_media_item_embeddings(
-        self, embedding: np.ndarray, k: int
+        self, query: QueryMediaItemEmbeddingRequest
     ) -> list[MediaItemEmbedding]:
+        filters_obj: dict[str, Any] = {}
+
+        # Date filtering
+        if query.start_date_taken or query.end_date_taken:
+            date_filter = {}
+            if query.start_date_taken:
+                date_filter["$gte"] = query.start_date_taken
+            if query.end_date_taken:
+                date_filter["$lte"] = query.end_date_taken
+            filters_obj["date_taken"] = date_filter
+
+        # Geo filtering
+        if query.around_location and query.around_radius is not None:
+            filters_obj["location"] = {
+                "$geoWithin": {
+                    "$centerSphere": [
+                        [
+                            query.around_location.longitude,
+                            query.around_location.latitude,
+                        ],
+                        query.around_radius / 6378137.0,
+                    ]
+                }
+            }
+
         pipeline = [
             {
                 "$vectorSearch": {
-                    "queryVector": self.__get_mongodb_vector(embedding),
+                    "queryVector": self.__get_mongodb_vector(query.embedding),
                     "path": "embedding",
-                    "numCandidates": k * 5,  # can tune
-                    "limit": k,
+                    "numCandidates": query.top_k * 5,  # can tune
+                    "limit": query.top_k,
                     "index": self._embedding_index_name,
+                    "filter": filters_obj,
                 }
             }
         ]
