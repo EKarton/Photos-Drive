@@ -8,6 +8,7 @@ from .base_vector_store import (
     MediaItemEmbedding,
     MediaItemEmbeddingId,
     CreateMediaItemEmbeddingRequest,
+    UpdateMediaItemEmbeddingRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,9 @@ class DistributedVectorStore(BaseVectorStore):
 
     def __init__(self, stores: List[BaseVectorStore]):
         self.stores = stores
+        self._store_id_to_store: dict[ObjectId, BaseVectorStore] = {
+            store.get_store_id(): store for store in stores
+        }
 
     @override
     def get_store_id(self) -> ObjectId:
@@ -129,3 +133,18 @@ class DistributedVectorStore(BaseVectorStore):
     def delete_all_media_item_embeddings(self):
         for store in self.stores:
             store.delete_all_media_item_embeddings()
+
+    @override
+    def update_media_item_embeddings(
+        self, requests: list[UpdateMediaItemEmbeddingRequest]
+    ):
+        client_id_to_reqs: dict[ObjectId, list[UpdateMediaItemEmbeddingRequest]] = {}
+        for request in requests:
+            if request.embedding_id.vector_store_id not in client_id_to_reqs:
+                client_id_to_reqs[request.embedding_id.vector_store_id] = []
+            client_id_to_reqs[request.embedding_id.vector_store_id].append(request)
+
+        for client_id in client_id_to_reqs:
+            self._store_id_to_store[client_id].update_media_item_embeddings(
+                client_id_to_reqs[client_id]
+            )

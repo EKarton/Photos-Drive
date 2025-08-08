@@ -24,7 +24,7 @@ from photos_drive.shared.metadata.media_items_repository import (
     CreateMediaItemRequest,
     UpdateMediaItemRequest,
 )
-from photos_drive.shared.metadata.media_items import (
+from photos_drive.shared.metadata.gps_location import (
     GpsLocation,
 )
 from photos_drive.shared.metadata.mongodb.testing import (

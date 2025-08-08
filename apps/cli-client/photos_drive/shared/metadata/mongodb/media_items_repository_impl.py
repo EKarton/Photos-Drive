@@ -1,3 +1,4 @@
+from photos_drive.shared.metadata.gps_location import GpsLocation
 import pymongo
 from bson import Binary
 from bson.objectid import ObjectId
@@ -19,7 +20,6 @@ from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
 )
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.media_items import (
-    GpsLocation,
     MediaItem,
 )
 from photos_drive.shared.metadata.media_items_repository import (

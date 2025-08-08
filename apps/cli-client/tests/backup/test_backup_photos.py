@@ -29,7 +29,7 @@ from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
 from photos_drive.shared.metadata.media_items_repository import (
     CreateMediaItemRequest,
 )
-from photos_drive.shared.metadata.media_items import GpsLocation
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )

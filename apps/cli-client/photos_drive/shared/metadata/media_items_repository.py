@@ -4,10 +4,11 @@ from typing import Optional
 from abc import ABC, abstractmethod
 from bson.objectid import ObjectId
 from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
+from .gps_location import GpsLocation
 
 from .media_item_id import MediaItemId
 from .album_id import AlbumId
-from .media_items import MediaItem, GpsLocation
+from .media_items import MediaItem
 
 
 @dataclass(frozen=True)

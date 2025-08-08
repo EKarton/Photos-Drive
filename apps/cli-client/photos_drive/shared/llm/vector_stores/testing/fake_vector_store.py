@@ -1,3 +1,4 @@
+from typing import override
 from bson.objectid import ObjectId
 import numpy as np
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
@@ -17,12 +18,15 @@ class FakeVectorStore(BaseVectorStore):
         self.__store_id: ObjectId = store_id
         self.__id_to_embeddings: dict[MediaItemEmbeddingId, MediaItemEmbedding] = {}
 
+    @override
     def get_store_id(self) -> ObjectId:
         return self.__store_id
 
+    @override
     def get_available_space(self) -> int:
         return 10**8
 
+    @override
     def add_media_item_embeddings(
         self, requests: list[CreateMediaItemEmbeddingRequest]
     ) -> list[MediaItemEmbedding]:
@@ -30,16 +34,22 @@ class FakeVectorStore(BaseVectorStore):
         for request in requests:
             id = self.__generate_unique_media_item_embedding_id()
             new_embedding = MediaItemEmbedding(
-                id=id, embedding=request.embedding, media_item_id=request.media_item_id
+                id=id,
+                embedding=request.embedding,
+                media_item_id=request.media_item_id,
+                location=request.location,
+                date_taken=request.date_taken,
             )
             self.__id_to_embeddings[id] = new_embedding
             new_embeddings.append(new_embedding)
         return new_embeddings
 
+    @override
     def delete_media_item_embeddings(self, ids: list[MediaItemEmbeddingId]):
         for id in ids:
             self.__id_to_embeddings.pop(id, None)
 
+    @override
     def get_relevent_media_item_embeddings(
         self, embedding: np.ndarray, k: int
     ) -> list[MediaItemEmbedding]:
@@ -66,8 +76,44 @@ class FakeVectorStore(BaseVectorStore):
 
         return [embedding for _, embedding in top_k]
 
+    @override
     def delete_all_media_item_embeddings(self):
         self.__id_to_embeddings.clear()
+
+    @override
+    def get_embedding_by_id(self, embedding_id):
+        return self.__id_to_embeddings[embedding_id]
+
+    @override
+    def update_media_item_embeddings(self, requests):
+        for request in requests:
+            original_embedding = self.__id_to_embeddings[request.embedding_id]
+
+            location = original_embedding.location
+            if request.clear_location:
+                location = None
+            elif request.new_location:
+                location = request.new_location
+
+            date_taken = original_embedding.date_taken
+            if request.new_date_taken:
+                date_taken = request.new_date_taken
+
+            media_item_id = original_embedding.media_item_id
+            if request.new_media_item_id:
+                media_item_id = request.new_media_item_id
+
+            embedding = original_embedding.embedding
+            if request.new_embedding:
+                embedding = request.new_embedding
+
+            self.__id_to_embeddings[request.embedding_id] = MediaItemEmbedding(
+                id=request.embedding_id,
+                embedding=embedding,
+                media_item_id=media_item_id,
+                location=location,
+                date_taken=date_taken,
+            )
 
     def __generate_unique_media_item_embedding_id(self) -> MediaItemEmbeddingId:
         id = MediaItemEmbeddingId(ObjectId(), ObjectId())
@@ -75,6 +121,3 @@ class FakeVectorStore(BaseVectorStore):
             id = MediaItemEmbeddingId(ObjectId(), ObjectId())
 
         return id
-
-    def get_embedding_by_id(self, embedding_id):
-        return self.__id_to_embeddings[embedding_id]

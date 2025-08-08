@@ -1,5 +1,8 @@
+from datetime import datetime
 import logging
-from typing import override
+from photos_drive.shared.metadata.gps_location import GpsLocation
+import pymongo
+from typing import Any, Mapping, cast, override
 from photos_drive.shared.metadata.media_item_id import (
     media_item_id_to_string,
     parse_string_to_media_item_id,
@@ -17,6 +20,7 @@ from .base_vector_store import (
     CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
     MediaItemEmbeddingId,
+    UpdateMediaItemEmbeddingRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -108,15 +112,16 @@ class MongoDbVectorStore(BaseVectorStore):
         # Build the return values
         added_docs = []
         for req, inserted_id in zip(requests, result.inserted_ids):
-            doc_id = MediaItemEmbeddingId(
-                vector_store_id=self._store_id,
-                object_id=inserted_id,
-            )
             added_docs.append(
                 MediaItemEmbedding(
-                    id=doc_id,
+                    id=MediaItemEmbeddingId(
+                        vector_store_id=self._store_id,
+                        object_id=inserted_id,
+                    ),
                     embedding=req.embedding,
                     media_item_id=req.media_item_id,
+                    location=req.location,
+                    date_taken=req.date_taken,
                 )
             )
         return added_docs
@@ -142,11 +147,7 @@ class MongoDbVectorStore(BaseVectorStore):
         if doc is None:
             raise ValueError(f"Cannot find embedding for {embedding_id}")
 
-        return MediaItemEmbedding(
-            id=embedding_id,
-            embedding=self.__get_embedding_np_from_mongo(doc["embedding"]),
-            media_item_id=parse_string_to_media_item_id(doc.get("media_item_id")),
-        )
+        return self.__parse_raw_document_to_media_item_embedding_obj(doc)
 
     @override
     def get_relevent_media_item_embeddings(
@@ -165,19 +166,59 @@ class MongoDbVectorStore(BaseVectorStore):
         ]
         docs = []
         for doc in self._collection.aggregate(pipeline):
-            doc_id = MediaItemEmbeddingId(
-                vector_store_id=self._store_id, object_id=doc["_id"]
-            )
-            docs.append(
-                MediaItemEmbedding(
-                    id=doc_id,
-                    embedding=self.__get_embedding_np_from_mongo(doc["embedding"]),
-                    media_item_id=parse_string_to_media_item_id(
-                        doc.get("media_item_id")
-                    ),
-                )
-            )
+            docs.append(self.__parse_raw_document_to_media_item_embedding_obj(doc))
         return docs
+
+    @override
+    def delete_all_media_item_embeddings(self):
+        self._collection.delete_many({})
+
+    @override
+    def update_media_item_embeddings(
+        self, requests: list[UpdateMediaItemEmbeddingRequest]
+    ):
+        operations: list[pymongo.UpdateOne] = []
+        for request in requests:
+            filter_query: Mapping = {
+                "_id": request.embedding_id.object_id,
+            }
+
+            set_query: Mapping = {"$set": {}, "$unset": {}}
+
+            if request.new_embedding:
+                set_query["$set"]['embedding'] = self.__get_mongodb_vector(
+                    request.new_embedding
+                )
+
+            if request.new_media_item_id:
+                set_query["$set"]['media_item_id'] = media_item_id_to_string(
+                    request.new_media_item_id
+                )
+
+            if request.clear_location:
+                set_query["$set"]['location'] = None
+            elif request.new_location is not None:
+                set_query["$set"]['location'] = {
+                    "type": "Point",
+                    "coordinates": [
+                        request.new_location.longitude,
+                        request.new_location.latitude,
+                    ],
+                }
+
+            if request.new_date_taken:
+                set_query["$set"]['date_taken'] = request.new_date_taken
+
+            operations.append(
+                pymongo.UpdateOne(filter=filter_query, update=set_query, upsert=False)
+            )
+
+        result = self._collection.bulk_write(requests=operations)
+        if result.matched_count != len(operations):
+            raise ValueError(
+                f"Unable to update all embeddings: {result.matched_count} "
+                + f"vs {len(operations)}"
+            )
 
     def __get_mongodb_vector(self, embedding: np.ndarray) -> Binary:
         return Binary.from_vector(embedding.tolist(), BinaryVectorDtype.FLOAT32)
@@ -185,6 +226,28 @@ class MongoDbVectorStore(BaseVectorStore):
     def __get_embedding_np_from_mongo(self, raw_embedding: Binary) -> np.ndarray:
         return np.array(raw_embedding.as_vector().data, dtype=np.float32)
 
-    @override
-    def delete_all_media_item_embeddings(self):
-        self._collection.delete_many({})
+    def __parse_raw_document_to_media_item_embedding_obj(
+        self, raw_item: Mapping[str, Any]
+    ) -> MediaItemEmbedding:
+        location: GpsLocation | None = None
+        if "location" in raw_item and raw_item["location"]:
+            location = GpsLocation(
+                longitude=float(raw_item["location"]["coordinates"][0]),
+                latitude=float(raw_item["location"]["coordinates"][1]),
+            )
+
+        date_taken = None
+        if 'date_taken' in raw_item and raw_item['date_taken']:
+            date_taken = cast(datetime, raw_item['date_taken'])
+        else:
+            date_taken = datetime(1970, 1, 1)
+
+        return MediaItemEmbedding(
+            id=MediaItemEmbeddingId(
+                vector_store_id=self.get_store_id(), object_id=raw_item['_id']
+            ),
+            embedding=self.__get_embedding_np_from_mongo(raw_item["embedding"]),
+            media_item_id=parse_string_to_media_item_id(raw_item["media_item_id"]),
+            location=location,
+            date_taken=date_taken,
+        )

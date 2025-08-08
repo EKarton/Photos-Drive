@@ -228,7 +228,10 @@ class PhotosBackup:
             media_item = add_diffs_to_media_item[add_diff]
             create_media_item_embedding_requests.append(
                 CreateMediaItemEmbeddingRequest(
-                    embedding=add_diff.embedding, media_item_id=media_item.id
+                    embedding=add_diff.embedding,
+                    media_item_id=media_item.id,
+                    location=add_diff.location,
+                    date_taken=add_diff.date_taken,
                 )
             )
         media_item_embeddings = self.__vector_store.add_media_item_embeddings(

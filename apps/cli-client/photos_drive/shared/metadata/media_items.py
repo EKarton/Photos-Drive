@@ -4,22 +4,9 @@ from datetime import datetime
 from bson.objectid import ObjectId
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 from photos_drive.shared.metadata.album_id import AlbumId
-
-
-@dataclass(frozen=True)
-class GpsLocation:
-    """
-    Represents a GPS location.
-
-    Attributes:
-        latitude (float): The latitude in degrees.
-        longitude (float): The longitude in degrees.
-    """
-
-    latitude: float
-    longitude: float
 
 
 @dataclass(frozen=True)

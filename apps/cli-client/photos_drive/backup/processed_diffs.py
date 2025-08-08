@@ -19,7 +19,7 @@ from photos_drive.shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
-from photos_drive.shared.metadata.media_items import GpsLocation
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.backup.diffs import Diff, Modifier
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,8 @@
 from typing import Optional
 from photos_drive.shared.metadata import album_id
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.metadata.media_item_id import media_item_id_to_string
-from photos_drive.shared.metadata.media_items import GpsLocation, MediaItem
+from photos_drive.shared.metadata.media_items import MediaItem
 from pydantic import BaseModel, Field
 
 
