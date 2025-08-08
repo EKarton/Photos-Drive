@@ -1,16 +1,17 @@
 from typing import Dict, cast
 import unittest
+
 from bson.objectid import ObjectId
 
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
+from photos_drive.shared.metadata.album_id import AlbumId, album_id_to_string
 from photos_drive.shared.metadata.albums_repository import (
     AlbumsRepository,
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from photos_drive.shared.metadata.album_id import AlbumId, album_id_to_string
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
+    AlbumsRepositoryImpl,
+)
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )

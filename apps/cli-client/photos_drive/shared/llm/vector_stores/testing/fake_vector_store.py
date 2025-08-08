@@ -1,6 +1,8 @@
 from typing import override
+
 from bson.objectid import ObjectId
 import numpy as np
+
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,

@@ -1,7 +1,8 @@
-from typing_extensions import Annotated
 import unittest
+
 import typer
 from typer.testing import CliRunner
+from typing_extensions import Annotated
 
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,

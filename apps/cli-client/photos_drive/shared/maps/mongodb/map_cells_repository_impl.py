@@ -1,7 +1,8 @@
 import sys
 from typing import Dict, cast
-import h3
+
 from bson.objectid import ObjectId
+import h3
 
 from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
 from photos_drive.shared.metadata.album_id import album_id_to_string

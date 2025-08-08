@@ -1,18 +1,18 @@
 import json
 import logging
 import os
+from typing import Optional
+
 import backoff
 import dacite
+from dacite import from_dict
+from google.auth.transport import DEFAULT_RETRYABLE_STATUS_CODES
+from google.auth.transport.requests import AuthorizedSession
 import magic
-from typing import Optional
 from requests import Response
 from requests.exceptions import HTTPError, RequestException
 
-from dacite import from_dict
-from google.auth.transport.requests import AuthorizedSession
-from google.auth.transport import DEFAULT_RETRYABLE_STATUS_CODES
-
-from .media_items import UploadedPhotosToGPhotosResult, MediaItem, VideoProcessingStatus
+from .media_items import MediaItem, UploadedPhotosToGPhotosResult, VideoProcessingStatus
 
 logger = logging.getLogger(__name__)
 

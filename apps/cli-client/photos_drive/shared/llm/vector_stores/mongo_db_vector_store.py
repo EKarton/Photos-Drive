@@ -1,21 +1,15 @@
 from datetime import datetime
 import logging
-import pymongo
 from typing import Any, Mapping, cast, override
-from photos_drive.shared.metadata.media_item_id import (
-    media_item_id_to_string,
-    parse_string_to_media_item_id,
-)
-from pymongo import MongoClient
+
+from bson.binary import Binary, BinaryVectorDtype
 from bson.objectid import ObjectId
 import numpy as np
-from pymongo.operations import SearchIndexModel
+import pymongo
+from pymongo import MongoClient
 from pymongo.errors import CollectionInvalid
-from bson.binary import Binary, BinaryVectorDtype
+from pymongo.operations import SearchIndexModel
 
-from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
-    MockMongoClient,
-)
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,
@@ -23,6 +17,13 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
     UpdateMediaItemEmbeddingRequest,
+)
+from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
+    MockMongoClient,
+)
+from photos_drive.shared.metadata.media_item_id import (
+    media_item_id_to_string,
+    parse_string_to_media_item_id,
 )
 
 logger = logging.getLogger(__name__)

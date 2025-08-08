@@ -1,4 +1,5 @@
 import unittest
+
 from bson.objectid import ObjectId
 
 from photos_drive.shared.metadata.album_id import (

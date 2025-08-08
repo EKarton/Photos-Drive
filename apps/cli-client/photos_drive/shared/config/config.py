@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
+
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 

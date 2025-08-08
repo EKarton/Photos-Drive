@@ -1,31 +1,32 @@
 from datetime import datetime
 import os
-from bson import Binary
 import unittest
+
+from bson import Binary
 from bson.objectid import ObjectId
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     MediaItemEmbeddingId,
     embedding_id_to_string,
 )
+from photos_drive.shared.metadata.album_id import (
+    AlbumId,
+    album_id_to_string,
+)
+from photos_drive.shared.metadata.gps_location import (
+    GpsLocation,
+)
+from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items_repository import (
+    CreateMediaItemRequest,
+    FindMediaItemRequest,
+    UpdateMediaItemRequest,
+)
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
-)
-from photos_drive.shared.metadata.album_id import (
-    AlbumId,
-    album_id_to_string,
-)
-from photos_drive.shared.metadata.media_item_id import MediaItemId
-from photos_drive.shared.metadata.media_items_repository import (
-    FindMediaItemRequest,
-    CreateMediaItemRequest,
-    UpdateMediaItemRequest,
-)
-from photos_drive.shared.metadata.gps_location import (
-    GpsLocation,
 )
 from photos_drive.shared.metadata.mongodb.testing import (
     create_mock_mongo_client,

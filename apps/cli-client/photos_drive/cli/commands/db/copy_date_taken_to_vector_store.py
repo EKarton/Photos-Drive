@@ -1,21 +1,34 @@
 from collections import deque
 import logging
 from typing import cast
-from typing_extensions import Annotated
+
 from tqdm import tqdm
+import typer
+from typing_extensions import Annotated
+
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     UpdateMediaItemEmbeddingRequest,
 )
-from photos_drive.shared.llm.vector_stores.vector_store_builder import (
-    config_to_vector_store,
-)
 from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
-import typer
+from photos_drive.shared.llm.vector_stores.vector_store_builder import (
+    config_to_vector_store,
+)
+
+from ....shared.metadata.album_id import AlbumId
+from ....shared.metadata.media_items_repository import (
+    FindMediaItemRequest,
+)
+from ....shared.metadata.mongodb.albums_repository_impl import (
+    AlbumsRepositoryImpl,
+)
+from ....shared.metadata.mongodb.clients_repository_impl import (
+    MongoDbClientsRepository,
+)
 from ....shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
@@ -26,16 +39,6 @@ from ...shared.inputs import (
 from ...shared.logging import setup_logging
 from ...shared.typer import (
     createMutuallyExclusiveGroup,
-)
-from ....shared.metadata.album_id import AlbumId
-from ....shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from ....shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
-)
-from ....shared.metadata.media_items_repository import (
-    FindMediaItemRequest,
 )
 
 logger = logging.getLogger(__name__)

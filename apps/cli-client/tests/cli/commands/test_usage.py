@@ -1,7 +1,8 @@
 import os
 import tempfile
-from unittest.mock import patch
 import unittest
+from unittest.mock import patch
+
 from bson import ObjectId
 from pymongo import MongoClient
 from typer.testing import CliRunner
@@ -10,11 +11,11 @@ from photos_drive.cli.app import build_app
 from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from photos_drive.shared.blob_store.gphotos.testing.fake_client import (
-    FakeGPhotosClient,
-)
 from photos_drive.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
+)
+from photos_drive.shared.blob_store.gphotos.testing.fake_client import (
+    FakeGPhotosClient,
 )
 from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,

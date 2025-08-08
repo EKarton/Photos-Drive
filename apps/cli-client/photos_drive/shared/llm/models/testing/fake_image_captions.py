@@ -1,5 +1,7 @@
 from typing import override
+
 from PIL import Image
+
 from photos_drive.shared.llm.models.image_captions import ImageCaptions
 
 FAKE_CAPTIONS = 'Sample captions'

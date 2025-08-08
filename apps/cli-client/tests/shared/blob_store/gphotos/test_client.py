@@ -1,21 +1,20 @@
 import unittest
 from unittest.mock import Mock, patch
-import requests_mock
+
 from freezegun import freeze_time
+from google.auth.transport import Request
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
-from google.auth.transport import Request
+import requests_mock
 
-from photos_drive.shared.blob_store.gphotos.client import (
-    GPhotosClientV2,
-    ListenableCredentials,
-    TokenRefreshCallback,
-)
-from photos_drive.shared.blob_store.gphotos.client import (
-    GPhotosStorageQuota,
-)
 from photos_drive.shared.blob_store.gphotos.albums_client import (
     GPhotosAlbumsClient,
+)
+from photos_drive.shared.blob_store.gphotos.client import (
+    GPhotosClientV2,
+    GPhotosStorageQuota,
+    ListenableCredentials,
+    TokenRefreshCallback,
 )
 from photos_drive.shared.blob_store.gphotos.media_items_client import (
     GPhotosMediaItemsClient,

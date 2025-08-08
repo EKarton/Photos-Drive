@@ -1,8 +1,9 @@
 import logging
 import os
-from typing_extensions import Annotated
-import typer
+
 from pymongo import MongoClient
+import typer
+from typing_extensions import Annotated
 
 from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,

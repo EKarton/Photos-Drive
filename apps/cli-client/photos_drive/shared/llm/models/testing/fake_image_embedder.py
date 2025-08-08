@@ -1,6 +1,8 @@
 from typing import override
-import numpy as np
+
 from PIL import Image
+import numpy as np
+
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 
 DIMENSION = 100

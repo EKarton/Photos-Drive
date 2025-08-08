@@ -1,9 +1,11 @@
 import logging
 from typing import Any, Dict, Mapping, cast, override
+
+from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 from pymongo.mongo_client import MongoClient
-from bson.objectid import ObjectId
 
+from ..metadata.album_id import AlbumId
 from .config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -19,7 +21,6 @@ from .config import (
     UpdateVectorStoreConfigRequest,
     VectorStoreConfig,
 )
-from ..metadata.album_id import AlbumId
 
 logger = logging.getLogger(__name__)
 

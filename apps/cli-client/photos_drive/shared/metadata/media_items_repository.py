@@ -1,13 +1,15 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-from abc import ABC, abstractmethod
-from bson.objectid import ObjectId
-from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
-from .gps_location import GpsLocation
 
-from .media_item_id import MediaItemId
+from bson.objectid import ObjectId
+
+from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
+
 from .album_id import AlbumId
+from .gps_location import GpsLocation
+from .media_item_id import MediaItemId
 from .media_items import MediaItem
 
 

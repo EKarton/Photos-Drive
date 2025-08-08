@@ -1,5 +1,26 @@
 import logging
+
+import typer
 from typing_extensions import Annotated
+
+from photos_drive.backup.backup_photos import PhotosBackup
+from photos_drive.backup.diffs import Diff
+from photos_drive.backup.processed_diffs import DiffsProcessor
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.files import (
+    get_media_file_paths_from_path,
+)
+from photos_drive.cli.shared.inputs import (
+    prompt_user_for_yes_no_answer,
+)
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.printer import pretty_print_diffs
+from photos_drive.cli.shared.typer import (
+    createMutuallyExclusiveGroup,
+)
+from photos_drive.shared.blob_store.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
@@ -9,26 +30,6 @@ from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
 )
 from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
     MapCellsRepositoryImpl,
-)
-import typer
-
-from photos_drive.backup.backup_photos import PhotosBackup
-from photos_drive.backup.diffs import Diff
-from photos_drive.backup.processed_diffs import DiffsProcessor
-from photos_drive.cli.shared.inputs import (
-    prompt_user_for_yes_no_answer,
-)
-from photos_drive.cli.shared.printer import pretty_print_diffs
-from photos_drive.cli.shared.files import (
-    get_media_file_paths_from_path,
-)
-from photos_drive.cli.shared.config import build_config_from_options
-from photos_drive.cli.shared.logging import setup_logging
-from photos_drive.cli.shared.typer import (
-    createMutuallyExclusiveGroup,
-)
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
 )
 from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,

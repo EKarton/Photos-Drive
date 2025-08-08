@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 from .album_id import AlbumId
 
 

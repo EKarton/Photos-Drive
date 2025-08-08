@@ -1,7 +1,10 @@
 import logging
 import math
 from typing import Generator
+
+import typer
 from typing_extensions import Annotated
+
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
@@ -12,7 +15,6 @@ from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
 from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
     MapCellsRepositoryImpl,
 )
-import typer
 
 from ...backup.backup_photos import (
     BackupResults,
@@ -23,22 +25,22 @@ from ...backup.processed_diffs import (
     DiffsProcessor,
     ProcessedDiff,
 )
+from ...cli.shared.config import build_config_from_options
 from ...cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
+from ...cli.shared.logging import setup_logging
 from ...cli.shared.printer import (
     pretty_print_processed_diffs,
 )
-from ...cli.shared.config import build_config_from_options
-from ...cli.shared.logging import setup_logging
 from ...cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from ...diff.get_diffs import DiffResults, FolderSyncDiff
-from ...shared.config.config import Config
 from ...shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
+from ...shared.config.config import Config
 from ...shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )

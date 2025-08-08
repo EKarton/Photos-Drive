@@ -1,4 +1,5 @@
 from typing import Dict
+
 from bson import ObjectId
 
 from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository

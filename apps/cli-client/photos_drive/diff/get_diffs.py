@@ -1,20 +1,20 @@
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from collections import deque
 import logging
 import os
 from typing import cast
 
-from ..shared.metadata.album_id import AlbumId
-from ..shared.utils.hashes.xxhash import compute_file_hash
 from ..shared.blob_store.gphotos.valid_file_extensions import MEDIA_ITEM_FILE_EXTENSIONS
 from ..shared.config.config import Config
+from ..shared.metadata.album_id import AlbumId
 from ..shared.metadata.albums import Album
 from ..shared.metadata.albums_repository import AlbumsRepository
 from ..shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     MediaItemsRepository,
 )
+from ..shared.utils.hashes.xxhash import compute_file_hash
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,8 @@
 import os
 import unittest
-import numpy as np
+
 from PIL import Image
+import numpy as np
 
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,

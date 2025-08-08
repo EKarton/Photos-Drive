@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
 from bson.objectid import ObjectId
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
+from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.metadata.media_item_id import MediaItemId
-from photos_drive.shared.metadata.album_id import AlbumId
 
 
 @dataclass(frozen=True)

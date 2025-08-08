@@ -1,6 +1,7 @@
-import unittest
-import tempfile
 import os
+import tempfile
+import unittest
+
 import xxhash
 
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash

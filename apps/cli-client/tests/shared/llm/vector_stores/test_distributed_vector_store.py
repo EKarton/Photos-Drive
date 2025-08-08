@@ -1,17 +1,18 @@
 from datetime import datetime, timezone
 import unittest
-import numpy as np
-from bson.objectid import ObjectId
 
+from bson.objectid import ObjectId
+import numpy as np
+
+from photos_drive.shared.llm.vector_stores.base_vector_store import (
+    CreateMediaItemEmbeddingRequest,
+    QueryMediaItemEmbeddingRequest,
+)
 from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
 from photos_drive.shared.llm.vector_stores.mongo_db_vector_store import (
     MongoDbVectorStore,
-)
-from photos_drive.shared.llm.vector_stores.base_vector_store import (
-    CreateMediaItemEmbeddingRequest,
-    QueryMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,

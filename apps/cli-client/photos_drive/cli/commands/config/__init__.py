@@ -1,10 +1,8 @@
 import typer
 
-from . import add
-from . import reauthorize
-from .view import view
+from . import add, reauthorize
 from .init import init
-
+from .view import view
 
 app = typer.Typer()
 app.command()(view)

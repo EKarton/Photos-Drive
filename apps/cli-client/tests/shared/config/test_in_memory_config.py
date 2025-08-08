@@ -1,6 +1,7 @@
 import unittest
-from bson import ObjectId
 from unittest.mock import MagicMock
+
+from bson import ObjectId
 from google.oauth2.credentials import Credentials
 
 from photos_drive.shared.config.config import (

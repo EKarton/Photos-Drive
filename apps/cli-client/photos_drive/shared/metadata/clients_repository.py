@@ -1,5 +1,6 @@
-from bson.objectid import ObjectId
 from abc import ABC, abstractmethod
+
+from bson.objectid import ObjectId
 
 
 class ClientsRepository(ABC):

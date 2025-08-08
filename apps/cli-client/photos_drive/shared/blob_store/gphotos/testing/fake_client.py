@@ -1,14 +1,13 @@
+import sys
 from typing import Optional
 import uuid
-import sys
 
+from ..albums_client import GPhotosAlbumsClient
 from ..client import GPhotosClientV2, GPhotosStorageQuota
-
-from .fake_media_items_client import FakeGPhotosMediaItemsClient
+from ..media_items_client import GPhotosMediaItemsClient
 from .fake_albums_client import FakeGPhotosAlbumsClient
 from .fake_items_repository import FakeItemsRepository
-from ..albums_client import GPhotosAlbumsClient
-from ..media_items_client import GPhotosMediaItemsClient
+from .fake_media_items_client import FakeGPhotosMediaItemsClient
 
 
 class FakeGPhotosClient(GPhotosClientV2):

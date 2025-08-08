@@ -1,4 +1,5 @@
 import logging
+
 from langchain_core.memory import BaseMemory
 
 logger = logging.getLogger(__name__)

@@ -1,13 +1,14 @@
 import logging
 from typing import List, Tuple, override
-import numpy as np
+
 from bson.objectid import ObjectId
+import numpy as np
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
+    CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
     MediaItemEmbeddingId,
-    CreateMediaItemEmbeddingRequest,
     QueryMediaItemEmbeddingRequest,
     UpdateMediaItemEmbeddingRequest,
 )

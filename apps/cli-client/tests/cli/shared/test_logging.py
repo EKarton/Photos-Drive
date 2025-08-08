@@ -1,8 +1,8 @@
-import unittest
+from contextlib import contextmanager
+from io import StringIO
 import logging
 import sys
-from io import StringIO
-from contextlib import contextmanager
+import unittest
 
 from photos_drive.cli.shared.logging import setup_logging
 

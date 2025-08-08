@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Optional
 
-
 from ..shared.metadata.gps_location import GpsLocation
 
 '''

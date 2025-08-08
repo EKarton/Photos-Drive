@@ -1,8 +1,9 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
-import logging
-from bson.objectid import ObjectId
 import concurrent
+from dataclasses import dataclass
+import logging
+
+from bson.objectid import ObjectId
 
 from ..shared.blob_store.gphotos.clients_repository import GPhotosClientsRepository
 

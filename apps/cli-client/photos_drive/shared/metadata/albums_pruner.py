@@ -1,7 +1,9 @@
 from typing import cast
+
 from photos_drive.shared.metadata.album_id import AlbumId
-from .media_items_repository import MediaItemsRepository
+
 from .albums_repository import AlbumsRepository
+from .media_items_repository import MediaItemsRepository
 
 
 class AlbumsPruner:

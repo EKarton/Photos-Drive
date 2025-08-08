@@ -4,8 +4,8 @@ from photos_drive.shared.blob_store.gphotos.client import (
     GPhotosStorageQuota,
 )
 from photos_drive.shared.blob_store.gphotos.testing import (
-    FakeItemsRepository,
     FakeGPhotosClient,
+    FakeItemsRepository,
 )
 
 

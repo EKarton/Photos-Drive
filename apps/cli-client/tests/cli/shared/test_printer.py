@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
-import unittest
 from io import StringIO
+import unittest
 from unittest.mock import patch
 
 from photos_drive.backup.diffs import Diff

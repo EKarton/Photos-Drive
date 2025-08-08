@@ -1,7 +1,6 @@
-from bson.objectid import ObjectId
-
-
 from dataclasses import dataclass
+
+from bson.objectid import ObjectId
 
 
 @dataclass(frozen=True)

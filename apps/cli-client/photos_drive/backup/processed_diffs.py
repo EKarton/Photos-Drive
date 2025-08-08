@@ -4,14 +4,16 @@ from datetime import datetime
 import logging
 import os
 from typing import Optional, Tuple, cast
-from tqdm import tqdm
-import magic
-from exiftool import ExifToolHelper
-import numpy as np
-from PIL import Image, ImageFile
 
+from PIL import Image, ImageFile
+from exiftool import ExifToolHelper
+import magic
+import numpy as np
+from tqdm import tqdm
+
+from photos_drive.backup.diffs import Diff, Modifier
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
-from photos_drive.shared.utils.mime_type.utils import is_image
+from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.utils.dimensions.cv2_video_dimensions import (
     get_width_height_of_video,
 )
@@ -19,8 +21,7 @@ from photos_drive.shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
-from photos_drive.shared.metadata.gps_location import GpsLocation
-from photos_drive.backup.diffs import Diff, Modifier
+from photos_drive.shared.utils.mime_type.utils import is_image
 
 logger = logging.getLogger(__name__)
 

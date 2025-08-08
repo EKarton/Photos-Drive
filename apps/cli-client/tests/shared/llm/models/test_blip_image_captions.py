@@ -1,5 +1,6 @@
 import os
 import unittest
+
 from PIL import Image
 
 from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions

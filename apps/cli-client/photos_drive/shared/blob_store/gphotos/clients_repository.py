@@ -1,11 +1,12 @@
 import logging
 from typing import Dict, Optional
+
+from bson.objectid import ObjectId
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
-from bson.objectid import ObjectId
 
-from .client import GPhotosClientV2, ListenableCredentials, TokenRefreshCallback
 from ...config.config import Config, GPhotosConfig, UpdateGPhotosConfigRequest
+from .client import GPhotosClientV2, ListenableCredentials, TokenRefreshCallback
 
 logger = logging.getLogger(__name__)
 

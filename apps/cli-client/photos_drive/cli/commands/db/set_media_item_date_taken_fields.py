@@ -2,11 +2,23 @@ from collections import deque
 from datetime import datetime
 import logging
 from typing import cast
-from typing_extensions import Annotated
-import typer
+
 from exiftool import ExifToolHelper
 from tqdm import tqdm
+import typer
+from typing_extensions import Annotated
 
+from ....shared.metadata.album_id import AlbumId
+from ....shared.metadata.media_items_repository import (
+    FindMediaItemRequest,
+    UpdateMediaItemRequest,
+)
+from ....shared.metadata.mongodb.albums_repository_impl import (
+    AlbumsRepositoryImpl,
+)
+from ....shared.metadata.mongodb.clients_repository_impl import (
+    MongoDbClientsRepository,
+)
 from ....shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
@@ -17,17 +29,6 @@ from ...shared.inputs import (
 from ...shared.logging import setup_logging
 from ...shared.typer import (
     createMutuallyExclusiveGroup,
-)
-from ....shared.metadata.album_id import AlbumId
-from ....shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from ....shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
-)
-from ....shared.metadata.media_items_repository import (
-    FindMediaItemRequest,
-    UpdateMediaItemRequest,
 )
 
 logger = logging.getLogger(__name__)

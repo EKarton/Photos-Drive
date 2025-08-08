@@ -1,10 +1,11 @@
 import unittest
+
 from bson.objectid import ObjectId
 
 from photos_drive.shared.metadata.media_item_id import (
     MediaItemId,
-    parse_string_to_media_item_id,
     media_item_id_to_string,
+    parse_string_to_media_item_id,
 )
 
 

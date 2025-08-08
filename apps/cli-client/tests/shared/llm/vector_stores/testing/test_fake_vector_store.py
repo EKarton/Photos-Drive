@@ -1,17 +1,17 @@
 from datetime import datetime, timezone
 import unittest
-import numpy as np
-from bson.objectid import ObjectId
 
-from photos_drive.shared.llm.vector_stores.testing.fake_vector_store import (
-    FakeVectorStore,
-)
+from bson.objectid import ObjectId
+import numpy as np
+
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
     QueryMediaItemEmbeddingRequest,
 )
+from photos_drive.shared.llm.vector_stores.testing.fake_vector_store import (
+    FakeVectorStore,
+)
 from photos_drive.shared.metadata.media_item_id import MediaItemId
-
 
 MOCK_MEDIA_ITEM_ID_1 = MediaItemId(ObjectId(), ObjectId())
 MOCK_MEDIA_ITEM_ID_2 = MediaItemId(ObjectId(), ObjectId())

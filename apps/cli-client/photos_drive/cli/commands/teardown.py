@@ -1,11 +1,12 @@
 import logging
-from typing_extensions import Annotated
-import typer
 
+import typer
+from typing_extensions import Annotated
+
+from ...cli.shared.config import build_config_from_options
 from ...cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from ...cli.shared.config import build_config_from_options
 from ...cli.shared.logging import setup_logging
 from ...cli.shared.typer import (
     createMutuallyExclusiveGroup,

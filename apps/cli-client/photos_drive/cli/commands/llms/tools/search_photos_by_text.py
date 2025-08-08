@@ -1,22 +1,24 @@
 from datetime import datetime
 from typing import List, Optional
-from photos_drive.cli.commands.llms.tools.media_item import (
-    MediaItemModel,
-    dataclass_to_pydantic_media_item,
-)
-from langchain_core.tools import BaseTool
-from langchain_core.tools.base import ArgsSchema
+
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-from photos_drive.shared.metadata.media_item_id import parse_string_to_media_item_id
+from langchain_core.tools import BaseTool
+from langchain_core.tools.base import ArgsSchema
 from pydantic import BaseModel, Field
+
+from photos_drive.cli.commands.llms.tools.media_item import (
+    MediaItemModel,
+    dataclass_to_pydantic_media_item,
+)
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     QueryMediaItemEmbeddingRequest,
 )
+from photos_drive.shared.metadata.media_item_id import parse_string_to_media_item_id
 from photos_drive.shared.metadata.media_items_repository import MediaItemsRepository
 
 DEFAULT_PROMPT = '''

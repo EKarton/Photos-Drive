@@ -1,7 +1,8 @@
-import pymongo
-from bson.objectid import ObjectId
 from collections import defaultdict
 from typing import Any, Dict, Mapping, cast
+
+from bson.objectid import ObjectId
+import pymongo
 
 from photos_drive.shared.metadata.album_id import (
     AlbumId,

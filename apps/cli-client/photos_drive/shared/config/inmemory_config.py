@@ -1,4 +1,5 @@
 from typing import Dict, override
+
 from bson.objectid import ObjectId
 
 from ..metadata.album_id import AlbumId

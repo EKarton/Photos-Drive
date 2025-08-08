@@ -1,10 +1,11 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
-from abc import ABC, abstractmethod
+
+import backoff
+from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 from requests.exceptions import RequestException
-from google.auth.transport.requests import AuthorizedSession
-import backoff
 
 from .albums_client import GPhotosAlbumsClient
 from .media_items_client import GPhotosMediaItemsClient

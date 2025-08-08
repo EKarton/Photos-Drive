@@ -1,7 +1,8 @@
 import configparser
 from typing import override
-from google.oauth2.credentials import Credentials
+
 from bson.objectid import ObjectId
+from google.oauth2.credentials import Credentials
 
 from ..metadata.album_id import AlbumId
 from .config import (

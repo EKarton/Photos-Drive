@@ -1,18 +1,19 @@
-from typer.testing import CliRunner
 import os
 import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
-from pymongo import MongoClient
+
 from bson import ObjectId
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from pymongo import MongoClient
+from typer.testing import CliRunner
 
+from photos_drive.cli.app import build_app
 from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
 )
-from photos_drive.cli.app import build_app
 from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,

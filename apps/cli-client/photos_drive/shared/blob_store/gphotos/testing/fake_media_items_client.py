@@ -1,7 +1,8 @@
 from typing import Optional
-from .fake_items_repository import FakeItemsRepository
+
+from ..media_items import MediaItem, UploadedPhotosToGPhotosResult
 from ..media_items_client import GPhotosMediaItemsClient
-from ..media_items import UploadedPhotosToGPhotosResult, MediaItem
+from .fake_items_repository import FakeItemsRepository
 
 
 class FakeGPhotosMediaItemsClient(GPhotosMediaItemsClient):
