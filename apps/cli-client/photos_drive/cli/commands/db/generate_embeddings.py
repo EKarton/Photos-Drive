@@ -19,25 +19,25 @@ from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
 )
 from photos_drive.shared.metadata.media_item_id import MediaItemId
 import typer
-from ....shared.metadata.mongodb.media_items_repository_impl import (
+from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
     MediaItemsRepositoryImpl,
 )
-from ....cli.shared.config import build_config_from_options
-from ....cli.shared.inputs import (
+from photos_drive.cli.shared.config import build_config_from_options
+from photos_drive.cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
 )
-from ....cli.shared.logging import setup_logging
-from ....cli.shared.typer import (
+from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from ....shared.metadata.album_id import AlbumId
-from ....shared.metadata.mongodb.albums_repository_impl import (
+from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
     AlbumsRepositoryImpl,
 )
-from ....shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
-from ....shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.media_items_repository import (
     FindMediaItemRequest,
     UpdateMediaItemRequest,
 )
@@ -158,7 +158,6 @@ def generate_embeddings(
         CreateMediaItemEmbeddingRequest(
             embedding=processed_diff.embedding,
             media_item_id=media_item_id,
-            location=processed_diff.location,
             date_taken=processed_diff.date_taken,
         )
         for media_item_id, processed_diff in zip(media_item_ids, processed_diffs)

@@ -5,7 +5,6 @@ from typing import Optional
 import numpy as np
 from bson.objectid import ObjectId
 from photos_drive.shared.metadata.media_item_id import MediaItemId
-from photos_drive.shared.metadata.gps_location import GpsLocation
 
 
 @dataclass(frozen=True)
@@ -60,15 +59,12 @@ class MediaItemEmbedding:
         id (DocumentId): The document ID.
         embedding (np.ndarray): The embedding.
         media_item_id (MediaItemId): The ID of the media item.
-        location (Optional[GpsLocation]): The GPS location of the media item, if
-            it exists.
         date_taken (datetime): The date of which this media item was taken.
     '''
 
     id: MediaItemEmbeddingId
     embedding: np.ndarray
     media_item_id: MediaItemId
-    location: Optional[GpsLocation]
     date_taken: datetime
 
 
@@ -80,13 +76,11 @@ class CreateMediaItemEmbeddingRequest:
     Attributes:
         embedding (np.ndarray): The embedding.
         media_item_id (MediaItemId): The ID of the media item.
-        location (Optional[GpsLocation]): The GPS location of the media item.
         date_taken (datetime): The date of which the media item was taken.
     '''
 
     embedding: np.ndarray
     media_item_id: MediaItemId
-    location: Optional[GpsLocation]
     date_taken: datetime
 
 
@@ -99,16 +93,12 @@ class UpdateMediaItemEmbeddingRequest:
         embedding_id (MediaItemEmbeddingId): The ID to the media item embedding
         new_embedding Optional[np.ndarray]: A new embedding, if it is set
         new_media_item_id (Optional[MediaItemId]): The new MediaItemId, if it is set
-        clear_location (bool): Whether to clear the GPS location or not
-        new_location (Optional[GpsLocation]): The new GPS location, if it is set
         new_date_taken (Optional[datetime]): The new date taken, if it is set
     '''
 
     embedding_id: MediaItemEmbeddingId
     new_embedding: Optional[np.ndarray] = None
     new_media_item_id: Optional[MediaItemId] = None
-    clear_location: bool = False
-    new_location: Optional[GpsLocation] = None
     new_date_taken: Optional[datetime] = None
 
 
@@ -123,8 +113,8 @@ class QueryMediaItemEmbeddingRequest:
             vector search
         end_date_taken (Optional[datetime]): The latest date to consider in the
             vector search
-        within_media_item_ids (Optional[list[MediaItemId]]): The list of media item IDs to
-            consider in the vector search
+        within_media_item_ids (Optional[list[MediaItemId]]): The list of media item IDs
+            to consider in the vector search
         top_k (int): The number of candidates to return
     '''
 

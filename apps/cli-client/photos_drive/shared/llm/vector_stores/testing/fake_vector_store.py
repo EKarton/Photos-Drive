@@ -38,7 +38,6 @@ class FakeVectorStore(BaseVectorStore):
                 id=id,
                 embedding=request.embedding,
                 media_item_id=request.media_item_id,
-                location=request.location,
                 date_taken=request.date_taken,
             )
             self.__id_to_embeddings[id] = new_embedding
@@ -92,12 +91,6 @@ class FakeVectorStore(BaseVectorStore):
         for request in requests:
             original_embedding = self.__id_to_embeddings[request.embedding_id]
 
-            location = original_embedding.location
-            if request.clear_location:
-                location = None
-            elif request.new_location:
-                location = request.new_location
-
             date_taken = original_embedding.date_taken
             if request.new_date_taken:
                 date_taken = request.new_date_taken
@@ -114,7 +107,6 @@ class FakeVectorStore(BaseVectorStore):
                 id=request.embedding_id,
                 embedding=embedding,
                 media_item_id=media_item_id,
-                location=location,
                 date_taken=date_taken,
             )
 

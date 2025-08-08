@@ -74,7 +74,6 @@ class TestMongoDbVectorStore(unittest.TestCase):
         req = CreateMediaItemEmbeddingRequest(
             embedding=embedding,
             media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            location=None,
             date_taken=MOCK_DATE_TAKEN,
         )
 
@@ -99,7 +98,6 @@ class TestMongoDbVectorStore(unittest.TestCase):
         req = CreateMediaItemEmbeddingRequest(
             embedding=embedding,
             media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            location=None,
             date_taken=MOCK_DATE_TAKEN,
         )
         added_doc = self.store.add_media_item_embeddings([req])[0]
@@ -116,7 +114,6 @@ class TestMongoDbVectorStore(unittest.TestCase):
         req = CreateMediaItemEmbeddingRequest(
             embedding=embedding,
             media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            location=None,
             date_taken=MOCK_DATE_TAKEN,
         )
         added_doc = self.store.add_media_item_embeddings([req])[0]
@@ -133,7 +130,6 @@ class TestMongoDbVectorStore(unittest.TestCase):
             CreateMediaItemEmbeddingRequest(
                 embedding=self._make_embedding(i),
                 media_item_id=MOCK_MEDIA_ITEM_ID_1,
-                location=None,
                 date_taken=MOCK_DATE_TAKEN,
             )
             for i in range(num_docs)
@@ -153,7 +149,6 @@ class TestMongoDbVectorStore(unittest.TestCase):
                 CreateMediaItemEmbeddingRequest(
                     embedding=embedding,
                     media_item_id=MOCK_MEDIA_ITEM_ID_1,
-                    location=None,
                     date_taken=MOCK_DATE_TAKEN,
                 )
             ]

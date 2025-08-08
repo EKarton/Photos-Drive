@@ -230,7 +230,6 @@ class PhotosBackup:
                 CreateMediaItemEmbeddingRequest(
                     embedding=add_diff.embedding,
                     media_item_id=media_item.id,
-                    location=add_diff.location,
                     date_taken=add_diff.date_taken,
                 )
             )

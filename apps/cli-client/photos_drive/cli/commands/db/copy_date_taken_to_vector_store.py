@@ -45,7 +45,7 @@ config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 
 
 @app.command()
-def copy_date_taken_and_location_to_vector_store(
+def copy_date_taken_to_vector_store(
     config_file: Annotated[
         str | None,
         typer.Option(
@@ -74,7 +74,7 @@ def copy_date_taken_and_location_to_vector_store(
     setup_logging(verbose)
 
     logger.debug(
-        "Called db copy-date-taken-and-location-to-vector-store handler with args:\n"
+        "Called db copy-date-taken-to-vector-store handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
         + f" verbose={verbose}"
@@ -120,7 +120,6 @@ def copy_date_taken_and_location_to_vector_store(
                     updates.append(
                         UpdateMediaItemEmbeddingRequest(
                             embedding_id=media_item.embedding_id,
-                            new_location=media_item.location,
                             new_date_taken=media_item.date_taken,
                         )
                     )

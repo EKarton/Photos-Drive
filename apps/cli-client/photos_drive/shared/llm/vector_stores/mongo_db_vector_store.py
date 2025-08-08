@@ -1,6 +1,5 @@
 from datetime import datetime
 import logging
-from photos_drive.shared.metadata.gps_location import GpsLocation
 import pymongo
 from typing import Any, Mapping, cast, override
 from photos_drive.shared.metadata.media_item_id import (
@@ -115,11 +114,6 @@ class MongoDbVectorStore(BaseVectorStore):
                 "media_item_id": media_item_id_to_string(req.media_item_id),
                 "date_taken": req.date_taken,
             }
-            if req.location:
-                data_object["location"] = {
-                    "type": "Point",
-                    "coordinates": [req.location.longitude, req.location.latitude],
-                }
             documents_to_insert.append(data_object)
         result = self._collection.insert_many(documents_to_insert)
 
@@ -134,7 +128,6 @@ class MongoDbVectorStore(BaseVectorStore):
                     ),
                     embedding=req.embedding,
                     media_item_id=req.media_item_id,
-                    location=req.location,
                     date_taken=req.date_taken,
                 )
             )
@@ -231,17 +224,6 @@ class MongoDbVectorStore(BaseVectorStore):
                     request.new_media_item_id
                 )
 
-            if request.clear_location:
-                set_query["$set"]['location'] = None
-            elif request.new_location is not None:
-                set_query["$set"]['location'] = {
-                    "type": "Point",
-                    "coordinates": [
-                        request.new_location.longitude,
-                        request.new_location.latitude,
-                    ],
-                }
-
             if request.new_date_taken:
                 set_query["$set"]['date_taken'] = request.new_date_taken
 
@@ -267,13 +249,6 @@ class MongoDbVectorStore(BaseVectorStore):
     def __parse_raw_document_to_media_item_embedding_obj(
         self, raw_item: Mapping[str, Any]
     ) -> MediaItemEmbedding:
-        location: GpsLocation | None = None
-        if "location" in raw_item and raw_item["location"]:
-            location = GpsLocation(
-                longitude=float(raw_item["location"]["coordinates"][0]),
-                latitude=float(raw_item["location"]["coordinates"][1]),
-            )
-
         date_taken = None
         if 'date_taken' in raw_item and raw_item['date_taken']:
             date_taken = cast(datetime, raw_item['date_taken'])
@@ -286,6 +261,5 @@ class MongoDbVectorStore(BaseVectorStore):
             ),
             embedding=self.__get_embedding_np_from_mongo(raw_item["embedding"]),
             media_item_id=parse_string_to_media_item_id(raw_item["media_item_id"]),
-            location=location,
             date_taken=date_taken,
         )

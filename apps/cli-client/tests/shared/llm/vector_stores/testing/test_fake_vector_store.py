@@ -36,7 +36,6 @@ class TestFakeVectorStore(unittest.TestCase):
         req = CreateMediaItemEmbeddingRequest(
             embedding=self._make_embedding(1.0),
             media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            location=None,
             date_taken=MOCK_DATE_TAKEN,
         )
         added = self.store.add_media_item_embeddings([req])
@@ -48,7 +47,6 @@ class TestFakeVectorStore(unittest.TestCase):
         req = CreateMediaItemEmbeddingRequest(
             embedding=self._make_embedding(1.0),
             media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            location=None,
             date_taken=MOCK_DATE_TAKEN,
         )
         added = self.store.add_media_item_embeddings([req])
@@ -63,7 +61,6 @@ class TestFakeVectorStore(unittest.TestCase):
             CreateMediaItemEmbeddingRequest(
                 embedding=self._make_embedding(i),
                 media_item_id=MOCK_MEDIA_ITEM_ID_1,
-                location=None,
                 date_taken=MOCK_DATE_TAKEN,
             )
             for i in range(3)
@@ -84,19 +81,16 @@ class TestFakeVectorStore(unittest.TestCase):
             CreateMediaItemEmbeddingRequest(
                 embedding=np.array([1.0, 0.0]),
                 media_item_id=MOCK_MEDIA_ITEM_ID_1,
-                location=None,
                 date_taken=MOCK_DATE_TAKEN,
             ),
             CreateMediaItemEmbeddingRequest(
                 embedding=np.array([0.0, 1.0]),
                 media_item_id=MOCK_MEDIA_ITEM_ID_2,
-                location=None,
                 date_taken=MOCK_DATE_TAKEN,
             ),
             CreateMediaItemEmbeddingRequest(
                 embedding=np.array([0.5, 0.5]),
                 media_item_id=MOCK_MEDIA_ITEM_ID_3,
-                location=None,
                 date_taken=MOCK_DATE_TAKEN,
             ),
         ]
@@ -116,7 +110,6 @@ class TestFakeVectorStore(unittest.TestCase):
         req = CreateMediaItemEmbeddingRequest(
             embedding=self._make_embedding(1.0),
             media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            location=None,
             date_taken=MOCK_DATE_TAKEN,
         )
         self.store.add_media_item_embeddings([req])
