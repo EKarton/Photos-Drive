@@ -6,9 +6,12 @@ import {
   Router,
   RouterModule,
 } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { filter, Subscription } from 'rxjs';
 
 import { ThemeToggleButtonComponent } from '../../themes/components/theme-toggle-button/theme-toggle-button.component';
+import { ChatDialogRequest } from '../chat-dialog/chat-dialog.request';
+import { dialogActions } from '../store/dialog';
 import { AvatarButtonComponent } from './avatar-button/avatar-button.component';
 
 enum Tabs {
@@ -34,6 +37,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private store = inject(Store);
 
   private subscriptions = new Subscription();
 
@@ -63,6 +67,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   closeSideBar() {
     this.isSidebarOpen.set(false);
+  }
+
+  onSearchClick() {
+    this.store.dispatch(
+      dialogActions.openDialog({
+        request: new ChatDialogRequest(),
+      }),
+    );
   }
 
   ngOnDestroy(): void {

@@ -7,7 +7,7 @@ import { ContentPageComponent } from './content-page.component';
 import { ImagesViewComponent } from './images-view/images-view.component';
 import { AlbumsEffects } from './store/albums/albums.effects';
 import { albumsFeature } from './store/albums/albums.reducer';
-import { mediaViewerFeature } from './store/media-viewer/media-viewer.reducer';
+import { dialogFeature } from './store/dialog/dialog.reducer';
 
 export const routes: Routes = [
   {
@@ -19,7 +19,7 @@ export const routes: Routes = [
     ],
     providers: [
       provideState(albumsFeature),
-      provideState(mediaViewerFeature),
+      provideState(dialogFeature),
       provideEffects(AlbumsEffects),
     ],
   },

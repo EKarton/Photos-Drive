@@ -10,7 +10,7 @@ import { GPhotosMediaItem } from '../../services/types/gphotos-media-item';
 import { MediaItemDetailsApiResponse } from '../../services/types/media-item';
 import { MediaItem } from '../../services/types/media-item';
 import { WebApiService } from '../../services/webapi.service';
-import { mediaViewerActions, mediaViewerState } from '../../store/media-viewer';
+import { dialogActions, dialogState } from '../../store/dialog';
 import { MediaViewerComponent } from '../media-viewer.component';
 
 const MEDIA_ITEM_IMAGE: MediaItem = {
@@ -98,7 +98,7 @@ describe('MediaViewerComponent', () => {
       providers: [
         provideMockStore({
           initialState: {
-            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+            [dialogState.FEATURE_KEY]: dialogState.initialState,
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
@@ -132,7 +132,7 @@ describe('MediaViewerComponent', () => {
       of(toPending<GetGPhotosMediaItemDetailsResponse>()),
     );
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
@@ -159,7 +159,7 @@ describe('MediaViewerComponent', () => {
     );
 
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem3',
         },
@@ -191,7 +191,7 @@ describe('MediaViewerComponent', () => {
     );
 
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
@@ -265,7 +265,7 @@ describe('MediaViewerComponent', () => {
       of(toSuccess(GPHOTOS_MEDIA_ITEM_VIDEO)),
     );
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem2',
         },
@@ -342,7 +342,7 @@ describe('MediaViewerComponent', () => {
       of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
@@ -369,7 +369,7 @@ describe('MediaViewerComponent', () => {
       of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
@@ -401,7 +401,7 @@ describe('MediaViewerComponent', () => {
       of(toSuccess(GPHOTOS_MEDIA_ITEM_VIDEO)),
     );
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem2',
         },
@@ -433,7 +433,7 @@ describe('MediaViewerComponent', () => {
       of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
@@ -459,7 +459,7 @@ describe('MediaViewerComponent', () => {
       of(toSuccess(GPHOTOS_MEDIA_ITEM_IMAGE)),
     );
     store.setState({
-      [mediaViewerState.FEATURE_KEY]: {
+      [dialogState.FEATURE_KEY]: {
         request: {
           mediaItemId: 'mediaItem1',
         },
@@ -476,7 +476,7 @@ describe('MediaViewerComponent', () => {
     fixture.autoDetectChanges();
 
     expect(store.dispatch).toHaveBeenCalledWith(
-      mediaViewerActions.closeMediaViewer(),
+      dialogActions.closeMediaViewer(),
     );
   });
 });

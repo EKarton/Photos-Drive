@@ -14,7 +14,7 @@ import { themeState } from '../../../themes/store';
 import { routes } from '../../content-page.routes';
 import { WebApiService } from '../../services/webapi.service';
 import { albumsState } from '../../store/albums';
-import { mediaViewerState } from '../../store/media-viewer';
+import { dialogState } from '../../store/dialog';
 import { HeaderComponent } from '../header.component';
 
 describe('HeaderComponent', () => {
@@ -36,7 +36,7 @@ describe('HeaderComponent', () => {
         provideMockStore({
           initialState: {
             [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
-            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+            [dialogState.FEATURE_KEY]: dialogState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
             [authState.FEATURE_KEY]: authState.buildInitialState(),
           },

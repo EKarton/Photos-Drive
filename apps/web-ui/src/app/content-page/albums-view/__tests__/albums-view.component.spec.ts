@@ -13,7 +13,7 @@ import { ListAlbumsResponse } from '../../services/types/list-albums';
 import { ListMediaItemsResponse } from '../../services/types/list-media-items';
 import { WebApiService } from '../../services/webapi.service';
 import { albumsState } from '../../store/albums';
-import { mediaViewerState } from '../../store/media-viewer';
+import { dialogState } from '../../store/dialog';
 import { AlbumsViewComponent } from '../albums-view.component';
 
 const ALBUM_DETAILS_ROOT: Album = {
@@ -96,7 +96,7 @@ describe('AlbumsViewComponent', () => {
         provideMockStore({
           initialState: {
             [albumsState.FEATURE_KEY]: albumsState.buildInitialState(),
-            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+            [dialogState.FEATURE_KEY]: dialogState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
             [authState.FEATURE_KEY]: authState.buildInitialState(),
           },
@@ -145,7 +145,7 @@ describe('AlbumsViewComponent', () => {
           .set('album4', toSuccess(ALBUM_DETAILS_2010))
           .set('album5', toSuccess(ALBUM_DETAILS_2011)),
       },
-      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+      [dialogState.FEATURE_KEY]: dialogState.initialState,
       [themeState.FEATURE_KEY]: themeState.initialState,
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });
@@ -205,7 +205,7 @@ describe('AlbumsViewComponent', () => {
             }),
           ),
       },
-      [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+      [dialogState.FEATURE_KEY]: dialogState.initialState,
       [themeState.FEATURE_KEY]: themeState.initialState,
       [authState.FEATURE_KEY]: authState.buildInitialState(),
     });

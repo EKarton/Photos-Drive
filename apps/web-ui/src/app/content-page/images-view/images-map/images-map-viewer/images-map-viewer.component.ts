@@ -19,8 +19,9 @@ import Supercluster from 'supercluster';
 
 import { MAPBOX_FACTORY_TOKEN } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
+import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
 import { Heatmap } from '../../../services/types/heatmap';
-import { mediaViewerActions } from '../../../store/media-viewer';
+import { dialogActions } from '../../../store/dialog';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
 
 export interface TileId {
@@ -323,8 +324,8 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
           componentRef.instance.markerClick.subscribe(() => {
             this.store.dispatch(
-              mediaViewerActions.openMediaViewer({
-                request: { mediaItemId: mediaItemId },
+              dialogActions.openDialog({
+                request: new MediaViewerRequest(mediaItemId),
               }),
             );
           }),
