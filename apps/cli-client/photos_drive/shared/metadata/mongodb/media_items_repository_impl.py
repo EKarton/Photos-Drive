@@ -89,20 +89,46 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         else:
             clients = all_clients
 
-        mongo_filter = {}
+        mongo_filter: dict[str, Any] = {}
         if request.album_id:
             mongo_filter['album_id'] = album_id_to_string(request.album_id)
         if request.file_name:
             mongo_filter['file_name'] = request.file_name
+
+        if request.earliest_date_taken or request.latest_date_taken:
+            date_taken_query = {}
+            if request.earliest_date_taken:
+                date_taken_query['$gte'] = request.earliest_date_taken
+            if request.latest_date_taken:
+                date_taken_query["$lte"] = request.latest_date_taken
+            mongo_filter["date_taken"] = date_taken_query
+
+        if request.location_range:
+            mongo_filter['location'] = {
+                "$near": {
+                    "$geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            request.location_range.location.longitude,
+                            request.location_range.location.latitude,
+                        ],
+                    },
+                    "$maxDistance": request.location_range.radius,
+                }
+            }
 
         media_items = []
         for client_id, client in clients:
             session = self._mongodb_clients_repository.get_session_for_client_id(
                 client_id,
             )
-            for raw_item in client['photos_drive']['media_items'].find(
+            query = client['photos_drive']['media_items'].find(
                 filter=mongo_filter, session=session
-            ):
+            )
+            if request.limit:
+                query = query.limit(request.limit)
+
+            for raw_item in query:
                 media_items.append(
                     self.__parse_raw_document_to_media_item_obj(client_id, raw_item)
                 )

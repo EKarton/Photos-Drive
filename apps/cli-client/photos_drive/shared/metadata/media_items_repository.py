@@ -89,6 +89,12 @@ class UpdateMediaItemRequest:
 
 
 @dataclass(frozen=True)
+class LocationRange:
+    location: GpsLocation
+    radius: float
+
+
+@dataclass(frozen=True)
 class FindMediaItemRequest:
     '''
     A class that represents the parameters needed to find existing media items in
@@ -100,11 +106,23 @@ class FindMediaItemRequest:
             clients.
         file_name (Optional[str]): The file name, if present.
         album_id (Optional[AlbumId]): The Album ID, if present.
+        earliest_date_taken (Optional[datetime]): The earliest date taken to consider
+            in the search, if present.
+        latest_date_taken (Optional[datetime]): The latest date taken to consider
+            in the search, if present.
+        location_range (Optional[LocationRange]): The geolocation of which media items
+            need to be within, if present.
+        limit (Optional[int]): The max. number of items to fetch, if present.
+            If not present, it will return all media items.
     '''
 
     mongodb_client_ids: Optional[list[ObjectId]] = None
     file_name: Optional[str] = None
     album_id: Optional[AlbumId] = None
+    earliest_date_taken: Optional[datetime] = None
+    latest_date_taken: Optional[datetime] = None
+    location_range: Optional[LocationRange] = None
+    limit: Optional[int] = None
 
 
 class MediaItemsRepository(ABC):

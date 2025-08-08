@@ -7,6 +7,7 @@ from langgraph.prebuilt.chat_agent_executor import AgentState
 from langmem.short_term import RunningSummary, SummarizationNode
 from pydantic import BaseModel, Field
 
+from photos_drive.cli.commands.llms.tools.find_photos import FindPhotosTool
 from photos_drive.cli.commands.llms.tools.find_similar_photos import (
     FindSimilarPhotosTool,
 )
@@ -62,8 +63,9 @@ def trial_4(config: Config):
     find_similar_photos_tool = FindSimilarPhotosTool(
         image_embedder, vector_store, media_items_repo
     )
+    find_photos_tool = FindPhotosTool(media_items_repo)
 
-    tools = [search_by_text_tool, find_similar_photos_tool]
+    tools = [search_by_text_tool, find_similar_photos_tool, find_photos_tool]
 
     class State(AgentState):
         # NOTE: we're adding this key to keep track of previous summary information
