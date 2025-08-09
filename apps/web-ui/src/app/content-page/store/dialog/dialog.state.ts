@@ -30,6 +30,7 @@ export const selectAnyDialogRequest = () =>
 
 /** Returns the request details for a particular dialog type */
 export const selectDialogRequests = <T extends BaseDialogRequest>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ctor: new (...args: any[]) => T,
 ) =>
   createSelector(selectDialogState, (state) =>
@@ -41,6 +42,7 @@ export const selectIsAnyDialogOpen = () =>
   createSelector(selectDialogState, (state) => state.isOpen);
 
 export const selectIsDialogOpen = <T extends BaseDialogRequest>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ctor: new (...args: any[]) => T,
 ) =>
   createSelector(

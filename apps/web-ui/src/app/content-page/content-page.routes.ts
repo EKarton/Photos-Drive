@@ -7,6 +7,8 @@ import { ContentPageComponent } from './content-page.component';
 import { ImagesViewComponent } from './images-view/images-view.component';
 import { AlbumsEffects } from './store/albums/albums.effects';
 import { albumsFeature } from './store/albums/albums.reducer';
+import { ChatsEffects } from './store/chats/chats.effects';
+import { chatsFeature } from './store/chats/chats.reducer';
 import { dialogFeature } from './store/dialog/dialog.reducer';
 
 export const routes: Routes = [
@@ -20,7 +22,9 @@ export const routes: Routes = [
     providers: [
       provideState(albumsFeature),
       provideState(dialogFeature),
+      provideState(chatsFeature),
       provideEffects(AlbumsEffects),
+      provideEffects(ChatsEffects),
     ],
   },
 ];

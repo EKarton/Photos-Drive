@@ -1,9 +1,14 @@
-<dialog #modal class="modal backdrop-blur-3xl">
+<dialog #modal class="modal backdrop-blur-3xl bg-white/70 dark:bg-gray-800/70">
   <!-- Top bar -->
   <div class="flex justify-end gap-4 absolute top-2 left-2 right-2 p-1">
+    <!-- Clear chat button -->
+    <button data-testid="claer-chat" class="btn btn-ghost btn-sm">
+      Clear chat
+    </button>
+
     <!-- The close dialog button -->
     <button
-      data-testid="media-viewer-close-button"
+      data-testid="close-dialog"
       class="btn btn-circle btn-outline border-none btn-sm"
       (click)="closeDialog()"
     >
@@ -25,47 +30,68 @@
   </div>
 
   <!-- Messages area -->
-  <div class="w-full overflow-y-auto h-full">
-    <div class="max-w-2xl mx-auto pt-14 pb-28 flex flex-col gap-4">
-      @for (message of messages(); track message) {
-        <div
-          class="flex"
-          [ngClass]="{ 'justify-end': message.type === 'User' }"
-        >
-          <div class="max-w-[80%]">
-            <div
-              [ngClass]="{
-                'bg-gray-200 dark:bg-gray-700 rounded-full px-4 py-3':
-                  message.type === 'User',
-              }"
-            >
-              {{ message.content }}
-            </div>
-            @if (message.reasoning) {
-              <details>
-                <summary
-                  class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
-                >
-                  Reasoning
-                </summary>
-                <div
-                  class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
-                >
-                  @for (reason of message.reasoning; track reason) {
-                    <p>{{ reason }}</p>
-                  }
-                </div>
-              </details>
-            }
-          </div>
-        </div>
-      }
+  @if (messages().length === 0) {
+    <div
+      class="flex-grow justify-center items-center flex flex-col gap-1 pb-16 h-full"
+    >
+      <p class="text-xl">Photos Search</p>
+      <ngx-typed-writer
+        [strings]="[
+          'Ask: photos of santorini',
+          'Ask: photos of family pictures',
+          'Ask: what was the last meal I had in Mountain View, CA',
+        ]"
+        [isHTML]="true"
+        [smartBackspace]="true"
+        [backSpeed]="20"
+        [typeSpeed]="30"
+      ></ngx-typed-writer>
     </div>
-  </div>
+  } @else {
+    <div class="w-full overflow-y-auto h-full">
+      <div class="max-w-2xl mx-auto pt-14 pb-28 px-3 flex flex-col gap-4">
+        @for (message of messages(); track message) {
+          <div
+            class="flex"
+            [ngClass]="{ 'justify-end': message.type === 'User' }"
+          >
+            <div class="max-w-[80%]">
+              <div
+                [ngClass]="{
+                  'bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-2':
+                    message.type === 'User',
+                }"
+              >
+                {{ message.content }}
+              </div>
+              @if (message.reasoning && message.reasoning.length > 0) {
+                <details>
+                  <summary
+                    class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
+                  >
+                    Reasoning
+                  </summary>
+                  <div
+                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
+                  >
+                    @for (reason of message.reasoning; track reason) {
+                      <p>{{ reason }}</p>
+                    }
+                  </div>
+                </details>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
   <!-- Search bar -->
-  <div class="absolute bottom-8 w-full max-w-2xl mx-auto flex">
-    <label class="input input-lg flex-1 rounded-full px-4 py-3">
+  <div class="absolute bottom-8 w-full max-w-2xl mx-auto flex px-3">
+    <label
+      class="input input-lg flex-1 rounded-full px-4 py-3 focus-within:outline-none focus-within:ring-0"
+    >
       <svg
         class="h-[1em] opacity-50"
         xmlns="http://www.w3.org/2000/svg"
@@ -82,9 +108,14 @@
           <path d="m21 21-4.3-4.3"></path>
         </g>
       </svg>
-      <input type="search" class="grow" placeholder="Search" />
-      <kbd class="kbd kbd-sm">⌘</kbd>
-      <kbd class="kbd kbd-sm">K</kbd>
+      <input
+        type="search"
+        class="grow focus:outline-none focus:ring-0 appearance-none"
+        placeholder="Search"
+        [formControl]="searchControl"
+        (keydown.enter)="onSearch()"
+      />
+      <kbd class="kbd kbd-sm">↵</kbd>
     </label>
   </div>
 </dialog>

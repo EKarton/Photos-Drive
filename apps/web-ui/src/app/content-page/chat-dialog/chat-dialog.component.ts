@@ -7,35 +7,38 @@ import {
   inject,
   OnDestroy,
   Signal,
-  signal,
   ViewChild,
 } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { NgxTypedWriterComponent } from 'ngx-typed-writer';
 import { Subscription } from 'rxjs';
 
 import { NAVIGATOR } from '../../app.tokens';
 import { HasFailedPipe } from '../../shared/results/pipes/has-failed.pipe';
 import { HasSucceededPipe } from '../../shared/results/pipes/has-succeeded.pipe';
 import { IsPendingPipe } from '../../shared/results/pipes/is-pending.pipe';
+import { sendUserMessage } from '../store/chats/chats.actions';
+import { Message, selectMessages } from '../store/chats/chats.state';
 import { dialogActions, dialogState } from '../store/dialog';
 import { ChatDialogRequest } from './chat-dialog.request';
 
-export type MessageType = 'Bot' | 'User';
-
-export interface Message {
-  type: MessageType;
-  content: string;
-  reasoning?: string[];
-}
-
 @Component({
   selector: 'app-content-chat-dialog',
-  imports: [CommonModule, IsPendingPipe, HasFailedPipe, HasSucceededPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgxTypedWriterComponent,
+    IsPendingPipe,
+    HasFailedPipe,
+    HasSucceededPipe,
+  ],
   templateUrl: './chat-dialog.component.html',
 })
 export class ChatDialogComponent implements AfterViewInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly navigator = inject(NAVIGATOR);
+  searchControl = new FormControl('');
   private readonly subscription = new Subscription();
 
   @ViewChild('modal') myModal?: ElementRef;
@@ -47,66 +50,8 @@ export class ChatDialogComponent implements AfterViewInit, OnDestroy {
     dialogState.selectDialogRequests(ChatDialogRequest),
   );
 
-  readonly messages: Signal<readonly Message[]> = signal([
-    {
-      type: 'Bot',
-      content: 'Hi there! How can I help you today?',
-      reasoning: undefined,
-    },
-    {
-      type: 'User',
-      content: 'Can you recommend a hiking trail in the Dolomites?',
-      reasoning: undefined,
-    },
-    {
-      type: 'Bot',
-      content:
-        "Absolutely! I recommend the Tre Cime di Lavaredo loop. It's about 10km with stunning views.",
-      reasoning: [
-        'I considered your interest in photography and nature.',
-        'Tre Cime offers panoramic views and multiple photo spots.',
-        'The trail is moderately challenging but well-marked.',
-      ],
-    },
-    {
-      type: 'User',
-      content: 'Perfect. Can you also suggest a nearby lake?',
-    },
-    {
-      type: 'Bot',
-      content:
-        "Lago di Misurina is only a short drive away. It's a beautiful spot for sunrise photography.",
-    },
-    {
-      type: 'Bot',
-      content: 'Hi there! How can I help you today?',
-      reasoning: undefined,
-    },
-    {
-      type: 'User',
-      content: 'Can you recommend a hiking trail in the Dolomites?',
-      reasoning: undefined,
-    },
-    {
-      type: 'Bot',
-      content:
-        "Absolutely! I recommend the Tre Cime di Lavaredo loop. It's about 10km with stunning views.",
-      reasoning: [
-        'I considered your interest in photography and nature.',
-        'Tre Cime offers panoramic views and multiple photo spots.',
-        'The trail is moderately challenging but well-marked.',
-      ],
-    },
-    {
-      type: 'User',
-      content: 'Perfect. Can you also suggest a nearby lake?',
-    },
-    {
-      type: 'Bot',
-      content:
-        "Lago di Misurina is only a short drive away. It's a beautiful spot for sunrise photography.",
-    },
-  ]);
+  readonly messages: Signal<readonly Message[]> =
+    this.store.selectSignal(selectMessages());
 
   constructor() {
     effect(() => {
@@ -117,22 +62,16 @@ export class ChatDialogComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  share(url: string, fileName: string) {
-    const shareData = {
-      title: fileName,
-      text: 'Photo from Photos Drive',
-      url,
-    };
-
-    if (this.navigator.canShare(shareData)) {
-      this.navigator.share(shareData);
-    } else {
-      console.error(`Data ${shareData} cannot be shared.`);
-    }
-  }
-
   closeDialog() {
     this.store.dispatch(dialogActions.closeDialog());
+  }
+
+  onSearch() {
+    const query = this.searchControl.value?.trim();
+    if (query) {
+      this.store.dispatch(sendUserMessage({ message: query }));
+      this.searchControl.reset();
+    }
   }
 
   ngAfterViewInit(): void {
