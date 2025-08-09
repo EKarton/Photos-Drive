@@ -1,5 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
+import { ChatDialogRequest } from '../../chat-dialog/chat-dialog.request';
+
 /** Represents a request to open a dialog. All dialog types must extend from this.  */
 export type BaseDialogRequest = object;
 
@@ -11,8 +13,8 @@ export interface DialogState {
 
 /** The initial state of the NgRx store. */
 export const initialState: DialogState = {
-  request: null,
-  isOpen: false,
+  request: new ChatDialogRequest(),
+  isOpen: true,
 };
 
 /** The feature key shared with the reducer. */

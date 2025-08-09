@@ -1,15 +1,4 @@
 <dialog #modal class="modal backdrop-blur-3xl">
-  <!-- Backdrop to close the dialog -->
-  <form
-    method="dialog"
-    class="modal-backdrop fixed inset-0"
-    (click)="closeDialog()"
-    (keydown.enter)="closeDialog()"
-  >
-    <!-- The form button is optional if you want keyboard support -->
-    <button class="sr-only" (click)="closeDialog()">close</button>
-  </form>
-
   <!-- Top bar -->
   <div class="flex justify-end gap-4 absolute top-2 left-2 right-2 p-1">
     <!-- The close dialog button -->
@@ -36,100 +25,66 @@
   </div>
 
   <!-- Messages area -->
-  <div class="flex-1 overflow-y-auto p-4 space-y-4">
-    <!-- Bot message -->
-    <div class="flex">
-      <div
-        class="bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-3 max-w-[80%]"
-      >
-        <p>Hi there! How can I help you today?</p>
-      </div>
-    </div>
-
-    <!-- User message -->
-    <div class="flex justify-end">
-      <div
-        class="bg-green-100 dark:bg-green-800 text-green-900 dark:text-green-100 rounded-lg px-4 py-3 max-w-[80%]"
-      >
-        <p>Can you recommend a hiking trail in the Dolomites?</p>
-      </div>
-    </div>
-
-    <!-- Bot message with reasoning -->
-    <div class="flex">
-      <div
-        class="bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-3 max-w-[80%] space-y-2"
-      >
-        <p>
-          Absolutely! I recommend the Tre Cime di Lavaredo loop. It's about 10
-          km with stunning views.
-        </p>
-
-        <!-- Reasoning panel -->
-        <details class="bg-gray-100 dark:bg-gray-800 rounded-md">
-          <summary
-            class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Reasoning
-          </summary>
-          <div
-            class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
-          >
-            <p>I considered your interest in photography and nature.</p>
-            <p>Tre Cime offers panoramic views and multiple photo spots.</p>
-            <p>The trail is moderately challenging but well-marked.</p>
+  <div class="w-full overflow-y-auto h-full">
+    <div class="max-w-2xl mx-auto pt-14 pb-28 flex flex-col gap-4">
+      @for (message of messages(); track message) {
+        <div
+          class="flex"
+          [ngClass]="{ 'justify-end': message.type === 'User' }"
+        >
+          <div class="max-w-[80%]">
+            <div
+              [ngClass]="{
+                'bg-gray-200 dark:bg-gray-700 rounded-full px-4 py-3':
+                  message.type === 'User',
+              }"
+            >
+              {{ message.content }}
+            </div>
+            @if (message.reasoning) {
+              <details>
+                <summary
+                  class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
+                >
+                  Reasoning
+                </summary>
+                <div
+                  class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
+                >
+                  @for (reason of message.reasoning; track reason) {
+                    <p>{{ reason }}</p>
+                  }
+                </div>
+              </details>
+            }
           </div>
-        </details>
-      </div>
-    </div>
-
-    <!-- User message -->
-    <div class="flex justify-end">
-      <div
-        class="bg-green-100 dark:bg-green-800 text-green-900 dark:text-green-100 rounded-lg px-4 py-3 max-w-[80%]"
-      >
-        <p>Perfect. Can you also suggest a nearby lake?</p>
-      </div>
-    </div>
-
-    <!-- Bot message -->
-    <div class="flex">
-      <div
-        class="bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-3 max-w-[80%]"
-      >
-        <p>
-          Lago di Misurina is only a short drive away. It's a beautiful spot for
-          sunrise photography.
-        </p>
-      </div>
+        </div>
+      }
     </div>
   </div>
 
-  <!-- Footer -->
-  <div
-    class="flex items-center gap-3 px-4 py-2 rounded-full max-w-4xl mx-auto shadow-lg"
-  >
-    <!-- Input -->
-    <input
-      type="text"
-      placeholder="Ask anything"
-      class="flex-1 bg-transparent outline-none text-lg"
-    />
-
-    <!-- Send button -->
-    <button class="btn btn-ghost btn-circle" aria-label="Send message">
+  <!-- Search bar -->
+  <div class="absolute bottom-8 w-full max-w-2xl mx-auto flex">
+    <label class="input input-lg flex-1 rounded-full px-4 py-3">
       <svg
+        class="h-[1em] opacity-50"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        fill="currentColor"
-        class="size-6"
       >
-        <path
-          fill-rule="evenodd"
-          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm.53 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v5.69a.75.75 0 0 0 1.5 0v-5.69l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z"
-          clip-rule="evenodd"
-        />
+        <g
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          stroke-width="2.5"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </g>
       </svg>
-    </button>
+      <input type="search" class="grow" placeholder="Search" />
+      <kbd class="kbd kbd-sm">⌘</kbd>
+      <kbd class="kbd kbd-sm">K</kbd>
+    </label>
   </div>
 </dialog>

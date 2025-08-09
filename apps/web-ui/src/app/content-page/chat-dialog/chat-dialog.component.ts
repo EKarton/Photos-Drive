@@ -6,6 +6,8 @@ import {
   ElementRef,
   inject,
   OnDestroy,
+  Signal,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -17,6 +19,14 @@ import { HasSucceededPipe } from '../../shared/results/pipes/has-succeeded.pipe'
 import { IsPendingPipe } from '../../shared/results/pipes/is-pending.pipe';
 import { dialogActions, dialogState } from '../store/dialog';
 import { ChatDialogRequest } from './chat-dialog.request';
+
+export type MessageType = 'Bot' | 'User';
+
+export interface Message {
+  type: MessageType;
+  content: string;
+  reasoning?: string[];
+}
 
 @Component({
   selector: 'app-content-chat-dialog',
@@ -36,6 +46,67 @@ export class ChatDialogComponent implements AfterViewInit, OnDestroy {
   private readonly requests = this.store.selectSignal(
     dialogState.selectDialogRequests(ChatDialogRequest),
   );
+
+  readonly messages: Signal<readonly Message[]> = signal([
+    {
+      type: 'Bot',
+      content: 'Hi there! How can I help you today?',
+      reasoning: undefined,
+    },
+    {
+      type: 'User',
+      content: 'Can you recommend a hiking trail in the Dolomites?',
+      reasoning: undefined,
+    },
+    {
+      type: 'Bot',
+      content:
+        "Absolutely! I recommend the Tre Cime di Lavaredo loop. It's about 10km with stunning views.",
+      reasoning: [
+        'I considered your interest in photography and nature.',
+        'Tre Cime offers panoramic views and multiple photo spots.',
+        'The trail is moderately challenging but well-marked.',
+      ],
+    },
+    {
+      type: 'User',
+      content: 'Perfect. Can you also suggest a nearby lake?',
+    },
+    {
+      type: 'Bot',
+      content:
+        "Lago di Misurina is only a short drive away. It's a beautiful spot for sunrise photography.",
+    },
+    {
+      type: 'Bot',
+      content: 'Hi there! How can I help you today?',
+      reasoning: undefined,
+    },
+    {
+      type: 'User',
+      content: 'Can you recommend a hiking trail in the Dolomites?',
+      reasoning: undefined,
+    },
+    {
+      type: 'Bot',
+      content:
+        "Absolutely! I recommend the Tre Cime di Lavaredo loop. It's about 10km with stunning views.",
+      reasoning: [
+        'I considered your interest in photography and nature.',
+        'Tre Cime offers panoramic views and multiple photo spots.',
+        'The trail is moderately challenging but well-marked.',
+      ],
+    },
+    {
+      type: 'User',
+      content: 'Perfect. Can you also suggest a nearby lake?',
+    },
+    {
+      type: 'Bot',
+      content:
+        "Lago di Misurina is only a short drive away. It's a beautiful spot for sunrise photography.",
+    },
+  ]);
 
   constructor() {
     effect(() => {
