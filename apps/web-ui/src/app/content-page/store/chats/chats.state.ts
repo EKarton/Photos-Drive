@@ -1,10 +1,17 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
+import { Result } from '../../../shared/results/results';
+
 export type MessageType = 'Bot' | 'User';
 
 export interface Message {
+  id: string;
   type: MessageType;
-  content: string;
+  content: Result<MessageContent>;
+}
+
+export interface MessageContent {
+  output: string;
   reasoning?: string[];
 }
 

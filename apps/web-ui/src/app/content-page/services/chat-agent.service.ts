@@ -1,12 +1,24 @@
 import { Injectable } from '@angular/core';
 import type { PromptTemplate } from '@langchain/core/prompts';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { AgentExecutor, createReactAgent } from 'langchain/agents';
+import {
+  AgentAction,
+  AgentExecutor,
+  AgentFinish,
+  AgentRunnableSequence,
+  AgentStep,
+  createReactAgent,
+} from 'langchain/agents';
 import { pull } from 'langchain/hub';
 import type { Tool } from 'langchain/tools';
-import { from, Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+
+type Agent = AgentRunnableSequence<
+  { steps: AgentStep[] },
+  AgentAction | AgentFinish
+>;
 
 export interface BotMessage {
   content: string;
@@ -16,6 +28,7 @@ export interface BotMessage {
 @Injectable({ providedIn: 'root' })
 export class ChatAgentService {
   private agentExecutor?: AgentExecutor;
+  private agent?: Agent;
 
   constructor() {
     this.loadAgent();
@@ -39,53 +52,40 @@ export class ChatAgentService {
     const prompt: PromptTemplate =
       await pull<PromptTemplate>('hwchase17/react');
 
-    const agent = await createReactAgent({ llm, tools, prompt });
-
+    this.agent = await createReactAgent({ llm, tools, prompt });
     this.agentExecutor = new AgentExecutor({
-      agent,
+      agent: this.agent,
       tools,
     });
   }
 
-  getAgentResponse(userMessage: string): Observable<BotMessage> {
-    console.log('getAgentResponse', userMessage);
+  getAgentResponseStream(userMessage: string): Observable<BotMessage> {
     if (!this.agentExecutor) {
-      console.log('I am here');
-      return from(Promise.reject('Agent not initialized yet'));
+      return throwError(() => new Error('Agent executor not initialized yet'));
     }
-    return from<Promise<BotMessage>>(
-      this.agentExecutor
-        .invoke({ input: userMessage })
-        .then((result: any) => {
-          console.log('I am here', userMessage, result);
 
-          // Typical agent output
-          const content =
-            result.output ?? (typeof result === 'string' ? result : '');
+    return new Observable<BotMessage>((observer) => {
+      (async () => {
+        try {
+          let content = '';
           const reasoning: string[] = [];
 
-          // Try to get reasoning chain from agent output
-          // This depends on the agent; often intermediateSteps or similar.
-          if (Array.isArray(result.intermediateSteps)) {
-            // Convert each step to a string or just extract relevant fields
-            reasoning.push(
-              ...result.intermediateSteps.map(
-                (step: any) =>
-                  step.observation ?? step.actionLog ?? String(step),
-              ),
-            );
-          } else if (result.reasoning) {
-            reasoning.push(...result.reasoning);
+          for await (const logPatch of this.agentExecutor!.streamLog({
+            input: userMessage,
+          })) {
+            for (const op of logPatch.ops) {
+              if (op.op === 'add' && op.value?.content) {
+                content += op.value.content;
+                observer.next({ content, reasoning });
+              }
+            }
           }
 
-          const botMessage: BotMessage = { content, reasoning };
-          console.log(botMessage);
-          return botMessage;
-        })
-        .catch((err: Error) => {
-          console.error('invoke() failed:', err);
-          return { content: 'Error from agent', reasoning: [String(err)] };
-        }),
-    );
+          observer.complete();
+        } catch (error) {
+          observer.error(error);
+        }
+      })();
+    });
   }
 }

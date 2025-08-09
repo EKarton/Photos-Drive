@@ -1,11 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { map, startWith, switchMap } from 'rxjs/operators';
 
-import { ChatAgentService } from '../../services/chat-agent.service';
-import { addBotMessage, sendUserMessage } from './chats.actions';
+import { Result, toPending } from '../../../shared/results/results';
+import { toResult } from '../../../shared/results/rxjs/toResult';
+import {
+  BotMessage,
+  ChatAgentService,
+} from '../../services/chat-agent.service';
+import { addOrUpdateBotMessage, sendUserMessage } from './chats.actions';
 
 @Injectable()
 export class ChatsEffects {
@@ -16,21 +20,16 @@ export class ChatsEffects {
   sendMessage$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(sendUserMessage),
-      switchMap(({ message }) =>
-        this.chatAgentService.getAgentResponse(message).pipe(
-          map(({ content, reasoning }) =>
-            addBotMessage({ message: content, reasoning }),
+      switchMap(({ userInput }) => {
+        const messageId = crypto.randomUUID();
+        return this.chatAgentService.getAgentResponseStream(userInput).pipe(
+          toResult(),
+          startWith(toPending<BotMessage>()),
+          map((botMessage: Result<BotMessage>) =>
+            addOrUpdateBotMessage({ id: messageId, botMessage }),
           ),
-          catchError(() =>
-            of(
-              addBotMessage({
-                message: 'Sorry, something went wrong.',
-                reasoning: ['No reasoning available'],
-              }),
-            ),
-          ),
-        ),
-      ),
+        );
+      }),
     );
   });
 }

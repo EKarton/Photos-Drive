@@ -1,15 +1,23 @@
 <dialog #modal class="modal backdrop-blur-3xl bg-white/70 dark:bg-gray-800/70">
   <!-- Top bar -->
-  <div class="flex justify-end gap-4 absolute top-2 left-2 right-2 p-1">
+  <div
+    class="flex justify-end gap-4 absolute top-0 left-0 right-0 pb-1 px-2 pt-3"
+  >
     <!-- Clear chat button -->
-    <button data-testid="claer-chat" class="btn btn-ghost btn-sm">
-      Clear chat
-    </button>
+    @if (messages().length > 0) {
+      <button
+        data-testid="clear-chat"
+        class="btn btn-ghost btn-sm"
+        (click)="clearChat()"
+      >
+        Clear chat
+      </button>
+    }
 
     <!-- The close dialog button -->
     <button
       data-testid="close-dialog"
-      class="btn btn-circle btn-outline border-none btn-sm"
+      class="btn btn-circle btn-ghost border-none btn-sm"
       (click)="closeDialog()"
     >
       <svg
@@ -56,15 +64,40 @@
             [ngClass]="{ 'justify-end': message.type === 'User' }"
           >
             <div class="max-w-[80%]">
+              @let messageContentResult = message.content;
               <div
                 [ngClass]="{
                   'bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-2':
                     message.type === 'User',
                 }"
               >
-                {{ message.content }}
+                @if (messageContentResult | isPending) {
+                  <span class="loading loading-dots loading-md"></span>
+                } @else if (messageContentResult | hasFailed) {
+                  Agent has thrown an error
+                } @else {
+                  {{ messageContentResult.data!.output }}
+                }
               </div>
-              @if (message.reasoning && message.reasoning.length > 0) {
+
+              @if (messageContentResult | hasFailed) {
+                <details>
+                  <summary
+                    class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
+                  >
+                    Error details
+                  </summary>
+                  <div
+                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
+                  >
+                    <p>{{ messageContentResult.error }}</p>
+                  </div>
+                </details>
+              } @else if (
+                (messageContentResult | hasSucceeded) &&
+                messageContentResult.data!.reasoning &&
+                messageContentResult.data!.reasoning.length > 0
+              ) {
                 <details>
                   <summary
                     class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
@@ -74,7 +107,10 @@
                   <div
                     class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
                   >
-                    @for (reason of message.reasoning; track reason) {
+                    @for (
+                      reason of messageContentResult.data!.reasoning;
+                      track reason
+                    ) {
                       <p>{{ reason }}</p>
                     }
                   </div>

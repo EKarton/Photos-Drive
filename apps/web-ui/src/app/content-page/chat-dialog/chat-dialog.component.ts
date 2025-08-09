@@ -18,7 +18,7 @@ import { NAVIGATOR } from '../../app.tokens';
 import { HasFailedPipe } from '../../shared/results/pipes/has-failed.pipe';
 import { HasSucceededPipe } from '../../shared/results/pipes/has-succeeded.pipe';
 import { IsPendingPipe } from '../../shared/results/pipes/is-pending.pipe';
-import { sendUserMessage } from '../store/chats/chats.actions';
+import { sendUserMessage, startNewChat } from '../store/chats/chats.actions';
 import { Message, selectMessages } from '../store/chats/chats.state';
 import { dialogActions, dialogState } from '../store/dialog';
 import { ChatDialogRequest } from './chat-dialog.request';
@@ -66,10 +66,14 @@ export class ChatDialogComponent implements AfterViewInit, OnDestroy {
     this.store.dispatch(dialogActions.closeDialog());
   }
 
+  clearChat() {
+    this.store.dispatch(startNewChat());
+  }
+
   onSearch() {
-    const query = this.searchControl.value?.trim();
-    if (query) {
-      this.store.dispatch(sendUserMessage({ message: query }));
+    const userInput = this.searchControl.value?.trim();
+    if (userInput) {
+      this.store.dispatch(sendUserMessage({ userInput }));
       this.searchControl.reset();
     }
   }

@@ -1,7 +1,13 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 
-import { addBotMessage, sendUserMessage, startNewChat } from './chats.actions';
-import { ChatsState, FEATURE_KEY, initialState } from './chats.state';
+import { toSuccess } from '../../../shared/results/results';
+import { mapResult } from '../../../shared/results/utils/mapResult';
+import {
+  addOrUpdateBotMessage,
+  sendUserMessage,
+  startNewChat,
+} from './chats.actions';
+import { ChatsState, FEATURE_KEY, initialState, Message } from './chats.state';
 
 export const chatsReducer = createReducer(
   initialState,
@@ -9,93 +15,51 @@ export const chatsReducer = createReducer(
   on(startNewChat, (state): ChatsState => {
     return {
       ...state,
-      messages: [
-        {
-          type: 'Bot',
-          content: 'Hi there! How can I help you today?',
-          reasoning: undefined,
-        },
-        {
-          type: 'User',
-          content: 'Can you recommend a hiking trail in the Dolomites?',
-          reasoning: undefined,
-        },
-        {
-          type: 'Bot',
-          content:
-            "Absolutely! I recommend the Tre Cime di Lavaredo loop. It's about 10km with stunning views.",
-          reasoning: [
-            'I considered your interest in photography and nature.',
-            'Tre Cime offers panoramic views and multiple photo spots.',
-            'The trail is moderately challenging but well-marked.',
-          ],
-        },
-        {
-          type: 'User',
-          content: 'Perfect. Can you also suggest a nearby lake?',
-        },
-        {
-          type: 'Bot',
-          content:
-            "Lago di Misurina is only a short drive away. It's a beautiful spot for sunrise photography.",
-        },
-        {
-          type: 'Bot',
-          content: 'Hi there! How can I help you today?',
-          reasoning: undefined,
-        },
-        {
-          type: 'User',
-          content: 'Can you recommend a hiking trail in the Dolomites?',
-          reasoning: undefined,
-        },
-        {
-          type: 'Bot',
-          content:
-            "Absolutely! I recommend the Tre Cime di Lavaredo loop. It's about 10km with stunning views.",
-          reasoning: [
-            'I considered your interest in photography and nature.',
-            'Tre Cime offers panoramic views and multiple photo spots.',
-            'The trail is moderately challenging but well-marked.',
-          ],
-        },
-        {
-          type: 'User',
-          content: 'Perfect. Can you also suggest a nearby lake?',
-        },
-        {
-          type: 'Bot',
-          content:
-            "Lago di Misurina is only a short drive away. It's a beautiful spot for sunrise photography.",
-        },
-      ],
+      messages: [],
     };
   }),
 
-  on(sendUserMessage, (state, { message }): ChatsState => {
+  on(sendUserMessage, (state, { userInput }): ChatsState => {
     return {
       ...state,
       messages: [
         ...state.messages,
         {
+          id: crypto.randomUUID(),
           type: 'User',
-          content: message,
+          content: toSuccess({ output: userInput }),
         },
       ],
     };
   }),
 
-  on(addBotMessage, (state, { message, reasoning }): ChatsState => {
+  on(addOrUpdateBotMessage, (state, { id, botMessage }): ChatsState => {
+    const updatedMessage: Message = {
+      id,
+      type: 'Bot',
+      content: mapResult(botMessage, (bm) => ({
+        output: bm.content,
+        reasoning: bm.reasoning,
+      })),
+    };
+
+    const existingIndex = state.messages.findIndex((msg) => msg.id === id);
+
+    if (existingIndex !== -1) {
+      // Replace the message at the found index
+      const updatedMessages = state.messages.map((msg, index) =>
+        index === existingIndex ? updatedMessage : msg,
+      );
+
+      return {
+        ...state,
+        messages: updatedMessages,
+      };
+    }
+
     return {
       ...state,
-      messages: [
-        ...state.messages,
-        {
-          type: 'Bot',
-          content: message,
-          reasoning,
-        },
-      ],
+      messages: [...state.messages, updatedMessage],
     };
   }),
 );
