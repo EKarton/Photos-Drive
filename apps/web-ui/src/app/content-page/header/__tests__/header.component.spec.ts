@@ -12,8 +12,10 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { authState } from '../../../auth/store';
 import { themeState } from '../../../themes/store';
 import { routes } from '../../content-page.routes';
+import { ChatAgentService } from '../../services/chat-agent/chat-agent.service';
 import { WebApiService } from '../../services/web-api/web-api.service';
 import { albumsState } from '../../store/albums';
+import { chatsState } from '../../store/chats';
 import { dialogsState } from '../../store/dialogs';
 import { HeaderComponent } from '../header.component';
 
@@ -27,6 +29,10 @@ describe('HeaderComponent', () => {
       'listMediaItems',
       'listAlbums',
     ]);
+    const mockChatAgentService = jasmine.createSpyObj('ChatAgentService', [
+      'clearMemory',
+      'getAgentResponseStream',
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
@@ -39,12 +45,11 @@ describe('HeaderComponent', () => {
             [dialogsState.FEATURE_KEY]: dialogsState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
             [authState.FEATURE_KEY]: authState.buildInitialState(),
+            [chatsState.FEATURE_KEY]: chatsState.initialState,
           },
         }),
-        {
-          provide: WebApiService,
-          useValue: mockWebApiService,
-        },
+        { provide: WebApiService, useValue: mockWebApiService },
+        { provide: ChatAgentService, useValue: mockChatAgentService },
         provideNoopAnimations(),
       ],
     }).compileComponents();

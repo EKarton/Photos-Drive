@@ -28,7 +28,10 @@ export const routes: Routes = [
       provideState(chatsFeature),
       provideEffects(AlbumsEffects),
       provideEffects(ChatsEffects),
-      { provide: MemorySaver, useFactory: () => new MemorySaver() },
+      {
+        provide: MemorySaver,
+        useFactory: () => new MemorySaver(),
+      },
       {
         provide: ChatGoogleGenerativeAI,
         useFactory: () =>
