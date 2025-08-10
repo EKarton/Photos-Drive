@@ -12,7 +12,12 @@ export interface Message {
 
 export interface MessageContent {
   output: string;
-  reasoning?: string[];
+  reasoning?: Reasoning[];
+}
+
+export interface Reasoning {
+  id: string;
+  content: string;
 }
 
 export interface ChatsState {

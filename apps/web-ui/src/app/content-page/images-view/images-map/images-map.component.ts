@@ -20,7 +20,7 @@ import { IsPendingPipe } from '../../../shared/results/pipes/is-pending.pipe';
 import { Result } from '../../../shared/results/results';
 import { takeSuccessfulDataOrElse } from '../../../shared/results/utils/takeSuccessfulDataOrElse';
 import * as themeState from '../../../themes/store/theme.state';
-import { Heatmap } from '../../services/types/heatmap';
+import { Heatmap } from '../../services/web-api/types/heatmap';
 import { ImagesMapStore } from './images-map.store';
 import {
   ImagesMapViewerComponent,

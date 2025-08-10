@@ -1,21 +1,35 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { map, startWith, switchMap } from 'rxjs/operators';
+import { map, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { Result, toPending } from '../../../shared/results/results';
 import { toResult } from '../../../shared/results/rxjs/toResult';
 import {
   BotMessage,
   ChatAgentService,
-} from '../../services/chat-agent.service';
-import { addOrUpdateBotMessage, sendUserMessage } from './chats.actions';
+} from '../../services/chat-agent/chat-agent.service';
+import {
+  addOrUpdateBotMessage,
+  sendUserMessage,
+  startNewChat,
+} from './chats.actions';
 
 @Injectable()
 export class ChatsEffects {
-  private readonly store = inject(Store);
   private readonly actions$ = inject(Actions);
   private readonly chatAgentService = inject(ChatAgentService);
+
+  startNewChat$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(startNewChat),
+        tap(() => {
+          this.chatAgentService.clearMemory();
+        }),
+      );
+    },
+    { dispatch: false },
+  );
 
   sendMessage$ = createEffect(() => {
     return this.actions$.pipe(

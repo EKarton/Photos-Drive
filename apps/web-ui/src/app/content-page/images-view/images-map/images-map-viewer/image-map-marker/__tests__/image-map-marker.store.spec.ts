@@ -11,12 +11,12 @@ import {
 import {
   GetGPhotosMediaItemDetailsResponse,
   GPhotosMediaItem,
-} from '../../../../../services/types/gphotos-media-item';
+} from '../../../../../services/web-api/types/gphotos-media-item';
 import {
   MediaItem,
   MediaItemDetailsApiResponse,
-} from '../../../../../services/types/media-item';
-import { WebApiService } from '../../../../../services/webapi.service';
+} from '../../../../../services/web-api/types/media-item';
+import { WebApiService } from '../../../../../services/web-api/web-api.service';
 import { ImageMapMarkerStore, INITIAL_STATE } from '../image-map-marker.store';
 
 const MEDIA_ITEM_ID = 'client1:photos1';

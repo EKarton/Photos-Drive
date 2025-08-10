@@ -15,7 +15,7 @@ import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { NgxMasonryComponent, NgxMasonryModule } from 'ngx-masonry';
 
 import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../app.tokens';
-import { ListMediaItemsSortBy } from '../../services/types/list-media-items';
+import { ListMediaItemsSortBy } from '../../services/web-api/types/list-media-items';
 import { ImageComponent } from './image/image.component';
 import { ImagesListStore } from './images-list.store';
 

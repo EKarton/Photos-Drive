@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ListMediaItemsSortByFields,
   ListMediaItemsSortDirection,
-} from '../../../services/types/list-media-items';
+} from '../../../services/web-api/types/list-media-items';
 import { ImagesSortDropdownComponent } from '../images-sort-dropdown.component';
 
 describe('ImagesSortDropdownComponent', () => {

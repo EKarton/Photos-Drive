@@ -5,8 +5,8 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { environment } from '../../../../environments/environment';
-import { toSuccess } from '../../../shared/results/results';
+import { environment } from '../../../../../environments/environment';
+import { toSuccess } from '../../../../shared/results/results';
 import { GetAlbumDetailsResponse } from '../types/album';
 import { GetGPhotosMediaItemDetailsResponse } from '../types/gphotos-media-item';
 import { GetHeatmapRequest, Heatmap } from '../types/heatmap';
@@ -20,7 +20,7 @@ import { ListMediaItemsResponse } from '../types/list-media-items';
 import { ListMediaItemsRequest } from '../types/list-media-items';
 import { ListMediaItemsSortDirection } from '../types/list-media-items';
 import { ListMediaItemsSortByFields } from '../types/list-media-items';
-import { WebApiService } from '../webapi.service';
+import { WebApiService } from '../web-api.service';
 
 describe('WebApiService', () => {
   let service: WebApiService;

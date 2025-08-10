@@ -20,7 +20,7 @@ import Supercluster from 'supercluster';
 import { MAPBOX_FACTORY_TOKEN } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
-import { Heatmap } from '../../../services/types/heatmap';
+import { Heatmap } from '../../../services/web-api/types/heatmap';
 import { dialogActions } from '../../../store/dialog';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
 

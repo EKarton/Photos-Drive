@@ -2,9 +2,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
-import { Result } from '../../shared/results/results';
-import { toResult } from '../../shared/results/rxjs/toResult';
+import { environment } from '../../../../environments/environment';
+import { Result } from '../../../shared/results/results';
+import { toResult } from '../../../shared/results/rxjs/toResult';
 import { GetAlbumDetailsResponse } from './types/album';
 import {
   GetGPhotosMediaItemDetailsRequest,

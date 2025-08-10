@@ -6,7 +6,7 @@ import {
   ListAlbumsSortBy,
   ListAlbumsSortByFields,
   ListAlbumsSortDirection,
-} from '../../../services/types/list-albums';
+} from '../../../services/web-api/types/list-albums';
 
 @Component({
   standalone: true,

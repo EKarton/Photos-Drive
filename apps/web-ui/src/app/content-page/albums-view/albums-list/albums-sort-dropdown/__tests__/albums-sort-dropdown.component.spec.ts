@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ListAlbumsSortByFields,
   ListAlbumsSortDirection,
-} from '../../../../services/types/list-albums';
+} from '../../../../services/web-api/types/list-albums';
 import { AlbumsSortDropdownComponent } from '../albums-sort-dropdown.component';
 
 describe('AlbumsSortDropdownComponent', () => {

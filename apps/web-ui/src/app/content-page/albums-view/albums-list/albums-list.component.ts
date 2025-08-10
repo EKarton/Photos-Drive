@@ -6,7 +6,7 @@ import {
   ListAlbumsSortBy,
   ListAlbumsSortByFields,
   ListAlbumsSortDirection,
-} from '../../services/types/list-albums';
+} from '../../services/web-api/types/list-albums';
 import { AlbumsListCardsComponent } from './albums-list-cards/albums-list-cards.component';
 import { AlbumsListTableComponent } from './albums-list-table/albums-list-table.component';
 import {

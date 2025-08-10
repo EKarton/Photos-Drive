@@ -9,13 +9,13 @@ import {
   toPending,
   toSuccess,
 } from '../../../../../shared/results/results';
-import { Album } from '../../../../services/types/album';
+import { Album } from '../../../../services/web-api/types/album';
 import {
   ListAlbumsResponse,
   ListAlbumsSortByFields,
   ListAlbumsSortDirection,
-} from '../../../../services/types/list-albums';
-import { WebApiService } from '../../../../services/webapi.service';
+} from '../../../../services/web-api/types/list-albums';
+import { WebApiService } from '../../../../services/web-api/web-api.service';
 import { AlbumsListCardsComponent } from '../albums-list-cards.component';
 
 const ALBUM_1: Album = {

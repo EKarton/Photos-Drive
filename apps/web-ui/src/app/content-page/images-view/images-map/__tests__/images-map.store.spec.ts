@@ -7,8 +7,8 @@ import {
   toPending,
   toSuccess,
 } from '../../../../shared/results/results';
-import { Heatmap } from '../../../services/types/heatmap';
-import { WebApiService } from '../../../services/webapi.service';
+import { Heatmap } from '../../../services/web-api/types/heatmap';
+import { WebApiService } from '../../../services/web-api/web-api.service';
 import { ImagesMapStore, INITIAL_STATE } from '../images-map.store';
 import { TileId } from '../images-map-viewer/images-map-viewer.component';
 

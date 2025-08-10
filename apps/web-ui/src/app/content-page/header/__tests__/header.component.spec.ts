@@ -12,7 +12,7 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { authState } from '../../../auth/store';
 import { themeState } from '../../../themes/store';
 import { routes } from '../../content-page.routes';
-import { WebApiService } from '../../services/webapi.service';
+import { WebApiService } from '../../services/web-api/web-api.service';
 import { albumsState } from '../../store/albums';
 import { dialogState } from '../../store/dialog';
 import { HeaderComponent } from '../header.component';

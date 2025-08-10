@@ -10,10 +10,10 @@ import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
 import { routes } from '../content-page.routes';
-import { Album } from '../services/types/album';
-import { ListAlbumsResponse } from '../services/types/list-albums';
-import { ListMediaItemsResponse } from '../services/types/list-media-items';
-import { WebApiService } from '../services/webapi.service';
+import { Album } from '../services/web-api/types/album';
+import { ListAlbumsResponse } from '../services/web-api/types/list-albums';
+import { ListMediaItemsResponse } from '../services/web-api/types/list-media-items';
+import { WebApiService } from '../services/web-api/web-api.service';
 import { albumsState } from '../store/albums';
 import { dialogState } from '../store/dialog';
 

@@ -7,13 +7,13 @@ import { RESIZE_OBSERVER_FACTORY_TOKEN } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { MockResizeObserverFactory } from '../../../../shared/resize-observer-factory/__mocks__/MockResizeObserverFactory';
 import { toSuccess } from '../../../../shared/results/results';
-import { GPhotosMediaItem } from '../../../services/types/gphotos-media-item';
+import { GPhotosMediaItem } from '../../../services/web-api/types/gphotos-media-item';
 import {
   ListMediaItemsResponse,
   ListMediaItemsSortByFields,
   ListMediaItemsSortDirection,
-} from '../../../services/types/list-media-items';
-import { WebApiService } from '../../../services/webapi.service';
+} from '../../../services/web-api/types/list-media-items';
+import { WebApiService } from '../../../services/web-api/web-api.service';
 import { dialogState } from '../../../store/dialog';
 import { ImagesListComponent } from '../images-list.component';
 

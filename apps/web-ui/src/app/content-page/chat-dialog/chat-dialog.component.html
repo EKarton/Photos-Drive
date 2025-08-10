@@ -58,7 +58,7 @@
   } @else {
     <div class="w-full overflow-y-auto h-full">
       <div class="max-w-2xl mx-auto pt-14 pb-28 px-3 flex flex-col gap-4">
-        @for (message of messages(); track message) {
+        @for (message of messages(); track message.id) {
           <div
             class="flex"
             [ngClass]="{ 'justify-end': message.type === 'User' }"
@@ -71,7 +71,10 @@
                     message.type === 'User',
                 }"
               >
-                @if (messageContentResult | isPending) {
+                @if (
+                  (messageContentResult | isPending) ||
+                  !messageContentResult.data!.output
+                ) {
                   <span class="loading loading-dots loading-md"></span>
                 } @else if (messageContentResult | hasFailed) {
                   Agent has thrown an error
@@ -109,9 +112,9 @@
                   >
                     @for (
                       reason of messageContentResult.data!.reasoning;
-                      track reason
+                      track reason.id
                     ) {
-                      <p>{{ reason }}</p>
+                      <p>{{ reason.content }}</p>
                     }
                   </div>
                 </details>

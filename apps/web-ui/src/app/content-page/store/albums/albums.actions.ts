@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 
 import { Result } from '../../../shared/results/results';
-import { Album, GetAlbumDetailsResponse } from '../../services/types/album';
+import { Album, GetAlbumDetailsResponse } from '../../services/web-api/types/album';
 
 /** An action that fetches the details of an album. */
 export const loadAlbumDetails = createAction(

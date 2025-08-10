@@ -5,8 +5,8 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../shared/results/results';
-import { GetAlbumDetailsResponse } from '../../../services/types/album';
-import { WebApiService } from '../../../services/webapi.service';
+import { GetAlbumDetailsResponse } from '../../../services/web-api/types/album';
+import { WebApiService } from '../../../services/web-api/web-api.service';
 import * as albumsActions from '../albums.actions';
 import { AlbumsEffects } from '../albums.effects';
 

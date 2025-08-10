@@ -14,7 +14,7 @@ import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe'
 import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
 import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
-import { GPhotosMediaItem } from '../../../services/types/gphotos-media-item';
+import { GPhotosMediaItem } from '../../../services/web-api/types/gphotos-media-item';
 import { dialogActions } from '../../../store/dialog';
 import { ImageStore } from './image.store';
 

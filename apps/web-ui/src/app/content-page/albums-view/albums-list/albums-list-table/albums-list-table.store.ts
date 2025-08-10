@@ -14,8 +14,8 @@ import {
   ListAlbumsRequest,
   ListAlbumsResponse,
   ListAlbumsSortBy,
-} from '../../../services/types/list-albums';
-import { WebApiService } from '../../../services/webapi.service';
+} from '../../../services/web-api/types/list-albums';
+import { WebApiService } from '../../../services/web-api/web-api.service';
 import { addAlbum } from '../../../store/albums/albums.actions';
 
 export interface AlbumsListTableState {
