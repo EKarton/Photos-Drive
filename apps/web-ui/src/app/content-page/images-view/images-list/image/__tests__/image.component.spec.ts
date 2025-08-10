@@ -6,12 +6,12 @@ import { of } from 'rxjs';
 import { WINDOW } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { toPending, toSuccess } from '../../../../../shared/results/results';
+import { MediaViewerRequest } from '../../../../media-viewer/media-viewer.request';
 import { GetGPhotosMediaItemDetailsResponse } from '../../../../services/web-api/types/gphotos-media-item';
 import { GPhotosMediaItem } from '../../../../services/web-api/types/gphotos-media-item';
 import { WebApiService } from '../../../../services/web-api/web-api.service';
-import { dialogActions, dialogState } from '../../../../store/dialog';
+import { dialogsActions, dialogsState } from '../../../../store/dialogs';
 import { ImageComponent } from '../image.component';
-import { MediaViewerRequest } from '../../../../media-viewer/media-viewer.request';
 
 const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
   baseUrl: 'http://www.google.com/photos/1',
@@ -39,7 +39,7 @@ describe('ImageComponent', () => {
         provideNoopAnimations(),
         provideMockStore({
           initialState: {
-            [dialogState.FEATURE_KEY]: dialogState.initialState,
+            [dialogsState.FEATURE_KEY]: dialogsState.initialState,
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
@@ -175,7 +175,7 @@ describe('ImageComponent', () => {
         .dispatchEvent(event);
 
       expect(store.dispatch).toHaveBeenCalledWith(
-        dialogActions.openDialog({
+        dialogsActions.openDialog({
           request: new MediaViewerRequest('photos1'),
         }),
       );

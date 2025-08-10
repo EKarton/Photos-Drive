@@ -48,6 +48,7 @@
     "supercluster": "^8.0.1",
     "tslib": "^2.3.0",
     "typescript-cookie": "^1.0.6",
+    "zod": "^3.25.76",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

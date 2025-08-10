@@ -20,7 +20,7 @@ import { IsPendingPipe } from '../../shared/results/pipes/is-pending.pipe';
 import { Result } from '../../shared/results/results';
 import { combineResults2 } from '../../shared/results/utils/combineResults2';
 import { GPhotosMediaItem } from '../services/web-api/types/gphotos-media-item';
-import { dialogActions, dialogState } from '../store/dialog';
+import { dialogsActions, dialogsState } from '../store/dialogs';
 import { MediaViewerRequest } from './media-viewer.request';
 import { MediaViewerStore } from './media-viewer.store';
 
@@ -51,10 +51,10 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('modal') myModal?: ElementRef;
 
   private readonly isOpen$ = this.store.select(
-    dialogState.selectIsDialogOpen(MediaViewerRequest),
+    dialogsState.selectIsDialogOpen(MediaViewerRequest),
   );
   private readonly requests = this.store.selectSignal(
-    dialogState.selectDialogRequests(MediaViewerRequest),
+    dialogsState.selectDialogRequests(MediaViewerRequest),
   );
 
   readonly isShareSupported = !!this.navigator.share;
@@ -112,7 +112,7 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
   }
 
   closeDialog() {
-    this.store.dispatch(dialogActions.closeDialog());
+    this.store.dispatch(dialogsActions.closeDialog());
   }
 
   ngAfterViewInit(): void {

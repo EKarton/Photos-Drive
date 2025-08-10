@@ -1,83 +1,50 @@
-import { Injectable } from '@angular/core';
-import { BaseMessage } from '@langchain/core/messages';
+import { inject, Injectable } from '@angular/core';
 import { Runnable } from '@langchain/core/runnables';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { MemorySaver } from '@langchain/langgraph/web';
-import type { Tool } from 'langchain/tools';
 import { Observable, throwError } from 'rxjs';
 
-import { environment } from '../../../../environments/environment';
+import { CurrentTimeTool } from './tools/get-current-time';
 
+/** The response from the LLM */
 export interface BotMessage {
   content: string;
   reasoning?: BotMessageReasoning[];
 }
 
+/** The reasoning message of the Bot message */
 export interface BotMessageReasoning {
   id: string;
   content: string;
 }
 
+/** The default thread ID */
 const DEFAULT_THREAD_ID = 'default_thread';
 
+/** The chat agent used to interface with the UI */
 @Injectable({ providedIn: 'root' })
 export class ChatAgentService {
   private agent?: Runnable;
-  private memory?: MemorySaver;
+
+  private readonly memorySaver = inject(MemorySaver);
+  private readonly chatGoogleGenerativeAI = inject(ChatGoogleGenerativeAI);
+  private readonly getCurrentTimeTool = inject(CurrentTimeTool);
 
   constructor() {
     this.loadAgent();
   }
 
   async loadAgent() {
-    const llm = new ChatGoogleGenerativeAI({
-      model: 'gemini-2.5-flash',
-      temperature: 0.7,
-      apiKey: environment.geminiApiKey,
-    });
-
-    async function summarizeMessages(messages: BaseMessage[]) {
-      const summaryPrompt = [
-        { role: 'system', content: 'Summarize the following conversation:' },
-        { role: 'user', content: JSON.stringify(messages) },
-      ];
-      const res = await llm.invoke(summaryPrompt);
-      return res.content;
-    }
-
-    const tools: Tool[] = [];
-    this.memory = new MemorySaver();
     this.agent = await createReactAgent({
-      llm,
-      tools,
-      checkpointSaver: this.memory,
-      preModelHook: async (state) => {
-        const maxMessages = 20;
-        if (state.messages.length > maxMessages) {
-          const oldMessages = state.messages.slice(
-            0,
-            state.messages.length - maxMessages,
-          );
-          const recentMessages = state.messages.slice(-maxMessages);
-
-          const summary = await summarizeMessages(oldMessages);
-
-          return {
-            messages: [
-              { role: 'system', content: `Conversation so far: ${summary}` },
-              ...recentMessages,
-            ],
-          };
-        }
-
-        return {}; // no changes if under the limit
-      },
+      llm: this.chatGoogleGenerativeAI,
+      tools: [this.getCurrentTimeTool],
+      checkpointSaver: this.memorySaver,
     });
   }
 
   clearMemory() {
-    this.memory?.deleteThread(DEFAULT_THREAD_ID);
+    this.memorySaver.deleteThread(DEFAULT_THREAD_ID);
   }
 
   getAgentResponseStream(userMessage: string): Observable<BotMessage> {

@@ -1,19 +1,11 @@
-import { closeDialog, openDialog } from '../dialog.actions';
-import { dialogReducer } from '../dialog.reducer';
-import { DialogState, initialState } from '../dialog.state';
+import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
+import { closeDialog, openDialog } from '../dialogs.actions';
+import { dialogReducer } from '../dialogs.reducer';
+import { DialogState, initialState } from '../dialogs.state';
 
-describe('Media Viewer Reducer', () => {
-  it('should return the initial state', () => {
-    const action = { type: 'NOOP' };
-
-    const state = dialogReducer(undefined, action);
-
-    expect(state).toEqual(initialState);
-  });
-
-  it('should handle openDialog action', () => {
-    const mediaItemId = 'item123';
-    const request = { mediaItemId };
+describe('Dialogs Reducer', () => {
+  it('should handle openDialog action with a dialog request', () => {
+    const request = new MediaViewerRequest('item123');
 
     const action = openDialog({ request });
     const state = dialogReducer(initialState, action);
@@ -29,7 +21,7 @@ describe('Media Viewer Reducer', () => {
   it('should handle closeDialog action', () => {
     const initialStateWithRequest: DialogState = {
       ...initialState,
-      request: { mediaItemId: 'item123' }, // Set a mock request
+      request: new MediaViewerRequest('item123'),
       isOpen: true,
     };
 

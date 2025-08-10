@@ -11,7 +11,7 @@ import { themeState } from '../../../themes/store';
 import { ListMediaItemsResponse } from '../../services/web-api/types/list-media-items';
 import { WebApiService } from '../../services/web-api/web-api.service';
 import { albumsState } from '../../store/albums';
-import { dialogState } from '../../store/dialog';
+import { dialogsState } from '../../store/dialogs';
 import { ImageMapMarkerComponent } from '../images-map/images-map-viewer/image-map-marker/image-map-marker.component';
 import { ImagesViewComponent } from '../images-view.component';
 
@@ -90,7 +90,7 @@ describe('ImagesViewComponent', () => {
     fixture.detectChanges();
 
     store.setState({
-      [dialogState.FEATURE_KEY]: dialogState.initialState,
+      [dialogsState.FEATURE_KEY]: dialogsState.initialState,
     });
     store.refreshState();
     fixture.detectChanges();

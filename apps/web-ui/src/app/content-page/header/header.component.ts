@@ -11,7 +11,7 @@ import { filter, Subscription } from 'rxjs';
 
 import { ThemeToggleButtonComponent } from '../../themes/components/theme-toggle-button/theme-toggle-button.component';
 import { ChatDialogRequest } from '../chat-dialog/chat-dialog.request';
-import { dialogActions } from '../store/dialog';
+import { dialogsActions } from '../store/dialogs';
 import { AvatarButtonComponent } from './avatar-button/avatar-button.component';
 
 enum Tabs {
@@ -71,7 +71,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   onSearchClick() {
     this.store.dispatch(
-      dialogActions.openDialog({
+      dialogsActions.openDialog({
         request: new ChatDialogRequest(),
       }),
     );

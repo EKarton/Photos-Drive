@@ -21,7 +21,7 @@ import { MAPBOX_FACTORY_TOKEN } from '../../../../app.tokens';
 import { authState } from '../../../../auth/store';
 import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
 import { Heatmap } from '../../../services/web-api/types/heatmap';
-import { dialogActions } from '../../../store/dialog';
+import { dialogsActions } from '../../../store/dialogs';
 import { ImageMapMarkerComponent } from './image-map-marker/image-map-marker.component';
 
 export interface TileId {
@@ -324,7 +324,7 @@ export class ImagesMapViewerComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
           componentRef.instance.markerClick.subscribe(() => {
             this.store.dispatch(
-              dialogActions.openDialog({
+              dialogsActions.openDialog({
                 request: new MediaViewerRequest(mediaItemId),
               }),
             );

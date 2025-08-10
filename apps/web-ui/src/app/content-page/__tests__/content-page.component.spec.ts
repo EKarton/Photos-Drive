@@ -10,12 +10,14 @@ import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { ContentPageComponent } from '../content-page.component';
 import { routes } from '../content-page.routes';
+import { ChatAgentService } from '../services/chat-agent/chat-agent.service';
 import { Album } from '../services/web-api/types/album';
 import { ListAlbumsResponse } from '../services/web-api/types/list-albums';
 import { ListMediaItemsResponse } from '../services/web-api/types/list-media-items';
 import { WebApiService } from '../services/web-api/web-api.service';
 import { albumsState } from '../store/albums';
-import { dialogState } from '../store/dialog';
+import { chatsState } from '../store/chats';
+import { dialogsState } from '../store/dialogs';
 
 const ALBUM_DETAILS_ROOT: Album = {
   id: 'album1',
@@ -81,6 +83,7 @@ const PAGE_1: ListMediaItemsResponse = {
 
 describe('ContentPageComponent', () => {
   let mockWebApiService: jasmine.SpyObj<WebApiService>;
+  let mockChatAgentService: jasmine.SpyObj<ChatAgentService>;
   let fixture: ComponentFixture<ContentPageComponent>;
   let router: Router;
 
@@ -88,6 +91,10 @@ describe('ContentPageComponent', () => {
     mockWebApiService = jasmine.createSpyObj('WebApiService', [
       'listMediaItems',
       'listAlbums',
+    ]);
+    mockChatAgentService = jasmine.createSpyObj('ChatAgentService', [
+      'clearMemory',
+      'getAgentResponseStream',
     ]);
 
     await TestBed.configureTestingModule({
@@ -103,15 +110,14 @@ describe('ContentPageComponent', () => {
                 .set('album4', toSuccess(ALBUM_DETAILS_2010))
                 .set('album5', toSuccess(ALBUM_DETAILS_2011)),
             },
-            [dialogState.FEATURE_KEY]: dialogState.initialState,
+            [dialogsState.FEATURE_KEY]: dialogsState.initialState,
             [themeState.FEATURE_KEY]: themeState.initialState,
             [authState.FEATURE_KEY]: authState.buildInitialState(),
+            [chatsState.FEATURE_KEY]: chatsState.initialState,
           },
         }),
-        {
-          provide: WebApiService,
-          useValue: mockWebApiService,
-        },
+        { provide: WebApiService, useValue: mockWebApiService },
+        { provide: ChatAgentService, useValue: mockChatAgentService },
         provideNoopAnimations(),
       ],
     }).compileComponents();

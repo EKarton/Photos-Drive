@@ -1,4 +1,4 @@
-import { BaseDialogRequest } from '../store/dialog/dialog.state';
+import { BaseDialogRequest } from '../store/dialogs/dialogs.state';
 
 /** Represents a request to open the media viewer with a particular media item ID. */
 export class MediaViewerRequest implements BaseDialogRequest {

@@ -14,7 +14,7 @@ import {
   ListMediaItemsSortDirection,
 } from '../../../services/web-api/types/list-media-items';
 import { WebApiService } from '../../../services/web-api/web-api.service';
-import { dialogState } from '../../../store/dialog';
+import { dialogsState } from '../../../store/dialogs';
 import { ImagesListComponent } from '../images-list.component';
 
 const PAGE_1: ListMediaItemsResponse = {
@@ -110,7 +110,7 @@ describe('ImagesListComponent', () => {
         provideNoopAnimations(),
         provideMockStore({
           initialState: {
-            [dialogState.FEATURE_KEY]: dialogState.initialState,
+            [dialogsState.FEATURE_KEY]: dialogsState.initialState,
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },

@@ -15,7 +15,7 @@ import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe'
 import { mapResult } from '../../../../shared/results/utils/mapResult';
 import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
 import { GPhotosMediaItem } from '../../../services/web-api/types/gphotos-media-item';
-import { dialogActions } from '../../../store/dialog';
+import { dialogsActions } from '../../../store/dialogs';
 import { ImageStore } from './image.store';
 
 export interface ImageData {
@@ -92,7 +92,7 @@ export class ImageComponent {
 
   private openImageInDialog(mediaItemId: string) {
     this.store.dispatch(
-      dialogActions.openDialog({
+      dialogsActions.openDialog({
         request: new MediaViewerRequest(mediaItemId),
       }),
     );

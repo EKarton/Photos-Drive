@@ -12,8 +12,8 @@ import { GPhotosMediaItem } from '../../../../services/web-api/types/gphotos-med
 import { Heatmap } from '../../../../services/web-api/types/heatmap';
 import { MediaItem } from '../../../../services/web-api/types/media-item';
 import { WebApiService } from '../../../../services/web-api/web-api.service';
-import { dialogState } from '../../../../store/dialog';
-import { openDialog } from '../../../../store/dialog/dialog.actions';
+import { dialogsState } from '../../../../store/dialogs';
+import { openDialog } from '../../../../store/dialogs/dialogs.actions';
 import { ImageMapMarkerComponent } from '../image-map-marker/image-map-marker.component';
 import {
   ImagesMapViewerComponent,
@@ -94,7 +94,7 @@ describe('ImagesMapViewerComponent', () => {
         provideNoopAnimations(),
         provideMockStore({
           initialState: {
-            [dialogState.FEATURE_KEY]: dialogState.initialState,
+            [dialogsState.FEATURE_KEY]: dialogsState.initialState,
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },

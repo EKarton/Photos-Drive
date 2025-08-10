@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 
-import { BaseDialogRequest } from './dialog.state';
+import { BaseDialogRequest } from './dialogs.state';
 
 /** An action that requests for the dialog to be open. */
 export const openDialog = createAction(

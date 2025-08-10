@@ -1,7 +1,7 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 
-import { closeDialog, openDialog } from './dialog.actions';
-import { DialogState, FEATURE_KEY, initialState } from './dialog.state';
+import { closeDialog, openDialog } from './dialogs.actions';
+import { DialogState, FEATURE_KEY, initialState } from './dialogs.state';
 
 export const dialogReducer = createReducer(
   initialState,

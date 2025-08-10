@@ -23,6 +23,11 @@ import {
   RawMediaItemDetailsApiResponse,
 } from './types/media-item';
 import { RawMediaItem } from './types/media-item';
+import {
+  RawSearchMediaItemsByTextResponse,
+  SearchMediaItemsByTextRequest,
+  SearchMediaItemsByTextResponse,
+} from './types/search-media-items-by-text';
 
 @Injectable({ providedIn: 'root' })
 export class WebApiService {
@@ -167,6 +172,38 @@ export class WebApiService {
         params,
       })
       .pipe(toResult());
+  }
+
+  searchMediaItemsByText(
+    accessToken: string,
+    request: SearchMediaItemsByTextRequest,
+  ): Observable<Result<SearchMediaItemsByTextResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/search`;
+    const body = {
+      query: request.text,
+      earliestDateTaken: request.earliestDateTaken
+        ? request.earliestDateTaken.toDateString()
+        : undefined,
+      latestDateTaken: request.latestDateTaken
+        ? request.latestDateTaken.toDateString()
+        : undefined,
+      withinMediaItemIds: request.withinMediaItemIds
+        ? request.withinMediaItemIds.join(',')
+        : undefined,
+    };
+
+    return this.httpClient
+      .post<RawSearchMediaItemsByTextResponse>(url, body, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .pipe(
+        map((res) => ({
+          mediaItems: res.mediaItems.map(this.convertRawMediaItemToMediaItem),
+        })),
+        toResult(),
+      );
   }
 
   private convertRawMediaItemToMediaItem(rawDoc: RawMediaItem): MediaItem {
