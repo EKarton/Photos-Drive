@@ -222,6 +222,66 @@ describe('ConfigStoreFromMongoDb', () => {
     });
   });
 
+  describe('getVectorStoreConfigs', () => {
+    beforeEach(async () => {
+      await mongoClient
+        .db(DatabaseName)
+        .collection(DatabaseCollections.VECTOR_STORE_CONFIGS)
+        .deleteMany({});
+    });
+
+    it('should return only configs of type MONGO_DB', async () => {
+      const validConfig = {
+        _id: new ObjectId(),
+        name: 'Mongo Vector Store Config',
+        type: 'mongodb-vector-store-type', // matches VECTOR_STORE_TYPES.MONGO_DB
+        read_only_connection_string: 'mongodb://localhost:27019'
+      };
+      const otherConfig = {
+        _id: new ObjectId(),
+        name: 'Other Vector Store Config',
+        type: 'some-other-type',
+        read_only_connection_string: 'mongodb://localhost:27020'
+      };
+
+      await mongoClient
+        .db(DatabaseName)
+        .collection(DatabaseCollections.VECTOR_STORE_CONFIGS)
+        .insertMany([validConfig, otherConfig]);
+
+      const result = await vaultStore.getVectorStoreConfigs();
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        id: validConfig._id.toString(),
+        name: validConfig.name,
+        connectionString: validConfig.read_only_connection_string
+      });
+    });
+
+    it('should return an empty array if there are no configs', async () => {
+      const result = await vaultStore.getVectorStoreConfigs();
+      expect(result).toEqual([]);
+    });
+
+    it('should return an empty array if no configs match MONGO_DB type', async () => {
+      const nonMatchingConfig = {
+        _id: new ObjectId(),
+        name: 'Non-Mongo Config',
+        type: 'non-mongo-type',
+        read_only_connection_string: 'mongodb://localhost:27021'
+      };
+
+      await mongoClient
+        .db(DatabaseName)
+        .collection(DatabaseCollections.VECTOR_STORE_CONFIGS)
+        .insertOne(nonMatchingConfig);
+
+      const result = await vaultStore.getVectorStoreConfigs();
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getRootAlbumId', () => {
     it('should return the root album ID', async () => {
       const rootAlbum = {

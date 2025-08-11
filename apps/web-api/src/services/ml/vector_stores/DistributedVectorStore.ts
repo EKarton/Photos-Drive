@@ -5,6 +5,7 @@ import {
   QueryMediaItemEmbeddingRequest
 } from './BaseVectorStore';
 
+/** A distributed vector store that joins from other vector stores. */
 export class DistributedVectorStore extends BaseVectorStore {
   private stores: BaseVectorStore[];
   private storeIdToStore: Record<string, BaseVectorStore>;
@@ -13,6 +14,7 @@ export class DistributedVectorStore extends BaseVectorStore {
     super();
     this.stores = stores;
     this.storeIdToStore = {};
+
     for (const store of stores) {
       this.storeIdToStore[store.getStoreId()] = store;
     }

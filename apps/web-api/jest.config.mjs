@@ -1,4 +1,5 @@
 export default {
+  testEnvironment: 'jest-environment-node-single-context',
   verbose: true,
   transform: {
     '^.+\\.tsx?$': 'ts-jest'

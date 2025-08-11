@@ -159,6 +159,111 @@ describe('MediaItemsRepositoryImpl', () => {
     });
   });
 
+  describe('bulkGetMediaItemByIds', () => {
+    let id1: MediaItemId;
+    let id2: MediaItemId;
+    let id3: MediaItemId;
+
+    beforeEach(async () => {
+      // Insert into client1
+      const inserted1 = await mongoClient1
+        .db('photos_drive')
+        .collection('media_items')
+        .insertOne({
+          file_name: 'from_client1.jpg',
+          gphotos_client_id: 'g1',
+          gphotos_media_item_id: 'm1',
+          album_id: 'a1:a2',
+          width: 100,
+          height: 200,
+          date_taken: new Date('2024-01-01')
+        });
+      id1 = {
+        clientId: 'client1',
+        objectId: inserted1.insertedId.toString()
+      };
+
+      // Insert into client2
+      const inserted2 = await mongoClient2
+        .db('photos_drive')
+        .collection('media_items')
+        .insertOne({
+          file_name: 'from_client2.jpg',
+          gphotos_client_id: 'g2',
+          gphotos_media_item_id: 'm2',
+          album_id: 'a3:a4',
+          width: 300,
+          height: 400,
+          date_taken: new Date('2024-02-02')
+        });
+      id2 = {
+        clientId: 'client2',
+        objectId: inserted2.insertedId.toString()
+      };
+
+      // Insert second doc into client1
+      const inserted3 = await mongoClient1
+        .db('photos_drive')
+        .collection('media_items')
+        .insertOne({
+          file_name: 'another_from_client1.jpg',
+          gphotos_client_id: 'g3',
+          gphotos_media_item_id: 'm3',
+          album_id: 'a5:a6',
+          width: 500,
+          height: 600,
+          date_taken: new Date('2024-03-03')
+        });
+      id3 = {
+        clientId: 'client1',
+        objectId: inserted3.insertedId.toHexString()
+      };
+    });
+
+    it('returns all matching media items from multiple clients', async () => {
+      const results = await mediaItemsRepo.bulkGetMediaItemByIds([
+        id1,
+        id2,
+        id3
+      ]);
+      expect(Array.isArray(results)).toBe(true);
+      expect(results).toHaveLength(3);
+
+      const byId = Object.fromEntries(results.map((r) => [r.id.objectId, r]));
+      expect(byId[id1.objectId].file_name).toBe('from_client1.jpg');
+      expect(byId[id2.objectId].file_name).toBe('from_client2.jpg');
+      expect(byId[id3.objectId].file_name).toBe('another_from_client1.jpg');
+    });
+
+    it('returns only the items that exist if some ids are not found', async () => {
+      const fakeId: MediaItemId = {
+        clientId: 'client2',
+        objectId: new ObjectId().toString()
+      };
+
+      const results = await mediaItemsRepo.bulkGetMediaItemByIds([id1, fakeId]);
+      expect(results).toHaveLength(1);
+      expect(results[0].id.objectId).toBe(id1.objectId);
+    });
+
+    it('returns empty array when no ids match', async () => {
+      const fakeId1: MediaItemId = {
+        clientId: 'client1',
+        objectId: new ObjectId().toString()
+      };
+      const fakeId2: MediaItemId = {
+        clientId: 'client2',
+        objectId: new ObjectId().toString()
+      };
+
+      const results = await mediaItemsRepo.bulkGetMediaItemByIds([
+        fakeId1,
+        fakeId2
+      ]);
+      expect(results).toEqual([]);
+    });
+  });
+
   describe('getNumMediaItemsInAlbum', () => {
     const albumId: AlbumId = {
       clientId: 'albumClient1',

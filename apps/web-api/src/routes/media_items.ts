@@ -72,6 +72,42 @@ export default async function (
     })
   );
 
+  router.get(
+    '/api/v1/media-items/:id',
+    await verifyAuthentication(),
+    await verifyAuthorization(),
+    wrap(async (req: Request, res: Response) => {
+      const rawMediaItemId = req.params.id;
+      const rawMediaItemIdParts = rawMediaItemId.split(':');
+      const mediaItemId: MediaItemId = {
+        clientId: rawMediaItemIdParts[0],
+        objectId: rawMediaItemIdParts[1]
+      };
+
+      try {
+        const abortController = new AbortController();
+        req.on('close', () => abortController.abort());
+
+        const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId, {
+          abortController
+        });
+        return res.status(200).json(serializeMediaItem(mediaItem));
+      } catch (error) {
+        const isNotFound =
+          error instanceof MongoDbClientNotFoundError ||
+          error instanceof MediaItemNotFoundError;
+
+        if (isNotFound) {
+          return res.status(404).json({
+            error: 'Media item not found'
+          });
+        }
+
+        throw error;
+      }
+    })
+  );
+
   router.post(
     '/api/v1/media-items/search',
     await verifyAuthentication(),
@@ -118,7 +154,6 @@ export default async function (
         }
       }
 
-      // Convert withinMediaItemIds strings to MediaItemId objects, if needed
       let mediaItemIdObjects: MediaItemId[] = [];
       if (withinMediaItemIds && Array.isArray(withinMediaItemIds)) {
         mediaItemIdObjects = withinMediaItemIds.map((idStr) =>
@@ -129,13 +164,7 @@ export default async function (
       const abortController = new AbortController();
       req.on('close', () => abortController.abort());
 
-      let start = performance.now();
       const embedding = await imageEmbedder.embedText(query);
-      console.log(
-        `Execution time to embedText: ${performance.now() - start} milliseconds`
-      );
-
-      start = performance.now();
       const searchResult = await vectorStore.getReleventMediaItemEmbeddings(
         {
           embedding: embedding,
@@ -146,58 +175,13 @@ export default async function (
         },
         { abortController }
       );
-      console.log(
-        `Execution time to getReleventMediaItemEmbeddings: ${performance.now() - start} milliseconds`
-      );
-
-      start = performance.now();
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
         searchResult.map((result) => result.mediaItemId)
       );
-      console.log(
-        `Execution time to getMediaItemByIds: ${performance.now() - start} milliseconds`
-      );
 
-      // Serialize media items for response
       return res.status(200).json({
         mediaItems: mediaItems.map(serializeMediaItem)
       });
-    })
-  );
-
-  router.get(
-    '/api/v1/media-items/:id',
-    await verifyAuthentication(),
-    await verifyAuthorization(),
-    wrap(async (req: Request, res: Response) => {
-      const rawMediaItemId = req.params.id;
-      const rawMediaItemIdParts = rawMediaItemId.split(':');
-      const mediaItemId: MediaItemId = {
-        clientId: rawMediaItemIdParts[0],
-        objectId: rawMediaItemIdParts[1]
-      };
-
-      try {
-        const abortController = new AbortController();
-        req.on('close', () => abortController.abort());
-
-        const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId, {
-          abortController
-        });
-        return res.status(200).json(serializeMediaItem(mediaItem));
-      } catch (error) {
-        const isNotFound =
-          error instanceof MongoDbClientNotFoundError ||
-          error instanceof MediaItemNotFoundError;
-
-        if (isNotFound) {
-          return res.status(404).json({
-            error: 'Media item not found'
-          });
-        }
-
-        throw error;
-      }
     })
   );
 

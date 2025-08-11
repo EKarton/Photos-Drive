@@ -134,5 +134,7 @@ export class App {
   async shutdown() {
     const clients = await this.mongoDbClientsRepository?.listClients();
     clients?.forEach(([_, client]) => client.close());
+
+    await this.imageEmbedder?.dispose();
   }
 }
