@@ -18,7 +18,6 @@ import { WebApiService } from '../services/web-api/web-api.service';
 import { albumsState } from '../store/albums';
 import { chatsState } from '../store/chats';
 import { dialogsState } from '../store/dialogs';
-import { environment } from '../../../environments/environment';
 
 const ALBUM_DETAILS_ROOT: Album = {
   id: 'album1',

@@ -18,7 +18,6 @@ describe('webApiHttpCacheInterceptor', () => {
   let mockCacheService: jasmine.SpyObj<HttpCacheService>;
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
-  let testUrl: string;
 
   beforeEach(() => {
     mockCacheService = jasmine.createSpyObj<HttpCacheService>(
@@ -50,9 +49,11 @@ describe('webApiHttpCacheInterceptor', () => {
       }),
     );
 
-    httpClient.get(testUrl).subscribe((res) => {
+    httpClient.get(environment.webApiEndpoint).subscribe((res) => {
       expect(res).toEqual('My data');
-      expect(mockCacheService.get).toHaveBeenCalledWith(testUrl);
+      expect(mockCacheService.get).toHaveBeenCalledWith(
+        environment.webApiEndpoint,
+      );
       done();
     });
   });
@@ -60,27 +61,29 @@ describe('webApiHttpCacheInterceptor', () => {
   it('should call next() and cache the response if not cached', (done) => {
     mockCacheService.get.and.returnValue(undefined);
 
-    httpClient.get(testUrl).subscribe((res) => {
+    httpClient.get(environment.webApiEndpoint).subscribe((res) => {
       expect(res).toEqual('My data');
-      expect(mockCacheService.get).toHaveBeenCalledWith(testUrl);
+      expect(mockCacheService.get).toHaveBeenCalledWith(
+        environment.webApiEndpoint,
+      );
       expect(mockCacheService.set).toHaveBeenCalledWith(
-        testUrl,
+        environment.webApiEndpoint,
         jasmine.any(HttpResponse),
         60 * 60 * 1000,
       );
       done();
     });
-    httpMock.expectOne(testUrl).flush('My data');
+    httpMock.expectOne(environment.webApiEndpoint).flush('My data');
   });
 
   it('should skip caching for non-GET requests', (done) => {
-    httpClient.post(testUrl, {}).subscribe((res) => {
+    httpClient.post(environment.webApiEndpoint, {}).subscribe((res) => {
       expect(res).toEqual('My data');
       expect(mockCacheService.get).not.toHaveBeenCalled();
       expect(mockCacheService.set).not.toHaveBeenCalled();
       done();
     });
-    httpMock.expectOne(testUrl).flush('My data');
+    httpMock.expectOne(environment.webApiEndpoint).flush('My data');
   });
 
   it('should skip caching for URLs outside webApiEndpoint', (done) => {
