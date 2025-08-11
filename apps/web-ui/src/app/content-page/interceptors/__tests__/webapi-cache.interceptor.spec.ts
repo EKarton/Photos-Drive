@@ -25,8 +25,6 @@ describe('webApiHttpCacheInterceptor', () => {
       'HttpCacheService',
       ['get', 'set'],
     );
-    environment.webApiEndpoint = 'http://localhost:3000';
-    testUrl = `${environment.webApiEndpoint}/api/v1/albums/123/media-items`;
 
     TestBed.configureTestingModule({
       providers: [

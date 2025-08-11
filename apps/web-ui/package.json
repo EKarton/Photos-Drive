@@ -6,8 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage",
-    "test:in": "ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage --include",
+    "test": "NG_APP_ENV=test ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage",
+    "test:in": "NG_APP_ENV=test ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage --include",
     "lint": "ng lint && npx stylelint 'src/**/*.scss'",
     "lint:fix": "ng lint --fix && npx stylelint 'src/**/*.scss' --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\""
