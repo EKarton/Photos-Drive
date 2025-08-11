@@ -10,7 +10,8 @@ import { MongoDbVectorStore } from '../../../../src/services/ml/vector_stores/Mo
 
 describe('MongoDbVectorStore', () => {
   let mongoServer: MongoMemoryServer;
-  let client: MongoClient;
+  let mongoClient: MongoClient;
+
   let store: MongoDbVectorStore;
   const dbName = 'testdb';
   const collectionName = 'testcollection';
@@ -18,19 +19,24 @@ describe('MongoDbVectorStore', () => {
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
-    client = new MongoClient(mongoServer.getUri());
-    await client.connect();
-    store = new MongoDbVectorStore(storeId, client, dbName, collectionName);
+    mongoClient = await MongoClient.connect(mongoServer.getUri());
+
+    store = new MongoDbVectorStore(
+      storeId,
+      mongoClient,
+      dbName,
+      collectionName
+    );
   });
 
   beforeEach(async () => {
-    await client.db(dbName).collection(collectionName).deleteMany({});
+    await mongoClient.db(dbName).collection(collectionName).deleteMany({});
     jest.restoreAllMocks();
   });
 
   afterAll(async () => {
-    if (client) {
-      await client.close(true);
+    if (mongoClient) {
+      await mongoClient.close(true);
     }
     if (mongoServer) {
       await mongoServer.stop({ force: true });
@@ -51,7 +57,7 @@ describe('MongoDbVectorStore', () => {
         media_item_id: '407f1f77bcf86cd799439013:507f1f77bcf86cd799439013',
         date_taken: new Date('2022-01-01')
       };
-      await client.db(dbName).collection(collectionName).insertOne(doc);
+      await mongoClient.db(dbName).collection(collectionName).insertOne(doc);
 
       const result = await store.getEmbeddingById(
         new MediaItemEmbeddingId(storeId, _id.toHexString())

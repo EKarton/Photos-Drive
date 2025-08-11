@@ -561,43 +561,5 @@ describe('Media Items Router', () => {
 
       expect(res.statusCode).toBe(500);
     });
-
-    // it('should call abort() if the request is closed before completion', async () => {
-    //   const repo = mock<MediaItemsRepository>();
-    //   // Return empty to avoid hitting serializing complexity
-    //   repo.bulkGetMediaItemByIds.mockResolvedValue([]);
-
-    //   const vectorStore = mock<BaseVectorStore>();
-    //   vectorStore.getReleventMediaItemEmbeddings.mockResolvedValue([]);
-
-    //   const imageEmbedder = mock<ImageEmbedder>();
-    //   imageEmbedder.embedText.mockResolvedValue(
-    //     new Float32Array([0.1, 0.2, 0.3])
-    //   );
-
-    //   // Spy on AbortController.abort to make sure it's called
-    //   const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
-
-    //   const app = express();
-    //   app.use(express.json());
-    //   app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
-
-    //   // Use supertest's "request" hook to simulate req 'close' event
-    //   const reqTest = request(app)
-    //     .post('/api/v1/media-items/search')
-    //     .set('Authorization', `Bearer ${token}`)
-    //     .send({ query: 'simulate abort' });
-
-    //   reqTest.on('request', (superagentReq) => {
-    //     // Force trigger "close" before the response comes back
-    //     superagentReq.emit('close');
-    //   });
-
-    //   const res = await reqTest;
-    //   expect(res.statusCode).toBe(200); // Still returns success because handlers finish
-    //   expect(abortSpy).toHaveBeenCalled();
-
-    //   abortSpy.mockRestore();
-    // });
   });
 });

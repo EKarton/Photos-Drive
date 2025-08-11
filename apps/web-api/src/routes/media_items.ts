@@ -176,7 +176,8 @@ export default async function (
         { abortController }
       );
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
-        searchResult.map((result) => result.mediaItemId)
+        searchResult.map((result) => result.mediaItemId),
+        { abortController }
       );
 
       return res.status(200).json({
