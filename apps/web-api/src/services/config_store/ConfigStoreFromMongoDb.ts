@@ -1,10 +1,17 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import {
+  MongoClient,
+  Document as MongoDBDocument,
+  ObjectId,
+  WithId
+} from 'mongodb';
 import { AlbumId } from '../metadata_store/Albums';
 import {
   ConfigStore,
   GPhotosConfig,
   MongoDbConfig,
-  UpdateGPhotosConfigRequest
+  MongoDbVectorStoreConfig,
+  UpdateGPhotosConfigRequest,
+  VectorStoreConfig
 } from './ConfigStore';
 
 export const DatabaseName = 'photos_drive';
@@ -13,7 +20,12 @@ export const DatabaseName = 'photos_drive';
 export enum DatabaseCollections {
   MONGODB_CONFIGS = 'mongodb_configs',
   GPHOTOS_CONFIGS = 'gphotos_configs',
-  ROOT_ALBUM = 'root_album'
+  ROOT_ALBUM = 'root_album',
+  VECTOR_STORE_CONFIGS = 'vector_store_configs'
+}
+
+export enum VECTOR_STORE_TYPES {
+  MONGO_DB = 'mongodb-vector-store-type'
 }
 
 /** Implementation of {@code Vault} read from Mongo Db. */
@@ -23,6 +35,7 @@ export class ConfigStoreFromMongoDb implements ConfigStore {
   constructor(client: MongoClient) {
     this._client = client;
   }
+
   async getMongoDbConfigs(): Promise<MongoDbConfig[]> {
     const docs = await this._client
       .db(DatabaseName)
@@ -96,6 +109,32 @@ export class ConfigStoreFromMongoDb implements ConfigStore {
     return {
       clientId: (doc['client_id'] as ObjectId).toString(),
       objectId: (doc['object_id'] as ObjectId).toString()
+    };
+  }
+
+  async getVectorStoreConfigs(): Promise<VectorStoreConfig[]> {
+    const docs = await this._client
+      .db(DatabaseName)
+      .collection(DatabaseCollections.VECTOR_STORE_CONFIGS)
+      .find()
+      .toArray();
+
+    const configs: VectorStoreConfig[] = [];
+    for (const doc of docs) {
+      if (doc['type'] === VECTOR_STORE_TYPES.MONGO_DB) {
+        configs.push(this.convertDocToMongoDbVectorStoreConfig(doc));
+      }
+    }
+    return configs;
+  }
+
+  private convertDocToMongoDbVectorStoreConfig(
+    doc: WithId<MongoDBDocument>
+  ): MongoDbVectorStoreConfig {
+    return {
+      id: doc['_id'].toString(),
+      name: doc['name'],
+      connectionString: doc['read_only_connection_string']
     };
   }
 }

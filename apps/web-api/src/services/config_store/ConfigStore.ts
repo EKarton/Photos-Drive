@@ -34,6 +34,21 @@ export interface UpdateGPhotosConfigRequest {
   newCredentials?: GPhotosCredentials;
 }
 
+/** Represents a Vector Store config */
+export interface VectorStoreConfig {
+  /** Unique ID to this vector store. */
+  id: string;
+
+  /** Name of this vector store. */
+  name: string;
+}
+
+/** Represents a MongoDB Vector Store config */
+export interface MongoDbVectorStoreConfig extends VectorStoreConfig {
+  /** The connection string to this config. */
+  connectionString: string;
+}
+
 /** Represents the config of the entire system. */
 export interface ConfigStore {
   /**
@@ -60,4 +75,9 @@ export interface ConfigStore {
    * @returns The album ID.
    */
   getRootAlbumId(): Promise<AlbumId>;
+
+  /** 
+   * Returns a list of vector store configs.
+   */
+  getVectorStoreConfigs(): Promise<VectorStoreConfig[]>;
 }

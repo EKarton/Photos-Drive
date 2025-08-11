@@ -26,6 +26,9 @@ import {
   MongoDbClientsRepository,
   MongoDbClientsRepositoryImpl
 } from './services/metadata_store/mongodb/MongoDbClientsRepository';
+import { OpenCLIPImageEmbedder } from './services/ml/models/OpenCLIPImageEmbeddings';
+import { configToVectorStore } from './services/ml/vector_stores/configToVectorStore';
+import { DistributedVectorStore } from './services/ml/vector_stores/DistributedVectorStore';
 import logger from './utils/logger';
 
 export class App {
@@ -39,6 +42,8 @@ export class App {
   private mediaItemsRepository?: MediaItemsRepository;
   private mapCellsRepository?: MapCellsRepository;
   private heatmapGenerator?: HeatmapGenerator;
+  private imageEmbedder?: OpenCLIPImageEmbedder;
+  private vectorStore?: DistributedVectorStore;
 
   constructor() {
     this.app = express();
@@ -73,10 +78,20 @@ export class App {
     );
     this.heatmapGenerator = new HeatmapGenerator(this.mapCellsRepository);
 
+    this.imageEmbedder = new OpenCLIPImageEmbedder();
+    await this.imageEmbedder.initialize();
+
+    this.vectorStore = new DistributedVectorStore(
+      (await this.config.getVectorStoreConfigs()).map((config) =>
+        configToVectorStore(config)
+      )
+    );
+
     const rootAlbumId = await this.config.getRootAlbumId();
 
     this.app.use(helmet());
     this.app.use(compression());
+    this.app.use(express.json());
     this.app.use(expressLogger());
     this.app.use(
       cors({
@@ -94,7 +109,13 @@ export class App {
         this.mediaItemsRepository
       )
     );
-    this.app.use(await mediaItemsRouter(this.mediaItemsRepository));
+    this.app.use(
+      await mediaItemsRouter(
+        this.mediaItemsRepository,
+        this.vectorStore,
+        this.imageEmbedder
+      )
+    );
     this.app.use(await gPhotosMediaItemsRouter(this.gPhotosClientsRepository));
     this.app.use(await mapsRouter(rootAlbumId, this.heatmapGenerator));
 

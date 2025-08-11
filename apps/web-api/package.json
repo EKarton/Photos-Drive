@@ -2,7 +2,7 @@
   "name": "photos_drive_web_api",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "cross-env TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true nodemon src/server.ts | pino-pretty",
     "build": "tsc",
@@ -17,7 +17,9 @@
   "license": "ISC",
   "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e",
   "dependencies": {
+    "@huggingface/transformers": "^3.7.1",
     "@mapbox/tilebelt": "^2.0.2",
+    "@tensorflow/tfjs": "^4.22.0",
     "async-middleware": "^1.2.1",
     "axios": "^1.7.7",
     "compression": "^1.7.4",
@@ -31,7 +33,7 @@
     "jose": "^5.6.3",
     "lodash": "^4.17.21",
     "lru-cache": "^11.0.0",
-    "mongodb": "^6.17.0",
+    "mongodb": "^6.18.0",
     "pino": "^9.3.2",
     "pino-http": "^10.2.0",
     "qs": "^6.13.0",
