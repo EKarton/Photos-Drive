@@ -53,7 +53,7 @@ export class OpenCLIPImageEmbedder implements ImageEmbedder {
     });
     const output = await this.textModel!(textInputs, {});
     const textEmbeddings: Tensor = output.text_embeds;
-    return textEmbeddings.normalize(2, -1).data;
+    return textEmbeddings.normalize(2, -1).data as Float32Array;
   }
 
   async embedImage(image: Blob): Promise<Float32Array> {
@@ -61,6 +61,6 @@ export class OpenCLIPImageEmbedder implements ImageEmbedder {
     const imageInputs = await this.processor!(rawImages);
     const output = await this.visionModel!(imageInputs);
     const imageEmbeddings: Tensor = output.image_embeds;
-    return imageEmbeddings.normalize(2, -1).data;
+    return imageEmbeddings.normalize(2, -1).data as Float32Array;
   }
 }
