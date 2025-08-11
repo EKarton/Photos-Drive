@@ -1,17 +1,17 @@
 export interface ImageEmbedder {
   /**
-   * Returns the embeddings of texts.
+   * Returns the embeddings of a text.
    *
-   * @param texts A list of texts
-   * @returns a list of embeddings for each text
+   * @param text Text to embed
+   * @returns the embedding for that text
    */
-  embedTexts(texts: string[]): Promise<Float32Array[]>;
+  embedText(text: string): Promise<Float32Array>;
 
   /**
-   * Returns the embeddings of images.
+   * Returns the embeddings of an image.
    *
-   * @param images A list of images
-   * @returns a list of embeddings for each image
+   * @param image An image
+   * @returns the embedding for that image
    */
-  embedImages(images: Blob[]): Promise<Float32Array[]>;
+  embedImage(imag: Blob): Promise<Float32Array>;
 }

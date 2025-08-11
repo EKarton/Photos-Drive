@@ -129,10 +129,16 @@ export default async function (
       const abortController = new AbortController();
       req.on('close', () => abortController.abort());
 
-      const embeddings = await imageEmbedder.embedTexts([query]);
+      let start = performance.now();
+      const embedding = await imageEmbedder.embedText(query);
+      console.log(
+        `Execution time to embedText: ${performance.now() - start} milliseconds`
+      );
+
+      start = performance.now();
       const searchResult = await vectorStore.getReleventMediaItemEmbeddings(
         {
-          embedding: embeddings[0],
+          embedding: embedding,
           startDateTaken: earliestDateObj,
           endDateTaken: latestDateObj,
           withinMediaItemIds: mediaItemIdObjects,
@@ -140,11 +146,16 @@ export default async function (
         },
         { abortController }
       );
+      console.log(
+        `Execution time to getReleventMediaItemEmbeddings: ${performance.now() - start} milliseconds`
+      );
 
-      const mediaItems = await Promise.all(
-        searchResult.map((result) =>
-          mediaItemsRepo.getMediaItemById(result.mediaItemId)
-        )
+      start = performance.now();
+      const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
+        searchResult.map((result) => result.mediaItemId)
+      );
+      console.log(
+        `Execution time to getMediaItemByIds: ${performance.now() - start} milliseconds`
       );
 
       // Serialize media items for response

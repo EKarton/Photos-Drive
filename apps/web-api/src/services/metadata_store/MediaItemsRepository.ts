@@ -40,6 +40,11 @@ export interface MediaItemsRepository {
     options?: { abortController?: AbortController }
   ): Promise<MediaItem>;
 
+  bulkGetMediaItemByIds(
+    ids: MediaItemId[],
+    options?: { abortController?: AbortController }
+  ): Promise<MediaItem[]>;
+
   getNumMediaItemsInAlbum(
     albumId: AlbumId,
     options?: { abortController?: AbortController }

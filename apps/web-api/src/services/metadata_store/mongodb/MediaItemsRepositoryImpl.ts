@@ -53,6 +53,47 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
     return this.convertMongoDbDocToMediaItemInstance(id, rawDocs);
   }
 
+  async bulkGetMediaItemByIds(
+    ids: MediaItemId[],
+    options?: { abortController?: AbortController }
+  ): Promise<MediaItem[]> {
+    const clientIdsToObjectIds = new Map<string, string[]>();
+    for (const id of ids) {
+      if (!clientIdsToObjectIds.has(id.clientId)) {
+        clientIdsToObjectIds.set(id.clientId, []);
+      }
+      clientIdsToObjectIds.get(id.clientId)!.push(id.objectId);
+    }
+
+    return (
+      await Promise.all(
+        Array.from(clientIdsToObjectIds.entries()).map(
+          async ([clientId, objectIds]) => {
+            const mongoDbClient =
+              this.mongoDbRepository.getClientFromId(clientId);
+
+            const rawDocs = await mongoDbClient
+              .db('photos_drive')
+              .collection('media_items')
+              .find(
+                { _id: { $in: objectIds.map((id) => new ObjectId(id)) } },
+                { signal: options?.abortController?.signal }
+              )
+              .toArray();
+
+            // Convert all docs for this client
+            return rawDocs.map((doc) =>
+              this.convertMongoDbDocToMediaItemInstance(
+                { clientId, objectId: doc._id.toString() },
+                doc
+              )
+            );
+          }
+        )
+      )
+    ).flat();
+  }
+
   async getNumMediaItemsInAlbum(
     albumId: AlbumId,
     options?: { abortController?: AbortController }
