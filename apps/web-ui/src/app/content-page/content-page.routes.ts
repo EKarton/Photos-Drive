@@ -30,16 +30,15 @@ export const routes: Routes = [
       provideEffects(ChatsEffects),
       {
         provide: MemorySaver,
-        useFactory: () => new MemorySaver(),
+        useValue: new MemorySaver(),
       },
       {
         provide: ChatGoogleGenerativeAI,
-        useFactory: () =>
-          new ChatGoogleGenerativeAI({
-            model: environment.geminiModel,
-            temperature: 0.7,
-            apiKey: environment.geminiApiKey,
-          }),
+        useValue: new ChatGoogleGenerativeAI({
+          model: environment.geminiModel,
+          temperature: 0.7,
+          apiKey: environment.geminiApiKey,
+        }),
       },
     ],
   },

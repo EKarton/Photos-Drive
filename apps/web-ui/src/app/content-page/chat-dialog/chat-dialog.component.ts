@@ -34,11 +34,12 @@ import { ChatDialogRequest } from './chat-dialog.request';
   templateUrl: './chat-dialog.component.html',
 })
 export class ChatDialogComponent implements AfterViewInit, OnDestroy {
-  private readonly store = inject(Store);
   searchControl = new FormControl('');
-  private readonly subscription = new Subscription();
 
   @ViewChild('modal') myModal?: ElementRef;
+
+  private readonly store = inject(Store);
+  private readonly subscription = new Subscription();
 
   private readonly isOpen$ = this.store.select(
     dialogsState.selectIsDialogOpen(ChatDialogRequest),

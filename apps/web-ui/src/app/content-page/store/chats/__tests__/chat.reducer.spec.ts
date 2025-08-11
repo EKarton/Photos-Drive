@@ -56,12 +56,16 @@ describe('Chat Reducer', () => {
   });
 
   it('should handle addOrUpdateBotMessage by updating existing Bot message', () => {
-    const existingId = 'bot-msg-1';
     const prevState: ChatsState = {
       ...initialState,
       messages: [
         {
-          id: existingId,
+          id: 'user-msg-1',
+          type: 'User',
+          content: toSuccess({ output: 'What is water', reasoning: [] }),
+        },
+        {
+          id: 'bot-msg-1',
           type: 'Bot',
           content: toSuccess({ output: 'Old content', reasoning: [] }),
         },
@@ -73,15 +77,23 @@ describe('Chat Reducer', () => {
       reasoning: [{ id: 'r1', content: 'some reasoning' }],
     };
     const action = chatActions.addOrUpdateBotMessage({
-      id: existingId,
+      id: 'bot-msg-1',
       botMessage: toSuccess(updatedBotMessage),
     });
 
     const newState = chatsReducer(prevState, action);
 
-    expect(newState.messages.length).toBe(1);
+    expect(newState.messages.length).toBe(2);
     expect(newState.messages[0]).toEqual({
-      id: existingId,
+      id: 'user-msg-1',
+      type: 'User',
+      content: toSuccess({
+        output: 'What is water',
+        reasoning: [],
+      }),
+    });
+    expect(newState.messages[1]).toEqual({
+      id: 'bot-msg-1',
       type: 'Bot',
       content: toSuccess({
         output: updatedBotMessage.content,
