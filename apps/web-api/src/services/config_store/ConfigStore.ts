@@ -76,7 +76,7 @@ export interface ConfigStore {
    */
   getRootAlbumId(): Promise<AlbumId>;
 
-  /** 
+  /**
    * Returns a list of vector store configs.
    */
   getVectorStoreConfigs(): Promise<VectorStoreConfig[]>;

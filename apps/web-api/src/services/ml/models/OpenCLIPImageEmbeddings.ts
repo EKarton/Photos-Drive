@@ -21,16 +21,23 @@ export class OpenCLIPImageEmbedder implements ImageEmbedder {
   constructor(public modelName = 'Xenova/clip-vit-large-patch14') {}
 
   async initialize() {
-    this.processor = await AutoProcessor.from_pretrained(this.modelName);
-    this.visionModel = await CLIPVisionModelWithProjection.from_pretrained(
-      this.modelName,
-      { progress_callback: this.progress_callback, cache_dir: './.cache' }
-    );
-    this.tokenizer = await AutoTokenizer.from_pretrained(this.modelName);
-    this.textModel = await CLIPTextModelWithProjection.from_pretrained(
-      this.modelName,
-      { progress_callback: this.progress_callback, cache_dir: './.cache' }
-    );
+    const [processor, visionModel, tokenizer, textModel] = await Promise.all([
+      AutoProcessor.from_pretrained(this.modelName),
+      CLIPVisionModelWithProjection.from_pretrained(this.modelName, {
+        progress_callback: this.progress_callback,
+        cache_dir: './.cache'
+      }),
+      AutoTokenizer.from_pretrained(this.modelName),
+      CLIPTextModelWithProjection.from_pretrained(this.modelName, {
+        progress_callback: this.progress_callback,
+        cache_dir: './.cache'
+      })
+    ]);
+
+    this.processor = processor;
+    this.visionModel = visionModel;
+    this.tokenizer = tokenizer;
+    this.textModel = textModel;
   }
 
   private progress_callback(event: ProgressInfo) {

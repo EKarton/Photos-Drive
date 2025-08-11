@@ -6,6 +6,9 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
+    ignores: ['node_modules/**', 'dist/**', '.cache/**', 'coverage/**']
+  },
+  {
     files: ['**/*.{js,mjs,cjs,ts}'],
     rules: {
       '@typescript-eslint/no-unused-vars': [
