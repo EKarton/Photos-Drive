@@ -20,6 +20,7 @@ import { sendUserMessage, startNewChat } from '../store/chats/chats.actions';
 import { Message, selectMessages } from '../store/chats/chats.state';
 import { dialogsActions, dialogsState } from '../store/dialogs';
 import { ChatDialogRequest } from './chat-dialog.request';
+import { ReasoningCollapseComponent } from './reasoning-collapse/reasoning-collapse.component';
 
 @Component({
   selector: 'app-content-chat-dialog',
@@ -30,6 +31,7 @@ import { ChatDialogRequest } from './chat-dialog.request';
     IsPendingPipe,
     HasFailedPipe,
     HasSucceededPipe,
+    ReasoningCollapseComponent,
   ],
   templateUrl: './chat-dialog.component.html',
 })

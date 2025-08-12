@@ -68,13 +68,7 @@
               } @else if (messageContentResult | hasSucceeded) {
                 @let reasoning = messageContentResult.data?.reasoning;
                 @if (reasoning && reasoning.length > 0) {
-                  @for (reason of reasoning; track reason.id) {
-                    <p
-                      class="text-sm text-gray-600 dark:text-gray-400 space-y-2"
-                    >
-                      {{ reason.content }}
-                    </p>
-                  }
+                  <app-reasoning-collapse [reasonings]="reasoning" />
                 }
               }
             </div>
