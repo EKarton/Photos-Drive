@@ -8,9 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "NG_APP_ENV=test ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage",
     "test:in": "NG_APP_ENV=test ng test --watch=false --no-progress --browsers=ChromeHeadless --code-coverage --include",
-    "lint": "ng lint && npx stylelint 'src/**/*.scss'",
-    "lint:fix": "ng lint --fix && npx stylelint 'src/**/*.scss' --fix",
-    "format": "prettier --write \"src/**/*.{ts,html,scss}\""
+    "lint": "ng lint && npx stylelint 'src/**/*.scss' && prettier --check \"src/**/*.{ts,html,scss}\"",
+    "lint:fix": "ng lint --fix && npx stylelint 'src/**/*.scss' --fix && prettier --write \"src/**/*.{ts,html,scss}\""
   },
   "private": true,
   "dependencies": {
