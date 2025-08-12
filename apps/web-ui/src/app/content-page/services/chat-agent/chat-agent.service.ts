@@ -1,10 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Runnable } from '@langchain/core/runnables';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
-import { MemorySaver } from '@langchain/langgraph/web';
 import { Observable, throwError } from 'rxjs';
 
+import { CHAT_MODEL, MEMORY_SAVER } from '../../content-page.tokens';
 import { CurrentTimeTool } from './tools/get-current-time';
 
 /** The response from the LLM */
@@ -27,8 +26,8 @@ const DEFAULT_THREAD_ID = 'default_thread';
 export class ChatAgentService {
   private agent?: Runnable;
 
-  private readonly memorySaver = inject(MemorySaver);
-  private readonly chatGoogleGenerativeAI = inject(ChatGoogleGenerativeAI);
+  private readonly memorySaver = inject(MEMORY_SAVER);
+  private readonly chatGoogleGenerativeAI = inject(CHAT_MODEL);
   private readonly getCurrentTimeTool = inject(CurrentTimeTool);
 
   constructor() {

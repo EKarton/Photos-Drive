@@ -4,6 +4,7 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { MemorySaver } from '@langchain/langgraph/web';
 
 import { environment } from '../../../../../environments/environment';
+import { CHAT_MODEL, MEMORY_SAVER } from '../../../content-page.tokens';
 import { BotMessage, ChatAgentService } from '../chat-agent.service';
 
 class MockRunnable {
@@ -31,8 +32,8 @@ describe('ChatAgentService', () => {
     TestBed.configureTestingModule({
       providers: [
         ChatAgentService,
-        { provide: MemorySaver, useValue: mockMemorySaver },
-        { provide: ChatGoogleGenerativeAI, useValue: mockLLM },
+        { provide: MEMORY_SAVER, useValue: mockMemorySaver },
+        { provide: CHAT_MODEL, useValue: mockLLM },
       ],
     });
 
