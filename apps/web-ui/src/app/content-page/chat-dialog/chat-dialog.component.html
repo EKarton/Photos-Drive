@@ -1,0 +1,160 @@
+<dialog #modal class="modal backdrop-blur-3xl bg-white/70 dark:bg-gray-800/70">
+  <!-- Top bar -->
+  <div
+    class="flex justify-end gap-4 absolute top-0 left-0 right-0 pb-1 px-2 pt-3"
+  >
+    <!-- Clear chat button -->
+    @if (messages().length > 0) {
+      <button
+        data-testid="clear-chat"
+        class="btn btn-ghost btn-sm"
+        (click)="clearChat()"
+      >
+        Clear chat
+      </button>
+    }
+
+    <!-- The close dialog button -->
+    <button
+      data-testid="close-dialog"
+      class="btn btn-circle btn-ghost border-none btn-sm"
+      (click)="closeDialog()"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-5"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 18 18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Messages area -->
+  @if (messages().length === 0) {
+    <div
+      class="flex-grow justify-center items-center flex flex-col gap-1 pb-16 h-full"
+    >
+      <p class="text-xl">Photos Search</p>
+      <ngx-typed-writer
+        [strings]="[
+          'Ask: photos of santorini',
+          'Ask: photos of family pictures',
+          'Ask: what was the last meal I had in Mountain View, CA',
+        ]"
+        [isHTML]="true"
+        [smartBackspace]="true"
+        [backSpeed]="20"
+        [typeSpeed]="30"
+      ></ngx-typed-writer>
+    </div>
+  } @else {
+    <div class="w-full overflow-y-auto h-full">
+      <div class="max-w-2xl mx-auto pt-14 pb-28 px-3 flex flex-col gap-4">
+        @for (message of messages(); track message.id) {
+          <div
+            class="flex"
+            [ngClass]="{ 'justify-end': message.type === 'User' }"
+          >
+            <div class="max-w-[80%]">
+              @let messageContentResult = message.content;
+              <div
+                [ngClass]="{
+                  'bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-2':
+                    message.type === 'User',
+                }"
+              >
+                @if (
+                  (messageContentResult | isPending) ||
+                  !messageContentResult.data!.output
+                ) {
+                  <span class="loading loading-dots loading-md"></span>
+                } @else if (messageContentResult | hasFailed) {
+                  Agent has thrown an error
+                } @else {
+                  {{ messageContentResult.data!.output }}
+                }
+              </div>
+
+              @if (messageContentResult | hasFailed) {
+                <details>
+                  <summary
+                    class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
+                  >
+                    Error details
+                  </summary>
+                  <div
+                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
+                  >
+                    <p>{{ messageContentResult.error }}</p>
+                  </div>
+                </details>
+              } @else if (
+                (messageContentResult | hasSucceeded) &&
+                messageContentResult.data!.reasoning &&
+                messageContentResult.data!.reasoning.length > 0
+              ) {
+                <details>
+                  <summary
+                    class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
+                  >
+                    Reasoning
+                  </summary>
+                  <div
+                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
+                  >
+                    @for (
+                      reason of messageContentResult.data!.reasoning;
+                      track reason.id
+                    ) {
+                      <p>{{ reason.content }}</p>
+                    }
+                  </div>
+                </details>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Search bar -->
+  <div class="absolute bottom-8 w-full max-w-2xl mx-auto flex px-3">
+    <label
+      class="input input-lg flex-1 rounded-full px-4 py-3 focus-within:outline-none focus-within:ring-0"
+    >
+      <svg
+        class="h-[1em] opacity-50"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <g
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          stroke-width="2.5"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </g>
+      </svg>
+      <input
+        type="search"
+        class="grow focus:outline-none focus:ring-0 appearance-none"
+        placeholder="Search"
+        [formControl]="searchControl"
+        (keydown.enter)="onSearch()"
+      />
+      <kbd class="kbd kbd-sm">↵</kbd>
+    </label>
+  </div>
+</dialog>

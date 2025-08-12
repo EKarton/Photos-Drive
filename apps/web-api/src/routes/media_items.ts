@@ -7,6 +7,7 @@ import {
   convertStringToAlbumId
 } from '../services/metadata_store/Albums';
 import {
+  convertStringToMediaItemId,
   mediaIdToString,
   MediaItem,
   MediaItemId
@@ -19,9 +20,15 @@ import {
   SortByField
 } from '../services/metadata_store/MediaItemsRepository';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
+import { ImageEmbedder } from '../services/ml/models/ImageEmbeddings';
+import { BaseVectorStore } from '../services/ml/vector_stores/BaseVectorStore';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
 
-export default async function (mediaItemsRepo: MediaItemsRepository) {
+export default async function (
+  mediaItemsRepo: MediaItemsRepository,
+  vectorStore: BaseVectorStore,
+  imageEmbedder: ImageEmbedder
+) {
   const router: Router = Router();
 
   router.get(
@@ -69,7 +76,7 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
     '/api/v1/media-items/:id',
     await verifyAuthentication(),
     await verifyAuthorization(),
-    wrap(async (req, res) => {
+    wrap(async (req: Request, res: Response) => {
       const rawMediaItemId = req.params.id;
       const rawMediaItemIdParts = rawMediaItemId.split(':');
       const mediaItemId: MediaItemId = {
@@ -98,6 +105,84 @@ export default async function (mediaItemsRepo: MediaItemsRepository) {
 
         throw error;
       }
+    })
+  );
+
+  router.post(
+    '/api/v1/media-items/search',
+    await verifyAuthentication(),
+    await verifyAuthorization(),
+    wrap(async (req: Request, res: Response) => {
+      const {
+        query,
+        earliestDateTaken,
+        latestDateTaken,
+        withinMediaItemIds,
+        topK
+      }: {
+        query: string;
+        earliestDateTaken?: string;
+        latestDateTaken?: string;
+        withinMediaItemIds?: string[];
+        topK?: number;
+      } = req.body;
+
+      if (!query || typeof query !== 'string') {
+        return res
+          .status(400)
+          .json({ error: 'Missing or invalid "query" field' });
+      }
+
+      // Convert dates to Date objects if provided
+      let earliestDateObj: Date | undefined;
+      if (earliestDateTaken) {
+        earliestDateObj = new Date(earliestDateTaken);
+        if (isNaN(earliestDateObj.getTime())) {
+          return res
+            .status(400)
+            .json({ error: 'Invalid earliestDateTaken format' });
+        }
+      }
+
+      let latestDateObj: Date | undefined;
+      if (latestDateTaken) {
+        latestDateObj = new Date(latestDateTaken);
+        if (isNaN(latestDateObj.getTime())) {
+          return res
+            .status(400)
+            .json({ error: 'Invalid latestDateTaken format' });
+        }
+      }
+
+      let mediaItemIdObjects: MediaItemId[] = [];
+      if (withinMediaItemIds && Array.isArray(withinMediaItemIds)) {
+        mediaItemIdObjects = withinMediaItemIds.map((idStr) =>
+          convertStringToMediaItemId(idStr)
+        );
+      }
+
+      const abortController = new AbortController();
+      req.on('close', () => abortController.abort());
+
+      const embedding = await imageEmbedder.embedText(query);
+      const searchResult = await vectorStore.getReleventMediaItemEmbeddings(
+        {
+          embedding: embedding,
+          startDateTaken: earliestDateObj,
+          endDateTaken: latestDateObj,
+          withinMediaItemIds: mediaItemIdObjects,
+          topK: topK ?? 10
+        },
+        { abortController }
+      );
+      const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
+        searchResult.map((result) => result.mediaItemId),
+        { abortController }
+      );
+
+      return res.status(200).json({
+        mediaItems: mediaItems.map(serializeMediaItem)
+      });
     })
   );
 

@@ -16,8 +16,8 @@ import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe'
 import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
 import { hasSucceed, Result } from '../../../../shared/results/results';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
-import { Album } from '../../../services/types/album';
-import { ListAlbumsSortBy } from '../../../services/types/list-albums';
+import { Album } from '../../../services/web-api/types/album';
+import { ListAlbumsSortBy } from '../../../services/web-api/types/list-albums';
 import { AlbumsListTableStore } from './albums-list-table.store';
 
 @Component({

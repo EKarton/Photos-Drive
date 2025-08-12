@@ -4,8 +4,8 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../../auth/store';
 import { toFailure, toSuccess } from '../../../../../shared/results/results';
-import { ListAlbumsResponse } from '../../../../services/types/list-albums';
-import { WebApiService } from '../../../../services/webapi.service';
+import { ListAlbumsResponse } from '../../../../services/web-api/types/list-albums';
+import { WebApiService } from '../../../../services/web-api/web-api.service';
 import {
   AlbumsListTableStore,
   INITIAL_STATE,

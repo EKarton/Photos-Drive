@@ -15,8 +15,11 @@ import { authState } from '../../../auth/store';
 import { Result, toPending } from '../../../shared/results/results';
 import { combineResults } from '../../../shared/results/utils/combineResults';
 import { mapResult } from '../../../shared/results/utils/mapResult';
-import { GetHeatmapRequest, Heatmap } from '../../services/types/heatmap';
-import { WebApiService } from '../../services/webapi.service';
+import {
+  GetHeatmapRequest,
+  Heatmap,
+} from '../../services/web-api/types/heatmap';
+import { WebApiService } from '../../services/web-api/web-api.service';
 import { TileId } from './images-map-viewer/images-map-viewer.component';
 
 export interface ImagesMapState {

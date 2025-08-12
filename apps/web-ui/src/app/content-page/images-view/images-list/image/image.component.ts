@@ -13,8 +13,9 @@ import { WINDOW } from '../../../../app.tokens';
 import { HasFailedPipe } from '../../../../shared/results/pipes/has-failed.pipe';
 import { IsPendingPipe } from '../../../../shared/results/pipes/is-pending.pipe';
 import { mapResult } from '../../../../shared/results/utils/mapResult';
-import { GPhotosMediaItem } from '../../../services/types/gphotos-media-item';
-import { mediaViewerActions } from '../../../store/media-viewer';
+import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
+import { GPhotosMediaItem } from '../../../services/web-api/types/gphotos-media-item';
+import { dialogsActions } from '../../../store/dialogs';
 import { ImageStore } from './image.store';
 
 export interface ImageData {
@@ -91,8 +92,8 @@ export class ImageComponent {
 
   private openImageInDialog(mediaItemId: string) {
     this.store.dispatch(
-      mediaViewerActions.openMediaViewer({
-        request: { mediaItemId },
+      dialogsActions.openDialog({
+        request: new MediaViewerRequest(mediaItemId),
       }),
     );
   }

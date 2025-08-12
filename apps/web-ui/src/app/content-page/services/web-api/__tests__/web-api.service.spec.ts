@@ -5,8 +5,8 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { environment } from '../../../../environments/environment';
-import { toSuccess } from '../../../shared/results/results';
+import { environment } from '../../../../../environments/environment';
+import { toSuccess } from '../../../../shared/results/results';
 import { GetAlbumDetailsResponse } from '../types/album';
 import { GetGPhotosMediaItemDetailsResponse } from '../types/gphotos-media-item';
 import { GetHeatmapRequest, Heatmap } from '../types/heatmap';
@@ -20,7 +20,7 @@ import { ListMediaItemsResponse } from '../types/list-media-items';
 import { ListMediaItemsRequest } from '../types/list-media-items';
 import { ListMediaItemsSortDirection } from '../types/list-media-items';
 import { ListMediaItemsSortByFields } from '../types/list-media-items';
-import { WebApiService } from '../webapi.service';
+import { WebApiService } from '../web-api.service';
 
 describe('WebApiService', () => {
   let service: WebApiService;
@@ -384,6 +384,106 @@ describe('WebApiService', () => {
       );
 
       req.flush(heatmap);
+    });
+  });
+
+  describe('searchMediaItemsByText', () => {
+    const accessToken = 'fake-token';
+
+    it('should make a POST request to search media items with minimal body', () => {
+      const request = {
+        text: 'beach',
+      };
+      const mockResponse = {
+        mediaItems: [
+          {
+            id: '1',
+            fileName: 'beach.jpg',
+            hashCode: 'abc',
+            gPhotosMediaItemId: 'g1',
+            width: 1920,
+            height: 1080,
+            dateTaken: '2024-05-27T13:17:46.000Z',
+          },
+        ],
+      };
+
+      service
+        .searchMediaItemsByText(accessToken, request)
+        .subscribe((response) => {
+          expect(response).toEqual(
+            toSuccess({
+              mediaItems: [
+                {
+                  id: '1',
+                  fileName: 'beach.jpg',
+                  hashCode: 'abc',
+                  gPhotosMediaItemId: 'g1',
+                  location: undefined,
+                  width: 1920,
+                  height: 1080,
+                  dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+                },
+              ],
+            }),
+          );
+        });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/api/v1/media-items/search`,
+      );
+
+      expect(req.request.method).toBe('POST');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+      expect(req.request.body).toEqual({
+        query: 'beach',
+        earliestDateTaken: undefined,
+        latestDateTaken: undefined,
+        withinMediaItemIds: undefined,
+      });
+
+      req.flush(mockResponse);
+    });
+
+    it('should include all fields in the POST body when provided', () => {
+      const earliestDate = new Date('2023-01-01');
+      const latestDate = new Date('2023-12-31');
+      const withinMediaItemIds = ['id1', 'id2'];
+      const request = {
+        text: 'mountains',
+        earliestDateTaken: earliestDate,
+        latestDateTaken: latestDate,
+        withinMediaItemIds,
+      };
+
+      const mockResponse = {
+        mediaItems: [],
+      };
+
+      service
+        .searchMediaItemsByText(accessToken, request)
+        .subscribe((response) => {
+          expect(response).toEqual(toSuccess(mockResponse));
+        });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/api/v1/media-items/search`,
+      );
+
+      expect(req.request.method).toBe('POST');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+      expect(req.request.body).toEqual({
+        query: 'mountains',
+        earliestDateTaken: earliestDate.toDateString(),
+        latestDateTaken: latestDate.toDateString(),
+        withinMediaItemIds: withinMediaItemIds.join(','),
+      });
+
+      req.flush(mockResponse);
     });
   });
 });

@@ -7,12 +7,13 @@ import { MAPBOX_FACTORY_TOKEN } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { MockMapboxFactory } from '../../../../../shared/mapbox-factory/__mocks__/MockMapboxFactory';
 import { toSuccess } from '../../../../../shared/results/results';
-import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
-import { Heatmap } from '../../../../services/types/heatmap';
-import { MediaItem } from '../../../../services/types/media-item';
-import { WebApiService } from '../../../../services/webapi.service';
-import { mediaViewerState } from '../../../../store/media-viewer';
-import { openMediaViewer } from '../../../../store/media-viewer/media-viewer.actions';
+import { MediaViewerRequest } from '../../../../media-viewer/media-viewer.request';
+import { GPhotosMediaItem } from '../../../../services/web-api/types/gphotos-media-item';
+import { Heatmap } from '../../../../services/web-api/types/heatmap';
+import { MediaItem } from '../../../../services/web-api/types/media-item';
+import { WebApiService } from '../../../../services/web-api/web-api.service';
+import { dialogsState } from '../../../../store/dialogs';
+import { openDialog } from '../../../../store/dialogs/dialogs.actions';
 import { ImageMapMarkerComponent } from '../image-map-marker/image-map-marker.component';
 import {
   ImagesMapViewerComponent,
@@ -93,7 +94,7 @@ describe('ImagesMapViewerComponent', () => {
         provideNoopAnimations(),
         provideMockStore({
           initialState: {
-            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+            [dialogsState.FEATURE_KEY]: dialogsState.initialState,
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
@@ -252,10 +253,8 @@ describe('ImagesMapViewerComponent', () => {
 
     // Expect the media viewer to be dispatched
     expect(store.dispatch).toHaveBeenCalledWith(
-      openMediaViewer({
-        request: {
-          mediaItemId: MEDIA_ITEM_1.id,
-        },
+      openDialog({
+        request: new MediaViewerRequest(MEDIA_ITEM_1.id),
       }),
     );
   }));

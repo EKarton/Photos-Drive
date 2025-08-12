@@ -6,13 +6,11 @@ import { of } from 'rxjs';
 import { WINDOW } from '../../../../../app.tokens';
 import { authState } from '../../../../../auth/store';
 import { toPending, toSuccess } from '../../../../../shared/results/results';
-import { GetGPhotosMediaItemDetailsResponse } from '../../../../services/types/gphotos-media-item';
-import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
-import { WebApiService } from '../../../../services/webapi.service';
-import {
-  mediaViewerActions,
-  mediaViewerState,
-} from '../../../../store/media-viewer';
+import { MediaViewerRequest } from '../../../../media-viewer/media-viewer.request';
+import { GetGPhotosMediaItemDetailsResponse } from '../../../../services/web-api/types/gphotos-media-item';
+import { GPhotosMediaItem } from '../../../../services/web-api/types/gphotos-media-item';
+import { WebApiService } from '../../../../services/web-api/web-api.service';
+import { dialogsActions, dialogsState } from '../../../../store/dialogs';
 import { ImageComponent } from '../image.component';
 
 const G_MEDIA_ITEM_DETAILS_PHOTO_1: GPhotosMediaItem = {
@@ -41,7 +39,7 @@ describe('ImageComponent', () => {
         provideNoopAnimations(),
         provideMockStore({
           initialState: {
-            [mediaViewerState.FEATURE_KEY]: mediaViewerState.initialState,
+            [dialogsState.FEATURE_KEY]: dialogsState.initialState,
           },
           selectors: [
             { selector: authState.selectAuthToken, value: 'mockAccessToken' },
@@ -177,8 +175,8 @@ describe('ImageComponent', () => {
         .dispatchEvent(event);
 
       expect(store.dispatch).toHaveBeenCalledWith(
-        mediaViewerActions.openMediaViewer({
-          request: { mediaItemId: 'photos1' },
+        dialogsActions.openDialog({
+          request: new MediaViewerRequest('photos1'),
         }),
       );
     });

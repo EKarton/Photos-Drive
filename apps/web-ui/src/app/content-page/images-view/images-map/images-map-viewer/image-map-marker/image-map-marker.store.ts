@@ -6,8 +6,8 @@ import { switchMap, tap } from 'rxjs/operators';
 import { authState } from '../../../../../auth/store';
 import { Result, toPending } from '../../../../../shared/results/results';
 import { switchMapResultToResultRxJs } from '../../../../../shared/results/rxjs/switchMapResultToResultRxJs';
-import { GPhotosMediaItem } from '../../../../services/types/gphotos-media-item';
-import { WebApiService } from '../../../../services/webapi.service';
+import { GPhotosMediaItem } from '../../../../services/web-api/types/gphotos-media-item';
+import { WebApiService } from '../../../../services/web-api/web-api.service';
 
 /** State definition for {@code ImageMapMarkerStore}. */
 export interface ImageMapMarkerState {

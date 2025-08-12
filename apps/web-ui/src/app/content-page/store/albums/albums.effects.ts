@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { distinct, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { authState } from '../../../auth/store';
-import { WebApiService } from '../../services/webapi.service';
+import { WebApiService } from '../../services/web-api/web-api.service';
 import * as albumsActions from './albums.actions';
 
 @Injectable()

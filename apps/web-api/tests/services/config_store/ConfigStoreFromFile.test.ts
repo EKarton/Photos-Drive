@@ -193,6 +193,53 @@ describe('ConfigStoreFromFile', () => {
     });
   });
 
+  describe('getVectorStoreConfigs', () => {
+    it('should return vector store configs for valid sections', async () => {
+      // Create a new config file containing a MongoDB vector store config
+      const vectorConfigPath = path.join(os.tmpdir(), 'test-config-vector.ini');
+      const vectorTestConfig =
+        '[vec1]\n' +
+        `type = ${SectionTypes.MONGODB_VECTOR_STORE_CONFIG}\n` +
+        'name = my_vector_store\n' +
+        'read_only_connection_string = mongodb://localhost:27017\n';
+
+      fs.writeFileSync(vectorConfigPath, vectorTestConfig);
+
+      const vectorVaultStore = new ConfigStoreFromFile(vectorConfigPath);
+      const configs = await vectorVaultStore.getVectorStoreConfigs();
+
+      expect(configs.length).toBe(1);
+      expect(configs[0]).toEqual({
+        id: 'vec1',
+        name: 'my_vector_store',
+        connectionString: 'mongodb://localhost:27017'
+      });
+
+      fs.unlinkSync(vectorConfigPath);
+    });
+
+    it('should return an empty array if no vector store configs are present', async () => {
+      // Create a config file without mongodb_vector_store_config type
+      const noVectorConfigPath = path.join(
+        os.tmpdir(),
+        'test-config-no-vector.ini'
+      );
+      const nonVectorTestConfig =
+        '[1]\n' +
+        `type = ${SectionTypes.MONGODB_CONFIG}\n` +
+        'name = db1\n' +
+        'read_only_connection_string = localhost:8080\n';
+      fs.writeFileSync(noVectorConfigPath, nonVectorTestConfig);
+
+      const noVectorVaultStore = new ConfigStoreFromFile(noVectorConfigPath);
+      const configs = await noVectorVaultStore.getVectorStoreConfigs();
+
+      expect(configs).toEqual([]);
+
+      fs.unlinkSync(noVectorConfigPath);
+    });
+  });
+
   describe('getRootAlbumId', () => {
     it('should return the root album ID', async () => {
       const rootAlbumId = await vaultStore.getRootAlbumId();

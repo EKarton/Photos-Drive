@@ -9,14 +9,17 @@ import {
   ConfigStore,
   GPhotosConfig,
   MongoDbConfig,
-  UpdateGPhotosConfigRequest
+  MongoDbVectorStoreConfig,
+  UpdateGPhotosConfigRequest,
+  VectorStoreConfig
 } from './ConfigStore';
 
 /** The valid section types in the config */
 export enum SectionTypes {
   MONGODB_CONFIG = 'mongodb_config',
   GPHOTOS_CONFIG = 'gphotos_config',
-  ROOT_ALBUM = 'root_album'
+  ROOT_ALBUM = 'root_album',
+  MONGODB_VECTOR_STORE_CONFIG = 'mongodb_vector_store_config'
 }
 
 /** The config type */
@@ -126,6 +129,33 @@ export class ConfigStoreFromFile implements ConfigStore {
     return new Promise((_, reject) =>
       reject(new Error('Cannot find root album'))
     );
+  }
+
+  async getVectorStoreConfigs(): Promise<VectorStoreConfig[]> {
+    const configs: VectorStoreConfig[] = [];
+
+    for (const sectionId in this._config) {
+      if (
+        this._config[sectionId]['type'] ===
+        SectionTypes.MONGODB_VECTOR_STORE_CONFIG
+      ) {
+        configs.push(this.parseMongoDBVectorStoreConfig(sectionId));
+      }
+    }
+
+    return new Promise((resolve, _) => resolve(configs));
+  }
+
+  private parseMongoDBVectorStoreConfig(
+    sectionId: string
+  ): MongoDbVectorStoreConfig {
+    return {
+      id: sectionId,
+      name: this._config[sectionId]['name'] as string,
+      connectionString: this._config[sectionId][
+        'read_only_connection_string'
+      ] as string
+    };
   }
 
   private async flush() {

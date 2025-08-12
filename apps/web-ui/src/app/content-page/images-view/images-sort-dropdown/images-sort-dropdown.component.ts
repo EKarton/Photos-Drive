@@ -6,7 +6,7 @@ import {
   ListMediaItemsSortBy,
   ListMediaItemsSortByFields,
   ListMediaItemsSortDirection,
-} from '../../services/types/list-media-items';
+} from '../../services/web-api/types/list-media-items';
 
 @Component({
   standalone: true,

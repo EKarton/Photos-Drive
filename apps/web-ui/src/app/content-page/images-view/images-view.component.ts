@@ -13,7 +13,7 @@ import {
   ListMediaItemsSortBy,
   ListMediaItemsSortByFields,
   ListMediaItemsSortDirection,
-} from '../services/types/list-media-items';
+} from '../services/web-api/types/list-media-items';
 import { ImagesListComponent } from './images-list/images-list.component';
 import { ImagesMapComponent } from './images-map/images-map.component';
 import { ImagesSortDropdownComponent } from './images-sort-dropdown/images-sort-dropdown.component';

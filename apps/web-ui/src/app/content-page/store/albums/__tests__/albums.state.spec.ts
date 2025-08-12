@@ -5,8 +5,8 @@ import {
   toPending,
   toSuccess,
 } from '../../../../shared/results/results';
-import { GetAlbumDetailsResponse } from '../../../services/types/album';
-import { Album } from '../../../services/types/album';
+import { GetAlbumDetailsResponse } from '../../../services/web-api/types/album';
+import { Album } from '../../../services/web-api/types/album';
 import {
   AlbumsState,
   buildInitialState,

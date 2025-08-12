@@ -5,9 +5,9 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../auth/store';
 import { toSuccess } from '../../../../shared/results/results';
-import { Album } from '../../../services/types/album';
-import { ListAlbumsResponse } from '../../../services/types/list-albums';
-import { WebApiService } from '../../../services/webapi.service';
+import { Album } from '../../../services/web-api/types/album';
+import { ListAlbumsResponse } from '../../../services/web-api/types/list-albums';
+import { WebApiService } from '../../../services/web-api/web-api.service';
 import { AlbumsListComponent } from '../albums-list.component';
 
 const ALBUM_API_RESPONSE_2010: Album = {

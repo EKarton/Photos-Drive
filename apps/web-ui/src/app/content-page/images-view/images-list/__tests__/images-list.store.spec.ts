@@ -8,9 +8,9 @@ import {
   ListMediaItemsResponse,
   ListMediaItemsSortByFields,
   ListMediaItemsSortDirection,
-} from '../../../services/types/list-media-items';
-import { MediaItem } from '../../../services/types/media-item';
-import { WebApiService } from '../../../services/webapi.service';
+} from '../../../services/web-api/types/list-media-items';
+import { MediaItem } from '../../../services/web-api/types/media-item';
+import { WebApiService } from '../../../services/web-api/web-api.service';
 import { ImagesListStore } from '../images-list.store';
 
 describe('ImagesListStore', () => {

@@ -9,9 +9,9 @@ import {
   toPending,
   toSuccess,
 } from '../../../../../shared/results/results';
-import { Album } from '../../../../services/types/album';
-import { ListAlbumsResponse } from '../../../../services/types/list-albums';
-import { WebApiService } from '../../../../services/webapi.service';
+import { Album } from '../../../../services/web-api/types/album';
+import { ListAlbumsResponse } from '../../../../services/web-api/types/list-albums';
+import { WebApiService } from '../../../../services/web-api/web-api.service';
 import { addAlbum } from '../../../../store/albums/albums.actions';
 import { AlbumsListCardsStore } from '../albums-list-cards.store';
 

@@ -35,6 +35,8 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
     where:
     - `NG_APP_LOGIN_URL`: is the login url of your [web-api](./../web-api)
     - `NG_APP_WEB_API_ENDPOINT`: is the domain of your [web-api](./../web-api)
+    - `NG_APP_GEMINI_API_KEY`: is the Gemini API key
+    - `NG_APP_GEMINI_MODEL`: is the Gemini model (ex: 'gemini-2.5-flash')
 
 4. Next, run:
 

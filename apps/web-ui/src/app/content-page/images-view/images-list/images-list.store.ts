@@ -5,11 +5,11 @@ import { EMPTY, switchMap, tap, withLatestFrom } from 'rxjs';
 
 import { authState } from '../../../auth/store';
 import { hasFailed, isPending, Result } from '../../../shared/results/results';
-import { ListMediaItemsResponse } from '../../services/types/list-media-items';
-import { ListMediaItemsRequest } from '../../services/types/list-media-items';
-import { ListMediaItemsSortBy } from '../../services/types/list-media-items';
-import { MediaItem } from '../../services/types/media-item';
-import { WebApiService } from '../../services/webapi.service';
+import { ListMediaItemsResponse } from '../../services/web-api/types/list-media-items';
+import { ListMediaItemsRequest } from '../../services/web-api/types/list-media-items';
+import { ListMediaItemsSortBy } from '../../services/web-api/types/list-media-items';
+import { MediaItem } from '../../services/web-api/types/media-item';
+import { WebApiService } from '../../services/web-api/web-api.service';
 
 export interface ImagesListState {
   albumId?: string;
