@@ -20,6 +20,7 @@ import { sendUserMessage, startNewChat } from '../store/chats/chats.actions';
 import { Message, selectMessages } from '../store/chats/chats.state';
 import { dialogsActions, dialogsState } from '../store/dialogs';
 import { ChatDialogRequest } from './chat-dialog.request';
+import { ReasoningCollapseComponent } from './reasoning-collapse/reasoning-collapse.component';
 
 @Component({
   selector: 'app-content-chat-dialog',
@@ -30,18 +31,18 @@ import { ChatDialogRequest } from './chat-dialog.request';
     IsPendingPipe,
     HasFailedPipe,
     HasSucceededPipe,
+    ReasoningCollapseComponent,
   ],
   templateUrl: './chat-dialog.component.html',
 })
 export class ChatDialogComponent implements AfterViewInit, OnDestroy {
   searchControl = new FormControl('');
-
-  @ViewChild('modal') myModal?: ElementRef;
+  @ViewChild('chatDialog') myModal?: ElementRef;
 
   private readonly store = inject(Store);
   private readonly subscription = new Subscription();
 
-  private readonly isOpen$ = this.store.select(
+  readonly isOpen$ = this.store.select(
     dialogsState.selectIsDialogOpen(ChatDialogRequest),
   );
 
