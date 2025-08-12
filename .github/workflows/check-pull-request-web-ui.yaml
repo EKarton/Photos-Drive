@@ -51,7 +51,7 @@ jobs:
         run: |
           cd ./apps/web-ui
           npm ci
-          npm run test -- --watch=false --no-progress --browsers=ChromeHeadless --code-coverage
+          npm run test
 
   build:
     name: Builds the Web UI app
