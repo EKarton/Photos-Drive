@@ -48,8 +48,8 @@ describe('ReasoningCollapseComponent', () => {
       '[data-testid="reasoning-content"]',
     );
     expect(paragraphs.length).toBe(2);
-    expect(paragraphs[0].nativeElement.textContent).toContain('Reason 1');
-    expect(paragraphs[1].nativeElement.textContent).toContain('Reason 2');
+    expect(paragraphs[0].textContent).toContain('Reason 1');
+    expect(paragraphs[1].textContent).toContain('Reason 2');
   });
 
   it('should close again after clicking toggle twice', () => {
