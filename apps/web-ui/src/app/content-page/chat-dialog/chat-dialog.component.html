@@ -1,4 +1,89 @@
-<dialog #modal class="modal backdrop-blur-3xl bg-white/70 dark:bg-gray-800/70">
+<dialog
+  #chatDialog
+  class="modal backdrop-blur-3xl bg-white/70 dark:bg-gray-800/70"
+>
+  <!-- Dialog area -->
+  @if (messages().length === 0) {
+    <div
+      class="modal-box max-w-2xl px-3 overflow-y-auto bg-transparent shadow-none"
+    >
+      <div class="flex flex-col items-center gap-1 pb-16">
+        <p class="text-xl">Photos Search</p>
+        <ngx-typed-writer
+          [strings]="[
+            'Ask: photos of santorini',
+            'Ask: photos of family pictures',
+            'Ask: what was the last meal I had in Mountain View, CA',
+          ]"
+          [isHTML]="true"
+          [smartBackspace]="true"
+          [backSpeed]="20"
+          [typeSpeed]="30"
+        ></ngx-typed-writer>
+      </div>
+    </div>
+    <form
+      method="dialog"
+      class="modal-backdrop"
+      (click)="closeDialog()"
+      (keydown.enter)="closeDialog()"
+    >
+      <button (click)="closeDialog()">close</button>
+    </form>
+  } @else {
+    <div
+      class="modal-box h-screen w-screen w-full h-full max-w-full max-h-full overflow-y-auto bg-transparent shadow-none"
+    >
+      <div class="mx-auto max-w-2xl px-3 pt-14 pb-28 flex flex-col gap-4">
+        @for (message of messages(); track message.id) {
+          <div
+            class="flex"
+            [ngClass]="{ 'justify-end': message.type === 'User' }"
+          >
+            <div class="max-w-[80%]">
+              @let messageContentResult = message.content;
+              <div
+                [ngClass]="{
+                  'bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-2':
+                    message.type === 'User',
+                }"
+              >
+                @if (
+                  (messageContentResult | isPending) ||
+                  !messageContentResult.data!.output
+                ) {
+                  <span class="loading loading-md"></span>
+                } @else if (messageContentResult | hasFailed) {
+                  Agent has thrown an error
+                } @else {
+                  {{ messageContentResult.data!.output }}
+                }
+              </div>
+
+              @if (messageContentResult | hasFailed) {
+                <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                  <p>Error details:</p>
+                  {{ messageContentResult.error }}
+                </div>
+              } @else if (messageContentResult | hasSucceeded) {
+                @let reasoning = messageContentResult.data?.reasoning;
+                @if (reasoning && reasoning.length > 0) {
+                  @for (reason of reasoning; track reason.id) {
+                    <p
+                      class="text-sm text-gray-600 dark:text-gray-400 space-y-2"
+                    >
+                      {{ reason.content }}
+                    </p>
+                  }
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Top bar -->
   <div
     class="flex justify-end gap-4 absolute top-0 left-0 right-0 pb-1 px-2 pt-3"
@@ -37,99 +122,12 @@
     </button>
   </div>
 
-  <!-- Messages area -->
-  @if (messages().length === 0) {
-    <div
-      class="flex-grow justify-center items-center flex flex-col gap-1 pb-16 h-full"
-    >
-      <p class="text-xl">Photos Search</p>
-      <ngx-typed-writer
-        [strings]="[
-          'Ask: photos of santorini',
-          'Ask: photos of family pictures',
-          'Ask: what was the last meal I had in Mountain View, CA',
-        ]"
-        [isHTML]="true"
-        [smartBackspace]="true"
-        [backSpeed]="20"
-        [typeSpeed]="30"
-      ></ngx-typed-writer>
-    </div>
-  } @else {
-    <div class="w-full overflow-y-auto h-full">
-      <div class="max-w-2xl mx-auto pt-14 pb-28 px-3 flex flex-col gap-4">
-        @for (message of messages(); track message.id) {
-          <div
-            class="flex"
-            [ngClass]="{ 'justify-end': message.type === 'User' }"
-          >
-            <div class="max-w-[80%]">
-              @let messageContentResult = message.content;
-              <div
-                [ngClass]="{
-                  'bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-2':
-                    message.type === 'User',
-                }"
-              >
-                @if (
-                  (messageContentResult | isPending) ||
-                  !messageContentResult.data!.output
-                ) {
-                  <span class="loading loading-dots loading-md"></span>
-                } @else if (messageContentResult | hasFailed) {
-                  Agent has thrown an error
-                } @else {
-                  {{ messageContentResult.data!.output }}
-                }
-              </div>
-
-              @if (messageContentResult | hasFailed) {
-                <details>
-                  <summary
-                    class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
-                  >
-                    Error details
-                  </summary>
-                  <div
-                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
-                  >
-                    <p>{{ messageContentResult.error }}</p>
-                  </div>
-                </details>
-              } @else if (
-                (messageContentResult | hasSucceeded) &&
-                messageContentResult.data!.reasoning &&
-                messageContentResult.data!.reasoning.length > 0
-              ) {
-                <details>
-                  <summary
-                    class="cursor-pointer px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400"
-                  >
-                    Reasoning
-                  </summary>
-                  <div
-                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 space-y-2"
-                  >
-                    @for (
-                      reason of messageContentResult.data!.reasoning;
-                      track reason.id
-                    ) {
-                      <p>{{ reason.content }}</p>
-                    }
-                  </div>
-                </details>
-              }
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  }
-
   <!-- Search bar -->
-  <div class="absolute bottom-8 w-full max-w-2xl mx-auto flex px-3">
+  <div
+    class="absolute bottom-8 left-3 right-3 mx-auto flex justify-center z-100"
+  >
     <label
-      class="input input-lg flex-1 rounded-full px-4 py-3 focus-within:outline-none focus-within:ring-0"
+      class="input input-lg flex-1 rounded-full max-w-2xl p-3 focus-within:outline-none focus-within:ring-0"
     >
       <svg
         class="h-[1em] opacity-50"

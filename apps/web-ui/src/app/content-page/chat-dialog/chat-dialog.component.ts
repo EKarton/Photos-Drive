@@ -35,13 +35,12 @@ import { ChatDialogRequest } from './chat-dialog.request';
 })
 export class ChatDialogComponent implements AfterViewInit, OnDestroy {
   searchControl = new FormControl('');
-
-  @ViewChild('modal') myModal?: ElementRef;
+  @ViewChild('chatDialog') myModal?: ElementRef;
 
   private readonly store = inject(Store);
   private readonly subscription = new Subscription();
 
-  private readonly isOpen$ = this.store.select(
+  readonly isOpen$ = this.store.select(
     dialogsState.selectIsDialogOpen(ChatDialogRequest),
   );
 
