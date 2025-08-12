@@ -1,32 +1,30 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { Reasoning } from '../../../store/chats/chats.state';
 import { ReasoningCollapseComponent } from '../reasoning-collapse.component';
 
-describe('ReasoningCollapseComponent', () => {
-  let fixture: ComponentFixture<ReasoningCollapseComponent>;
-  let mockReasonings: Reasoning[];
+const mockReasonings: Reasoning[] = [
+  { id: '1', content: 'Reason 1' },
+  { id: '2', content: 'Reason 2' },
+];
 
+describe('ReasoningCollapseComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ReasoningCollapseComponent],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(ReasoningCollapseComponent);
-
-    mockReasonings = [
-      { id: '1', content: 'Reason 1' },
-      { id: '2', content: 'Reason 2' },
-    ];
   });
 
   it('should show toggle button and be closed by default', () => {
+    const fixture = TestBed.createComponent(ReasoningCollapseComponent);
     fixture.componentRef.setInput('reasonings', mockReasonings);
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector('button');
+    const button = fixture.nativeElement.querySelector(
+      '[data-testid="toggle-button"]',
+    );
     expect(button).toBeTruthy();
-    expect(button.nativeElement.textContent).toContain('Show Reasoning');
+    expect(button.textContent).toContain('Show Reasoning');
 
     expect(
       fixture.nativeElement.querySelectorAll(
@@ -36,11 +34,14 @@ describe('ReasoningCollapseComponent', () => {
   });
 
   it('should open and display reasonings after clicking toggle', () => {
+    const fixture = TestBed.createComponent(ReasoningCollapseComponent);
     fixture.componentRef.setInput('reasonings', mockReasonings);
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector('button');
-    button.nativeElement.click();
+    const button = fixture.nativeElement.querySelector(
+      '[data-testid="toggle-button"]',
+    );
+    button.click();
     fixture.detectChanges();
 
     const paragraphs = fixture.nativeElement.querySelectorAll(
@@ -52,11 +53,14 @@ describe('ReasoningCollapseComponent', () => {
   });
 
   it('should close again after clicking toggle twice', () => {
+    const fixture = TestBed.createComponent(ReasoningCollapseComponent);
     fixture.componentRef.setInput('reasonings', mockReasonings);
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector('button');
-    button.nativeElement.click();
+    const button = fixture.nativeElement.querySelector(
+      '[data-testid="toggle-button"]',
+    );
+    button.click();
     fixture.detectChanges();
 
     expect(
@@ -65,7 +69,7 @@ describe('ReasoningCollapseComponent', () => {
       ).length,
     ).toBe(2);
 
-    button.nativeElement.click();
+    button.click();
     fixture.detectChanges();
 
     expect(
