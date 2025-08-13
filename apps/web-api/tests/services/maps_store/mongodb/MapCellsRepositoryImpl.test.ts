@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MapCellsRepositoryImpl } from '../../../../src/services/maps_store/mongodb/MapCellsRepositoryImpl';
-import { InMemoryMongoDbClientsRepository } from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+import { InMemoryMongoDbClientsRepository } from '../../../../src/services/metadata_store/mongodb/MongoDbClientsStore';
 
 describe('MapCellsRepositoryImpl', () => {
   let mongoServer1: MongoMemoryServer;

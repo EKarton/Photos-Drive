@@ -18,19 +18,26 @@ import {
   ListMediaItemsRequest,
   ListMediaItemsResponse,
   MediaItemNotFoundError,
-  MediaItemsRepository,
+  MediaItemsStore,
   SortBy,
   SortByDirection,
   SortByField
-} from '../MediaItemsRepository';
-import { MongoDbClientsRepository } from './MongoDbClientsRepository';
+} from '../MediaItemsStore';
+import { MongoDbClientsStore } from './MongoDbClientsStore';
 
-/** Implementation of {@code MediaItemsRepository} */
-export class MediaItemsRepositoryImpl implements MediaItemsRepository {
-  private mongoDbRepository: MongoDbClientsRepository;
+/**
+ * Implementation of {@code MediaItemsRepository}
+ * @deprecated use DistributedMediaItemsStore instead.
+ */
+export class MediaItemsRepositoryImpl implements MediaItemsStore {
+  private mongoDbRepository: MongoDbClientsStore;
 
-  constructor(mongoDbRepository: MongoDbClientsRepository) {
+  constructor(mongoDbRepository: MongoDbClientsStore) {
     this.mongoDbRepository = mongoDbRepository;
+  }
+
+  getClientId(): string {
+    throw new Error('Cannot get client ID from this repo');
   }
 
   async getMediaItemById(
@@ -137,6 +144,29 @@ export class MediaItemsRepositoryImpl implements MediaItemsRepository {
 
         if (req.albumId) {
           filterObj['album_id'] = albumIdToString(req.albumId);
+        }
+        if (req.earliestDateTaken || req.latestDateTaken) {
+          filterObj['date_taken'] = {};
+          if (req.earliestDateTaken) {
+            filterObj['date_taken']['$gte'] = req.earliestDateTaken;
+          }
+          if (req.latestDateTaken) {
+            filterObj['date_taken']['$lte'] = req.latestDateTaken;
+          }
+        }
+        if (req.withinLocation) {
+          filterObj['location'] = {
+            $near: {
+              $geometry: {
+                type: 'Point',
+                coordinates: [
+                  req.withinLocation.longitude,
+                  req.withinLocation.latitude
+                ]
+              },
+              $maxDistance: req.withinLocation.range
+            }
+          };
         }
 
         const lastSeenMediaItemId = clientIdToMediaItemId.get(clientId);

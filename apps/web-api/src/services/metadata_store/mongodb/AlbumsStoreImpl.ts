@@ -15,21 +15,28 @@ import {
 } from '../Albums';
 import {
   AlbumNotFoundError,
-  AlbumsRepository,
+  AlbumsStore,
   ListAlbumsRequest,
   ListAlbumsResponse,
   SortBy,
   SortByDirection,
   SortByField
-} from '../AlbumsRepository';
-import { MongoDbClientsRepository } from './MongoDbClientsRepository';
+} from '../AlbumsStore';
+import { MongoDbClientsStore } from './MongoDbClientsStore';
 
-/** Implementation of {@code AlbumsRepository} */
-export class AlbumsRepositoryImpl implements AlbumsRepository {
-  private mongoDbRepository: MongoDbClientsRepository;
+/**
+ * Implementation of {@code AlbumsRepository}
+ * @deprecated use DistributedAlbumsStore instead.
+ */
+export class AlbumsStoreImpl implements AlbumsStore {
+  private mongoDbRepository: MongoDbClientsStore;
 
-  constructor(mongoDbRepository: MongoDbClientsRepository) {
+  constructor(mongoDbRepository: MongoDbClientsStore) {
     this.mongoDbRepository = mongoDbRepository;
+  }
+
+  getClientId(): string {
+    throw new Error('Cannot get client ID from this repo');
   }
 
   async getAlbumById(

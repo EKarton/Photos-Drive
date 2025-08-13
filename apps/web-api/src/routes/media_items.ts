@@ -15,17 +15,17 @@ import {
 import {
   ListMediaItemsRequest,
   MediaItemNotFoundError,
-  MediaItemsRepository,
+  MediaItemsStore,
   SortByDirection,
   SortByField
-} from '../services/metadata_store/MediaItemsRepository';
-import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
+} from '../services/metadata_store/MediaItemsStore';
+import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsStore';
 import { ImageEmbedder } from '../services/ml/models/ImageEmbeddings';
 import { BaseVectorStore } from '../services/ml/vector_stores/BaseVectorStore';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
 
 export default async function (
-  mediaItemsRepo: MediaItemsRepository,
+  mediaItemsRepo: MediaItemsStore,
   vectorStore: BaseVectorStore,
   imageEmbedder: ImageEmbedder
 ) {
@@ -41,12 +41,33 @@ export default async function (
       const pageToken = req.query['pageToken'] as string;
       const sortBy = req.query['sortBy'];
       const sortDir = req.query['sortDir'];
+      const earliestDateTaken = req.query['earliest'] as string;
+      const latestDateTaken = req.query['latest'] as string;
+      const latitudeRange = Number(req.query['latitude']);
+      const longitudeRange = Number(req.query['longitude']);
+      const locationRange = Number(req.query['range']);
 
       const abortController = new AbortController();
       req.on('close', () => abortController.abort());
 
       const listMediaItemsRequest: ListMediaItemsRequest = {
         albumId: albumId ? convertStringToAlbumId(albumId) : undefined,
+        earliestDateTaken: earliestDateTaken
+          ? new Date(earliestDateTaken)
+          : undefined,
+        latestDateTaken: latestDateTaken
+          ? new Date(latestDateTaken)
+          : undefined,
+        withinLocation:
+          !isNaN(latitudeRange) &&
+          !isNaN(longitudeRange) &&
+          !isNaN(locationRange)
+            ? {
+                latitude: latitudeRange,
+                longitude: longitudeRange,
+                range: locationRange
+              }
+            : undefined,
         pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
         sortBy: {

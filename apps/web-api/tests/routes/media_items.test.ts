@@ -8,11 +8,11 @@ import {
 } from '../../src/services/metadata_store/MediaItems';
 import {
   MediaItemNotFoundError,
-  MediaItemsRepository,
+  MediaItemsStore,
   SortByDirection,
   SortByField
-} from '../../src/services/metadata_store/MediaItemsRepository';
-import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+} from '../../src/services/metadata_store/MediaItemsStore';
+import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/mongodb/MongoDbClientsStore';
 import { ImageEmbedder } from '../../src/services/ml/models/ImageEmbeddings';
 import {
   BaseVectorStore,
@@ -82,7 +82,7 @@ describe('Media Items Router', () => {
 
   describe('GET api/v1/media-items', () => {
     it('should return 200 with default pageSize and no sort when query params are missing', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.listMediaItems.mockResolvedValue({
         mediaItems: MOCK_MEDIA_ITEMS,
         nextPageToken: undefined
@@ -143,7 +143,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 200 with albumId', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.listMediaItems.mockResolvedValue({
         mediaItems: [],
         nextPageToken: 'next-token'
@@ -180,7 +180,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 200 with pageToken, sortBy=id, and sortDir=asc', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.listMediaItems.mockResolvedValue({
         mediaItems: [],
         nextPageToken: 'next-token'
@@ -216,7 +216,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 200 with pageToken, sortBy=id, and sortDir=desc', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.listMediaItems.mockResolvedValue({
         mediaItems: [],
         nextPageToken: 'next-token'
@@ -252,7 +252,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 500 when an unexpected error is thrown', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.listMediaItems.mockRejectedValue(new Error('Something went wrong'));
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
@@ -290,7 +290,7 @@ describe('Media Items Router', () => {
         height: 2000,
         date_taken: new Date('2025-06-07T17:00:00.000Z')
       };
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.getMediaItemById.mockResolvedValue(mockMediaItem);
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
@@ -319,7 +319,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 404 response given MediaItemsRepository returns MongoDbClientNotFoundError', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.getMediaItemById.mockRejectedValue(
         new MongoDbClientNotFoundError('mediaItemClientId1:mediaItem1')
       );
@@ -342,7 +342,7 @@ describe('Media Items Router', () => {
         clientId: 'mediaItemClientId1',
         objectId: 'mediaItem1'
       };
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.getMediaItemById.mockRejectedValue(
         new MediaItemNotFoundError(mediaItemId)
       );
@@ -361,7 +361,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 500 response given MediaItemsRepository returns random error', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       repo.getMediaItemById.mockRejectedValue(new Error('Random error'));
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
@@ -380,7 +380,7 @@ describe('Media Items Router', () => {
 
   describe('POST /api/v1/media-items/search', () => {
     it('should return 200 with matching media items', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
 
@@ -447,7 +447,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 400 if query is missing', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
 
@@ -465,7 +465,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 400 for invalid earliestDateTaken format', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
 
@@ -483,7 +483,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 400 for invalid latestDateTaken format', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
 
@@ -501,7 +501,7 @@ describe('Media Items Router', () => {
     });
 
     it('should pass filters and topK to vectorStore', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
 
@@ -541,7 +541,7 @@ describe('Media Items Router', () => {
     });
 
     it('should return 500 if vector store throws', async () => {
-      const repo = mock<MediaItemsRepository>();
+      const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
       const imageEmbedder = mock<ImageEmbedder>();
 

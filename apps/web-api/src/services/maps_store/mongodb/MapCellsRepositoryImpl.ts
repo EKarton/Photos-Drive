@@ -1,7 +1,7 @@
 import { Filter, Document as MongoDbDocument } from 'mongodb';
 import { AlbumId, albumIdToString } from '../../metadata_store/Albums';
 import { convertStringToMediaItemId } from '../../metadata_store/MediaItems';
-import { MongoDbClientsRepository } from '../../metadata_store/mongodb/MongoDbClientsRepository';
+import { MongoDbClientsStore } from '../../metadata_store/mongodb/MongoDbClientsStore';
 import {
   CellId,
   HeatmapPoints,
@@ -16,9 +16,9 @@ export const MAX_QUERY_TIME_MS = 5000;
 
 /** Implementation of {@code TilesRepository} */
 export class MapCellsRepositoryImpl implements MapCellsRepository {
-  private mongoDbRepository: MongoDbClientsRepository;
+  private mongoDbRepository: MongoDbClientsStore;
 
-  constructor(mongoDbRepository: MongoDbClientsRepository) {
+  constructor(mongoDbRepository: MongoDbClientsStore) {
     this.mongoDbRepository = mongoDbRepository;
   }
 

@@ -10,19 +10,19 @@ import {
 } from '../services/metadata_store/Albums';
 import {
   AlbumNotFoundError,
-  AlbumsRepository,
+  AlbumsStore,
   ListAlbumsRequest,
   SortByDirection,
   SortByField
-} from '../services/metadata_store/AlbumsRepository';
-import { MediaItemsRepository } from '../services/metadata_store/MediaItemsRepository';
-import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsRepository';
+} from '../services/metadata_store/AlbumsStore';
+import { MediaItemsStore } from '../services/metadata_store/MediaItemsStore';
+import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsStore';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
 
 export default async function (
   rootAlbumId: AlbumId,
-  albumsRepo: AlbumsRepository,
-  mediaItemsRepo: MediaItemsRepository
+  albumsRepo: AlbumsStore,
+  mediaItemsRepo: MediaItemsStore
 ) {
   const router: Router = Router();
 

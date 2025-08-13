@@ -6,21 +6,21 @@ import {
   SortBy,
   SortByDirection,
   SortByField
-} from '../../../../src/services/metadata_store/AlbumsRepository';
+} from '../../../../src/services/metadata_store/AlbumsStore';
 import {
-  AlbumsRepositoryImpl,
+  DistributedAlbumsStore,
   sortAlbum
-} from '../../../../src/services/metadata_store/mongodb/AlbumsRepositoryImpl';
-import { InMemoryMongoDbClientsRepository } from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+} from '../../../../src/services/metadata_store/mongodb/DistributedAlbumsStore';
+import { MongoDbAlbumsStore } from '../../../../src/services/metadata_store/mongodb/MongoDbAlbumsStore';
 
-describe('AlbumsRepositoryImpl', () => {
+describe('DistributedAlbumsStore', () => {
   let mongoServer1: MongoMemoryServer;
   let mongoServer2: MongoMemoryServer;
 
   let mongoClient1: MongoClient;
   let mongoClient2: MongoClient;
 
-  let albumsRepo: AlbumsRepositoryImpl;
+  let albumsRepo: DistributedAlbumsStore;
 
   beforeAll(async () => {
     // Start the in-memory MongoDB server
@@ -29,11 +29,10 @@ describe('AlbumsRepositoryImpl', () => {
     mongoClient1 = await MongoClient.connect(mongoServer1.getUri(), {});
     mongoClient2 = await MongoClient.connect(mongoServer2.getUri(), {});
 
-    const mongoDbClientsRepo = new InMemoryMongoDbClientsRepository([
-      ['client1', mongoClient1],
-      ['client2', mongoClient2]
+    albumsRepo = new DistributedAlbumsStore([
+      new MongoDbAlbumsStore('client1', mongoClient1),
+      new MongoDbAlbumsStore('client2', mongoClient2)
     ]);
-    albumsRepo = new AlbumsRepositoryImpl(mongoDbClientsRepo);
   }, 10000);
 
   afterEach(async () => {

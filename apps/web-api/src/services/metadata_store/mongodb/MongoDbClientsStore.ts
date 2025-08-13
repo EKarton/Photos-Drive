@@ -2,7 +2,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import { ConfigStore } from '../../config_store/ConfigStore';
 
 /** Represents a repository of all MongoDB clients. */
-export interface MongoDbClientsRepository {
+export interface MongoDbClientsStore {
   /**
    * Returns the MongoDB client from its ID.
    * @param clientId The MongoDB client ID.
@@ -19,13 +19,13 @@ export interface MongoDbClientsRepository {
 }
 
 /** Implementation class of {@code MongoDbClientsRepository} */
-export class MongoDbClientsRepositoryImpl implements MongoDbClientsRepository {
+export class MongoDbClientsStoreImpl implements MongoDbClientsStore {
   private idToClient = new Map<string, MongoClient>();
 
   static async buildFromVault(
     vault: ConfigStore
-  ): Promise<MongoDbClientsRepositoryImpl> {
-    const repo = new MongoDbClientsRepositoryImpl();
+  ): Promise<MongoDbClientsStoreImpl> {
+    const repo = new MongoDbClientsStoreImpl();
 
     const configs = await vault.getMongoDbConfigs();
     configs.forEach((config) => {
@@ -59,9 +59,7 @@ export class MongoDbClientsRepositoryImpl implements MongoDbClientsRepository {
 }
 
 /** In-memory implementation of MongoDbClientsRepository for testing. */
-export class InMemoryMongoDbClientsRepository
-  implements MongoDbClientsRepository
-{
+export class InMemoryMongoDbClientsRepository implements MongoDbClientsStore {
   private clients: Map<string, MongoClient>;
 
   constructor(initialClients?: [string, MongoClient][]) {
