@@ -89,6 +89,18 @@ export class WebApiService {
     if (request.albumId) {
       params = params.set('albumId', request.albumId);
     }
+    if (request.earliestDateTaken) {
+      params = params.set('earliest', request.earliestDateTaken.toString());
+    }
+    if (request.latestDateTaken) {
+      params = params.set('latest', request.latestDateTaken.toString());
+    }
+    if (request.locationRange) {
+      params = params
+        .set('latitude', request.locationRange.latitude)
+        .set('longitude', request.locationRange.longitude)
+        .set('range', request.locationRange.range);
+    }
     if (request.pageSize) {
       params = params.set('pageSize', request.pageSize);
     }
@@ -174,6 +186,7 @@ export class WebApiService {
       .pipe(toResult());
   }
 
+  /** Searches for media items by text */
   searchMediaItemsByText(
     accessToken: string,
     request: SearchMediaItemsByTextRequest,
@@ -182,10 +195,10 @@ export class WebApiService {
     const body = {
       query: request.text,
       earliestDateTaken: request.earliestDateTaken
-        ? request.earliestDateTaken.toDateString()
+        ? request.earliestDateTaken.toISOString()
         : undefined,
       latestDateTaken: request.latestDateTaken
-        ? request.latestDateTaken.toDateString()
+        ? request.latestDateTaken.toISOString()
         : undefined,
       withinMediaItemIds: request.withinMediaItemIds
         ? request.withinMediaItemIds.join(',')

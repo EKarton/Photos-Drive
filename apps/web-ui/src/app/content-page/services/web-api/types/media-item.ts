@@ -2,7 +2,7 @@ export interface RawMediaItem {
   id: string;
   fileName: string;
   hashCode: string;
-  location?: MediaItemLocation;
+  location?: GpsLocation;
   gPhotosMediaItemId: string;
   width: number;
   height: number;
@@ -15,7 +15,7 @@ export interface MediaItem {
   id: string;
   fileName: string;
   hashCode: string;
-  location?: MediaItemLocation;
+  location?: GpsLocation;
   gPhotosMediaItemId: string;
   width: number;
   height: number;
@@ -24,7 +24,7 @@ export interface MediaItem {
 
 export type MediaItemDetailsApiResponse = MediaItem;
 
-export interface MediaItemLocation {
+export interface GpsLocation {
   latitude: number;
   longitude: number;
 }

@@ -70,6 +70,13 @@
                 @if (reasoning && reasoning.length > 0) {
                   <app-reasoning-collapse [reasonings]="reasoning" />
                 }
+
+                @let mediaItemIds = messageContentResult.data?.mediaItemIds;
+                @for (mediaItemId of mediaItemIds; track mediaItemId) {
+                  <p class="text-sm text-gray-600 dark:text-gray-400 pl-5">
+                    {{ mediaItemId }}
+                  </p>
+                }
               }
             </div>
           </div>
