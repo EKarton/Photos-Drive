@@ -29,7 +29,9 @@ const DEFAULT_THREAD_ID = 'default_thread';
 export const ResponseFormatSchema = z.object({
   output: z
     .string()
-    .describe("The human-readable answer to the user's question"),
+    .describe(
+      "The human-readable answer to the user's question. If there are media items to show to the user, only include the count of the media items to display in the output field",
+    ),
   mediaItemIds: z
     .array(z.string())
     .describe(
