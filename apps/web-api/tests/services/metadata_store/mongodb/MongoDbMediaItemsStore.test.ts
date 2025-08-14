@@ -275,6 +275,7 @@ describe('MongoDbMediaItemsStore', () => {
           gphotos_media_item_id: 'media_item_1',
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           location: {
+            type: 'Point',
             coordinates: [40.0, -70.0]
           },
           width: 1000,
@@ -334,6 +335,12 @@ describe('MongoDbMediaItemsStore', () => {
           height: 2,
           date_taken: new Date(2024, 4, 5)
         });
+
+      // Enable geospatial queries
+      await mongoClient1
+        .db('photos_drive')
+        .collection('media_items')
+        .createIndex({ location: '2dsphere' });
     });
 
     it('should return all albums given no album ID', async () => {
@@ -752,6 +759,60 @@ describe('MongoDbMediaItemsStore', () => {
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439010'
+      });
+    });
+
+    it('should return no media items given withinLocation filter is set', async () => {
+      const res = await mediaItemsRepo.listMediaItems({
+        withinLocation: {
+          latitude: -49,
+          longitude: 90,
+          range: 100
+        },
+        pageSize: 100,
+        sortBy: {
+          field: SortByField.DATE_TAKEN,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        mediaItems: [],
+        nextPageToken: undefined
+      });
+    });
+
+    it('should return media items with correct date_taken fields given earliestDateTaken and latestDateTaken filter is set', async () => {
+      const res = await mediaItemsRepo.listMediaItems({
+        earliestDateTaken: new Date(2024, 4, 1),
+        latestDateTaken: new Date(2024, 4, 2),
+        pageSize: 100,
+        sortBy: {
+          field: SortByField.DATE_TAKEN,
+          direction: SortByDirection.DESCENDING
+        }
+      });
+
+      expect(res).toEqual({
+        mediaItems: [
+          {
+            album_id: {
+              clientId: '407f1f77bcf86cd799439001',
+              objectId: '407f1f77bcf86cd799439002'
+            },
+            date_taken: new Date(2024, 4, 2),
+            file_name: 'image2.jpg',
+            gphotos_client_id: 'gphotos_client_2',
+            gphotos_media_item_id: 'media_item_2',
+            height: 20,
+            id: {
+              clientId: 'client1',
+              objectId: '507f1f77bcf86cd799439011'
+            },
+            width: 10
+          }
+        ],
+        nextPageToken: 'client1:507f1f77bcf86cd799439011'
       });
     });
   });
