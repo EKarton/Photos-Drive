@@ -5,14 +5,14 @@ import albumsRouter from '../../src/routes/albums';
 import { Album, AlbumId } from '../../src/services/metadata_store/Albums';
 import {
   AlbumNotFoundError,
-  AlbumsRepository
-} from '../../src/services/metadata_store/AlbumsRepository';
+  AlbumsStore
+} from '../../src/services/metadata_store/AlbumsStore';
 import {
-  MediaItemsRepository,
+  MediaItemsStore,
   SortByDirection,
   SortByField
-} from '../../src/services/metadata_store/MediaItemsRepository';
-import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+} from '../../src/services/metadata_store/MediaItemsStore';
+import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/mongodb/MongoDbClientsStore';
 import { fakeAuthEnv, generateTestToken } from './utils/auth';
 import { setupTestEnv } from './utils/env';
 
@@ -52,8 +52,8 @@ describe('Albums Router', () => {
 
   describe('GET api/v1/albums/:albumId', () => {
     it('should return 200 with correct body response, given correct parameters', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ALBUM);
       mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
       mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
@@ -81,8 +81,8 @@ describe('Albums Router', () => {
     });
 
     it('should return 200 with correct body response when requesting for album without parent album ID', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.getAlbumById.mockResolvedValue({
         ...MOCK_ALBUM,
         parent_album_id: undefined
@@ -113,8 +113,8 @@ describe('Albums Router', () => {
     });
 
     it('should return 200 given albumId is set to root', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.getAlbumById.mockResolvedValue(MOCK_ROOT_ALBUM);
       mockAlbumsRepository.getNumAlbumsInAlbum.mockResolvedValue(1);
       mockMediaItemsRepository.getNumMediaItemsInAlbum.mockResolvedValue(2);
@@ -142,8 +142,8 @@ describe('Albums Router', () => {
     });
 
     it(`should return error code, given MongoDbClientNotFoundError thrown from AlbumsRepository`, async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.getAlbumById.mockRejectedValue(
         new MongoDbClientNotFoundError('albumClient1:albumObject2')
       );
@@ -167,8 +167,8 @@ describe('Albums Router', () => {
     });
 
     it(`should return error code, given MongoDbClientNotFoundError thrown from AlbumsRepository`, async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.getAlbumById.mockRejectedValue(
         new AlbumNotFoundError({
           clientId: 'albumClient1',
@@ -195,8 +195,8 @@ describe('Albums Router', () => {
     });
 
     it('should return error code, given random error thrown from AlbumsRepository', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.getAlbumById.mockRejectedValue(
         new Error('Random error')
       );
@@ -220,8 +220,8 @@ describe('Albums Router', () => {
 
   describe('GET /api/v1/albums', () => {
     it('should return 200 with default pageSize and sort when no query params are provided', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.listAlbums.mockResolvedValue({
         albums: [MOCK_ALBUM],
         nextPageToken: undefined
@@ -270,8 +270,8 @@ describe('Albums Router', () => {
     });
 
     it('should return 200 with query parameters pageSize, pageToken, sortBy, sortDir, and parentAlbumId', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.listAlbums.mockResolvedValue({
         albums: [MOCK_ALBUM],
         nextPageToken: 'nextToken'
@@ -326,8 +326,8 @@ describe('Albums Router', () => {
     });
 
     it('should return 200 with parentAlbumId set to root', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.listAlbums.mockResolvedValue({
         albums: [MOCK_ALBUM],
         nextPageToken: undefined
@@ -376,8 +376,8 @@ describe('Albums Router', () => {
     });
 
     it('should return 500 when albumsRepo.listAlbums throws unexpected error', async () => {
-      const mockAlbumsRepository = mock<AlbumsRepository>();
-      const mockMediaItemsRepository = mock<MediaItemsRepository>();
+      const mockAlbumsRepository = mock<AlbumsStore>();
+      const mockMediaItemsRepository = mock<MediaItemsStore>();
       mockAlbumsRepository.listAlbums.mockRejectedValue(
         new Error('Unexpected error')
       );

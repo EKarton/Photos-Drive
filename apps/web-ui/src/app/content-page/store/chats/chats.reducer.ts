@@ -27,7 +27,7 @@ export const chatsReducer = createReducer(
         {
           id: crypto.randomUUID(),
           type: 'User',
-          content: toSuccess({ output: userInput }),
+          content: toSuccess({ output: userInput, mediaItemIds: [] }),
         },
       ],
     };
@@ -39,6 +39,7 @@ export const chatsReducer = createReducer(
       type: 'Bot',
       content: mapResult(botMessage, (bm) => ({
         output: bm.content,
+        mediaItemIds: bm.mediaItemIds,
         reasoning: bm.reasoning,
       })),
     };

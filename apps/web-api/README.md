@@ -97,8 +97,6 @@ This is the web api app used to serve content to the web ui.
 
 2. To fix linting issues, run `pnpm lint:fix`
 
-3. To run tests, run `pnpm test`
+3. To run tests, run `pnpm test`. It automatically runs code coverage, and puts the code coverage under the `./coverage` folder.
 
-4. To run tests with coverage, run `pnpm test:coverage`
-
-5. To run tests with coverage for a particular file, run tests like this: `pnpm test:coverage tests/middlewares`
+4. To run tests for a particular file, run tests like this: `pnpm test:coverage tests/middlewares`

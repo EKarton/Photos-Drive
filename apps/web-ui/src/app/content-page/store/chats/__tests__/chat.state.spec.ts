@@ -34,13 +34,17 @@ describe('Chat State', () => {
         {
           id: '1',
           type: 'User',
-          content: toSuccess<MessageContent>({ output: 'Hello' }),
+          content: toSuccess<MessageContent>({
+            output: 'Hello',
+            mediaItemIds: [],
+          }),
         },
         {
           id: '2',
           type: 'Bot',
           content: toSuccess<MessageContent>({
             output: 'Hi there',
+            mediaItemIds: [],
             reasoning: [{ id: 'r1', content: 'some reasoning' }],
           }),
         },

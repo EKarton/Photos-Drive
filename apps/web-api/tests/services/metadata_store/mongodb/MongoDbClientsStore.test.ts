@@ -4,12 +4,12 @@ import { ConfigStore } from '../../../../src/services/config_store/ConfigStore';
 import {
   InMemoryMongoDbClientsRepository,
   MongoDbClientNotFoundError,
-  MongoDbClientsRepositoryImpl
-} from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+  MongoDbClientsStoreImpl
+} from '../../../../src/services/metadata_store/mongodb/MongoDbClientsStore';
 
 describe('MongoDbClientsRepositoryImpl', () => {
   let mockConfigStore: jest.Mocked<ConfigStore>;
-  let mongoDbClientsRepo: MongoDbClientsRepositoryImpl;
+  let mongoDbClientsRepo: MongoDbClientsStoreImpl;
 
   beforeEach(async () => {
     // Create a mocked implementation of Vault
@@ -29,7 +29,7 @@ describe('MongoDbClientsRepositoryImpl', () => {
 
     // Build the repository from the mocked vault
     mongoDbClientsRepo =
-      await MongoDbClientsRepositoryImpl.buildFromVault(mockConfigStore);
+      await MongoDbClientsStoreImpl.buildFromVault(mockConfigStore);
   });
 
   afterEach(() => {

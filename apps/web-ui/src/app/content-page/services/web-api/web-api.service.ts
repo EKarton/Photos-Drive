@@ -7,6 +7,10 @@ import { Result } from '../../../shared/results/results';
 import { toResult } from '../../../shared/results/rxjs/toResult';
 import { GetAlbumDetailsResponse } from './types/album';
 import {
+  BulkGetMediaItemsByIdsRequest,
+  BulkGetMediaItemsByIdsResponse,
+} from './types/bulk-get-media-items-by-ids';
+import {
   GetGPhotosMediaItemDetailsRequest,
   GetGPhotosMediaItemDetailsResponse,
 } from './types/gphotos-media-item';
@@ -83,11 +87,23 @@ export class WebApiService {
     accessToken: string,
     request: ListMediaItemsRequest,
   ): Observable<Result<ListMediaItemsResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/media-items`;
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/search`;
 
     let params = new HttpParams();
     if (request.albumId) {
       params = params.set('albumId', request.albumId);
+    }
+    if (request.earliestDateTaken) {
+      params = params.set('earliest', request.earliestDateTaken.toISOString());
+    }
+    if (request.latestDateTaken) {
+      params = params.set('latest', request.latestDateTaken.toISOString());
+    }
+    if (request.locationRange) {
+      params = params
+        .set('latitude', request.locationRange.latitude)
+        .set('longitude', request.locationRange.longitude)
+        .set('range', request.locationRange.range);
     }
     if (request.pageSize) {
       params = params.set('pageSize', request.pageSize);
@@ -174,18 +190,19 @@ export class WebApiService {
       .pipe(toResult());
   }
 
+  /** Searches for media items by text */
   searchMediaItemsByText(
     accessToken: string,
     request: SearchMediaItemsByTextRequest,
   ): Observable<Result<SearchMediaItemsByTextResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/media-items/search`;
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/vector-search`;
     const body = {
       query: request.text,
       earliestDateTaken: request.earliestDateTaken
-        ? request.earliestDateTaken.toDateString()
+        ? request.earliestDateTaken.toISOString()
         : undefined,
       latestDateTaken: request.latestDateTaken
-        ? request.latestDateTaken.toDateString()
+        ? request.latestDateTaken.toISOString()
         : undefined,
       withinMediaItemIds: request.withinMediaItemIds
         ? request.withinMediaItemIds.join(',')
@@ -194,6 +211,26 @@ export class WebApiService {
 
     return this.httpClient
       .post<RawSearchMediaItemsByTextResponse>(url, body, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .pipe(
+        map((res) => ({
+          mediaItems: res.mediaItems.map(this.convertRawMediaItemToMediaItem),
+        })),
+        toResult(),
+      );
+  }
+
+  bulkGetMediaItemsByIds(
+    accessToken: string,
+    request: BulkGetMediaItemsByIdsRequest,
+  ): Observable<Result<BulkGetMediaItemsByIdsResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/bulk-get`;
+
+    return this.httpClient
+      .post<RawListMediaItemsResponse>(url, request, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

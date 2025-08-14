@@ -10,20 +10,20 @@ import {
   SortBy,
   SortByDirection,
   SortByField
-} from '../../../../src/services/metadata_store/MediaItemsRepository';
+} from '../../../../src/services/metadata_store/MediaItemsStore';
 import {
-  MediaItemsRepositoryImpl,
+  DistributedMediaItemsStore,
   sortMediaItem
-} from '../../../../src/services/metadata_store/mongodb/MediaItemsRepositoryImpl';
-import { InMemoryMongoDbClientsRepository } from '../../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+} from '../../../../src/services/metadata_store/mongodb/DistributedMediaItemsStore';
+import { MongoDbMediaItemsStore } from '../../../../src/services/metadata_store/mongodb/MongoDbMediaItemsStore';
 
-describe('MediaItemsRepositoryImpl', () => {
+describe('DistributedMediaItemsStore', () => {
   let mongoServer1: MongoMemoryServer;
   let mongoServer2: MongoMemoryServer;
   let mongoClient1: MongoClient;
   let mongoClient2: MongoClient;
 
-  let mediaItemsRepo: MediaItemsRepositoryImpl;
+  let mediaItemsRepo: DistributedMediaItemsStore;
 
   beforeAll(async () => {
     // Start the in-memory MongoDB server
@@ -32,11 +32,10 @@ describe('MediaItemsRepositoryImpl', () => {
     mongoClient1 = await MongoClient.connect(mongoServer1.getUri(), {});
     mongoClient2 = await MongoClient.connect(mongoServer2.getUri(), {});
 
-    const mongoDbClientsRepo = new InMemoryMongoDbClientsRepository([
-      ['client1', mongoClient1],
-      ['client2', mongoClient2]
+    mediaItemsRepo = new DistributedMediaItemsStore([
+      new MongoDbMediaItemsStore('client1', mongoClient1),
+      new MongoDbMediaItemsStore('client2', mongoClient2)
     ]);
-    mediaItemsRepo = new MediaItemsRepositoryImpl(mongoDbClientsRepo);
   });
 
   afterEach(async () => {
@@ -62,6 +61,14 @@ describe('MediaItemsRepositoryImpl', () => {
       await mongoServer2.stop({ force: true });
     }
   }, 10000);
+
+  describe('getStoreId', () => {
+    it('should throw an error', () => {
+      expect(() => mediaItemsRepo.getClientId()).toThrow(
+        'Cannot get client ID from this repo'
+      );
+    });
+  });
 
   describe('getMediaItemById', () => {
     const mediaItemId: MediaItemId = {

@@ -21,7 +21,7 @@ describe('ChatsEffects', () => {
   beforeEach(() => {
     chatAgentServiceSpy = jasmine.createSpyObj('ChatAgentService', [
       'clearMemory',
-      'getAgentResponseStream',
+      'getAgentResponse',
     ]);
 
     TestBed.configureTestingModule({
@@ -48,11 +48,9 @@ describe('ChatsEffects', () => {
   });
 
   describe('sendMessage$', () => {
-    it('should call getAgentResponseStream and dispatch addOrUpdateBotMessage actions', () => {
-      const botMessage: BotMessage = { content: 'Hi there' };
-      chatAgentServiceSpy.getAgentResponseStream.and.returnValue(
-        of(botMessage),
-      );
+    it('should call getAgentResponse and dispatch addOrUpdateBotMessage actions', () => {
+      const botMessage: BotMessage = { content: 'Hi there', mediaItemIds: [] };
+      chatAgentServiceSpy.getAgentResponse.and.returnValue(of(botMessage));
 
       actions$ = of(chatActions.sendUserMessage({ userInput: 'Hi' }));
 
@@ -61,9 +59,7 @@ describe('ChatsEffects', () => {
         actions.push(action);
       });
 
-      expect(chatAgentServiceSpy.getAgentResponseStream).toHaveBeenCalledWith(
-        'Hi',
-      );
+      expect(chatAgentServiceSpy.getAgentResponse).toHaveBeenCalledWith('Hi');
       expect(actions[0]).toEqual(
         jasmine.objectContaining({
           id: jasmine.any(String),
@@ -76,6 +72,7 @@ describe('ChatsEffects', () => {
           id: jasmine.any(String),
           botMessage: toSuccess({
             content: 'Hi there',
+            mediaItemIds: [],
           }),
           type: '[Chats] Adds or updates a bot message',
         }),

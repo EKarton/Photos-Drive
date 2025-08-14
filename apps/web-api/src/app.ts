@@ -18,14 +18,16 @@ import { ConfigStoreFromMongoDb } from './services/config_store/ConfigStoreFromM
 import { HeatmapGenerator } from './services/maps_store/HeatmapGenerator';
 import { MapCellsRepository } from './services/maps_store/MapCellsRepository';
 import { MapCellsRepositoryImpl } from './services/maps_store/mongodb/MapCellsRepositoryImpl';
-import { AlbumsRepository } from './services/metadata_store/AlbumsRepository';
-import { MediaItemsRepository } from './services/metadata_store/MediaItemsRepository';
-import { AlbumsRepositoryImpl } from './services/metadata_store/mongodb/AlbumsRepositoryImpl';
-import { MediaItemsRepositoryImpl } from './services/metadata_store/mongodb/MediaItemsRepositoryImpl';
+import { AlbumsStore } from './services/metadata_store/AlbumsStore';
+import { MediaItemsStore } from './services/metadata_store/MediaItemsStore';
+import { DistributedAlbumsStore } from './services/metadata_store/mongodb/DistributedAlbumsStore';
+import { DistributedMediaItemsStore } from './services/metadata_store/mongodb/DistributedMediaItemsStore';
+import { MongoDbAlbumsStore } from './services/metadata_store/mongodb/MongoDbAlbumsStore';
 import {
-  MongoDbClientsRepository,
-  MongoDbClientsRepositoryImpl
-} from './services/metadata_store/mongodb/MongoDbClientsRepository';
+  MongoDbClientsStore,
+  MongoDbClientsStoreImpl
+} from './services/metadata_store/mongodb/MongoDbClientsStore';
+import { MongoDbMediaItemsStore } from './services/metadata_store/mongodb/MongoDbMediaItemsStore';
 import { OpenCLIPImageEmbedder } from './services/ml/models/OpenCLIPImageEmbeddings';
 import { configToVectorStore } from './services/ml/vector_stores/configToVectorStore';
 import { DistributedVectorStore } from './services/ml/vector_stores/DistributedVectorStore';
@@ -36,10 +38,10 @@ export class App {
   private appConfig: AppConfig;
 
   private config?: ConfigStore;
-  private mongoDbClientsRepository?: MongoDbClientsRepository;
+  private mongoDbClientsRepository?: MongoDbClientsStore;
   private gPhotosClientsRepository?: GPhotosClientsRepository;
-  private albumsRepository?: AlbumsRepository;
-  private mediaItemsRepository?: MediaItemsRepository;
+  private albumsStore?: AlbumsStore;
+  private mediaItemsStore?: MediaItemsStore;
   private mapCellsRepository?: MapCellsRepository;
   private heatmapGenerator?: HeatmapGenerator;
   private imageEmbedder?: OpenCLIPImageEmbedder;
@@ -64,14 +66,26 @@ export class App {
     }
 
     this.mongoDbClientsRepository =
-      await MongoDbClientsRepositoryImpl.buildFromVault(this.config);
+      await MongoDbClientsStoreImpl.buildFromVault(this.config);
     this.gPhotosClientsRepository =
       await GPhotosClientsRepository.buildFromVault(this.config);
-    this.albumsRepository = new AlbumsRepositoryImpl(
+
+    this.albumsStore = new DistributedAlbumsStore(
       this.mongoDbClientsRepository
+        .listClients()
+        .map(
+          ([clientId, mongoClient]) =>
+            new MongoDbAlbumsStore(clientId, mongoClient)
+        )
     );
-    this.mediaItemsRepository = new MediaItemsRepositoryImpl(
+
+    this.mediaItemsStore = new DistributedMediaItemsStore(
       this.mongoDbClientsRepository
+        .listClients()
+        .map(
+          ([clientId, mongoClient]) =>
+            new MongoDbMediaItemsStore(clientId, mongoClient)
+        )
     );
     this.mapCellsRepository = new MapCellsRepositoryImpl(
       this.mongoDbClientsRepository
@@ -103,15 +117,11 @@ export class App {
     this.app.use(healthRouter());
     this.app.use(await authRouter());
     this.app.use(
-      await albumsRouter(
-        rootAlbumId,
-        this.albumsRepository,
-        this.mediaItemsRepository
-      )
+      await albumsRouter(rootAlbumId, this.albumsStore, this.mediaItemsStore)
     );
     this.app.use(
       await mediaItemsRouter(
-        this.mediaItemsRepository,
+        this.mediaItemsStore,
         this.vectorStore,
         this.imageEmbedder
       )

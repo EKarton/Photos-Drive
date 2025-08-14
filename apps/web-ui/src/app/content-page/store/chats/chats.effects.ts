@@ -36,7 +36,7 @@ export class ChatsEffects {
       ofType(sendUserMessage),
       switchMap(({ userInput }) => {
         const messageId = crypto.randomUUID();
-        return this.chatAgentService.getAgentResponseStream(userInput).pipe(
+        return this.chatAgentService.getAgentResponse(userInput).pipe(
           toResult(),
           startWith(toPending<BotMessage>()),
           map((botMessage: Result<BotMessage>) =>

@@ -15,8 +15,17 @@ export interface ListMediaItemsSortBy {
   direction: ListMediaItemsSortDirection;
 }
 
+export interface ListMediaItemsLocationRange {
+  latitude: number;
+  longitude: number;
+  range: number;
+}
+
 export interface ListMediaItemsRequest {
   albumId?: string;
+  earliestDateTaken?: Date;
+  latestDateTaken?: Date;
+  locationRange?: ListMediaItemsLocationRange;
   pageSize?: number;
   pageToken?: string;
   sortBy?: ListMediaItemsSortBy;

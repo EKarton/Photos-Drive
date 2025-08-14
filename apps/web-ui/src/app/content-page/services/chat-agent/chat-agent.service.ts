@@ -1,14 +1,19 @@
 import { inject, Injectable } from '@angular/core';
+import { StructuredOutputParser } from '@langchain/core/output_parsers';
 import { Runnable } from '@langchain/core/runnables';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { Observable, throwError } from 'rxjs';
+import { z } from 'zod';
 
 import { CHAT_MODEL, MEMORY_SAVER } from '../../content-page.tokens';
+import { FindMediaItemsTool } from './tools/find-media-items';
 import { CurrentTimeTool } from './tools/get-current-time';
+import { SearchMediaItemsByTextTool } from './tools/search-media-items-by-text';
 
 /** The response from the LLM */
 export interface BotMessage {
   content: string;
+  mediaItemIds: string[];
   reasoning?: BotMessageReasoning[];
 }
 
@@ -21,6 +26,21 @@ export interface BotMessageReasoning {
 /** The default thread ID */
 const DEFAULT_THREAD_ID = 'default_thread';
 
+export const ResponseFormatSchema = z.object({
+  output: z
+    .string()
+    .describe(
+      "The human-readable answer to the user's question. If there are media items to show to the user, only include the count of the media items to display in the output field",
+    ),
+  mediaItemIds: z
+    .array(z.string())
+    .describe(
+      'A list of media item IDs for each media item to show to the user',
+    ),
+});
+
+export type ResponseFormatType = z.infer<typeof ResponseFormatSchema>;
+
 /** The chat agent used to interface with the UI */
 @Injectable({ providedIn: 'root' })
 export class ChatAgentService {
@@ -29,16 +49,27 @@ export class ChatAgentService {
   private readonly memorySaver = inject(MEMORY_SAVER);
   private readonly chatGoogleGenerativeAI = inject(CHAT_MODEL);
   private readonly getCurrentTimeTool = inject(CurrentTimeTool);
+  private readonly searchMediaItemsForTextTool = inject(
+    SearchMediaItemsByTextTool,
+  );
+  private readonly findMediaItemsTool = inject(FindMediaItemsTool);
 
   constructor() {
     this.loadAgent();
   }
 
   async loadAgent() {
+    const parser = StructuredOutputParser.fromZodSchema(ResponseFormatSchema);
+
     this.agent = await createReactAgent({
       llm: this.chatGoogleGenerativeAI,
-      tools: [this.getCurrentTimeTool],
+      tools: [
+        this.getCurrentTimeTool,
+        this.searchMediaItemsForTextTool,
+        this.findMediaItemsTool,
+      ],
       checkpointSaver: this.memorySaver,
+      responseFormat: parser,
     });
   }
 
@@ -46,7 +77,7 @@ export class ChatAgentService {
     this.memorySaver.deleteThread(DEFAULT_THREAD_ID);
   }
 
-  getAgentResponseStream(userMessage: string): Observable<BotMessage> {
+  getAgentResponse(userMessage: string): Observable<BotMessage> {
     if (!this.agent) {
       return throwError(() => new Error('Agent executor not initialized yet'));
     }
@@ -54,40 +85,26 @@ export class ChatAgentService {
     return new Observable<BotMessage>((observer) => {
       (async () => {
         try {
-          const stream = await this.agent!.streamEvents(
+          const response = await this.agent!.invoke(
             {
-              messages: [{ role: 'user', content: userMessage }],
+              messages: [
+                {
+                  role: 'user',
+                  content: userMessage,
+                },
+              ],
             },
             {
-              version: 'v2',
               configurable: {
                 thread_id: DEFAULT_THREAD_ID,
               },
             },
           );
 
-          let content = '';
-          const reasoning: BotMessageReasoning[] = [];
-          for await (const event of stream) {
-            switch (event.event) {
-              case 'on_chain_end':
-              case 'on_chat_model_end':
-              case 'on_tool_end':
-              case 'on_on_llm_end':
-              case 'on_prompt_end':
-              case 'on_retriever_end':
-                reasoning.push({
-                  id: event.run_id,
-                  content: `Called ${event.event}: ${event.name}`,
-                });
-                break;
-              case 'on_chat_model_stream':
-                content += event.data.chunk.content;
-                break;
-            }
-            observer.next({ content, reasoning: [...reasoning] });
-          }
-
+          observer.next({
+            content: response.structuredResponse.output,
+            mediaItemIds: response.structuredResponse.mediaItemIds,
+          });
           observer.complete();
         } catch (error) {
           observer.error(error);

@@ -14,7 +14,7 @@ import {
   mediaIdToString,
   MediaItemId
 } from '../../../src/services/metadata_store/MediaItems';
-import { InMemoryMongoDbClientsRepository } from '../../../src/services/metadata_store/mongodb/MongoDbClientsRepository';
+import { InMemoryMongoDbClientsRepository } from '../../../src/services/metadata_store/mongodb/MongoDbClientsStore';
 
 const MEDIA_ITEM_ID_1: MediaItemId = {
   clientId: 'client1',

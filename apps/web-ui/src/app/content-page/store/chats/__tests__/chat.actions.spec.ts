@@ -27,6 +27,7 @@ describe('Chat Actions', () => {
     const id = 'bot-message-1';
     const botMessage: BotMessage = {
       content: 'Hi there!',
+      mediaItemIds: [],
       reasoning: [{ id: 'r1', content: 'Reason 1' }],
     };
     const result = toSuccess(botMessage);

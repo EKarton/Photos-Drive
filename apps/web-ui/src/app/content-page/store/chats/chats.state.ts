@@ -12,6 +12,7 @@ export interface Message {
 
 export interface MessageContent {
   output: string;
+  mediaItemIds: string[];
   reasoning?: Reasoning[];
 }
 

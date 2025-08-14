@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import logging
 from typing import Any, Dict, Mapping, cast
 
 from bson import Binary
@@ -30,19 +31,43 @@ from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     MongoDbClientsRepository,
 )
 
+logger = logging.getLogger(__name__)
+
+
+LOCATION_INDEX_NAME = 'location_index'
+
 
 class MediaItemsRepositoryImpl(MediaItemsRepository):
     """Implementation class for MediaItemsRepository."""
 
-    def __init__(self, mongodb_clients_repository: MongoDbClientsRepository):
+    def __init__(
+        self,
+        mongodb_clients_repository: MongoDbClientsRepository,
+        location_index_name=LOCATION_INDEX_NAME,
+    ):
         """
         Creates a MediaItemsRepository
 
         Args:
             mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
                 clients that stores albums.
+            location_index_name (string): The index name for doing location queries
         """
         self._mongodb_clients_repository = mongodb_clients_repository
+
+        for _, client in self._mongodb_clients_repository.get_all_clients():
+            collection = client["photos_drive"]["media_items"]
+            if not self.__has_location_index(collection, location_index_name):
+                self.__create_location_index(collection, location_index_name)
+
+    def __has_location_index(self, collection, index_name):
+        return any(
+            [index["name"] == index_name for index in collection.list_search_indexes()]
+        )
+
+    def __create_location_index(self, collection, index_name):
+        collection.create_index([("location", "2dsphere")], name=index_name)
+        logger.debug(f'Created location index {index_name}')
 
     def get_media_item_by_id(self, id: MediaItemId) -> MediaItem:
         client = self._mongodb_clients_repository.get_client_by_id(id.client_id)

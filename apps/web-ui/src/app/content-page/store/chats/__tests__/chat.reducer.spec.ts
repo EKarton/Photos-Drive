@@ -8,7 +8,11 @@ describe('Chat Reducer', () => {
     const prevState: ChatsState = {
       ...initialState,
       messages: [
-        { id: '1', type: 'User', content: toSuccess({ output: 'hi' }) },
+        {
+          id: '1',
+          type: 'User',
+          content: toSuccess({ output: 'hi', mediaItemIds: [] }),
+        },
       ],
     };
 
@@ -30,12 +34,17 @@ describe('Chat Reducer', () => {
       type: 'User',
       content: toSuccess({
         output: userInput,
+        mediaItemIds: [],
       }),
     });
   });
 
   it('should handle addOrUpdateBotMessage by adding a new Bot message if id not found', () => {
-    const botMessage = { content: 'Hello from bot', reasoning: [] };
+    const botMessage = {
+      content: 'Hello from bot',
+      mediaItemIds: [],
+      reasoning: [],
+    };
     const id = 'bot-msg-1';
     const action = chatActions.addOrUpdateBotMessage({
       id,
@@ -50,6 +59,7 @@ describe('Chat Reducer', () => {
       type: 'Bot',
       content: toSuccess({
         output: botMessage.content,
+        mediaItemIds: [],
         reasoning: [],
       }),
     });
@@ -62,18 +72,27 @@ describe('Chat Reducer', () => {
         {
           id: 'user-msg-1',
           type: 'User',
-          content: toSuccess({ output: 'What is water', reasoning: [] }),
+          content: toSuccess({
+            output: 'What is water',
+            mediaItemIds: [],
+            reasoning: [],
+          }),
         },
         {
           id: 'bot-msg-1',
           type: 'Bot',
-          content: toSuccess({ output: 'Old content', reasoning: [] }),
+          content: toSuccess({
+            output: 'Old content',
+            mediaItemIds: [],
+            reasoning: [],
+          }),
         },
       ],
     };
 
     const updatedBotMessage = {
       content: 'Updated content',
+      mediaItemIds: [],
       reasoning: [{ id: 'r1', content: 'some reasoning' }],
     };
     const action = chatActions.addOrUpdateBotMessage({
@@ -89,6 +108,7 @@ describe('Chat Reducer', () => {
       type: 'User',
       content: toSuccess({
         output: 'What is water',
+        mediaItemIds: [],
         reasoning: [],
       }),
     });
@@ -97,6 +117,7 @@ describe('Chat Reducer', () => {
       type: 'Bot',
       content: toSuccess({
         output: updatedBotMessage.content,
+        mediaItemIds: [],
         reasoning: updatedBotMessage.reasoning,
       }),
     });

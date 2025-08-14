@@ -19,9 +19,19 @@ export interface SortBy {
   direction: SortByDirection;
 }
 
+/** Within location search definition for {@code ListMediaItemsRequest} */
+export interface WithinLocation {
+  latitude: number;
+  longitude: number;
+  range: number;
+}
+
 /** Request params for {@code MediaItemsRepository.listMediaItems} */
 export interface ListMediaItemsRequest {
   albumId?: AlbumId;
+  earliestDateTaken?: Date;
+  latestDateTaken?: Date;
+  withinLocation?: WithinLocation;
   pageSize: number;
   pageToken?: string;
   sortBy: SortBy;
@@ -34,7 +44,9 @@ export type ListMediaItemsResponse = {
 };
 
 /** A class that stores the media items from the database. */
-export interface MediaItemsRepository {
+export interface MediaItemsStore {
+  getClientId(): string;
+
   getMediaItemById(
     id: MediaItemId,
     options?: { abortController?: AbortController }
