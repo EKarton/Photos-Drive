@@ -90,10 +90,10 @@ export class SearchMediaItemsForTextTool extends DynamicStructuredTool {
             .pipe(fromResult()),
         );
 
+        const mediaItems = searchMediaItemsByTextResponse.mediaItems;
+
         return {
-          media_items: searchMediaItemsByTextResponse.mediaItems.map(
-            domainToToolMediaItem,
-          ),
+          media_items: mediaItems.map(domainToToolMediaItem),
         };
       },
     });

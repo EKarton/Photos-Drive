@@ -96,8 +96,10 @@ export class FindPhotosTool extends DynamicStructuredTool {
             .pipe(fromResult()),
         );
 
+        const mediaItems = response.mediaItems;
+
         return {
-          media_items: response.mediaItems.map(domainToToolMediaItem),
+          media_items: mediaItems.map(domainToToolMediaItem),
         };
       },
     });

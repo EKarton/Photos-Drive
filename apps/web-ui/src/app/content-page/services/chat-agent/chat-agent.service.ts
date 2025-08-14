@@ -29,12 +29,12 @@ const DEFAULT_THREAD_ID = 'default_thread';
 export const ResponseFormatSchema = z.object({
   output: z
     .string()
-    .describe(
-      "The answer to the user's question. Do not show the list of file paths for each media item to show to the user in this field since it should be in the filePaths field.",
-    ),
-  filePaths: z
+    .describe("The human-readable answer to the user's question"),
+  mediaItemIds: z
     .array(z.string())
-    .describe('A list of file paths for each media item to show to the user'),
+    .describe(
+      'A list of media item IDs for each media item to show to the user',
+    ),
 });
 
 export type ResponseFormatType = z.infer<typeof ResponseFormatSchema>;
@@ -101,7 +101,7 @@ export class ChatAgentService {
 
           observer.next({
             content: response.structuredResponse.output,
-            mediaItemIds: response.structuredResponse.filePaths,
+            mediaItemIds: response.structuredResponse.mediaItemIds,
           });
           observer.complete();
         } catch (error) {

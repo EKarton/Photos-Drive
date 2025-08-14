@@ -7,6 +7,10 @@ import { Result } from '../../../shared/results/results';
 import { toResult } from '../../../shared/results/rxjs/toResult';
 import { GetAlbumDetailsResponse } from './types/album';
 import {
+  BulkGetMediaItemsByIdsRequest,
+  BulkGetMediaItemsByIdsResponse,
+} from './types/bulk-get-media-items-by-ids';
+import {
   GetGPhotosMediaItemDetailsRequest,
   GetGPhotosMediaItemDetailsResponse,
 } from './types/gphotos-media-item';
@@ -83,7 +87,7 @@ export class WebApiService {
     accessToken: string,
     request: ListMediaItemsRequest,
   ): Observable<Result<ListMediaItemsResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/media-items`;
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/search`;
 
     let params = new HttpParams();
     if (request.albumId) {
@@ -191,7 +195,7 @@ export class WebApiService {
     accessToken: string,
     request: SearchMediaItemsByTextRequest,
   ): Observable<Result<SearchMediaItemsByTextResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/media-items/search`;
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/vector-search`;
     const body = {
       query: request.text,
       earliestDateTaken: request.earliestDateTaken
@@ -207,6 +211,26 @@ export class WebApiService {
 
     return this.httpClient
       .post<RawSearchMediaItemsByTextResponse>(url, body, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .pipe(
+        map((res) => ({
+          mediaItems: res.mediaItems.map(this.convertRawMediaItemToMediaItem),
+        })),
+        toResult(),
+      );
+  }
+
+  bulkGetMediaItemsByIds(
+    accessToken: string,
+    request: BulkGetMediaItemsByIdsRequest,
+  ): Observable<Result<BulkGetMediaItemsByIdsResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/bulk-get`;
+
+    return this.httpClient
+      .post<RawListMediaItemsResponse>(url, request, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
