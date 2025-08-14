@@ -1,5 +1,6 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import { addRequestAbortController } from '../middlewares/abort-controller';
 import { verifyAuthentication } from '../middlewares/authentication';
 import { verifyAuthorization } from '../middlewares/authorization';
 import {
@@ -35,6 +36,7 @@ export default async function (
     '/api/v1/media-items/search',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const albumId = req.query['albumId'] as string;
       const pageSize = Number(req.query['pageSize']);
@@ -46,9 +48,6 @@ export default async function (
       const latitudeRange = Number(req.query['latitude']);
       const longitudeRange = Number(req.query['longitude']);
       const locationRange = Number(req.query['range']);
-
-      const abortController = new AbortController();
-      req.on('close', () => abortController.abort());
 
       const listMediaItemsRequest: ListMediaItemsRequest = {
         albumId: albumId ? convertStringToAlbumId(albumId) : undefined,
@@ -81,7 +80,7 @@ export default async function (
       };
       const response = await mediaItemsRepo.listMediaItems(
         listMediaItemsRequest,
-        { abortController }
+        { abortController: req.abortController }
       );
 
       return res.status(200).json({
@@ -97,6 +96,7 @@ export default async function (
     '/api/v1/media-items/:id',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const rawMediaItemId = req.params.id;
       const rawMediaItemIdParts = rawMediaItemId.split(':');
@@ -106,11 +106,8 @@ export default async function (
       };
 
       try {
-        const abortController = new AbortController();
-        req.on('close', () => abortController.abort());
-
         const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId, {
-          abortController
+          abortController: req.abortController
         });
         return res.status(200).json(serializeMediaItem(mediaItem));
       } catch (error) {
@@ -133,6 +130,7 @@ export default async function (
     '/api/v1/media-items/vector-search',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const {
         query,
@@ -182,9 +180,6 @@ export default async function (
         );
       }
 
-      const abortController = new AbortController();
-      req.on('close', () => abortController.abort());
-
       const embedding = await imageEmbedder.embedText(query);
       const searchResult = await vectorStore.getReleventMediaItemEmbeddings(
         {
@@ -194,11 +189,11 @@ export default async function (
           withinMediaItemIds: mediaItemIdObjects,
           topK: topK ?? 10
         },
-        { abortController }
+        { abortController: req.abortController }
       );
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
         searchResult.map((result) => result.mediaItemId),
-        { abortController }
+        { abortController: req.abortController }
       );
 
       return res.status(200).json({
@@ -211,6 +206,7 @@ export default async function (
     '/api/v1/media-items/bulk-get',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const mediaItemIds: string[] = req.body['mediaItemIds'] as string[];
 
@@ -220,12 +216,9 @@ export default async function (
         });
       }
 
-      const abortController = new AbortController();
-      req.on('close', () => abortController.abort());
-
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
         mediaItemIds.map(convertStringToMediaItemId),
-        { abortController }
+        { abortController: req.abortController }
       );
 
       return res.status(200).json({

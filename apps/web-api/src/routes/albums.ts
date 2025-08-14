@@ -1,5 +1,6 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import { addRequestAbortController } from '../middlewares/abort-controller';
 import { verifyAuthentication } from '../middlewares/authentication';
 import { verifyAuthorization } from '../middlewares/authorization';
 import {
@@ -30,6 +31,7 @@ export default async function (
     '/api/v1/albums/:albumId',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       try {
         const inputAlbumId = req.params.albumId;
@@ -41,13 +43,16 @@ export default async function (
           albumId = convertStringToAlbumId(inputAlbumId);
         }
 
-        const abortController = new AbortController();
-        req.on('close', () => abortController.abort());
-
         const [album, numChildAlbums, numMediaItems] = await Promise.all([
-          albumsRepo.getAlbumById(albumId, { abortController }),
-          albumsRepo.getNumAlbumsInAlbum(albumId, { abortController }),
-          mediaItemsRepo.getNumMediaItemsInAlbum(albumId, { abortController })
+          albumsRepo.getAlbumById(albumId, {
+            abortController: req.abortController
+          }),
+          albumsRepo.getNumAlbumsInAlbum(albumId, {
+            abortController: req.abortController
+          }),
+          mediaItemsRepo.getNumMediaItemsInAlbum(albumId, {
+            abortController: req.abortController
+          })
         ]);
 
         return res
@@ -70,6 +75,7 @@ export default async function (
     '/api/v1/albums',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const pageSize = Number(req.query['pageSize']);
       const pageToken = req.query['pageToken'] as string;
@@ -86,9 +92,6 @@ export default async function (
         }
       }
 
-      const abortController = new AbortController();
-      req.on('close', () => abortController.abort());
-
       const listAlbumsRequest: ListAlbumsRequest = {
         parentAlbumId,
         pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
@@ -103,7 +106,7 @@ export default async function (
         }
       };
       const response = await albumsRepo.listAlbums(listAlbumsRequest, {
-        abortController
+        abortController: req.abortController
       });
 
       const [mediaItemCounts, childAlbumCounts] = await Promise.all([
