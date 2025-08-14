@@ -6,9 +6,9 @@ import { Observable, throwError } from 'rxjs';
 import { z } from 'zod';
 
 import { CHAT_MODEL, MEMORY_SAVER } from '../../content-page.tokens';
-import { FindPhotosTool } from './tools/find-media-items';
+import { FindMediaItemsTool } from './tools/find-media-items';
 import { CurrentTimeTool } from './tools/get-current-time';
-import { SearchMediaItemsForTextTool } from './tools/search-media-items-by-text';
+import { SearchMediaItemsByTextTool } from './tools/search-media-items-by-text';
 
 /** The response from the LLM */
 export interface BotMessage {
@@ -50,9 +50,9 @@ export class ChatAgentService {
   private readonly chatGoogleGenerativeAI = inject(CHAT_MODEL);
   private readonly getCurrentTimeTool = inject(CurrentTimeTool);
   private readonly searchMediaItemsForTextTool = inject(
-    SearchMediaItemsForTextTool,
+    SearchMediaItemsByTextTool,
   );
-  private readonly findMediaItemsTool = inject(FindPhotosTool);
+  private readonly findMediaItemsTool = inject(FindMediaItemsTool);
 
   constructor() {
     this.loadAgent();

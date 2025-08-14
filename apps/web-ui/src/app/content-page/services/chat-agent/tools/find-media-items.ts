@@ -51,7 +51,7 @@ export type FindPhotosToolOutputType = z.infer<
 >;
 
 @Injectable({ providedIn: 'root' })
-export class FindPhotosTool extends DynamicStructuredTool {
+export class FindMediaItemsTool extends DynamicStructuredTool {
   private readonly store = inject(Store);
   private readonly webApiService = inject(WebApiService);
 

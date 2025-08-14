@@ -49,7 +49,7 @@ describe('ChatsEffects', () => {
 
   describe('sendMessage$', () => {
     it('should call getAgentResponseStream and dispatch addOrUpdateBotMessage actions', () => {
-      const botMessage: BotMessage = { content: 'Hi there' };
+      const botMessage: BotMessage = { content: 'Hi there', mediaItemIds: [] };
       chatAgentServiceSpy.getAgentResponseStream.and.returnValue(
         of(botMessage),
       );

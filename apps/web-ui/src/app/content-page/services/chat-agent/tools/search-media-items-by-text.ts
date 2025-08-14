@@ -12,7 +12,6 @@ import {
   MediaItemModelSchema,
 } from './models/media-items';
 
-// --- Tool Input ---
 export const SearchPhotosByTextToolInputSchema = z.object({
   query: z
     .string()
@@ -38,11 +37,11 @@ export const SearchPhotosByTextToolInputSchema = z.object({
     .default(5)
     .describe('Maximum number of similar photos to retrieve'),
 });
+
 export type SearchPhotosByTextToolInputType = z.infer<
   typeof SearchPhotosByTextToolInputSchema
 >;
 
-// --- Tool Output ---
 export const SearchPhotosByTextToolOutputSchema = z.object({
   media_items: z.array(MediaItemModelSchema).describe('List of similar photos'),
 });
@@ -51,9 +50,8 @@ export type SearchPhotosByTextToolOutputType = z.infer<
   typeof SearchPhotosByTextToolOutputSchema
 >;
 
-// --- Tool Implementation ---
 @Injectable({ providedIn: 'root' })
-export class SearchMediaItemsForTextTool extends DynamicStructuredTool {
+export class SearchMediaItemsByTextTool extends DynamicStructuredTool {
   private readonly store = inject(Store);
   private readonly webApiService = inject(WebApiService);
 
