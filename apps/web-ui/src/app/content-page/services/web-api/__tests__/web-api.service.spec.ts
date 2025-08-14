@@ -188,7 +188,7 @@ describe('WebApiService', () => {
       });
 
       const req = httpMock.expectOne(
-        `${environment.webApiEndpoint}/api/v1/media-items`,
+        `${environment.webApiEndpoint}/api/v1/media-items/search`,
       );
 
       expect(req.request.method).toBe('GET');
@@ -201,8 +201,17 @@ describe('WebApiService', () => {
     });
 
     it('should include query params when provided', () => {
+      const earliestDateTaken = new Date(2025, 4, 2);
+      const latestDateTaken = new Date(2025, 4, 2);
       const request: ListMediaItemsRequest = {
         albumId: 'album123',
+        earliestDateTaken,
+        latestDateTaken,
+        locationRange: {
+          latitude: -49,
+          longitude: 90,
+          range: 100,
+        },
         pageSize: 10,
         pageToken: 'page123',
         sortBy: {
@@ -219,12 +228,18 @@ describe('WebApiService', () => {
 
       const req = httpMock.expectOne((req) => {
         return (
-          req.url === `${environment.webApiEndpoint}/api/v1/media-items` &&
+          req.url ===
+            `${environment.webApiEndpoint}/api/v1/media-items/search` &&
           req.params.get('albumId') === 'album123' &&
           req.params.get('pageSize') === '10' &&
           req.params.get('pageToken') === 'page123' &&
           req.params.get('sortBy') === 'id' &&
-          req.params.get('sortDir') === 'desc'
+          req.params.get('sortDir') === 'desc' &&
+          req.params.get('earliest') === earliestDateTaken.toISOString() &&
+          req.params.get('latest') === latestDateTaken.toISOString() &&
+          req.params.get('latitude') === '-49' &&
+          req.params.get('longitude') === '90' &&
+          req.params.get('range') === '100'
         );
       });
 
@@ -430,7 +445,7 @@ describe('WebApiService', () => {
         });
 
       const req = httpMock.expectOne(
-        `${environment.webApiEndpoint}/api/v1/media-items/search`,
+        `${environment.webApiEndpoint}/api/v1/media-items/vector-search`,
       );
 
       expect(req.request.method).toBe('POST');
@@ -469,7 +484,7 @@ describe('WebApiService', () => {
         });
 
       const req = httpMock.expectOne(
-        `${environment.webApiEndpoint}/api/v1/media-items/search`,
+        `${environment.webApiEndpoint}/api/v1/media-items/vector-search`,
       );
 
       expect(req.request.method).toBe('POST');
@@ -478,10 +493,107 @@ describe('WebApiService', () => {
       );
       expect(req.request.body).toEqual({
         query: 'mountains',
-        earliestDateTaken: earliestDate.toDateString(),
-        latestDateTaken: latestDate.toDateString(),
+        earliestDateTaken: earliestDate.toISOString(),
+        latestDateTaken: latestDate.toISOString(),
         withinMediaItemIds: withinMediaItemIds.join(','),
       });
+
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('bulkGetMediaItemsByIds', () => {
+    const accessToken = 'fake-token';
+
+    it('should make a POST request and map media items correctly', () => {
+      const request = {
+        mediaItemIds: ['1', '2'],
+      };
+
+      const mockResponse = {
+        mediaItems: [
+          {
+            id: '1',
+            fileName: 'photo1.jpg',
+            hashCode: 'abc1',
+            gPhotosMediaItemId: 'g1',
+            width: 100,
+            height: 200,
+            dateTaken: '2024-01-01T00:00:00.000Z',
+          },
+          {
+            id: '2',
+            fileName: 'photo2.jpg',
+            hashCode: 'abc2',
+            gPhotosMediaItemId: 'g2',
+            width: 300,
+            height: 400,
+            dateTaken: '2024-02-01T00:00:00.000Z',
+          },
+        ],
+      };
+
+      service
+        .bulkGetMediaItemsByIds(accessToken, request)
+        .subscribe((response) => {
+          expect(response).toEqual(
+            toSuccess({
+              mediaItems: [
+                {
+                  id: '1',
+                  fileName: 'photo1.jpg',
+                  hashCode: 'abc1',
+                  gPhotosMediaItemId: 'g1',
+                  location: undefined,
+                  width: 100,
+                  height: 200,
+                  dateTaken: new Date('2024-01-01T00:00:00.000Z'),
+                },
+                {
+                  id: '2',
+                  fileName: 'photo2.jpg',
+                  hashCode: 'abc2',
+                  gPhotosMediaItemId: 'g2',
+                  location: undefined,
+                  width: 300,
+                  height: 400,
+                  dateTaken: new Date('2024-02-01T00:00:00.000Z'),
+                },
+              ],
+            }),
+          );
+        });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/api/v1/media-items/bulk-get`,
+      );
+      expect(req.request.method).toBe('POST');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+      expect(req.request.body).toEqual(request);
+
+      req.flush(mockResponse);
+    });
+
+    it('should handle empty mediaItemIds array', () => {
+      const request = { mediaItemIds: [] };
+      const mockResponse = { mediaItems: [] };
+
+      service
+        .bulkGetMediaItemsByIds(accessToken, request)
+        .subscribe((response) => {
+          expect(response).toEqual(toSuccess({ mediaItems: [] }));
+        });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/api/v1/media-items/bulk-get`,
+      );
+      expect(req.request.method).toBe('POST');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+      expect(req.request.body).toEqual(request);
 
       req.flush(mockResponse);
     });

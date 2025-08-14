@@ -2,13 +2,16 @@ import { TestBed } from '@angular/core/testing';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { MemorySaver } from '@langchain/langgraph/web';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { environment } from '../../../../../environments/environment';
+import { authState } from '../../../../auth/store';
 import { CHAT_MODEL, MEMORY_SAVER } from '../../../content-page.tokens';
+import { WebApiService } from '../../web-api/web-api.service';
 import { BotMessage, ChatAgentService } from '../chat-agent.service';
 
 class MockRunnable {
-  streamEvents = jasmine.createSpy('streamEvents');
+  invoke = jasmine.createSpy('invoke');
 }
 
 describe('ChatAgentService', () => {
@@ -29,11 +32,22 @@ describe('ChatAgentService', () => {
       new AIMessageChunk({ content: 'content' }),
     );
 
+    const webApiServiceSpy = jasmine.createSpyObj<WebApiService>(
+      'WebApiService',
+      ['searchMediaItemsByText'],
+    );
+
     TestBed.configureTestingModule({
       providers: [
         ChatAgentService,
         { provide: MEMORY_SAVER, useValue: mockMemorySaver },
         { provide: CHAT_MODEL, useValue: mockLLM },
+        provideMockStore({
+          selectors: [
+            { selector: authState.selectAuthToken, value: 'accessToken123' },
+          ],
+        }),
+        { provide: WebApiService, useValue: webApiServiceSpy },
       ],
     });
 
@@ -49,11 +63,11 @@ describe('ChatAgentService', () => {
     expect(mockMemorySaver.deleteThread).toHaveBeenCalledWith('default_thread');
   });
 
-  it('getAgentResponseStream should error if agent is not initialized', (done) => {
+  it('getAgentResponse should error if agent is not initialized', (done) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (service as any).agent = undefined;
 
-    service.getAgentResponseStream('hi').subscribe({
+    service.getAgentResponse('hi').subscribe({
       next: () => fail('should not emit'),
       error: (err) => {
         expect(err.message).toBe('Agent executor not initialized yet');
@@ -62,44 +76,43 @@ describe('ChatAgentService', () => {
     });
   });
 
-  it('getAgentResponseStream should emit content and reasoning and complete', (done) => {
-    async function* fakeStream() {
-      yield {
-        event: 'on_chat_model_stream',
-        data: { chunk: { content: 'hello' } },
-      };
-      yield { event: 'on_chain_end', run_id: 'run123', name: 'chainName' };
-    }
-
+  it('getAgentResponse should emit output and media item IDs and complete', (done) => {
     const mockRunnable = new MockRunnable();
-    mockRunnable.streamEvents.and.returnValue(Promise.resolve(fakeStream()));
+    mockRunnable.invoke.and.resolveTo({
+      structuredResponse: {
+        output: 'Hi',
+        mediaItemIds: ['client1:photo1', 'client2:photo2'],
+      },
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (service as any).agent = mockRunnable;
 
     const emitted: BotMessage[] = [];
-    service.getAgentResponseStream('hello').subscribe({
+    service.getAgentResponse('hello').subscribe({
       next: (msg) => emitted.push(msg),
       complete: () => {
         expect(emitted.length).toBeGreaterThan(0);
-        expect(emitted[0].content).toContain('hello');
-        expect(
-          emitted.some((m) => m.reasoning?.some((r) => r.id === 'run123')),
-        ).toBeTrue();
+        expect(emitted[0].content).toContain('Hi');
+        expect(emitted[0].mediaItemIds).toEqual([
+          'client1:photo1',
+          'client2:photo2',
+        ]);
+        expect(emitted[0].reasoning).toBeUndefined();
         done();
       },
       error: (err) => fail(err),
     });
   });
 
-  it('getAgentResponseStream should emit error when fake stream throws an error', (done) => {
+  it('getAgentResponse should emit error when fake stream throws an error', (done) => {
     const mockRunnable = new MockRunnable();
-    mockRunnable.streamEvents.and.returnValue(
+    mockRunnable.invoke.and.returnValue(
       Promise.reject(new Error('Random error')),
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (service as any).agent = mockRunnable;
 
-    service.getAgentResponseStream('hello').subscribe({
+    service.getAgentResponse('hello').subscribe({
       error: () => {
         done();
       },

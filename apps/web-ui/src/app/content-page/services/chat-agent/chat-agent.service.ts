@@ -77,7 +77,7 @@ export class ChatAgentService {
     this.memorySaver.deleteThread(DEFAULT_THREAD_ID);
   }
 
-  getAgentResponseStream(userMessage: string): Observable<BotMessage> {
+  getAgentResponse(userMessage: string): Observable<BotMessage> {
     if (!this.agent) {
       return throwError(() => new Error('Agent executor not initialized yet'));
     }

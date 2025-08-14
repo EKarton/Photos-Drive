@@ -9,8 +9,7 @@
     "start": "NODE_ENV=production node dist/server.js",
     "lint": "eslint . && prettier . --check",
     "lint:fix": "eslint . --fix && prettier . --write",
-    "test": "jest --runInBand",
-    "test:coverage": "jest --coverage --runInBand"
+    "test": "jest --coverage --runInBand"
   },
   "keywords": [],
   "author": "",

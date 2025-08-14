@@ -94,10 +94,10 @@ export class WebApiService {
       params = params.set('albumId', request.albumId);
     }
     if (request.earliestDateTaken) {
-      params = params.set('earliest', request.earliestDateTaken.toString());
+      params = params.set('earliest', request.earliestDateTaken.toISOString());
     }
     if (request.latestDateTaken) {
-      params = params.set('latest', request.latestDateTaken.toString());
+      params = params.set('latest', request.latestDateTaken.toISOString());
     }
     if (request.locationRange) {
       params = params
