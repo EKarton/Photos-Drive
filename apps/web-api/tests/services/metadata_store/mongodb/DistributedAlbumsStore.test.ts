@@ -59,6 +59,14 @@ describe('DistributedAlbumsStore', () => {
     }
   }, 10000);
 
+  describe('getStoreId', () => {
+    it('should throw an error', () => {
+      expect(() => albumsRepo.getClientId()).toThrow(
+        'Cannot get client ID from this repo'
+      );
+    });
+  });
+
   describe('getAlbumById', () => {
     beforeEach(async () => {
       // Set up the database and collection

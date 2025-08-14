@@ -62,6 +62,14 @@ describe('DistributedMediaItemsStore', () => {
     }
   }, 10000);
 
+  describe('getStoreId', () => {
+    it('should throw an error', () => {
+      expect(() => mediaItemsRepo.getClientId()).toThrow(
+        'Cannot get client ID from this repo'
+      );
+    });
+  });
+
   describe('getMediaItemById', () => {
     const mediaItemId: MediaItemId = {
       clientId: 'client1',
