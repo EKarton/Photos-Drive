@@ -80,7 +80,7 @@ describe('Media Items Router', () => {
     cleanupTestEnvFn();
   });
 
-  describe('GET api/v1/media-items', () => {
+  describe('GET api/v1/media-items/search', () => {
     it('should return 200 with default pageSize and no sort when query params are missing', async () => {
       const repo = mock<MediaItemsStore>();
       repo.listMediaItems.mockResolvedValue({
@@ -94,7 +94,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .get('/api/v1/media-items')
+        .get('/api/v1/media-items/search')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(200);
@@ -155,7 +155,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .get('/api/v1/media-items?albumId=albumClient1:albumObject1')
+        .get('/api/v1/media-items/search?albumId=albumClient1:albumObject1')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(200);
@@ -193,7 +193,7 @@ describe('Media Items Router', () => {
 
       const res = await request(app)
         .get(
-          '/api/v1/media-items?pageSize=10&pageToken=abc&sortBy=id&sortDir=asc'
+          '/api/v1/media-items/search?pageSize=10&pageToken=abc&sortBy=id&sortDir=asc'
         )
         .set('Authorization', `Bearer ${token}`);
 
@@ -229,7 +229,7 @@ describe('Media Items Router', () => {
 
       const res = await request(app)
         .get(
-          '/api/v1/media-items?pageSize=10&pageToken=abc&sortBy=id&sortDir=desc'
+          '/api/v1/media-items/search?pageSize=10&pageToken=abc&sortBy=id&sortDir=desc'
         )
         .set('Authorization', `Bearer ${token}`);
 
@@ -261,7 +261,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .get('/api/v1/media-items')
+        .get('/api/v1/media-items/search')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(500);
@@ -378,7 +378,7 @@ describe('Media Items Router', () => {
     });
   });
 
-  describe('POST /api/v1/media-items/search', () => {
+  describe('POST /api/v1/media-items/vector-search', () => {
     it('should return 200 with matching media items', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
@@ -415,7 +415,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .post('/api/v1/media-items/search')
+        .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
         .send({ query: 'cats and dogs' });
 
@@ -456,7 +456,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .post('/api/v1/media-items/search')
+        .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
         .send({});
 
@@ -474,7 +474,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .post('/api/v1/media-items/search')
+        .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
         .send({ query: 'test', earliestDateTaken: 'invalid-date' });
 
@@ -492,7 +492,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .post('/api/v1/media-items/search')
+        .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
         .send({ query: 'test', latestDateTaken: 'invalid-date' });
 
@@ -517,7 +517,7 @@ describe('Media Items Router', () => {
       const latest = '2025-01-02T00:00:00.000Z';
 
       await request(app)
-        .post('/api/v1/media-items/search')
+        .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
         .send({
           query: 'filtered',
@@ -555,7 +555,7 @@ describe('Media Items Router', () => {
       app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
 
       const res = await request(app)
-        .post('/api/v1/media-items/search')
+        .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
         .send({ query: 'search' });
 

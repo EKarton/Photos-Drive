@@ -32,7 +32,7 @@ export default async function (
   const router: Router = Router();
 
   router.get(
-    '/api/v1/media-items',
+    '/api/v1/media-items/search',
     await verifyAuthentication(),
     await verifyAuthorization(),
     wrap(async (req: Request, res: Response) => {
@@ -130,7 +130,7 @@ export default async function (
   );
 
   router.post(
-    '/api/v1/media-items/search',
+    '/api/v1/media-items/vector-search',
     await verifyAuthentication(),
     await verifyAuthorization(),
     wrap(async (req: Request, res: Response) => {
@@ -198,6 +198,33 @@ export default async function (
       );
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
         searchResult.map((result) => result.mediaItemId),
+        { abortController }
+      );
+
+      return res.status(200).json({
+        mediaItems: mediaItems.map(serializeMediaItem)
+      });
+    })
+  );
+
+  router.post(
+    '/api/v1/media-items/bulk-get',
+    await verifyAuthentication(),
+    await verifyAuthorization(),
+    wrap(async (req: Request, res: Response) => {
+      const mediaItemIds: string[] = req.body['mediaItemIds'] as string[];
+
+      if (mediaItemIds.length > 50) {
+        return res.status(413).json({
+          error: 'Too many media item IDs to fetch (needs to be under 50)'
+        });
+      }
+
+      const abortController = new AbortController();
+      req.on('close', () => abortController.abort());
+
+      const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
+        mediaItemIds.map(convertStringToMediaItemId),
         { abortController }
       );
 
