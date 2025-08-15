@@ -6,7 +6,7 @@ import {
   Document as MongoDBDocument,
   ObjectId
 } from 'mongodb';
-import { convertStringToMediaItemId } from '../../metadata_store/MediaItems';
+import { convertStringToMediaItemId } from '../metadata_store/MediaItems';
 import {
   BaseVectorStore,
   MediaItemEmbedding,

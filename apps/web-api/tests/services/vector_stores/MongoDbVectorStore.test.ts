@@ -1,12 +1,12 @@
 import { jest } from '@jest/globals';
 import { Binary, MongoClient, ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { convertStringToMediaItemId } from '../../../../src/services/metadata_store/MediaItems';
+import { convertStringToMediaItemId } from '../../../src/services/metadata_store/MediaItems';
 import {
   MediaItemEmbeddingId,
   QueryMediaItemEmbeddingRequest
-} from '../../../../src/services/ml/vector_stores/BaseVectorStore';
-import { MongoDbVectorStore } from '../../../../src/services/ml/vector_stores/MongoDbVectorStore';
+} from '../../../src/services/vector_stores/BaseVectorStore';
+import { MongoDbVectorStore } from '../../../src/services/vector_stores/MongoDbVectorStore';
 
 describe('MongoDbVectorStore', () => {
   let mongoServer: MongoMemoryServer;

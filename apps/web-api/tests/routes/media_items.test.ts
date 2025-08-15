@@ -13,11 +13,10 @@ import {
   SortByField
 } from '../../src/services/metadata_store/MediaItemsStore';
 import { MongoDbClientNotFoundError } from '../../src/services/metadata_store/mongodb/MongoDbClientsStore';
-import { ImageEmbedder } from '../../src/services/ml/models/ImageEmbeddings';
 import {
   BaseVectorStore,
   MediaItemEmbeddingId
-} from '../../src/services/ml/vector_stores/BaseVectorStore';
+} from '../../src/services/vector_stores/BaseVectorStore';
 import { fakeAuthEnv, generateTestToken } from './utils/auth';
 import { setupTestEnv } from './utils/env';
 
@@ -88,10 +87,9 @@ describe('Media Items Router', () => {
         nextPageToken: undefined
       });
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .get('/api/v1/media-items/search')
@@ -149,10 +147,9 @@ describe('Media Items Router', () => {
         nextPageToken: 'next-token'
       });
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .get(
@@ -193,10 +190,9 @@ describe('Media Items Router', () => {
       const repo = mock<MediaItemsStore>();
       repo.listMediaItems.mockRejectedValue(new Error('Something went wrong'));
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .get('/api/v1/media-items/search')
@@ -231,10 +227,9 @@ describe('Media Items Router', () => {
       const repo = mock<MediaItemsStore>();
       repo.getMediaItemById.mockResolvedValue(mockMediaItem);
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
@@ -262,10 +257,9 @@ describe('Media Items Router', () => {
         new MongoDbClientNotFoundError('mediaItemClientId1:mediaItem1')
       );
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
@@ -285,10 +279,9 @@ describe('Media Items Router', () => {
         new MediaItemNotFoundError(mediaItemId)
       );
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
@@ -302,10 +295,9 @@ describe('Media Items Router', () => {
       const repo = mock<MediaItemsStore>();
       repo.getMediaItemById.mockRejectedValue(new Error('Random error'));
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .get('/api/v1/media-items/mediaItemClientId1:mediaItem1')
@@ -320,12 +312,7 @@ describe('Media Items Router', () => {
     it('should return 200 with matching media items', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
-      // Stub embeddings and matching results
-      imageEmbedder.embedText.mockResolvedValue(
-        new Float32Array([0.1, 0.2, 0.3])
-      );
       vectorStore.getReleventMediaItemEmbeddings.mockResolvedValue([
         {
           id: new MediaItemEmbeddingId(
@@ -350,12 +337,12 @@ describe('Media Items Router', () => {
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
-        .send({ query: 'cats and dogs' });
+        .send({ queryEmbedding: new Float32Array([0.1, 0.2, 0.3]) });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
@@ -387,11 +374,10 @@ describe('Media Items Router', () => {
     it('should return 400 if query is missing', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .post('/api/v1/media-items/vector-search')
@@ -399,22 +385,26 @@ describe('Media Items Router', () => {
         .send({});
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({ error: 'Missing or invalid "query" field' });
+      expect(res.body).toEqual({
+        error: 'Missing or invalid "queryEmbedding" field'
+      });
     });
 
     it('should return 400 for invalid earliestDateTaken format', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
-        .send({ query: 'test', earliestDateTaken: 'invalid-date' });
+        .send({
+          queryEmbedding: new Float32Array([1, 2, 3]),
+          earliestDateTaken: 'invalid-date'
+        });
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({ error: 'Invalid earliestDateTaken format' });
@@ -423,16 +413,18 @@ describe('Media Items Router', () => {
     it('should return 400 for invalid latestDateTaken format', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
-        .send({ query: 'test', latestDateTaken: 'invalid-date' });
+        .send({
+          queryEmbedding: new Float32Array([1, 2, 3]),
+          latestDateTaken: 'invalid-date'
+        });
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({ error: 'Invalid latestDateTaken format' });
@@ -441,15 +433,13 @@ describe('Media Items Router', () => {
     it('should pass filters and topK to vectorStore', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
-      imageEmbedder.embedText.mockResolvedValue(new Float32Array([1, 2, 3]));
       vectorStore.getReleventMediaItemEmbeddings.mockResolvedValue([]);
       repo.bulkGetMediaItemByIds.mockResolvedValue([]);
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const earliest = '2025-01-01T00:00:00.000Z';
       const latest = '2025-01-02T00:00:00.000Z';
@@ -458,7 +448,7 @@ describe('Media Items Router', () => {
         .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          query: 'filtered',
+          queryEmbedding: new Float32Array([1, 2, 3]),
           earliestDateTaken: earliest,
           latestDateTaken: latest,
           withinMediaItemIds: ['albumClient1:mediaItem1'],
@@ -481,21 +471,19 @@ describe('Media Items Router', () => {
     it('should return 500 if vector store throws', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
-      imageEmbedder.embedText.mockResolvedValue(new Float32Array([1, 2, 3]));
       vectorStore.getReleventMediaItemEmbeddings.mockRejectedValue(
         new Error('Internal fail')
       );
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .post('/api/v1/media-items/vector-search')
         .set('Authorization', `Bearer ${token}`)
-        .send({ query: 'search' });
+        .send({ queryEmbedding: new Float32Array([1, 2, 3]) });
 
       expect(res.statusCode).toBe(500);
     });
@@ -505,13 +493,12 @@ describe('Media Items Router', () => {
     it('should return 200 with media items', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       repo.bulkGetMediaItemByIds.mockResolvedValue(MOCK_MEDIA_ITEMS);
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .post('/api/v1/media-items/bulk-get')
@@ -550,11 +537,10 @@ describe('Media Items Router', () => {
     it('should return 413 if there are too many media items to request for', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const tooManyIds = new Array(51).fill('albumClient1:mediaItem1');
 
@@ -576,7 +562,6 @@ describe('Media Items Router', () => {
     it('should return 500 if there is an error with fetching media items', async () => {
       const repo = mock<MediaItemsStore>();
       const vectorStore = mock<BaseVectorStore>();
-      const imageEmbedder = mock<ImageEmbedder>();
 
       repo.bulkGetMediaItemByIds.mockRejectedValue(
         new Error('Database failure')
@@ -584,7 +569,7 @@ describe('Media Items Router', () => {
 
       const app = express();
       app.use(express.json());
-      app.use(await mediaItemsRouter(repo, vectorStore, imageEmbedder));
+      app.use(await mediaItemsRouter(repo, vectorStore));
 
       const res = await request(app)
         .post('/api/v1/media-items/bulk-get')

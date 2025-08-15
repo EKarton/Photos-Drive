@@ -1,16 +1,16 @@
 import { MediaItem, RawMediaItem } from './media-item';
 
-export interface SearchMediaItemsByTextRequest {
-  text: string;
+export interface VectorSearchMediaItemsRequest {
+  queryEmbedding: Float32Array;
   earliestDateTaken?: Date;
   latestDateTaken?: Date;
   withinMediaItemIds?: string[];
 }
 
-export interface RawSearchMediaItemsByTextResponse {
+export interface RawVectorSearchMediaItemsResponse {
   mediaItems: RawMediaItem[];
 }
 
-export interface SearchMediaItemsByTextResponse {
+export interface VectorSearchMediaItemsResponse {
   mediaItems: MediaItem[];
 }

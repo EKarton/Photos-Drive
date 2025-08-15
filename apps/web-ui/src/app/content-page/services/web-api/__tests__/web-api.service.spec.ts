@@ -407,7 +407,7 @@ describe('WebApiService', () => {
 
     it('should make a POST request to search media items with minimal body', () => {
       const request = {
-        text: 'beach',
+        queryEmbedding: new Float32Array([1, 2, 3]),
       };
       const mockResponse = {
         mediaItems: [
@@ -424,7 +424,7 @@ describe('WebApiService', () => {
       };
 
       service
-        .searchMediaItemsByText(accessToken, request)
+        .vectorSearchMediaItems(accessToken, request)
         .subscribe((response) => {
           expect(response).toEqual(
             toSuccess({
@@ -453,7 +453,7 @@ describe('WebApiService', () => {
         `Bearer ${accessToken}`,
       );
       expect(req.request.body).toEqual({
-        query: 'beach',
+        queryEmbedding: new Float32Array([1, 2, 3]),
         earliestDateTaken: undefined,
         latestDateTaken: undefined,
         withinMediaItemIds: undefined,
@@ -467,7 +467,7 @@ describe('WebApiService', () => {
       const latestDate = new Date('2023-12-31');
       const withinMediaItemIds = ['id1', 'id2'];
       const request = {
-        text: 'mountains',
+        queryEmbedding: new Float32Array([1, 2, 3]),
         earliestDateTaken: earliestDate,
         latestDateTaken: latestDate,
         withinMediaItemIds,
@@ -478,7 +478,7 @@ describe('WebApiService', () => {
       };
 
       service
-        .searchMediaItemsByText(accessToken, request)
+        .vectorSearchMediaItems(accessToken, request)
         .subscribe((response) => {
           expect(response).toEqual(toSuccess(mockResponse));
         });
@@ -492,7 +492,7 @@ describe('WebApiService', () => {
         `Bearer ${accessToken}`,
       );
       expect(req.request.body).toEqual({
-        query: 'mountains',
+        queryEmbedding: new Float32Array([1, 2, 3]),
         earliestDateTaken: earliestDate.toISOString(),
         latestDateTaken: latestDate.toISOString(),
         withinMediaItemIds: withinMediaItemIds.join(','),

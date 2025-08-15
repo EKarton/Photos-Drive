@@ -21,14 +21,12 @@ import {
   SortByField
 } from '../services/metadata_store/MediaItemsStore';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsStore';
-import { ImageEmbedder } from '../services/ml/models/ImageEmbeddings';
-import { BaseVectorStore } from '../services/ml/vector_stores/BaseVectorStore';
+import { BaseVectorStore } from '../services/vector_stores/BaseVectorStore';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
 
 export default async function (
   mediaItemsRepo: MediaItemsStore,
-  vectorStore: BaseVectorStore,
-  imageEmbedder: ImageEmbedder
+  vectorStore: BaseVectorStore
 ) {
   const router: Router = Router();
 
@@ -133,23 +131,23 @@ export default async function (
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const {
-        query,
+        queryEmbedding,
         earliestDateTaken,
         latestDateTaken,
         withinMediaItemIds,
         topK
       }: {
-        query: string;
+        queryEmbedding?: Float32Array;
         earliestDateTaken?: string;
         latestDateTaken?: string;
         withinMediaItemIds?: string[];
         topK?: number;
       } = req.body;
 
-      if (!query || typeof query !== 'string') {
+      if (!queryEmbedding) {
         return res
           .status(400)
-          .json({ error: 'Missing or invalid "query" field' });
+          .json({ error: 'Missing or invalid "queryEmbedding" field' });
       }
 
       // Convert dates to Date objects if provided
@@ -180,10 +178,9 @@ export default async function (
         );
       }
 
-      const embedding = await imageEmbedder.embedText(query);
       const searchResult = await vectorStore.getReleventMediaItemEmbeddings(
         {
-          embedding: embedding,
+          embedding: queryEmbedding,
           startDateTaken: earliestDateObj,
           endDateTaken: latestDateObj,
           withinMediaItemIds: mediaItemIdObjects,

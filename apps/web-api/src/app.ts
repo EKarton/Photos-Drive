@@ -28,9 +28,8 @@ import {
   MongoDbClientsStoreImpl
 } from './services/metadata_store/mongodb/MongoDbClientsStore';
 import { MongoDbMediaItemsStore } from './services/metadata_store/mongodb/MongoDbMediaItemsStore';
-import { OpenCLIPImageEmbedder } from './services/ml/models/OpenCLIPImageEmbeddings';
-import { configToVectorStore } from './services/ml/vector_stores/configToVectorStore';
-import { DistributedVectorStore } from './services/ml/vector_stores/DistributedVectorStore';
+import { configToVectorStore } from './services/vector_stores/configToVectorStore';
+import { DistributedVectorStore } from './services/vector_stores/DistributedVectorStore';
 import logger from './utils/logger';
 
 export class App {
@@ -44,7 +43,6 @@ export class App {
   private mediaItemsStore?: MediaItemsStore;
   private mapCellsRepository?: MapCellsRepository;
   private heatmapGenerator?: HeatmapGenerator;
-  private imageEmbedder?: OpenCLIPImageEmbedder;
   private vectorStore?: DistributedVectorStore;
 
   constructor() {
@@ -92,9 +90,6 @@ export class App {
     );
     this.heatmapGenerator = new HeatmapGenerator(this.mapCellsRepository);
 
-    this.imageEmbedder = new OpenCLIPImageEmbedder();
-    await this.imageEmbedder.initialize();
-
     this.vectorStore = new DistributedVectorStore(
       (await this.config.getVectorStoreConfigs()).map((config) =>
         configToVectorStore(config)
@@ -120,11 +115,7 @@ export class App {
       await albumsRouter(rootAlbumId, this.albumsStore, this.mediaItemsStore)
     );
     this.app.use(
-      await mediaItemsRouter(
-        this.mediaItemsStore,
-        this.vectorStore,
-        this.imageEmbedder
-      )
+      await mediaItemsRouter(this.mediaItemsStore, this.vectorStore)
     );
     this.app.use(await gPhotosMediaItemsRouter(this.gPhotosClientsRepository));
     this.app.use(await mapsRouter(rootAlbumId, this.heatmapGenerator));
@@ -144,7 +135,5 @@ export class App {
   async shutdown() {
     const clients = await this.mongoDbClientsRepository?.listClients();
     clients?.forEach(([_, client]) => client.close());
-
-    await this.imageEmbedder?.dispose();
   }
 }

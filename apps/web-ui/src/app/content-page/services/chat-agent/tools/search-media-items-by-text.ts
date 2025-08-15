@@ -1,11 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DynamicStructuredTool } from 'langchain/tools';
-import { firstValueFrom } from 'rxjs';
+import { combineLatest, firstValueFrom, switchMap } from 'rxjs';
 import { z } from 'zod';
 
 import { selectAuthToken } from '../../../../auth/store/auth.state';
 import { fromResult } from '../../../../shared/results/rxjs/fromResult';
+import { mapResultRxJs } from '../../../../shared/results/rxjs/mapResultRxJs';
+import { OpenClipEmbedderService } from '../../text-embedding/open-clip-embedder.service';
+import { VectorSearchMediaItemsResponse } from '../../web-api/types/search-media-items-by-text';
 import { WebApiService } from '../../web-api/web-api.service';
 import {
   domainToToolMediaItem,
@@ -54,6 +57,7 @@ export type SearchPhotosByTextToolOutputType = z.infer<
 export class SearchMediaItemsByTextTool extends DynamicStructuredTool {
   private readonly store = inject(Store);
   private readonly webApiService = inject(WebApiService);
+  private readonly openClipEmbedderService = inject(OpenClipEmbedderService);
 
   constructor() {
     super({
@@ -67,32 +71,31 @@ export class SearchMediaItemsByTextTool extends DynamicStructuredTool {
       func: async (
         input: SearchPhotosByTextToolInputType,
       ): Promise<SearchPhotosByTextToolOutputType> => {
-        const accessToken = await firstValueFrom(
-          this.store.select(selectAuthToken),
+        return firstValueFrom(
+          combineLatest([
+            this.store.select(selectAuthToken),
+            this.openClipEmbedderService.getTextEmbedding(input.query),
+          ]).pipe(
+            switchMap(([accessToken, queryEmbedding]) => {
+              return this.webApiService.vectorSearchMediaItems(accessToken, {
+                queryEmbedding,
+                earliestDateTaken: input.earliest_date_taken
+                  ? new Date(input.earliest_date_taken)
+                  : undefined,
+                latestDateTaken: input.latest_date_taken
+                  ? new Date(input.latest_date_taken)
+                  : undefined,
+                withinMediaItemIds: input.within_media_item_ids
+                  ? input.within_media_item_ids.split(',')
+                  : undefined,
+              });
+            }),
+            mapResultRxJs((res: VectorSearchMediaItemsResponse) => ({
+              media_items: res.mediaItems.map(domainToToolMediaItem),
+            })),
+            fromResult(),
+          ),
         );
-
-        const searchMediaItemsByTextResponse = await firstValueFrom(
-          this.webApiService
-            .searchMediaItemsByText(accessToken, {
-              text: input.query,
-              earliestDateTaken: input.earliest_date_taken
-                ? new Date(input.earliest_date_taken)
-                : undefined,
-              latestDateTaken: input.latest_date_taken
-                ? new Date(input.latest_date_taken)
-                : undefined,
-              withinMediaItemIds: input.within_media_item_ids
-                ? input.within_media_item_ids.split(',')
-                : undefined,
-            })
-            .pipe(fromResult()),
-        );
-
-        const mediaItems = searchMediaItemsByTextResponse.mediaItems;
-
-        return {
-          media_items: mediaItems.map(domainToToolMediaItem),
-        };
       },
     });
   }
