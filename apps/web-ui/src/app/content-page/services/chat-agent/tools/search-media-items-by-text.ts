@@ -19,7 +19,7 @@ export const SearchPhotosByTextToolInputSchema = z.object({
   query: z
     .string()
     .describe(
-      'A text string describing what to find. This is required text that must be non-empty',
+      'A natural language description of what to find in the photo library. This should be a short, vivid phrase — NOT just one or two words. For example: "a group of women laughing together", "a father holding his newborn baby", "two dogs playing in the snow".',
     ),
   earliest_date_taken: z
     .string()
