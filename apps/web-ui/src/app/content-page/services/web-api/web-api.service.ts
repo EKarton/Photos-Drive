@@ -197,7 +197,7 @@ export class WebApiService {
   ): Observable<Result<VectorSearchMediaItemsResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/media-items/vector-search`;
     const body = {
-      queryEmbedding: request.queryEmbedding,
+      queryEmbedding: Array.from(request.queryEmbedding),
       earliestDateTaken: request.earliestDateTaken
         ? request.earliestDateTaken.toISOString()
         : undefined,
