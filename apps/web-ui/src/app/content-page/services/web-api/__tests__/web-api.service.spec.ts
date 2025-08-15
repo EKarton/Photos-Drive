@@ -424,7 +424,7 @@ describe('WebApiService', () => {
       };
 
       service
-        .searchMediaItemsByText(accessToken, request)
+        .vectorSearchMediaItems(accessToken, request)
         .subscribe((response) => {
           expect(response).toEqual(
             toSuccess({
@@ -478,7 +478,7 @@ describe('WebApiService', () => {
       };
 
       service
-        .searchMediaItemsByText(accessToken, request)
+        .vectorSearchMediaItems(accessToken, request)
         .subscribe((response) => {
           expect(response).toEqual(toSuccess(mockResponse));
         });

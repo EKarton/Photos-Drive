@@ -28,9 +28,9 @@ import {
 } from './types/media-item';
 import { RawMediaItem } from './types/media-item';
 import {
-  RawSearchMediaItemsByTextResponse,
-  SearchMediaItemsByTextRequest,
-  SearchMediaItemsByTextResponse,
+  RawVectorSearchMediaItemsResponse,
+  VectorSearchMediaItemsRequest,
+  VectorSearchMediaItemsResponse,
 } from './types/search-media-items-by-text';
 
 @Injectable({ providedIn: 'root' })
@@ -191,13 +191,13 @@ export class WebApiService {
   }
 
   /** Searches for media items by text */
-  searchMediaItemsByText(
+  vectorSearchMediaItems(
     accessToken: string,
-    request: SearchMediaItemsByTextRequest,
-  ): Observable<Result<SearchMediaItemsByTextResponse>> {
+    request: VectorSearchMediaItemsRequest,
+  ): Observable<Result<VectorSearchMediaItemsResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/media-items/vector-search`;
     const body = {
-      query: request.text,
+      queryEmbedding: request.queryEmbedding,
       earliestDateTaken: request.earliestDateTaken
         ? request.earliestDateTaken.toISOString()
         : undefined,
@@ -210,7 +210,7 @@ export class WebApiService {
     };
 
     return this.httpClient
-      .post<RawSearchMediaItemsByTextResponse>(url, body, {
+      .post<RawVectorSearchMediaItemsResponse>(url, body, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

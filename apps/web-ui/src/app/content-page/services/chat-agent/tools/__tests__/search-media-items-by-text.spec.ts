@@ -49,7 +49,7 @@ describe('SearchMediaItemsForTextTool', () => {
       },
     ];
 
-    webApiServiceSpy.searchMediaItemsByText.and.returnValue(
+    webApiServiceSpy.vectorSearchMediaItems.and.returnValue(
       of(toSuccess({ mediaItems: mockMediaItems })),
     );
   });
@@ -65,7 +65,7 @@ describe('SearchMediaItemsForTextTool', () => {
 
     const result = await tool.func(input);
 
-    expect(webApiServiceSpy.searchMediaItemsByText).toHaveBeenCalledWith(
+    expect(webApiServiceSpy.vectorSearchMediaItems).toHaveBeenCalledWith(
       fakeToken,
       {
         text: 'sunset beach',
@@ -96,7 +96,7 @@ describe('SearchMediaItemsForTextTool', () => {
 
     const result = await tool.func(input);
 
-    expect(webApiServiceSpy.searchMediaItemsByText).toHaveBeenCalledWith(
+    expect(webApiServiceSpy.vectorSearchMediaItems).toHaveBeenCalledWith(
       fakeToken,
       {
         text: 'sunset beach',

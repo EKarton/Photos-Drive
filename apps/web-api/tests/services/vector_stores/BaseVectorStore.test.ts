@@ -1,4 +1,4 @@
-import { MediaItemEmbeddingId } from '../../../../src/services/ml/vector_stores/BaseVectorStore';
+import { MediaItemEmbeddingId } from '../../../src/services/vector_stores/BaseVectorStore';
 
 describe('MediaItemEmbeddingId', () => {
   it('constructor sets vectorStoreId and objectId', () => {
