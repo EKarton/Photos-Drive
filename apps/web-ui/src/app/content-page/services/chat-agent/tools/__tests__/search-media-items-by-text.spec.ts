@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 
 import { authState } from '../../../../../auth/store';
 import { toSuccess } from '../../../../../shared/results/results';
+import { OpenClipEmbedderService } from '../../../text-embedding/open-clip-embedder.service';
 import { MediaItem } from '../../../web-api/types/media-item';
 import { WebApiService } from '../../../web-api/web-api.service';
 import {
@@ -14,13 +15,20 @@ import {
 describe('SearchMediaItemsForTextTool', () => {
   let tool: SearchMediaItemsByTextTool;
   let webApiServiceSpy: jasmine.SpyObj<WebApiService>;
+  let textEmbedderSpy: jasmine.SpyObj<OpenClipEmbedderService>;
   const fakeToken = 'FAKE_TOKEN';
 
   beforeEach(() => {
     // Web API service spy
     webApiServiceSpy = jasmine.createSpyObj<WebApiService>('WebApiService', [
-      'searchMediaItemsByText',
+      'vectorSearchMediaItems',
     ]);
+
+    // Open Clip Embedder service spy
+    textEmbedderSpy = jasmine.createSpyObj<OpenClipEmbedderService>(
+      'OpenClipEmbedderService',
+      ['getTextEmbedding'],
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -31,6 +39,7 @@ describe('SearchMediaItemsForTextTool', () => {
           ],
         }),
         { provide: WebApiService, useValue: webApiServiceSpy },
+        { provide: OpenClipEmbedderService, useValue: textEmbedderSpy },
       ],
     });
 
@@ -52,6 +61,9 @@ describe('SearchMediaItemsForTextTool', () => {
     webApiServiceSpy.vectorSearchMediaItems.and.returnValue(
       of(toSuccess({ mediaItems: mockMediaItems })),
     );
+    textEmbedderSpy.getTextEmbedding.and.returnValue(
+      of(new Float32Array([1, 2, 3])),
+    );
   });
 
   it('should call webApiService with correct parameters and map results', async () => {
@@ -68,7 +80,7 @@ describe('SearchMediaItemsForTextTool', () => {
     expect(webApiServiceSpy.vectorSearchMediaItems).toHaveBeenCalledWith(
       fakeToken,
       {
-        text: 'sunset beach',
+        queryEmbedding: new Float32Array([1, 2, 3]),
         earliestDateTaken: new Date('2022-01-01'),
         latestDateTaken: new Date('2022-12-31'),
         withinMediaItemIds: ['123', '456'],
@@ -99,7 +111,7 @@ describe('SearchMediaItemsForTextTool', () => {
     expect(webApiServiceSpy.vectorSearchMediaItems).toHaveBeenCalledWith(
       fakeToken,
       {
-        text: 'sunset beach',
+        queryEmbedding: new Float32Array([1, 2, 3]),
         earliestDateTaken: undefined,
         latestDateTaken: undefined,
         withinMediaItemIds: undefined,

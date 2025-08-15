@@ -34,7 +34,7 @@ describe('ChatAgentService', () => {
 
     const webApiServiceSpy = jasmine.createSpyObj<WebApiService>(
       'WebApiService',
-      ['searchMediaItemsByText'],
+      ['vectorSearchMediaItems'],
     );
 
     TestBed.configureTestingModule({
