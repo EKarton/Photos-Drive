@@ -137,7 +137,7 @@ export default async function (
         withinMediaItemIds,
         topK
       }: {
-        queryEmbedding?: Float32Array;
+        queryEmbedding?: number[];
         earliestDateTaken?: string;
         latestDateTaken?: string;
         withinMediaItemIds?: string[];
@@ -180,7 +180,7 @@ export default async function (
 
       const searchResult = await vectorStore.getReleventMediaItemEmbeddings(
         {
-          embedding: queryEmbedding,
+          embedding: new Float32Array(queryEmbedding),
           startDateTaken: earliestDateObj,
           endDateTaken: latestDateObj,
           withinMediaItemIds: mediaItemIdObjects,
