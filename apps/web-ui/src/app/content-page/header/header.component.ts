@@ -42,23 +42,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
 
   ngOnInit() {
+    this.updateSelectedTab();
     this.subscriptions.add(
       this.router.events
         .pipe(filter((event) => event instanceof NavigationEnd))
         .subscribe(() => {
-          let child = this.route.firstChild;
-          while (child?.firstChild) {
-            child = child.firstChild;
-          }
-          const path = child?.snapshot.routeConfig?.path;
-
-          if (path?.startsWith('albums/')) {
-            this.selectedTab.set(Tabs.ALBUMS);
-          } else if (path === 'photos') {
-            this.selectedTab.set(Tabs.PHOTOS);
-          }
+          this.updateSelectedTab();
         }),
     );
+  }
+
+  private updateSelectedTab() {
+    let child = this.route.firstChild;
+    while (child?.firstChild) {
+      child = child.firstChild;
+    }
+
+    const path = child?.snapshot.routeConfig?.path;
+
+    if (path?.startsWith('albums/')) {
+      this.selectedTab.set(Tabs.ALBUMS);
+    } else if (path === 'photos') {
+      this.selectedTab.set(Tabs.PHOTOS);
+    }
   }
 
   openSideBar() {
