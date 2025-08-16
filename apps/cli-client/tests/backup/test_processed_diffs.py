@@ -182,7 +182,6 @@ class TestDiffsProcessor(unittest.TestCase):
                 embedding=FAKE_EMBEDDING,
             ),
         )
-        self.assertIsNone(processed_diffs[7])
         self.assertEqual(
             processed_diffs[7],
             ProcessedDiff(
@@ -195,7 +194,7 @@ class TestDiffsProcessor(unittest.TestCase):
                 location=None,
                 width=3264,
                 height=2448,
-                date_taken=datetime.datetime(1970, 1, 1, 0, 0),
+                date_taken=datetime(1970, 1, 1),
                 mime_type='image/jpeg',
                 captions=FAKE_CAPTIONS,
                 embedding=FAKE_EMBEDDING,
