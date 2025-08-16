@@ -338,7 +338,7 @@ class DiffsProcessor:
             return images
 
         with tqdm(
-            total=len(diffs_to_process), desc="Generating image embeddings"
+            total=len(diffs_to_process), desc="Generating image captions"
         ) as pbar:
             for start in range(0, len(diffs_to_process), self.captions_batch_size):
                 batch = diffs_to_process[start : start + self.captions_batch_size]

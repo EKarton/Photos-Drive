@@ -2,6 +2,7 @@ import logging
 import math
 from typing import Generator
 
+from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
 import typer
 from typing_extensions import Annotated
 
@@ -126,7 +127,7 @@ def sync(
         print("No changes")
         return
 
-    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings())
+    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings(), BlipImageCaptions())
     processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
 
     pretty_print_processed_diffs(processed_diffs)

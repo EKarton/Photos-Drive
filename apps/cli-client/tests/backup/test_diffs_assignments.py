@@ -10,6 +10,7 @@ from photos_drive.backup.processed_diffs import ProcessedDiff
 from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
+from photos_drive.shared.llm.models.testing.fake_image_captions import FAKE_CAPTIONS
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'
 
@@ -44,6 +45,7 @@ class TestDiffsAssigner(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             mime_type='image/jpeg',
+            captions=FAKE_CAPTIONS,
             embedding=MOCK_EMBEDDING,
         )
         diff2 = ProcessedDiff(
@@ -58,6 +60,7 @@ class TestDiffsAssigner(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             mime_type='image/jpeg',
+            captions=FAKE_CAPTIONS,
             embedding=MOCK_EMBEDDING,
         )
         assignments = diffs_assigner.get_diffs_assignments([diff1, diff2])
@@ -86,6 +89,7 @@ class TestDiffsAssigner(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             mime_type='image/jpeg',
+            captions=FAKE_CAPTIONS,
             embedding=MOCK_EMBEDDING,
         )
         with self.assertRaisesRegex(
@@ -118,6 +122,7 @@ class TestDiffsAssigner(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             mime_type='image/jpeg',
+            captions=FAKE_CAPTIONS,
             embedding=MOCK_EMBEDDING,
         )
         diff2 = ProcessedDiff(
@@ -132,6 +137,7 @@ class TestDiffsAssigner(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             mime_type='image/jpeg',
+            captions=FAKE_CAPTIONS,
             embedding=MOCK_EMBEDDING,
         )
         diff3 = ProcessedDiff(
@@ -146,6 +152,7 @@ class TestDiffsAssigner(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             mime_type='image/jpeg',
+            captions=FAKE_CAPTIONS,
             embedding=MOCK_EMBEDDING,
         )
 

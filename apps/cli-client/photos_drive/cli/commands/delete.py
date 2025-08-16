@@ -1,5 +1,6 @@
 import logging
 
+from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
 import typer
 from typing_extensions import Annotated
 
@@ -112,7 +113,7 @@ def delete(
         return
 
     # Process the diffs with metadata
-    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings())
+    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings(), BlipImageCaptions())
     processed_diffs = diff_processor.process_raw_diffs(diffs)
     for processed_diff in processed_diffs:
         logger.debug(f"Processed diff: {processed_diff}")

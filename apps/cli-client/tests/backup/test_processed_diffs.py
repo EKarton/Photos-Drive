@@ -3,9 +3,14 @@ import unittest
 
 from photos_drive.backup.diffs import Diff
 from photos_drive.backup.processed_diffs import (
+    EMPTY_CAPTIONS,
     EMPTY_EMBEDDING,
     DiffsProcessor,
     ProcessedDiff,
+)
+from photos_drive.shared.llm.models.testing.fake_image_captions import (
+    FAKE_CAPTIONS,
+    FakeImageCaptions,
 )
 from photos_drive.shared.llm.models.testing.fake_image_embedder import (
     FAKE_EMBEDDING,
@@ -28,6 +33,7 @@ class TestDiffsProcessor(unittest.TestCase):
             "heic-image-2.heic",
             "video.mov",
             "large_image.jpg",
+            "image-without-dates.jpg",
         ]
         diffs = [
             Diff(
@@ -39,9 +45,9 @@ class TestDiffsProcessor(unittest.TestCase):
             for file_name in test_file_names
         ]
 
-        processor = DiffsProcessor(FakeImageEmbedder())
+        processor = DiffsProcessor(FakeImageEmbedder(), FakeImageCaptions())
         processed_diffs = processor.process_raw_diffs(diffs)
-        self.assertEqual(len(processed_diffs), 7)
+        self.assertEqual(len(processed_diffs), 8)
         self.assertEqual(
             processed_diffs[0],
             ProcessedDiff(
@@ -58,6 +64,7 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=3024,
                 date_taken=datetime(2022, 11, 18, 16, 39, 21),
                 mime_type='image/heic',
+                captions=FAKE_CAPTIONS,
                 embedding=FAKE_EMBEDDING,
             ),
         )
@@ -75,6 +82,7 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=2448,
                 date_taken=datetime(2013, 5, 30, 10, 30, 39),
                 mime_type='image/jpeg',
+                captions=FAKE_CAPTIONS,
                 embedding=FAKE_EMBEDDING,
             ),
         )
@@ -94,6 +102,7 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=2448,
                 date_taken=datetime(2013, 5, 30, 10, 30, 39),
                 mime_type='image/jpeg',
+                captions=FAKE_CAPTIONS,
                 embedding=FAKE_EMBEDDING,
             ),
         )
@@ -111,6 +120,7 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=2448,
                 date_taken=datetime(2013, 5, 30, 10, 30, 39),
                 mime_type='image/jpeg',
+                captions=FAKE_CAPTIONS,
                 embedding=FAKE_EMBEDDING,
             ),
         )
@@ -130,6 +140,7 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=3024,
                 date_taken=datetime(2022, 6, 20, 15, 15, 53),
                 mime_type='image/heic',
+                captions=FAKE_CAPTIONS,
                 embedding=FAKE_EMBEDDING,
             ),
         )
@@ -147,10 +158,10 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=1308,
                 date_taken=datetime(2022, 5, 29, 11, 19, 1),
                 mime_type='video/quicktime',
+                captions=EMPTY_CAPTIONS,
                 embedding=EMPTY_EMBEDDING,
             ),
         )
-        # self.assertIsNone(processed_diffs[6])
         self.assertEqual(
             processed_diffs[6],
             ProcessedDiff(
@@ -167,7 +178,27 @@ class TestDiffsProcessor(unittest.TestCase):
                 height=3872,
                 date_taken=datetime(2018, 12, 25, 13, 15, 27),
                 mime_type='image/jpeg',
-                embedding=EMPTY_EMBEDDING,
+                captions=FAKE_CAPTIONS,
+                embedding=FAKE_EMBEDDING,
+            ),
+        )
+        self.assertIsNone(processed_diffs[7])
+        self.assertEqual(
+            processed_diffs[7],
+            ProcessedDiff(
+                modifier='+',
+                file_path=diffs[7].file_path,
+                album_name='tests/backup/resources/test_processed_diffs_files',
+                file_name='image-without-dates.jpg',
+                file_size=2620046,
+                file_hash=b'l\r\xece^&]8',
+                location=None,
+                width=3264,
+                height=2448,
+                date_taken=datetime.datetime(1970, 1, 1, 0, 0),
+                mime_type='image/jpeg',
+                captions=FAKE_CAPTIONS,
+                embedding=FAKE_EMBEDDING,
             ),
         )
 
@@ -184,7 +215,7 @@ class TestDiffsProcessor(unittest.TestCase):
             mime_type="image/png",
         )
 
-        processor = DiffsProcessor(FakeImageEmbedder())
+        processor = DiffsProcessor(FakeImageEmbedder(), FakeImageCaptions())
         processed_diffs = processor.process_raw_diffs([diff])
 
         self.assertEqual(len(processed_diffs), 1)
@@ -198,30 +229,6 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].date_taken, datetime(2010, 2, 2))
         self.assertEqual(processed_diffs[0].mime_type, 'image/png')
 
-    def test_process_raw_diffs_with_no_date_taken(self):
-        test_file_path = self.__get_file_path("image-without-dates.jpg")
-        diff = Diff(
-            modifier="+",
-            file_path=test_file_path,
-        )
-
-        processor = DiffsProcessor(FakeImageEmbedder())
-        processed_diffs = processor.process_raw_diffs([diff])
-
-        self.assertEqual(len(processed_diffs), 1)
-        self.assertEqual(
-            processed_diffs[0].album_name,
-            'tests/backup/resources/test_processed_diffs_files',
-        )
-        self.assertEqual(processed_diffs[0].file_name, 'image-without-dates.jpg')
-        self.assertEqual(processed_diffs[0].file_size, 2620046)
-        self.assertEqual(processed_diffs[0].location, None)
-        self.assertEqual(
-            processed_diffs[0].file_hash, compute_file_hash(test_file_path)
-        )
-        self.assertEqual(processed_diffs[0].date_taken, datetime(1970, 1, 1))
-        self.assertEqual(processed_diffs[0].mime_type, 'image/jpeg')
-
     def test_process_raw_diffs_with_deletion_diff(self):
         test_file_path = self.__get_file_path('image-with-location.jpg')
         diff = Diff(
@@ -231,25 +238,28 @@ class TestDiffsProcessor(unittest.TestCase):
             file_name=None,
         )
 
-        processor = DiffsProcessor(FakeImageEmbedder())
+        processor = DiffsProcessor(FakeImageEmbedder(), FakeImageCaptions())
         processed_diffs = processor.process_raw_diffs([diff])
 
         self.assertEqual(len(processed_diffs), 1)
-        self.assertEqual(processed_diffs[0].modifier, '-')
-        self.assertEqual(processed_diffs[0].file_path, test_file_path)
         self.assertEqual(
-            processed_diffs[0].album_name,
-            'tests/backup/resources/test_processed_diffs_files',
+            processed_diffs[0],
+            ProcessedDiff(
+                modifier='-',
+                file_path=test_file_path,
+                album_name='tests/backup/resources/test_processed_diffs_files',
+                file_name="image-with-location.jpg",
+                file_size=0,
+                file_hash=b'0',
+                location=None,
+                width=0,
+                height=0,
+                date_taken=datetime(1970, 1, 1),
+                mime_type='none',
+                captions=EMPTY_CAPTIONS,
+                embedding=EMPTY_EMBEDDING,
+            ),
         )
-        self.assertEqual(processed_diffs[0].file_name, "image-with-location.jpg")
-        self.assertEqual(processed_diffs[0].file_size, 0)
-        self.assertIsNone(processed_diffs[0].location)
-        self.assertEqual(processed_diffs[0].file_hash, b'0')
-        self.assertEqual(processed_diffs[0].width, 0)
-        self.assertEqual(processed_diffs[0].height, 0)
-        self.assertEqual(processed_diffs[0].date_taken, datetime(1970, 1, 1))
-        self.assertEqual(processed_diffs[0].mime_type, 'none')
-        self.assertEqual(processed_diffs[0].embedding, EMPTY_EMBEDDING)
 
     def test_process_raw_diffs_file_not_exist(self):
         diff = Diff(
@@ -257,7 +267,7 @@ class TestDiffsProcessor(unittest.TestCase):
         )
 
         with self.assertRaisesRegex(ValueError, "File .* does not exist."):
-            processor = DiffsProcessor(FakeImageEmbedder())
+            processor = DiffsProcessor(FakeImageEmbedder(), FakeImageCaptions())
             processor.process_raw_diffs([diff])
 
     def __get_file_path(self, file_name: str) -> str:
