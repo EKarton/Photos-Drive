@@ -188,7 +188,6 @@ export default async function (
         },
         { abortController: req.abortController }
       );
-      console.log(searchResult);
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
         searchResult.map((result) => result.mediaItemId),
         { abortController: req.abortController }
