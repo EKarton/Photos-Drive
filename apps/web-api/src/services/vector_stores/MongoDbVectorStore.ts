@@ -125,8 +125,4 @@ export class MongoDbVectorStore extends BaseVectorStore {
   private toMongoVector(embedding: Float32Array): Binary {
     return Binary.fromFloat32Array(embedding);
   }
-
-  private parseMongoVector(binary: Binary): Float32Array {
-    return binary.toFloat32Array();
-  }
 }
