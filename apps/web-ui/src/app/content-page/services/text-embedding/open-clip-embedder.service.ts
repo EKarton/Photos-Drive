@@ -7,7 +7,7 @@ import {
   ProgressInfo,
   Tensor,
 } from '@huggingface/transformers';
-import { from, map, Observable, shareReplay, switchMap } from 'rxjs';
+import { from, map, Observable, shareReplay, switchMap, tap } from 'rxjs';
 
 export const MODEL_NAME = 'Xenova/clip-vit-large-patch14';
 
@@ -15,26 +15,15 @@ export const MODEL_NAME = 'Xenova/clip-vit-large-patch14';
 export class OpenClipEmbedderService {
   // Note: the from() function loads the model right away
   private model$: Observable<[PreTrainedTokenizer, PreTrainedModel]> = from(
-    Promise.all([
-      AutoTokenizer.from_pretrained(MODEL_NAME),
-      CLIPTextModelWithProjection.from_pretrained(MODEL_NAME, {
-        progress_callback: this.progressCallback,
-        cache_dir: './.cache',
-        dtype: 'fp32',
-      }),
-    ]),
-  ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    loadModels(),
+  ).pipe(
+    shareReplay({ bufferSize: 1, refCount: true }),
+    tap(() => {
+      console.log('Loaded models');
+    }),
+  );
 
-  constructor() {
-    this.model$.subscribe(() => console.log('Loaded clip embedder models'));
-  }
-
-  private progressCallback(event: ProgressInfo) {
-    if (event.status === 'progress') {
-      console.log(`Downloading: ${event.file} ${event.progress}%`);
-    }
-  }
-
+  /** Gets the text embeddings for a particular query */
   getTextEmbedding(text: string): Observable<Float32Array> {
     return this.model$.pipe(
       switchMap(([tokenizer, textModel]) => {
@@ -52,4 +41,34 @@ export class OpenClipEmbedderService {
       }),
     );
   }
+}
+
+function loadModels(): Promise<[PreTrainedTokenizer, PreTrainedModel]> {
+  console.log(`Loading ${MODEL_NAME}`);
+
+  const device = selectBestDevice();
+  console.log('Device:', selectBestDevice());
+
+  return Promise.all([
+    AutoTokenizer.from_pretrained(MODEL_NAME),
+    CLIPTextModelWithProjection.from_pretrained(MODEL_NAME, {
+      progress_callback: progressCallback,
+      device,
+      dtype: 'fp32',
+    }),
+  ]);
+}
+
+function progressCallback(event: ProgressInfo) {
+  if (event.status === 'progress') {
+    console.log(`Downloading: ${event.file} ${event.progress}%`);
+  }
+}
+
+function selectBestDevice(): 'webgpu' | 'wasm' {
+  // WebGPU requires a secure context (https or localhost) and browser support
+  if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
+    return 'webgpu';
+  }
+  return 'wasm'; // CPU backend
 }
