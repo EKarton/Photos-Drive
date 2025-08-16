@@ -26,7 +26,7 @@ def create_mock_mongo_client(
             'objects': objects,
         }
     )
-    mock_client['photos_drive']['media_items'].list_search_indexes = Mock(
+    mock_client['photos_drive']['media_items'].list_search_indexes = Mock(  # type: ignore
         return_value=[]
     )
 
