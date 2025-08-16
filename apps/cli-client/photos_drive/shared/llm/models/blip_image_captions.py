@@ -30,9 +30,7 @@ class BlipImageCaptions(ImageCaptions):
     def generate_caption(self, images: list[Image.Image]) -> list[str]:
         inputs = self.blip_processor(images=images, return_tensors="pt").to(self.device)
         with torch.no_grad():
-            generated_ids = self.blip_model.generate(
-                **inputs, max_new_tokens=50, num_beams=3
-            )
+            generated_ids = self.blip_model.generate(**inputs, max_new_tokens=50)
 
         captions = self.blip_processor.batch_decode(
             generated_ids, skip_special_tokens=True

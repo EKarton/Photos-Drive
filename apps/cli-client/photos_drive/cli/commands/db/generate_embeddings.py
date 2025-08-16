@@ -155,6 +155,9 @@ def generate_embeddings(
 
     assert len(media_item_ids) == len(diffs) == len(processed_diffs)
 
+    for diff in processed_diffs:
+        print(f"{diff.file_name} -> {diff.captions}")
+
     if not prompt_user_for_yes_no_answer('Add embeddings to metadata db? [Y/N]:'):
         raise ValueError("Operation cancelled")
 
