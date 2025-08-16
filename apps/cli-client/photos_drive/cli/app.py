@@ -10,7 +10,6 @@ from photos_drive.cli.commands import (
     sync,
     teardown,
     usage,
-    compare_embeddings,
 )
 
 
@@ -26,7 +25,6 @@ def build_app() -> typer.Typer:
     app.add_typer(teardown.app)
     app.add_typer(usage.app)
     app.add_typer(llm.app)
-    app.add_typer(compare_embeddings.app)
 
     return app
 
