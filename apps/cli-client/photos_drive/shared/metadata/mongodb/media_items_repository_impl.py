@@ -33,7 +33,6 @@ from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
 
 logger = logging.getLogger(__name__)
 
-
 LOCATION_INDEX_NAME = 'location_index'
 
 
@@ -51,7 +50,6 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
         Args:
             mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
                 clients that stores albums.
-            location_index_name (string): The index name for doing location queries
         """
         self._mongodb_clients_repository = mongodb_clients_repository
 

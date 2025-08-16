@@ -453,7 +453,7 @@ describe('WebApiService', () => {
         `Bearer ${accessToken}`,
       );
       expect(req.request.body).toEqual({
-        queryEmbedding: new Float32Array([1, 2, 3]),
+        queryEmbedding: [1, 2, 3],
         earliestDateTaken: undefined,
         latestDateTaken: undefined,
         withinMediaItemIds: undefined,
@@ -492,7 +492,7 @@ describe('WebApiService', () => {
         `Bearer ${accessToken}`,
       );
       expect(req.request.body).toEqual({
-        queryEmbedding: new Float32Array([1, 2, 3]),
+        queryEmbedding: [1, 2, 3],
         earliestDateTaken: earliestDate.toISOString(),
         latestDateTaken: latestDate.toISOString(),
         withinMediaItemIds: withinMediaItemIds.join(','),

@@ -1,40 +1,52 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   AutoTokenizer,
   CLIPTextModelWithProjection,
   PreTrainedModel,
   PreTrainedTokenizer,
-  ProgressInfo,
   Tensor,
 } from '@huggingface/transformers';
-import { from, map, Observable, shareReplay, switchMap } from 'rxjs';
+import { from, map, Observable, shareReplay, switchMap, tap } from 'rxjs';
+
+import { NAVIGATOR } from '../../../app.tokens';
 
 export const MODEL_NAME = 'Xenova/clip-vit-large-patch14';
 
 @Injectable({ providedIn: 'root' })
 export class OpenClipEmbedderService {
-  // Note: the from() function loads the model right away
+  private readonly navigator = inject(NAVIGATOR);
+
   private model$: Observable<[PreTrainedTokenizer, PreTrainedModel]> = from(
-    Promise.all([
+    this.loadModels(),
+  ).pipe(
+    shareReplay({ bufferSize: 1, refCount: true }),
+    tap(() => {
+      console.log('Loaded models');
+    }),
+  );
+
+  private loadModels(): Promise<[PreTrainedTokenizer, PreTrainedModel]> {
+    console.log(`Loading ${MODEL_NAME}`);
+
+    const device = this.selectBestDevice();
+    console.log('Device:', this.selectBestDevice());
+
+    return Promise.all([
       AutoTokenizer.from_pretrained(MODEL_NAME),
       CLIPTextModelWithProjection.from_pretrained(MODEL_NAME, {
-        progress_callback: this.progressCallback,
-        cache_dir: './.cache',
+        device,
         dtype: 'fp32',
       }),
-    ]),
-  ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
-
-  constructor() {
-    this.model$.subscribe(() => console.log('Loaded clip embedder models'));
+    ]);
   }
 
-  private progressCallback(event: ProgressInfo) {
-    if (event.status === 'progress') {
-      console.log(`Downloading: ${event.file} ${event.progress}%`);
-    }
+  private selectBestDevice(): 'webgpu' | 'wasm' {
+    return typeof this.navigator !== 'undefined' && 'gpu' in this.navigator
+      ? 'webgpu'
+      : 'wasm';
   }
 
+  /** Gets the text embeddings for a particular query */
   getTextEmbedding(text: string): Observable<Float32Array> {
     return this.model$.pipe(
       switchMap(([tokenizer, textModel]) => {
