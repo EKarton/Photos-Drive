@@ -63,12 +63,7 @@ describe('MongoDbVectorStore', () => {
         new MediaItemEmbeddingId(storeId, _id.toHexString())
       );
 
-      expect(result.embedding).toEqual(embeddingArray);
       expect(result).toEqual({
-        dateTaken: new Date('2022-01-01T00:00:00.000Z'),
-        embedding: new Float32Array([
-          0.10000000149011612, 0.20000000298023224, 0.30000001192092896
-        ]),
         id: new MediaItemEmbeddingId('test-store', _id.toString()),
         mediaItemId: {
           clientId: '407f1f77bcf86cd799439013',
@@ -87,18 +82,70 @@ describe('MongoDbVectorStore', () => {
   });
 
   describe('getReleventMediaItemEmbeddings', () => {
-    it('returns parsed embeddings from aggregation pipeline', async () => {
+    it('calls aggregation pipeline correctly and returns correct embeddings given no optional query fields set', async () => {
       const doc1 = {
         _id: new ObjectId(),
         embedding: Binary.fromFloat32Array(new Float32Array([0.1, 0.2, 0.3])),
         media_item_id: '407f1f77bcf86cd799439011:507f1f77bcf86cd799439011',
-        date_taken: new Date('2022-01-01')
+        date_taken: new Date('2022-02-01'),
+        score: 0.98
       };
       const doc2 = {
         _id: new ObjectId(),
         embedding: Binary.fromFloat32Array(new Float32Array([0.4, 0.5, 0.6])),
         media_item_id: '407f1f77bcf86cd799439012:507f1f77bcf86cd799439012',
-        date_taken: new Date('2022-02-01')
+        date_taken: new Date('2022-02-01'),
+        score: 0.98
+      };
+
+      // Mock aggregate() to fake Atlas vector search results
+      jest.spyOn(store['_collection'], 'aggregate').mockReturnValue({
+        [Symbol.asyncIterator]: async function* () {
+          yield doc1;
+          yield doc2;
+        }
+      } as never);
+
+      const query: QueryMediaItemEmbeddingRequest = {
+        embedding: new Float32Array([1.1, 1.2, 1.3]),
+        topK: 2
+      };
+      const results = await store.getReleventMediaItemEmbeddings(query);
+
+      expect(results).toEqual([
+        {
+          id: new MediaItemEmbeddingId('test-store', doc1._id.toString()),
+          mediaItemId: {
+            clientId: '407f1f77bcf86cd799439011',
+            objectId: '507f1f77bcf86cd799439011'
+          },
+          score: 0.98
+        },
+        {
+          id: new MediaItemEmbeddingId('test-store', doc2._id.toString()),
+          mediaItemId: {
+            clientId: '407f1f77bcf86cd799439012',
+            objectId: '507f1f77bcf86cd799439012'
+          },
+          score: 0.98
+        }
+      ]);
+    });
+
+    it('calls aggregation pipeline correctly and returns parsed embeddings given optional query fields', async () => {
+      const doc1 = {
+        _id: new ObjectId(),
+        embedding: Binary.fromFloat32Array(new Float32Array([0.1, 0.2, 0.3])),
+        media_item_id: '407f1f77bcf86cd799439011:507f1f77bcf86cd799439011',
+        date_taken: new Date('2022-01-01'),
+        score: 0.98
+      };
+      const doc2 = {
+        _id: new ObjectId(),
+        embedding: Binary.fromFloat32Array(new Float32Array([0.4, 0.5, 0.6])),
+        media_item_id: '407f1f77bcf86cd799439012:507f1f77bcf86cd799439012',
+        date_taken: new Date('2022-02-01'),
+        score: 0.98
       };
 
       // Mock aggregate() to fake Atlas vector search results
@@ -127,59 +174,6 @@ describe('MongoDbVectorStore', () => {
       const results = await store.getReleventMediaItemEmbeddings(query);
       expect(results).toHaveLength(2);
       expect(results[0].id).toBeInstanceOf(MediaItemEmbeddingId);
-      expect(typeof results[0].dateTaken.getTime()).toBe('number');
-    });
-
-    it('returns parsed embeddings that do not contain date_taken fields', async () => {
-      const doc1 = {
-        _id: new ObjectId(),
-        embedding: Binary.fromFloat32Array(new Float32Array([0.1, 0.2, 0.3])),
-        media_item_id: '407f1f77bcf86cd799439011:507f1f77bcf86cd799439011'
-      };
-      const doc2 = {
-        _id: new ObjectId(),
-        embedding: Binary.fromFloat32Array(new Float32Array([0.4, 0.5, 0.6])),
-        media_item_id: '407f1f77bcf86cd799439012:507f1f77bcf86cd799439012'
-      };
-
-      // Mock aggregate() to fake Atlas vector search results
-      jest.spyOn(store['_collection'], 'aggregate').mockReturnValue({
-        [Symbol.asyncIterator]: async function* () {
-          yield doc1;
-          yield doc2;
-        }
-      } as never);
-
-      const query: QueryMediaItemEmbeddingRequest = {
-        embedding: new Float32Array([1.1, 1.2, 1.3]),
-        topK: 2
-      };
-
-      const results = await store.getReleventMediaItemEmbeddings(query);
-      expect(results).toEqual([
-        {
-          dateTaken: new Date('1970-01-01T00:00:00.000Z'),
-          embedding: new Float32Array([
-            0.10000000149011612, 0.20000000298023224, 0.30000001192092896
-          ]),
-          id: new MediaItemEmbeddingId('test-store', doc1._id.toString()),
-          mediaItemId: {
-            clientId: '407f1f77bcf86cd799439011',
-            objectId: '507f1f77bcf86cd799439011'
-          }
-        },
-        {
-          dateTaken: new Date('1970-01-01T00:00:00.000Z'),
-          embedding: new Float32Array([
-            0.4000000059604645, 0.5, 0.6000000238418579
-          ]),
-          id: new MediaItemEmbeddingId('test-store', doc2._id.toString()),
-          mediaItemId: {
-            clientId: '407f1f77bcf86cd799439012',
-            objectId: '507f1f77bcf86cd799439012'
-          }
-        }
-      ]);
     });
   });
 });

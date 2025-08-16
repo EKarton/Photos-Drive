@@ -21,9 +21,7 @@ export class MediaItemEmbeddingId {
 
 export interface MediaItemEmbedding {
   readonly id: MediaItemEmbeddingId;
-  readonly embedding: Float32Array;
   readonly mediaItemId: MediaItemId;
-  readonly dateTaken: Date;
 }
 
 export interface QueryMediaItemEmbeddingRequest {
@@ -34,13 +32,17 @@ export interface QueryMediaItemEmbeddingRequest {
   readonly topK: number;
 }
 
+export type MediaItemEmbeddingQueryResult = MediaItemEmbedding & {
+  score: number;
+};
+
 export abstract class BaseVectorStore {
   abstract getStoreId(): string;
 
   abstract getReleventMediaItemEmbeddings(
     query: QueryMediaItemEmbeddingRequest,
     options?: { abortController?: AbortController }
-  ): Promise<MediaItemEmbedding[]>;
+  ): Promise<MediaItemEmbeddingQueryResult[]>;
 
   abstract getEmbeddingById(
     embeddingId: MediaItemEmbeddingId,

@@ -2,6 +2,7 @@ import {
   BaseVectorStore,
   MediaItemEmbedding,
   MediaItemEmbeddingId,
+  MediaItemEmbeddingQueryResult,
   QueryMediaItemEmbeddingRequest
 } from './BaseVectorStore';
 
@@ -27,14 +28,16 @@ export class DistributedVectorStore extends BaseVectorStore {
   override async getReleventMediaItemEmbeddings(
     query: QueryMediaItemEmbeddingRequest,
     options?: { abortController?: AbortController }
-  ): Promise<MediaItemEmbedding[]> {
-    return (
+  ): Promise<MediaItemEmbeddingQueryResult[]> {
+    const results = (
       await Promise.all(
         this.stores.map((store) =>
           store.getReleventMediaItemEmbeddings(query, options)
         )
       )
     ).flat();
+
+    return results.sort((a, b) => a.score - b.score).slice(0, query.topK);
   }
 
   override async getEmbeddingById(

@@ -11,6 +11,7 @@ import {
   BaseVectorStore,
   MediaItemEmbedding,
   MediaItemEmbeddingId,
+  MediaItemEmbeddingQueryResult,
   QueryMediaItemEmbeddingRequest
 } from './BaseVectorStore';
 
@@ -59,7 +60,7 @@ export class MongoDbVectorStore extends BaseVectorStore {
   override async getReleventMediaItemEmbeddings(
     query: QueryMediaItemEmbeddingRequest,
     options?: { abortController?: AbortController }
-  ): Promise<MediaItemEmbedding[]> {
+  ): Promise<MediaItemEmbeddingQueryResult[]> {
     const filter: Filter<MongoDBDocument> = {};
 
     if (query.startDateTaken || query.endDateTaken) {
@@ -84,9 +85,16 @@ export class MongoDbVectorStore extends BaseVectorStore {
           index: this._embeddingIndexName,
           path: 'embedding',
           queryVector: this.toMongoVector(query.embedding),
-          numCandidates: query.topK * 5,
+          numCandidates: query.topK * 10,
           filter,
           limit: query.topK
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          media_item_id: 1,
+          score: { $meta: 'vectorSearchScore' }
         }
       }
     ];
@@ -94,9 +102,12 @@ export class MongoDbVectorStore extends BaseVectorStore {
     const cursor = this._collection.aggregate(pipeline, {
       signal: options?.abortController?.signal
     });
-    const results: MediaItemEmbedding[] = [];
+    const results: MediaItemEmbeddingQueryResult[] = [];
     for await (const doc of cursor) {
-      results.push(this.parseDocumentToMediaItemEmbedding(doc));
+      results.push({
+        ...this.parseDocumentToMediaItemEmbedding(doc),
+        score: doc.score
+      });
     }
     return results;
   }
@@ -105,24 +116,13 @@ export class MongoDbVectorStore extends BaseVectorStore {
   private parseDocumentToMediaItemEmbedding(
     doc: MongoDBDocument
   ): MediaItemEmbedding {
-    const id = new MediaItemEmbeddingId(this._storeId, doc._id.toHexString());
-    const embedding = this.parseMongoVector(doc.embedding);
-    const mediaItemId = convertStringToMediaItemId(doc.media_item_id);
-    const dateTaken = doc.date_taken ? new Date(doc.date_taken) : new Date(0);
-
     return {
-      id,
-      embedding,
-      mediaItemId,
-      dateTaken
+      id: new MediaItemEmbeddingId(this._storeId, doc._id.toHexString()),
+      mediaItemId: convertStringToMediaItemId(doc.media_item_id)
     };
   }
 
   private toMongoVector(embedding: Float32Array): Binary {
     return Binary.fromFloat32Array(embedding);
-  }
-
-  private parseMongoVector(binary: Binary): Float32Array {
-    return binary.toFloat32Array();
   }
 }

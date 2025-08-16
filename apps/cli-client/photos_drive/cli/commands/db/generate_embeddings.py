@@ -3,6 +3,7 @@ import logging
 from typing import cast
 
 from tqdm import tqdm
+from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
 import typer
 from typing_extensions import Annotated
 
@@ -87,6 +88,7 @@ def generate_embeddings(
     )
 
     image_embedder = OpenCLIPImageEmbeddings()
+    image_captions = BlipImageCaptions()
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
@@ -145,7 +147,10 @@ def generate_embeddings(
 
     print(f"Need to generate {len(diffs)} embeddings")
 
-    diffs_processor = DiffsProcessor(image_embedder=image_embedder)
+    diffs_processor = DiffsProcessor(
+        image_embedder=image_embedder,
+        image_captions=image_captions,
+    )
     processed_diffs = diffs_processor.process_raw_diffs(diffs)
 
     assert len(media_item_ids) == len(diffs) == len(processed_diffs)

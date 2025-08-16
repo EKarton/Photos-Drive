@@ -21,7 +21,7 @@ export class OpenClipEmbedderService {
   ).pipe(
     shareReplay({ bufferSize: 1, refCount: true }),
     tap(() => {
-      console.log('Loaded models');
+      console.log(`Loaded ${MODEL_NAME}`);
     }),
   );
 

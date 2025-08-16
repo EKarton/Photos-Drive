@@ -12,6 +12,7 @@ import numpy as np
 from tqdm import tqdm
 
 from photos_drive.backup.diffs import Diff, Modifier
+from photos_drive.shared.llm.models.image_captions import ImageCaptions
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 from photos_drive.shared.metadata.gps_location import GpsLocation
 from photos_drive.shared.utils.dimensions.cv2_video_dimensions import (
@@ -30,6 +31,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 DEFAULT_DATE_TIME = datetime(1970, 1, 1)
 
+EMPTY_CAPTIONS = ''
 EMPTY_EMBEDDING = np.empty((1,), dtype=np.float32)
 
 
@@ -51,6 +53,7 @@ class ProcessedDiff:
         height (int): The height of the image / video.
         date_taken (datetime): The date and time for when the image / video was taken.
         mime_type (str): The mime type of this image / video.
+        captions (str): The captions for this image / video.
         embedding (np.ndarray): The embedding of this image / video.
     """
 
@@ -65,6 +68,7 @@ class ProcessedDiff:
     height: int
     date_taken: datetime
     mime_type: str
+    captions: str
     embedding: np.ndarray = field(compare=False, hash=False)
 
 
@@ -78,7 +82,9 @@ class DiffsProcessor:
     def __init__(
         self,
         image_embedder: ImageEmbeddings,
-        embedder_batch_size=4,
+        image_captions: ImageCaptions,
+        embedder_batch_size=16,
+        captions_batch_size=16,
     ):
         '''
         Constructs an instance of {@code DiffsProcessor}
@@ -86,11 +92,17 @@ class DiffsProcessor:
         Args:
             - image_embedder (ImageEmbeddings):
                 The image embedder
+            - image_captions (ImageCaptions)
+                The image captions generator
             - embedder_batch_size (int):
                 The number of images / videos to get its embeddings in parallel.
+            captions_batch_size (int):
+                The number of images / videos to get its captions in parallel.
         '''
         self.image_embedder = image_embedder
+        self.image_captions = image_captions
         self.embedder_batch_size = embedder_batch_size
+        self.captions_batch_size = captions_batch_size
 
     def process_raw_diffs(self, diffs: list[Diff]) -> list[ProcessedDiff]:
         """
@@ -105,6 +117,9 @@ class DiffsProcessor:
         """
         processed_diffs = self.__get_basic_processed_diffs(diffs)
         processed_diffs = self.__populate_processed_diffs_with_exif_metadata(
+            diffs, processed_diffs
+        )
+        processed_diffs = self.__populate_processed_diffs_with_captions(
             diffs, processed_diffs
         )
         processed_diffs = self.__populate_processed_diffs_with_embeddings(
@@ -133,6 +148,7 @@ class DiffsProcessor:
                 height=height,
                 date_taken=DEFAULT_DATE_TIME,  # Placeholder; will be updated later
                 mime_type=mime_type,
+                captions=EMPTY_CAPTIONS,
                 embedding=EMPTY_EMBEDDING,
             )
 
@@ -300,6 +316,43 @@ class DiffsProcessor:
                 )
 
         return metadatas
+
+    def __populate_processed_diffs_with_captions(
+        self, diffs: list[Diff], processed_diffs: list[ProcessedDiff]
+    ) -> list[ProcessedDiff]:
+        diffs_to_process: list[Tuple[int, ProcessedDiff]] = [
+            (i, processed_diff)
+            for i, processed_diff in enumerate(processed_diffs)
+            if processed_diff.modifier == "+"
+            and processed_diff.mime_type
+            and is_image(processed_diff.mime_type)
+        ]
+
+        updated_processed_diffs = processed_diffs.copy()
+
+        def load_images(diff_batch):
+            images = []
+            for _, diff in diff_batch:
+                with Image.open(diff.file_path) as img:
+                    images.append(img.convert("RGB").copy())
+            return images
+
+        with tqdm(
+            total=len(diffs_to_process), desc="Generating image captions"
+        ) as pbar:
+            for start in range(0, len(diffs_to_process), self.captions_batch_size):
+                batch = diffs_to_process[start : start + self.captions_batch_size]
+                images = load_images(batch)
+
+                captions = self.image_captions.generate_caption(images)
+                for idx_in_batch, (proc_idx, _) in enumerate(batch):
+                    updated_processed_diffs[proc_idx] = replace(
+                        updated_processed_diffs[proc_idx],
+                        captions=captions[idx_in_batch],
+                    )
+                    pbar.update(1)
+
+        return updated_processed_diffs
 
     def __populate_processed_diffs_with_embeddings(
         self, diffs: list[Diff], processed_diffs: list[ProcessedDiff]
