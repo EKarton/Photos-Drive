@@ -1,4 +1,4 @@
-from typing import override
+from typing_extensions import override
 
 from bson.objectid import ObjectId
 import numpy as np

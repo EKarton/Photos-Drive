@@ -1,6 +1,7 @@
 from datetime import datetime
 import logging
-from typing import Any, Mapping, cast, override
+from typing import Any, Mapping, cast
+from typing_extensions import override
 
 from bson.binary import Binary, BinaryVectorDtype
 from bson.objectid import ObjectId

@@ -41,6 +41,7 @@ langgraph = "^0.5.4"
 langmem = "^0.0.28"
 rich = "^14.0.0"
 pymongo = "<4.11"
+typing-extensions = "^4.14.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

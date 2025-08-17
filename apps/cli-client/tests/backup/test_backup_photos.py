@@ -195,7 +195,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         # Test assert: check on the Photos folder and it's linked correctly
         self.assertIn(
-            f'{mongodb_client_1_id}:{archives_album['_id']}',
+            f'{mongodb_client_1_id}:{archives_album._id}',
             photos_album['parent_album_id'],
         )
 
@@ -227,16 +227,16 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         # Test assert: check that the album IDs in the media items are correct
         self.assertEqual(
-            dog_item['album_id'], f'{mongodb_client_1_id}:{album_2010['_id']}'
+            dog_item['album_id'], f'{mongodb_client_1_id}:{album_2010._id}'
         )
         self.assertEqual(
-            cat_item['album_id'], f'{mongodb_client_1_id}:{album_2010['_id']}'
+            cat_item['album_id'], f'{mongodb_client_1_id}:{album_2010._id}'
         )
         self.assertEqual(
-            fish_item['album_id'], f'{mongodb_client_1_id}:{album_2009['_id']}'
+            fish_item['album_id'], f'{mongodb_client_1_id}:{album_2009._id}'
         )
         self.assertEqual(
-            bird_item['album_id'], f'{mongodb_client_1_id}:{album_2009['_id']}'
+            bird_item['album_id'], f'{mongodb_client_1_id}:{album_2009._id}'
         )
 
         # Test assert: check that the photos are added to map cells repository
@@ -245,29 +245,27 @@ class TestPhotosBackup(ParametrizedTestCase):
         ) + list(mongodb_client_2['photos_drive']['map_cells'].find({}))
         dog_citem = list(
             filter(
-                lambda x: x['media_item_id']
-                == f'{mongodb_client_1_id}:{dog_item['_id']}',
+                lambda x: x['media_item_id'] == f'{mongodb_client_1_id}:{dog_item._id}',
                 cell_items,
             )
         )
         cat_citem = list(
             filter(
-                lambda x: x['media_item_id']
-                == f'{mongodb_client_1_id}:{cat_item['_id']}',
+                lambda x: x['media_item_id'] == f'{mongodb_client_1_id}:{cat_item._id}',
                 cell_items,
             )
         )
         fish_citem = list(
             filter(
                 lambda x: x['media_item_id']
-                == f'{mongodb_client_1_id}:{fish_item['_id']}',
+                == f'{mongodb_client_1_id}:{fish_item._id}',
                 cell_items,
             )
         )
         bird_citem = list(
             filter(
                 lambda x: x['media_item_id']
-                == f'{mongodb_client_1_id}:{bird_item['_id']}',
+                == f'{mongodb_client_1_id}:{bird_item._id}',
                 cell_items,
             )
         )
@@ -403,7 +401,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         cat_citem = list(
             filter(
                 lambda x: x['media_item_id']
-                == f'{mongodb_client_1_id}:{cat_mitem['_id']}',
+                == f'{mongodb_client_1_id}:{cat_mitem._id}',
                 cell_items,
             )
         )
@@ -552,7 +550,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         dog_citem = list(
             filter(
                 lambda x: x['media_item_id']
-                == f'{mongodb_client_1_id}:{dog_mitem['_id']}',
+                == f'{mongodb_client_1_id}:{dog_mitem._id}',
                 cell_items,
             )
         )

@@ -1,5 +1,6 @@
 import logging
-from typing import List, Tuple, override
+from typing import List, Tuple
+from typing_extensions import override
 
 from bson.objectid import ObjectId
 import numpy as np
