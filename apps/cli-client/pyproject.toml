@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "photos_drive"
-version = "8.0.6"
+version = "8.1.0"
 description = ""
 authors = ["Emilio Kartono <e.kartonoe@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.12,<3.13"
+python = ">=3.10,<3.13"
 exifread = "^3.0.0"
 typer = "^0.15.1"
 backoff = "^2.2.1"
@@ -31,7 +31,7 @@ faiss-cpu = "^1.11.0.post1"
 langchain-google-vertexai = "^2.0.27"
 langchain-community = "^0.3.27"
 langchain-experimental = "^0.3.4"
-torch = "=2.2.2"
+torch = "<=2.2.2"
 numpy = "<2"
 open-clip-torch = "^2.32.0"
 langchain-google-genai = "^2.1.8"
@@ -41,6 +41,7 @@ langgraph = "^0.5.4"
 langmem = "^0.0.28"
 rich = "^14.0.0"
 pymongo = "<4.11"
+typing-extensions = "^4.14.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

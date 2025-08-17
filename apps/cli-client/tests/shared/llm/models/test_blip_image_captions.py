@@ -28,7 +28,7 @@ class TestBlipImageCaptions(unittest.TestCase):
         self.assertEqual(
             captions,
             [
-                'a globe with red lines on it',
-                'the map of the city of prague, with all the different icons',
+                'a globe with a grid of lines on it',
+                'a map with different apps on it',
             ],
         )

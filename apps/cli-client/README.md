@@ -256,26 +256,19 @@ It will delete all photos / videos from your system, and move all photos / video
    poetry install
    ```
 
-3. Install torch and torchvision by running:
-
-   ```bash
-   poetry env activate
-   pip install torch torchvision
-   ```
-
-4. To lint your code, run:
+3. To lint your code, run:
 
    ```bash
    poetry run mypy . && poetry run flake8 && poetry run isort . && poetry run black .
    ```
 
-5. To run all tests and code coverage, run:
+4. To run all tests and code coverage, run:
 
    ```bash
    poetry run coverage run  --source=photos_drive -m pytest tests/ && poetry run coverage report -m
    ```
 
-6. To run tests and code coverage for a particular test file, run:
+5. To run tests and code coverage for a particular test file, run:
 
    ```bash
    poetry run coverage run --source=photos_drive -m pytest <insert-file-path> && poetry run coverage report -m
@@ -287,7 +280,7 @@ It will delete all photos / videos from your system, and move all photos / video
    poetry run coverage run --source=photos_drive -m pytest tests/backup/test_backup_photos.py && poetry run coverage report -m
    ```
 
-7. To publish a new version of the app:
+6. To publish a new version of the app:
 
    1. First, bump up the package version by running:
 

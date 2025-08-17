@@ -1,5 +1,5 @@
 import configparser
-from typing import override
+from typing_extensions import override
 
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
