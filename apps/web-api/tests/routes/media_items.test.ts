@@ -333,7 +333,11 @@ describe('Media Items Router', () => {
           dateTaken: new Date(0)
         }
       ]);
-      repo.bulkGetMediaItemByIds.mockResolvedValue(MOCK_MEDIA_ITEMS);
+      // Mimic bulkGetMediaItemByIds returning media item IDs not in order
+      repo.bulkGetMediaItemByIds.mockResolvedValue([
+        MOCK_MEDIA_ITEMS[1],
+        MOCK_MEDIA_ITEMS[0]
+      ]);
 
       const app = express();
       app.use(express.json());

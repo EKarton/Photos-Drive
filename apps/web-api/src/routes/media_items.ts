@@ -22,6 +22,7 @@ import {
 } from '../services/metadata_store/MediaItemsStore';
 import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsStore';
 import { BaseVectorStore } from '../services/vector_stores/BaseVectorStore';
+import logger from '../utils/logger';
 import parseEnumOrElse from '../utils/parseEnumOrElse';
 
 export default async function (
@@ -188,6 +189,8 @@ export default async function (
         },
         { abortController: req.abortController }
       );
+
+      logger.info(`Found ${searchResult.length} results`);
 
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
         searchResult.map((result) => result.mediaItemId),
