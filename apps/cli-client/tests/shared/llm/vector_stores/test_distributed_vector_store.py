@@ -178,7 +178,7 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
             ]
         )[0]
 
-        self.distributed_store.delete_media_item_embeddings([doc1.id, doc2.id])
+        self.distributed_store.delete_media_item_embeddings_by_media_item_ids([MOCK_MEDIA_ITEM_ID_1, MOCK_MEDIA_ITEM_ID_2])
 
         # Ensure that they are deleted
         self.assertIsNone(
@@ -246,3 +246,111 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
             )
         )
         self.assertEqual(results, [])
+
+    def test_get_embeddings_by_media_item_ids_across_stores(self):
+        # Add documents to both stores
+        doc1 = self.store1.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(0),
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
+        )[0]
+        doc2 = self.store2.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(1),
+                    media_item_id=MOCK_MEDIA_ITEM_ID_2,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
+        )[0]
+        doc3 = self.store1.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(2),
+                    media_item_id=MOCK_MEDIA_ITEM_ID_3,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
+        )[0]
+
+        # Query for all three documents from the distributed store
+        requested_ids = [MOCK_MEDIA_ITEM_ID_1, MOCK_MEDIA_ITEM_ID_2, MOCK_MEDIA_ITEM_ID_3]
+        results = self.distributed_store.get_embeddings_by_media_item_ids(requested_ids)
+
+        # Assertions
+        self.assertEqual(len(results), 3)
+        retrieved_ids = {doc.media_item_id for doc in results}
+        self.assertSetEqual(retrieved_ids, set(requested_ids))
+
+        # Check the content of the retrieved documents
+        retrieved_doc_1 = next(doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_1)
+        np.testing.assert_array_equal(retrieved_doc_1.embedding, doc1.embedding)
+
+        retrieved_doc_2 = next(doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_2)
+        np.testing.assert_array_equal(retrieved_doc_2.embedding, doc2.embedding)
+
+        retrieved_doc_3 = next(doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_3)
+        np.testing.assert_array_equal(retrieved_doc_3.embedding, doc3.embedding)
+
+    def test_get_embeddings_by_media_item_ids_with_non_existent_ids(self):
+        # Add one document to a store
+        self.store1.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(0),
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
+        )
+
+        # Query for a mix of existing and non-existent IDs
+        non_existent_id = MediaItemId(ObjectId(), ObjectId())
+        requested_ids = [MOCK_MEDIA_ITEM_ID_1, non_existent_id]
+        results = self.distributed_store.get_embeddings_by_media_item_ids(requested_ids)
+
+        # Assertions
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].media_item_id, MOCK_MEDIA_ITEM_ID_1)
+
+    def test_get_embeddings_by_media_item_ids_empty_list(self):
+        # Add some docs to ensure the stores are not empty
+        self.store1.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(0),
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
+        )
+
+        # Query with an empty list of IDs
+        results = self.distributed_store.get_embeddings_by_media_item_ids([])
+
+        # Assertions
+        self.assertEqual(len(results), 0)
+
+    def test_get_embeddings_by_media_item_ids_with_duplicates(self):
+        # Add one document
+        doc1 = self.store1.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(0),
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
+        )[0]
+        
+        # Query with a list containing the same ID multiple times
+        requested_ids = [MOCK_MEDIA_ITEM_ID_1, MOCK_MEDIA_ITEM_ID_1]
+        results = self.distributed_store.get_embeddings_by_media_item_ids(requested_ids)
+
+        # The function should still return only one result for that ID
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].media_item_id, MOCK_MEDIA_ITEM_ID_1)

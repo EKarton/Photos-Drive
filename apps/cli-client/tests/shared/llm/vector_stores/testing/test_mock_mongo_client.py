@@ -29,22 +29,24 @@ class TestMockCollection(unittest.TestCase):
         self.assertIsNone(self.collection.find_one({"_id": ObjectId()}))
 
     def test_delete_many_deletes_and_returns_count(self):
-        docs = [{"foo": i} for i in range(5)]
-        inserted = self.collection.insert_many(docs)
+        docs_to_insert = [
+            {"media_item_id": "item1"},
+            {"media_item_id": "item2"},
+            {"media_item_id": "item3"},
+        ]
+        self.collection.insert_many(docs_to_insert)
 
-        # Delete two documents
-        delete_ids = inserted.inserted_ids[:2]
-        result = self.collection.delete_many({"_id": {"$in": delete_ids}})
+        # Delete two documents by their media_item_id
+        media_item_ids_to_delete = ["item1", "item3"]
+        result = self.collection.delete_many(
+            {"media_item_id": {"$in": media_item_ids_to_delete}}
+        )
         self.assertEqual(result.deleted_count, 2)
 
-        # Confirm they are deleted
-        for _id in delete_ids:
-            self.assertIsNone(self.collection.find_one({"_id": _id}))
-
-        # Delete documents that don’t exist results in count 0
-        new_id = ObjectId()
-        result = self.collection.delete_many({"_id": {"$in": [new_id]}})
-        self.assertEqual(result.deleted_count, 0)
+        # Verify documents are gone
+        remaining_docs = list(self.collection.find({}))
+        self.assertEqual(len(remaining_docs), 1)
+        self.assertEqual(remaining_docs[0]["media_item_id"], "item2")
 
     def test_aggregate_returns_documents_with_limit(self):
         # Insert 5 documents

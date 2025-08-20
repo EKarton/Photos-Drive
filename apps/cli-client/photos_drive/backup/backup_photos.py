@@ -217,11 +217,10 @@ class PhotosBackup:
                 self.__map_cells_repo.add_media_item(media_item)
 
         # Step 10: Delete media items from vector store
-        self.__vector_store.delete_media_item_embeddings(
+        self.__vector_store.delete_media_item_embeddings_by_media_item_ids(
             [
-                media_item.embedding_id
+                media_item.id
                 for media_item in total_media_items_to_delete
-                if media_item.embedding_id is not None
             ]
         )
 
@@ -236,18 +235,9 @@ class PhotosBackup:
                     date_taken=add_diff.date_taken,
                 )
             )
-        media_item_embeddings = self.__vector_store.add_media_item_embeddings(
+        self.__vector_store.add_media_item_embeddings(
             create_media_item_embedding_requests
         )
-        update_media_items_requests: list[UpdateMediaItemRequest] = []
-        for media_item_embedding in media_item_embeddings:
-            update_media_items_requests.append(
-                UpdateMediaItemRequest(
-                    media_item_id=media_item_embedding.media_item_id,
-                    new_embedding_id=media_item_embedding.id,
-                )
-            )
-        self.__media_items_repo.update_many_media_items(update_media_items_requests)
 
         # Step 8: Return the results of the backup
         return BackupResults(

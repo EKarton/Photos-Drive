@@ -1,8 +1,5 @@
 import typer
 
-from photos_drive.cli.commands.db.copy_date_taken_to_vector_store import (
-    copy_date_taken_to_vector_store,
-)
 from photos_drive.cli.commands.db.delete_child_album_ids_from_albums_db import (
     delete_child_album_ids_from_albums_db,
 )
@@ -33,4 +30,3 @@ app.command()(delete_child_album_ids_from_albums_db)
 app.command()(delete_media_items_without_album_id)
 app.command()(initialize_map_cells_db)
 app.command()(generate_embeddings)
-app.command()(copy_date_taken_to_vector_store)
