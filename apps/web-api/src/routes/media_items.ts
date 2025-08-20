@@ -188,17 +188,21 @@ export default async function (
         },
         { abortController: req.abortController }
       );
-      const mediaItemIdsInOrder = searchResult.map((result) => result.mediaItemId);
-      
+      const mediaItemIdsInOrder = searchResult.map(
+        (result) => result.mediaItemId
+      );
+
       const mediaItems = await mediaItemsRepo.bulkGetMediaItemByIds(
         searchResult.map((result) => result.mediaItemId),
         { abortController: req.abortController }
       );
 
       // Create a map from mediaItemId to mediaItem for lookup
-      const mediaItemMap = new Map(mediaItems.map(item => [item.id, item]));
+      const mediaItemMap = new Map(mediaItems.map((item) => [item.id, item]));
 
-      const orderedMediaItems = mediaItemIdsInOrder.map(id => mediaItemMap.get(id)).filter((mediaItem) => mediaItem !== undefined);
+      const orderedMediaItems = mediaItemIdsInOrder
+        .map((id) => mediaItemMap.get(id))
+        .filter((mediaItem) => mediaItem !== undefined);
 
       return res.status(200).json({
         mediaItems: orderedMediaItems.map(serializeMediaItem)
