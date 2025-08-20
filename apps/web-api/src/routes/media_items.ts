@@ -198,7 +198,7 @@ export default async function (
       // Create a map from mediaItemId to mediaItem for lookup
       const mediaItemMap = new Map(mediaItems.map(item => [item.id, item]));
 
-      const orderedMediaItems = mediaItemIdsInOrder.map(id => mediaItemMap.get(id)).filter(Boolean);
+      const orderedMediaItems = mediaItemIdsInOrder.map(id => mediaItemMap.get(id)).filter((mediaItem) => mediaItem !== undefined);
 
       return res.status(200).json({
         mediaItems: orderedMediaItems.map(serializeMediaItem)
