@@ -200,10 +200,12 @@ export default async function (
       logger.info(`Got ${mediaItems.length} details`);
 
       // Create a map from mediaItemId to mediaItem for lookup
-      const mediaItemMap = new Map(mediaItems.map((item) => [item.id, item]));
+      const mediaItemMap = new Map(
+        mediaItems.map((item) => [mediaIdToString(item.id), item])
+      );
 
       const orderedMediaItems = searchResult
-        .map((result) => mediaItemMap.get(result.mediaItemId))
+        .map((result) => mediaItemMap.get(mediaIdToString(result.mediaItemId)))
         .filter((mediaItem) => mediaItem !== undefined);
 
       return res.status(200).json({
