@@ -197,6 +197,8 @@ export default async function (
         { abortController: req.abortController }
       );
 
+      logger.info(`Got ${mediaItems.length} details`);
+
       // Create a map from mediaItemId to mediaItem for lookup
       const mediaItemMap = new Map(mediaItems.map((item) => [item.id, item]));
 
