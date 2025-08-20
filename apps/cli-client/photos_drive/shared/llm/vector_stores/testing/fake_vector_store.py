@@ -1,7 +1,6 @@
-from typing_extensions import override
-
 from bson.objectid import ObjectId
 import numpy as np
+from typing_extensions import override
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
@@ -9,6 +8,9 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     MediaItemEmbedding,
     MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
+)
+from photos_drive.shared.metadata.media_item_id import (
+    MediaItemId,
 )
 
 DEFAULT_VECTOR_STORE_ID = ObjectId()
@@ -47,9 +49,16 @@ class FakeVectorStore(BaseVectorStore):
         return new_embeddings
 
     @override
-    def delete_media_item_embeddings(self, ids: list[MediaItemEmbeddingId]):
-        for id in ids:
-            self.__id_to_embeddings.pop(id, None)
+    def delete_media_item_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ):
+        embedding_ids: list[MediaItemEmbeddingId] = []
+        for embedding_id, embedding in self.__id_to_embeddings.items():
+            if embedding.media_item_id in media_item_ids:
+                embedding_ids.append(embedding_id)
+
+        for embedding_id in embedding_ids:
+            self.__id_to_embeddings.pop(embedding_id)
 
     @override
     def get_relevent_media_item_embeddings(
@@ -85,32 +94,14 @@ class FakeVectorStore(BaseVectorStore):
         self.__id_to_embeddings.clear()
 
     @override
-    def get_embedding_by_id(self, embedding_id):
-        return self.__id_to_embeddings[embedding_id]
-
-    @override
-    def update_media_item_embeddings(self, requests):
-        for request in requests:
-            original_embedding = self.__id_to_embeddings[request.embedding_id]
-
-            date_taken = original_embedding.date_taken
-            if request.new_date_taken:
-                date_taken = request.new_date_taken
-
-            media_item_id = original_embedding.media_item_id
-            if request.new_media_item_id:
-                media_item_id = request.new_media_item_id
-
-            embedding = original_embedding.embedding
-            if request.new_embedding:
-                embedding = request.new_embedding
-
-            self.__id_to_embeddings[request.embedding_id] = MediaItemEmbedding(
-                id=request.embedding_id,
-                embedding=embedding,
-                media_item_id=media_item_id,
-                date_taken=date_taken,
-            )
+    def get_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ) -> list[MediaItemEmbedding]:
+        docs = []
+        for _embedding_id, embedding in self.__id_to_embeddings.items():
+            if embedding.media_item_id in media_item_ids:
+                docs.append(embedding)
+        return docs
 
     def __generate_unique_media_item_embedding_id(self) -> MediaItemEmbeddingId:
         id = MediaItemEmbeddingId(ObjectId(), ObjectId())

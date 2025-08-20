@@ -1,8 +1,8 @@
 import configparser
-from typing_extensions import override
 
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
+from typing_extensions import override
 
 from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,

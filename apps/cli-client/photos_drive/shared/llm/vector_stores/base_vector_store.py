@@ -159,25 +159,14 @@ class BaseVectorStore(ABC):
         '''
 
     @abstractmethod
-    def update_media_item_embeddings(
-        self, requests: list[UpdateMediaItemEmbeddingRequest]
+    def delete_media_item_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
     ):
         '''
-        Updates a list of embeddings
+        Deletes a list of media item embeddings by its media item IDs
 
         Args:
-            request (list[UpdateMediaItemEmbeddingRequest]): A list of
-                embeddings to update in the store
-        '''
-
-    @abstractmethod
-    def delete_media_item_embeddings(self, ids: list[MediaItemEmbeddingId]):
-        '''
-        Deletes a list of media item embeddings
-
-        Args:
-            ids (list[MediaItemEmbeddingId]): A list of embeddings by their
-                IDs to delete from the store
+            media_item_ids (list[MediaItemId]): A list of media item IDs
         '''
 
     @abstractmethod
@@ -195,17 +184,17 @@ class BaseVectorStore(ABC):
         '''
 
     @abstractmethod
-    def get_embedding_by_id(
-        self, embedding_id: MediaItemEmbeddingId
-    ) -> MediaItemEmbedding:
+    def get_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ) -> list[MediaItemEmbedding]:
         '''
-        Returns the embeddings from an embedding ID
+        Returns the embeddings from a list of media item IDs
 
         Args:
-            embedding_id (MediaItemEmbeddingId): The embedding ID
+            media_item_ids (list[MediaItemId]): A list of media item IDs to fetch for
 
         Returns:
-            MediaItemEmbedding: the embedding
+            list[MediaItemEmbedding]: A list of embeddings
         '''
 
     @abstractmethod

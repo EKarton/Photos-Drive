@@ -1,9 +1,9 @@
 import logging
-from typing_extensions import override
 
 from PIL import Image
 import torch
 from transformers import BlipForConditionalGeneration, BlipProcessor
+from typing_extensions import override
 
 from photos_drive.shared.llm.models.image_captions import ImageCaptions
 

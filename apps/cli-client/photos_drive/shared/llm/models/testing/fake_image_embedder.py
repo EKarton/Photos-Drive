@@ -1,7 +1,6 @@
-from typing_extensions import override
-
 from PIL import Image
 import numpy as np
+from typing_extensions import override
 
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 

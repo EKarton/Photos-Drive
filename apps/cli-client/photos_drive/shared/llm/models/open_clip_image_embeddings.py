@@ -1,10 +1,10 @@
 import logging
-from typing_extensions import override
 
 from PIL import Image
 import numpy as np
 import torch
 from transformers import CLIPModel, CLIPProcessor
+from typing_extensions import override
 
 from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
 

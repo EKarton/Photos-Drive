@@ -1,17 +1,18 @@
 import logging
 from typing import List, Tuple
-from typing_extensions import override
 
 from bson.objectid import ObjectId
 import numpy as np
+from typing_extensions import override
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
-    MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
-    UpdateMediaItemEmbeddingRequest,
+)
+from photos_drive.shared.metadata.media_item_id import (
+    MediaItemId,
 )
 
 logger = logging.getLogger(__name__)
@@ -89,16 +90,11 @@ class DistributedVectorStore(BaseVectorStore):
         return result_docs
 
     @override
-    def delete_media_item_embeddings(self, ids: List[MediaItemEmbeddingId]):
-        # Group ids by their vector_store_id
-        store_map: dict[ObjectId, list[MediaItemEmbeddingId]] = {}
-        for doc_id in ids:
-            store_map.setdefault(doc_id.vector_store_id, []).append(doc_id)
-
+    def delete_media_item_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ):
         for store in self.stores:
-            store_id = store.get_store_id()
-            if store_id in store_map:
-                store.delete_media_item_embeddings(store_map[store_id])
+            store.delete_media_item_embeddings_by_media_item_ids(media_item_ids)
 
     @override
     def get_relevent_media_item_embeddings(
@@ -123,31 +119,15 @@ class DistributedVectorStore(BaseVectorStore):
         return top_docs
 
     @override
-    def get_embedding_by_id(
-        self, embedding_id: MediaItemEmbeddingId
-    ) -> MediaItemEmbedding:
+    def get_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ) -> list[MediaItemEmbedding]:
+        embeddings: list[MediaItemEmbedding] = []
         for store in self.stores:
-            if store.get_store_id() == embedding_id.vector_store_id:
-                print("Hehehe")
-                return store.get_embedding_by_id(embedding_id)
-        raise ValueError(f'Unable to find embedding {embedding_id}')
+            embeddings += store.get_embeddings_by_media_item_ids(media_item_ids)
+        return embeddings
 
     @override
     def delete_all_media_item_embeddings(self):
         for store in self.stores:
             store.delete_all_media_item_embeddings()
-
-    @override
-    def update_media_item_embeddings(
-        self, requests: list[UpdateMediaItemEmbeddingRequest]
-    ):
-        client_id_to_reqs: dict[ObjectId, list[UpdateMediaItemEmbeddingRequest]] = {}
-        for request in requests:
-            if request.embedding_id.vector_store_id not in client_id_to_reqs:
-                client_id_to_reqs[request.embedding_id.vector_store_id] = []
-            client_id_to_reqs[request.embedding_id.vector_store_id].append(request)
-
-        for client_id in client_id_to_reqs:
-            self._store_id_to_store[client_id].update_media_item_embeddings(
-                client_id_to_reqs[client_id]
-            )

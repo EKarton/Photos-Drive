@@ -43,14 +43,19 @@ class TestFakeVectorStore(unittest.TestCase):
         self.assertEqual(added[0].media_item_id, MOCK_MEDIA_ITEM_ID_1)
         self.assertTrue(np.allclose(added[0].embedding, req.embedding))
 
-    def test_delete_media_item_embeddings_removes_entries(self):
-        req = CreateMediaItemEmbeddingRequest(
-            embedding=self._make_embedding(1.0),
-            media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            date_taken=MOCK_DATE_TAKEN,
+    def test_delete_media_item_embeddings_by_media_item_ids_removes_entries(self):
+        self.store.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=self._make_embedding(1.0),
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
         )
-        added = self.store.add_media_item_embeddings([req])
-        self.store.delete_media_item_embeddings([added[0].id])
+        self.store.delete_media_item_embeddings_by_media_item_ids(
+            [MOCK_MEDIA_ITEM_ID_1]
+        )
         results = self.store.get_relevent_media_item_embeddings(
             QueryMediaItemEmbeddingRequest(embedding=self._make_embedding(1.0), top_k=1)
         )

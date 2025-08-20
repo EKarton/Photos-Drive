@@ -1,7 +1,7 @@
 from typing import Dict
-from typing_extensions import override
 
 from bson.objectid import ObjectId
+from typing_extensions import override
 
 from photos_drive.shared.config.config import (
     AddGPhotosConfigRequest,

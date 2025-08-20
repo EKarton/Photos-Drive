@@ -1,15 +1,14 @@
 from datetime import datetime
 import logging
 from typing import Any, Mapping, cast
-from typing_extensions import override
 
 from bson.binary import Binary, BinaryVectorDtype
 from bson.objectid import ObjectId
 import numpy as np
-import pymongo
 from pymongo import MongoClient
 from pymongo.errors import CollectionInvalid
 from pymongo.operations import SearchIndexModel
+from typing_extensions import override
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
@@ -17,12 +16,12 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     MediaItemEmbedding,
     MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
-    UpdateMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
 )
 from photos_drive.shared.metadata.media_item_id import (
+    MediaItemId,
     media_item_id_to_string,
     parse_string_to_media_item_id,
 )
@@ -138,27 +137,18 @@ class MongoDbVectorStore(BaseVectorStore):
         return added_docs
 
     @override
-    def delete_media_item_embeddings(self, ids: list[MediaItemEmbeddingId]):
-        store_ids = [id.vector_store_id for id in ids]
-        if not all(sid == self.get_store_id() for sid in store_ids):
-            raise ValueError('Some IDs do not belong to this vector store')
-
-        object_ids = [id.object_id for id in ids]
-        self._collection.delete_many({"_id": {"$in": object_ids}})
-
-    @override
-    def get_embedding_by_id(
-        self, embedding_id: MediaItemEmbeddingId
-    ) -> MediaItemEmbedding:
-        doc = self._collection.find_one(
-            {
-                "_id": embedding_id.object_id,
+    def delete_media_item_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ):
+        filter_obj = {
+            "media_item_id": {
+                "$in": [
+                    media_item_id_to_string(media_item_id)
+                    for media_item_id in media_item_ids
+                ]
             }
-        )
-        if doc is None:
-            raise ValueError(f"Cannot find embedding for {embedding_id}")
-
-        return self.__parse_raw_document_to_media_item_embedding_obj(doc)
+        }
+        self._collection.delete_many(filter_obj)
 
     @override
     def get_relevent_media_item_embeddings(
@@ -203,44 +193,26 @@ class MongoDbVectorStore(BaseVectorStore):
         return docs
 
     @override
-    def delete_all_media_item_embeddings(self):
-        self._collection.delete_many({})
+    def get_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ) -> list[MediaItemEmbedding]:
+        filter_obj = {
+            "media_item_id": {
+                "$in": [
+                    media_item_id_to_string(media_item_id)
+                    for media_item_id in media_item_ids
+                ]
+            }
+        }
+
+        docs = []
+        for doc in self._collection.find(filter_obj):
+            docs.append(self.__parse_raw_document_to_media_item_embedding_obj(doc))
+        return docs
 
     @override
-    def update_media_item_embeddings(
-        self, requests: list[UpdateMediaItemEmbeddingRequest]
-    ):
-        operations: list[pymongo.UpdateOne] = []
-        for request in requests:
-            filter_query: Mapping = {
-                "_id": request.embedding_id.object_id,
-            }
-
-            set_query: Mapping = {"$set": {}, "$unset": {"location": ""}}
-
-            if request.new_embedding:
-                set_query["$set"]['embedding'] = self.__get_mongodb_vector(
-                    request.new_embedding
-                )
-
-            if request.new_media_item_id:
-                set_query["$set"]['media_item_id'] = media_item_id_to_string(
-                    request.new_media_item_id
-                )
-
-            if request.new_date_taken:
-                set_query["$set"]['date_taken'] = request.new_date_taken
-
-            operations.append(
-                pymongo.UpdateOne(filter=filter_query, update=set_query, upsert=False)
-            )
-
-        result = self._collection.bulk_write(operations)
-        if result.matched_count != len(operations):
-            raise ValueError(
-                f"Unable to update all embeddings: {result.matched_count} "
-                + f"vs {len(operations)}"
-            )
+    def delete_all_media_item_embeddings(self):
+        self._collection.delete_many({})
 
     def __get_mongodb_vector(self, embedding: np.ndarray) -> Binary:
         return Binary.from_vector(embedding.tolist(), BinaryVectorDtype.FLOAT32)

@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 from bson import Binary
 from bson.objectid import ObjectId
-from photos_drive.shared.llm.models.testing.fake_image_captions import FAKE_CAPTIONS
 from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from photos_drive.backup.backup_photos import PhotosBackup
@@ -15,6 +14,7 @@ from photos_drive.shared.blob_store.gphotos.testing import (
     FakeItemsRepository,
 )
 from photos_drive.shared.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.llm.models.testing.fake_image_captions import FAKE_CAPTIONS
 from photos_drive.shared.llm.models.testing.fake_image_embedder import FAKE_EMBEDDING
 from photos_drive.shared.llm.vector_stores.testing.fake_vector_store import (
     FakeVectorStore,
