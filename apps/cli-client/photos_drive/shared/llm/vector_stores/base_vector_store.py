@@ -181,6 +181,15 @@ class BaseVectorStore(ABC):
         '''
 
     @abstractmethod
+    def delete_media_item_embeddings_by_media_item_ids(self, ids: [MediaItemId]):
+        '''
+        Deletes a list of media item embeddings by its media item IDs
+
+        Args:
+            ids (list[MediaItemId]): A list of media item IDs
+        '''
+
+    @abstractmethod
     def get_relevent_media_item_embeddings(
         self, query: QueryMediaItemEmbeddingRequest
     ) -> list[MediaItemEmbedding]:
