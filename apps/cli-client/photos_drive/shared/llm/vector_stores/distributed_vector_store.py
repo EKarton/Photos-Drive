@@ -1,17 +1,15 @@
 import logging
 from typing import List, Tuple
-from typing_extensions import override
 
 from bson.objectid import ObjectId
 import numpy as np
+from typing_extensions import override
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
-    MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
-    UpdateMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.metadata.media_item_id import (
     MediaItemId,
@@ -92,7 +90,9 @@ class DistributedVectorStore(BaseVectorStore):
         return result_docs
 
     @override
-    def delete_media_item_embeddings_by_media_item_ids(self, media_item_ids: list[MediaItemId]):
+    def delete_media_item_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ):
         for store in self.stores:
             store.delete_media_item_embeddings_by_media_item_ids(media_item_ids)
 

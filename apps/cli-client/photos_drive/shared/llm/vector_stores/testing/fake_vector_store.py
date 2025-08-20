@@ -1,7 +1,6 @@
-from typing_extensions import override
-
 from bson.objectid import ObjectId
 import numpy as np
+from typing_extensions import override
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
@@ -50,7 +49,9 @@ class FakeVectorStore(BaseVectorStore):
         return new_embeddings
 
     @override
-    def delete_media_item_embeddings_by_media_item_ids(self, media_item_ids: list[MediaItemId]):
+    def delete_media_item_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ):
         embedding_ids: list[MediaItemEmbeddingId] = []
         for embedding_id, embedding in self.__id_to_embeddings.items():
             if embedding.media_item_id in media_item_ids:
@@ -93,7 +94,9 @@ class FakeVectorStore(BaseVectorStore):
         self.__id_to_embeddings.clear()
 
     @override
-    def get_embeddings_by_media_item_ids(self, media_item_ids: list[MediaItemId]) -> list[MediaItemEmbedding]:
+    def get_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ) -> list[MediaItemEmbedding]:
         docs = []
         for _embedding_id, embedding in self.__id_to_embeddings.items():
             if embedding.media_item_id in media_item_ids:

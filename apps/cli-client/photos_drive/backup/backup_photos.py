@@ -36,7 +36,6 @@ from photos_drive.shared.metadata.media_items_repository import (
     CreateMediaItemRequest,
     FindMediaItemRequest,
     MediaItemsRepository,
-    UpdateMediaItemRequest,
 )
 from photos_drive.shared.metadata.transactions_context import TransactionsContext
 
@@ -218,10 +217,7 @@ class PhotosBackup:
 
         # Step 10: Delete media items from vector store
         self.__vector_store.delete_media_item_embeddings_by_media_item_ids(
-            [
-                media_item.id
-                for media_item in total_media_items_to_delete
-            ]
+            [media_item.id for media_item in total_media_items_to_delete]
         )
 
         # Step 11: Add media items with embeddings to vector store

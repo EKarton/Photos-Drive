@@ -1,6 +1,5 @@
-from typing_extensions import override
-
 from PIL import Image
+from typing_extensions import override
 
 from photos_drive.shared.llm.models.image_captions import ImageCaptions
 

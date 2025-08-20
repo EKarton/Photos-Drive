@@ -1,6 +1,5 @@
 import logging
 
-from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
 import typer
 from typing_extensions import Annotated
 
@@ -22,6 +21,7 @@ from photos_drive.cli.shared.typer import (
 from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
+from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
 from photos_drive.shared.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )

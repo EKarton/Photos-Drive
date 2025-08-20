@@ -7,7 +7,6 @@ import numpy as np
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
-    MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.mongo_db_vector_store import (
@@ -17,7 +16,7 @@ from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
 )
 from photos_drive.shared.metadata.media_item_id import (
-    MediaItemId, 
+    MediaItemId,
     media_item_id_to_string,
 )
 
@@ -99,15 +98,20 @@ class TestMongoDbVectorStore(unittest.TestCase):
 
     def test_delete_documents_removes_from_mock(self):
         embedding = self._make_embedding(1.2)
-        req = CreateMediaItemEmbeddingRequest(
-            embedding=embedding,
-            media_item_id=MOCK_MEDIA_ITEM_ID_1,
-            date_taken=MOCK_DATE_TAKEN,
+        self.store.add_media_item_embeddings(
+            [
+                CreateMediaItemEmbeddingRequest(
+                    embedding=embedding,
+                    media_item_id=MOCK_MEDIA_ITEM_ID_1,
+                    date_taken=MOCK_DATE_TAKEN,
+                )
+            ]
         )
-        added_doc = self.store.add_media_item_embeddings([req])[0]
 
         # Delete the added document
-        self.store.delete_media_item_embeddings_by_media_item_ids([MOCK_MEDIA_ITEM_ID_1])
+        self.store.delete_media_item_embeddings_by_media_item_ids(
+            [MOCK_MEDIA_ITEM_ID_1]
+        )
         deleted = self.mock_client['photos_drive'][self.collection_name].find_one(
             {"media_item_id": media_item_id_to_string(MOCK_MEDIA_ITEM_ID_1)}
         )
@@ -179,16 +183,18 @@ class TestMongoDbVectorStore(unittest.TestCase):
         self.store.add_media_item_embeddings([req1, req2, req3])
 
         # Find by multiple IDs
-        result = self.store.get_embeddings_by_media_item_ids([MOCK_MEDIA_ITEM_ID_1, media_item_id_3])
+        result = self.store.get_embeddings_by_media_item_ids(
+            [MOCK_MEDIA_ITEM_ID_1, media_item_id_3]
+        )
 
         # Assertions
         self.assertEqual(len(result), 2)
-        
+
         # Check that the results contain the correct media item IDs
         found_ids = {item.media_item_id for item in result}
         expected_ids = {MOCK_MEDIA_ITEM_ID_1, media_item_id_3}
         self.assertSetEqual(found_ids, expected_ids)
-        
+
         # Check that the correct embeddings are returned for each ID
         for item in result:
             if item.media_item_id == MOCK_MEDIA_ITEM_ID_1:

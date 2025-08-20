@@ -178,7 +178,9 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
             ]
         )[0]
 
-        self.distributed_store.delete_media_item_embeddings_by_media_item_ids([MOCK_MEDIA_ITEM_ID_1, MOCK_MEDIA_ITEM_ID_2])
+        self.distributed_store.delete_media_item_embeddings_by_media_item_ids(
+            [MOCK_MEDIA_ITEM_ID_1, MOCK_MEDIA_ITEM_ID_2]
+        )
 
         # Ensure that they are deleted
         self.assertIsNone(
@@ -278,7 +280,11 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
         )[0]
 
         # Query for all three documents from the distributed store
-        requested_ids = [MOCK_MEDIA_ITEM_ID_1, MOCK_MEDIA_ITEM_ID_2, MOCK_MEDIA_ITEM_ID_3]
+        requested_ids = [
+            MOCK_MEDIA_ITEM_ID_1,
+            MOCK_MEDIA_ITEM_ID_2,
+            MOCK_MEDIA_ITEM_ID_3,
+        ]
         results = self.distributed_store.get_embeddings_by_media_item_ids(requested_ids)
 
         # Assertions
@@ -287,13 +293,19 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
         self.assertSetEqual(retrieved_ids, set(requested_ids))
 
         # Check the content of the retrieved documents
-        retrieved_doc_1 = next(doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_1)
+        retrieved_doc_1 = next(
+            doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_1
+        )
         np.testing.assert_array_equal(retrieved_doc_1.embedding, doc1.embedding)
 
-        retrieved_doc_2 = next(doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_2)
+        retrieved_doc_2 = next(
+            doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_2
+        )
         np.testing.assert_array_equal(retrieved_doc_2.embedding, doc2.embedding)
 
-        retrieved_doc_3 = next(doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_3)
+        retrieved_doc_3 = next(
+            doc for doc in results if doc.media_item_id == MOCK_MEDIA_ITEM_ID_3
+        )
         np.testing.assert_array_equal(retrieved_doc_3.embedding, doc3.embedding)
 
     def test_get_embeddings_by_media_item_ids_with_non_existent_ids(self):
@@ -337,7 +349,7 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
 
     def test_get_embeddings_by_media_item_ids_with_duplicates(self):
         # Add one document
-        doc1 = self.store1.add_media_item_embeddings(
+        self.store1.add_media_item_embeddings(
             [
                 CreateMediaItemEmbeddingRequest(
                     embedding=self._make_embedding(0),
@@ -346,7 +358,7 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
                 )
             ]
         )[0]
-        
+
         # Query with a list containing the same ID multiple times
         requested_ids = [MOCK_MEDIA_ITEM_ID_1, MOCK_MEDIA_ITEM_ID_1]
         results = self.distributed_store.get_embeddings_by_media_item_ids(requested_ids)

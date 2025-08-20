@@ -118,7 +118,7 @@ class MockCollection:
 
         if "_id" in query and "$in" in query["_id"]:
             ids_to_delete = set(query["_id"]["$in"])
-            for doc_id, doc in self._documents.items():
+            for doc_id, _doc in self._documents.items():
                 if doc_id in ids_to_delete:
                     documents_to_delete_ids.append(doc_id)
         elif "media_item_id" in query and "$in" in query["media_item_id"]:
@@ -126,17 +126,17 @@ class MockCollection:
             for doc_id, doc in self._documents.items():
                 if doc.get("media_item_id") in media_item_ids_to_delete:
                     documents_to_delete_ids.append(doc_id)
-        
+
         # Delete the found documents
         for doc_id in documents_to_delete_ids:
             if doc_id in self._documents:
                 del self._documents[doc_id]
                 deleted_count += 1
-                
+
         class Result:
             def __init__(self, count):
                 self.deleted_count = count
-        
+
         return Result(deleted_count)
 
     def find(self, query):
@@ -148,15 +148,14 @@ class MockCollection:
         if "media_item_id" in query and "$in" in query["media_item_id"]:
             media_item_ids_to_find = set(query["media_item_id"]["$in"])
             matching_docs = []
-            
+
             # Find documents that match the media item IDs
             for doc in self._documents.values():
                 if doc.get("media_item_id") in media_item_ids_to_find:
                     matching_docs.append(doc)
             return matching_docs
 
-        # Fallback for unhandled queries
-        raise NotImplementedError("This mock `find` method only supports '$in' queries on 'media_item_id'.")
+        raise NotImplementedError("This mock does not support this query")
 
     def aggregate(self, pipeline):
         # Since mongomock does not support $vectorSearch, this mock just returns all

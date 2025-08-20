@@ -1,15 +1,14 @@
 from datetime import datetime
 import logging
 from typing import Any, Mapping, cast
-from typing_extensions import override
 
 from bson.binary import Binary, BinaryVectorDtype
 from bson.objectid import ObjectId
 import numpy as np
-import pymongo
 from pymongo import MongoClient
 from pymongo.errors import CollectionInvalid
 from pymongo.operations import SearchIndexModel
+from typing_extensions import override
 
 from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
@@ -17,7 +16,6 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     MediaItemEmbedding,
     MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
-    UpdateMediaItemEmbeddingRequest,
 )
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
@@ -139,7 +137,9 @@ class MongoDbVectorStore(BaseVectorStore):
         return added_docs
 
     @override
-    def delete_media_item_embeddings_by_media_item_ids(self, media_item_ids: list[MediaItemId]):
+    def delete_media_item_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ):
         filter_obj = {
             "media_item_id": {
                 "$in": [
@@ -193,7 +193,9 @@ class MongoDbVectorStore(BaseVectorStore):
         return docs
 
     @override
-    def get_embeddings_by_media_item_ids(self, media_item_ids: list[MediaItemId]) -> list[MediaItemEmbedding]:
+    def get_embeddings_by_media_item_ids(
+        self, media_item_ids: list[MediaItemId]
+    ) -> list[MediaItemEmbedding]:
         filter_obj = {
             "media_item_id": {
                 "$in": [

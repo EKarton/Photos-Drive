@@ -100,7 +100,9 @@ class FindSimilarPhotosTool(BaseTool):
         if not media_item.embedding_id:
             return FindSimilarPhotosOutput(media_items=[])
 
-        embedding = self.vector_store.get_embeddings_by_media_item_ids([media_item.id])[0]
+        embedding = self.vector_store.get_embeddings_by_media_item_ids([media_item.id])[
+            0
+        ]
 
         earliest_date_obj = None
         if earliest_date_taken != '':
