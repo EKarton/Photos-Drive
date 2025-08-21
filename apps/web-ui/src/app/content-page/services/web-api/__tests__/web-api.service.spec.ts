@@ -457,6 +457,7 @@ describe('WebApiService', () => {
         earliestDateTaken: undefined,
         latestDateTaken: undefined,
         withinMediaItemIds: undefined,
+        topK: undefined,
       });
 
       req.flush(mockResponse);
@@ -471,6 +472,7 @@ describe('WebApiService', () => {
         earliestDateTaken: earliestDate,
         latestDateTaken: latestDate,
         withinMediaItemIds,
+        topK: 50,
       };
 
       const mockResponse = {
@@ -496,6 +498,7 @@ describe('WebApiService', () => {
         earliestDateTaken: earliestDate.toISOString(),
         latestDateTaken: latestDate.toISOString(),
         withinMediaItemIds: withinMediaItemIds.join(','),
+        topK: 50,
       });
 
       req.flush(mockResponse);
