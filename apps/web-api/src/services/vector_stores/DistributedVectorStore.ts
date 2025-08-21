@@ -37,7 +37,7 @@ export class DistributedVectorStore extends BaseVectorStore {
       )
     ).flat();
 
-    return results.sort((a, b) => a.score - b.score).slice(0, query.topK);
+    return results.sort((a, b) => b.score - a.score).slice(0, query.topK);
   }
 
   override async getEmbeddingById(
