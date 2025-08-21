@@ -37,7 +37,7 @@ export const SearchPhotosByTextToolInputSchema = z.object({
     ),
   top_k: z
     .number()
-    .default(5)
+    .default(25)
     .describe('Maximum number of similar photos to retrieve'),
 });
 
@@ -88,6 +88,7 @@ export class SearchMediaItemsByTextTool extends DynamicStructuredTool {
                 withinMediaItemIds: input.within_media_item_ids
                   ? input.within_media_item_ids.split(',')
                   : undefined,
+                topK: input.top_k,
               });
             }),
             mapResultRxJs((res: VectorSearchMediaItemsResponse) => ({
