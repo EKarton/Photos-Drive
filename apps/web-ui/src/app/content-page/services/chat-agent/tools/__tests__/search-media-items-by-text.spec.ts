@@ -116,7 +116,7 @@ describe('SearchMediaItemsForTextTool', () => {
         earliestDateTaken: undefined,
         latestDateTaken: undefined,
         withinMediaItemIds: undefined,
-        topK: 25,
+        topK: 5,
       },
     );
     expect(result.media_items[0]).toEqual({

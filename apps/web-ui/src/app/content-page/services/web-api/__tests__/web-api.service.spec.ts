@@ -457,6 +457,7 @@ describe('WebApiService', () => {
         earliestDateTaken: undefined,
         latestDateTaken: undefined,
         withinMediaItemIds: undefined,
+        topK: undefined,
       });
 
       req.flush(mockResponse);
