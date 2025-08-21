@@ -207,6 +207,7 @@ export class WebApiService {
       withinMediaItemIds: request.withinMediaItemIds
         ? request.withinMediaItemIds.join(',')
         : undefined,
+      topK: request.topK,
     };
 
     return this.httpClient

@@ -72,7 +72,7 @@ describe('SearchMediaItemsForTextTool', () => {
       earliest_date_taken: '2022-01-01',
       latest_date_taken: '2022-12-31',
       within_media_item_ids: '123,456',
-      top_k: 5,
+      top_k: 25,
     };
 
     const result = await tool.func(input);
@@ -84,6 +84,7 @@ describe('SearchMediaItemsForTextTool', () => {
         earliestDateTaken: new Date('2022-01-01'),
         latestDateTaken: new Date('2022-12-31'),
         withinMediaItemIds: ['123', '456'],
+        topK: 25,
       },
     );
     expect(result.media_items[0]).toEqual({
@@ -115,6 +116,7 @@ describe('SearchMediaItemsForTextTool', () => {
         earliestDateTaken: undefined,
         latestDateTaken: undefined,
         withinMediaItemIds: undefined,
+        topK: 25,
       },
     );
     expect(result.media_items[0]).toEqual({

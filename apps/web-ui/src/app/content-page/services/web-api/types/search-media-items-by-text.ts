@@ -5,6 +5,7 @@ export interface VectorSearchMediaItemsRequest {
   earliestDateTaken?: Date;
   latestDateTaken?: Date;
   withinMediaItemIds?: string[];
+  topK?: number;
 }
 
 export interface RawVectorSearchMediaItemsResponse {
