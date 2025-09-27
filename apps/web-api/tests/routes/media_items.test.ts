@@ -202,6 +202,149 @@ describe('Media Items Router', () => {
     });
   });
 
+  describe('GET api/v1/media-items/sample', () => {
+    it('should return 200 with default params when query params are missing', async () => {
+      const repo = mock<MediaItemsStore>();
+      repo.sampleMediaItems.mockResolvedValue({ mediaItems: MOCK_MEDIA_ITEMS });
+
+      const vectorStore = mock<BaseVectorStore>();
+
+      const app = express();
+      app.use(express.json());
+      app.use(await mediaItemsRouter(repo, vectorStore));
+
+      const res = await request(app)
+        .get('/api/v1/media-items/sample')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ sampleSize: 2 });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        mediaItems: [
+          {
+            id: 'albumClient1:mediaItem1',
+            albumId: 'albumClient1:albumObject1',
+            fileName: 'dog.png',
+            gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+            location: {
+              latitude: 123,
+              longitude: 456
+            },
+            width: 1000,
+            height: 2000,
+            dateTaken: '2025-06-07T17:00:00.000Z'
+          },
+          {
+            id: 'albumClient1:mediaItem2',
+            albumId: 'albumClient1:albumObject1',
+            fileName: 'cat.png',
+            gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+            location: {
+              latitude: 123,
+              longitude: 456
+            },
+            width: 100,
+            height: 200,
+            dateTaken: '2024-06-07T17:00:00.000Z'
+          }
+        ]
+      });
+
+      expect(repo.sampleMediaItems).toHaveBeenCalledWith(
+        {
+          pageSize: 25,
+          pageToken: undefined
+        },
+        { abortController: expect.any(AbortController) }
+      );
+    });
+
+    it('should return 200 with query params populated', async () => {
+      const repo = mock<MediaItemsStore>();
+      repo.sampleMediaItems.mockResolvedValue({ mediaItems: MOCK_MEDIA_ITEMS });
+
+      const vectorStore = mock<BaseVectorStore>();
+
+      const app = express();
+      app.use(express.json());
+      app.use(await mediaItemsRouter(repo, vectorStore));
+
+      const res = await request(app)
+        .get(
+          '/api/v1/media-items/sample?albumId=albumClient1:albumObject1&pageSize=10&earliest=2025-01-01&latest=2025-04-01&latitude=-48&longitude=95&range=300'
+        )
+        .set('Authorization', `Bearer ${token}`)
+        .send({ sampleSize: 2 });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        mediaItems: [
+          {
+            id: 'albumClient1:mediaItem1',
+            albumId: 'albumClient1:albumObject1',
+            fileName: 'dog.png',
+            gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+            location: {
+              latitude: 123,
+              longitude: 456
+            },
+            width: 1000,
+            height: 2000,
+            dateTaken: '2025-06-07T17:00:00.000Z'
+          },
+          {
+            id: 'albumClient1:mediaItem2',
+            albumId: 'albumClient1:albumObject1',
+            fileName: 'cat.png',
+            gPhotosMediaItemId: 'gPhotosClient1:gPhotosMediaItem1',
+            location: {
+              latitude: 123,
+              longitude: 456
+            },
+            width: 100,
+            height: 200,
+            dateTaken: '2024-06-07T17:00:00.000Z'
+          }
+        ]
+      });
+
+      expect(repo.sampleMediaItems).toHaveBeenCalledWith(
+        {
+          albumId: {
+            clientId: 'albumClient1',
+            objectId: 'albumObject1'
+          },
+          earliestDateTaken: new Date('2025-01-01'),
+          latestDateTaken: new Date('2025-04-01'),
+          withinLocation: {
+            latitude: -48,
+            longitude: 95,
+            range: 300
+          },
+          pageSize: 10
+        },
+        { abortController: expect.any(AbortController) }
+      );
+    });
+
+    it('should return 500 when an unexpected error is thrown', async () => {
+      const repo = mock<MediaItemsStore>();
+      repo.sampleMediaItems.mockRejectedValue(
+        new Error('Something went wrong')
+      );
+      const vectorStore = mock<BaseVectorStore>();
+
+      const app = express();
+      app.use(await mediaItemsRouter(repo, vectorStore));
+
+      const res = await request(app)
+        .get('/api/v1/media-items/sample')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(500);
+    });
+  });
+
   describe('GET /api/v1/media-items/:id', () => {
     it('should return 200 response with correct body given valid media item id', async () => {
       const mockMediaItem: MediaItem = {
@@ -320,8 +463,7 @@ describe('Media Items Router', () => {
             new Object().toString()
           ),
           mediaItemId: MOCK_MEDIA_ITEMS[0].id,
-          embedding: new Float32Array([0.1, 0.2, 0.3]),
-          dateTaken: new Date(0)
+          score: 0.9
         },
         {
           id: new MediaItemEmbeddingId(
@@ -329,8 +471,7 @@ describe('Media Items Router', () => {
             new Object().toString()
           ),
           mediaItemId: MOCK_MEDIA_ITEMS[1].id,
-          embedding: new Float32Array([0.1, 0.2, 0.3]),
-          dateTaken: new Date(0)
+          score: 0.8
         }
       ]);
       // Mimic bulkGetMediaItemByIds returning media item IDs not in order

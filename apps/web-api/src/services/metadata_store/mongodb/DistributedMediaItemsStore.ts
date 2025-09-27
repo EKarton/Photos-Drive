@@ -10,6 +10,8 @@ import {
   ListMediaItemsRequest,
   ListMediaItemsResponse,
   MediaItemsStore,
+  SampleMediaItemsRequest,
+  SampleMediaItemsResponse,
   SortBy,
   SortByDirection,
   SortByField
@@ -136,6 +138,22 @@ export class DistributedMediaItemsStore implements MediaItemsStore {
     return {
       mediaItems: sortedMediaItems,
       nextPageToken: sortedMediaItems.length > 0 ? nextPageToken : undefined
+    };
+  }
+
+  async sampleMediaItems(
+    req: SampleMediaItemsRequest,
+    options?: { abortController?: AbortController }
+  ): Promise<SampleMediaItemsResponse> {
+    const responses = await Promise.all(
+      this.repos.map((repo) => repo.sampleMediaItems(req, options))
+    );
+
+    return {
+      mediaItems: responses
+        .map((res) => res.mediaItems)
+        .flat()
+        .slice(0, req.pageSize)
     };
   }
 }

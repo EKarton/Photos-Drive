@@ -99,12 +99,14 @@ describe('MongoDbVectorStore', () => {
       };
 
       // Mock aggregate() to fake Atlas vector search results
-      jest.spyOn(store['_collection'], 'aggregate').mockReturnValue({
-        [Symbol.asyncIterator]: async function* () {
-          yield doc1;
-          yield doc2;
-        }
-      } as never);
+      const aggregateFn = jest
+        .spyOn(store['_collection'], 'aggregate')
+        .mockReturnValue({
+          [Symbol.asyncIterator]: async function* () {
+            yield doc1;
+            yield doc2;
+          }
+        } as never);
 
       const query: QueryMediaItemEmbeddingRequest = {
         embedding: new Float32Array([1.1, 1.2, 1.3]),
@@ -130,6 +132,28 @@ describe('MongoDbVectorStore', () => {
           score: 0.98
         }
       ]);
+      expect(aggregateFn).toHaveBeenCalledWith(
+        [
+          {
+            $vectorSearch: {
+              filter: {},
+              index: 'vector_index',
+              limit: 2,
+              numCandidates: 20,
+              path: 'embedding',
+              queryVector: Binary.fromFloat32Array(query.embedding)
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              media_item_id: 1,
+              score: { $meta: 'vectorSearchScore' }
+            }
+          }
+        ],
+        { signal: undefined }
+      );
     });
 
     it('calls aggregation pipeline correctly and returns parsed embeddings given optional query fields', async () => {
@@ -149,12 +173,14 @@ describe('MongoDbVectorStore', () => {
       };
 
       // Mock aggregate() to fake Atlas vector search results
-      jest.spyOn(store['_collection'], 'aggregate').mockReturnValue({
-        [Symbol.asyncIterator]: async function* () {
-          yield doc1;
-          yield doc2;
-        }
-      } as never);
+      const aggregateFn = jest
+        .spyOn(store['_collection'], 'aggregate')
+        .mockReturnValue({
+          [Symbol.asyncIterator]: async function* () {
+            yield doc1;
+            yield doc2;
+          }
+        } as never);
 
       const query: QueryMediaItemEmbeddingRequest = {
         embedding: new Float32Array([1.1, 1.2, 1.3]),
@@ -173,7 +199,45 @@ describe('MongoDbVectorStore', () => {
 
       const results = await store.getReleventMediaItemEmbeddings(query);
       expect(results).toHaveLength(2);
-      expect(results[0].id).toBeInstanceOf(MediaItemEmbeddingId);
+      expect(aggregateFn).toHaveBeenCalledWith(
+        [
+          {
+            $vectorSearch: {
+              filter: {
+                date_taken: {
+                  $gte: new Date('2021-01-01'),
+                  $lte: new Date('2023-01-01')
+                },
+                media_item_id: {
+                  $in: [
+                    {
+                      clientId: '407f1f77bcf86cd799439011',
+                      objectId: '507f1f77bcf86cd799439011'
+                    },
+                    {
+                      clientId: '407f1f77bcf86cd799439012',
+                      objectId: '507f1f77bcf86cd799439012'
+                    }
+                  ]
+                }
+              },
+              index: 'vector_index',
+              limit: 2,
+              numCandidates: 20,
+              path: 'embedding',
+              queryVector: Binary.fromFloat32Array(query.embedding)
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              media_item_id: 1,
+              score: { $meta: 'vectorSearchScore' }
+            }
+          }
+        ],
+        { signal: undefined }
+      );
     });
   });
 });

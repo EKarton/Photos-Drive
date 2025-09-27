@@ -20,6 +20,8 @@ import { ListMediaItemsResponse } from '../types/list-media-items';
 import { ListMediaItemsRequest } from '../types/list-media-items';
 import { ListMediaItemsSortDirection } from '../types/list-media-items';
 import { ListMediaItemsSortByFields } from '../types/list-media-items';
+import { SampleMediaItemsResponse } from '../types/sample-media-items';
+import { SampleMediaItemsRequest } from '../types/sample-media-items';
 import { WebApiService } from '../web-api.service';
 
 describe('WebApiService', () => {
@@ -248,6 +250,93 @@ describe('WebApiService', () => {
         `Bearer ${accessToken}`,
       );
 
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('sampleMediaItems', () => {
+    const accessToken = 'fake-token';
+
+    it('should make a GET request to sample media items with minimal request', () => {
+      const request: SampleMediaItemsRequest = {};
+      const mockResponse = {
+        mediaItems: [
+          {
+            id: '1',
+            fileName: 'sample.jpg',
+            hashCode: 'xyz',
+            gPhotosMediaItemId: 'g1',
+            width: 100,
+            height: 200,
+            dateTaken: '2024-06-01T10:00:00.000Z',
+          },
+        ],
+      };
+
+      service.sampleMediaItems(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(
+          toSuccess<SampleMediaItemsResponse>({
+            mediaItems: [
+              {
+                id: '1',
+                fileName: 'sample.jpg',
+                hashCode: 'xyz',
+                gPhotosMediaItemId: 'g1',
+                location: undefined,
+                width: 100,
+                height: 200,
+                dateTaken: new Date('2024-06-01T10:00:00.000Z'),
+              },
+            ],
+          }),
+        );
+      });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/api/v1/media-items/sample`,
+      );
+
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Authorization')).toBe(
+        `Bearer ${accessToken}`,
+      );
+      expect(req.request.params.keys()).toEqual([]);
+
+      req.flush(mockResponse);
+    });
+
+    it('should include query params when provided', () => {
+      const earliestDate = new Date('2025-05-01');
+      const latestDate = new Date('2025-05-02');
+      const request: SampleMediaItemsRequest = {
+        albumId: 'album123',
+        earliestDateTaken: earliestDate,
+        latestDateTaken: latestDate,
+        locationRange: { latitude: 10, longitude: 20, range: 50 },
+        pageSize: 5,
+      };
+
+      const mockResponse = { mediaItems: [] };
+
+      service.sampleMediaItems(accessToken, request).subscribe((response) => {
+        expect(response).toEqual(toSuccess(mockResponse));
+      });
+
+      const req = httpMock.expectOne((req) => {
+        return (
+          req.url ===
+            `${environment.webApiEndpoint}/api/v1/media-items/sample` &&
+          req.params.get('albumId') === 'album123' &&
+          req.params.get('earliest') === earliestDate.toISOString() &&
+          req.params.get('latest') === latestDate.toISOString() &&
+          req.params.get('latitude') === '10' &&
+          req.params.get('longitude') === '20' &&
+          req.params.get('range') === '50' &&
+          req.params.get('pageSize') === '5'
+        );
+      });
+
+      expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });
   });

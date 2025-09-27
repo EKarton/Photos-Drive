@@ -17,6 +17,7 @@ import {
   ListMediaItemsRequest,
   MediaItemNotFoundError,
   MediaItemsStore,
+  SampleMediaItemsRequest,
   SortByDirection,
   SortByField
 } from '../services/metadata_store/MediaItemsStore';
@@ -87,6 +88,51 @@ export default async function (
         nextPageToken: response.nextPageToken
           ? encodeURIComponent(response.nextPageToken)
           : undefined
+      });
+    })
+  );
+
+  router.get(
+    '/api/v1/media-items/sample',
+    await verifyAuthentication(),
+    await verifyAuthorization(),
+    addRequestAbortController(),
+    wrap(async (req: Request, res: Response) => {
+      const albumId = req.query['albumId'] as string;
+      const pageSize = Number(req.query['pageSize']);
+      const earliestDateTaken = req.query['earliest'] as string;
+      const latestDateTaken = req.query['latest'] as string;
+      const latitudeRange = Number(req.query['latitude']);
+      const longitudeRange = Number(req.query['longitude']);
+      const locationRange = Number(req.query['range']);
+
+      const sampleMediaItemsRequest: SampleMediaItemsRequest = {
+        albumId: albumId ? convertStringToAlbumId(albumId) : undefined,
+        earliestDateTaken: earliestDateTaken
+          ? new Date(earliestDateTaken)
+          : undefined,
+        latestDateTaken: latestDateTaken
+          ? new Date(latestDateTaken)
+          : undefined,
+        withinLocation:
+          !isNaN(latitudeRange) &&
+          !isNaN(longitudeRange) &&
+          !isNaN(locationRange)
+            ? {
+                latitude: latitudeRange,
+                longitude: longitudeRange,
+                range: locationRange
+              }
+            : undefined,
+        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25
+      };
+      const response = await mediaItemsRepo.sampleMediaItems(
+        sampleMediaItemsRequest,
+        { abortController: req.abortController }
+      );
+
+      return res.status(200).json({
+        mediaItems: response.mediaItems.map(serializeMediaItem)
       });
     })
   );

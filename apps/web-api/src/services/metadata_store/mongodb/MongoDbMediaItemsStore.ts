@@ -4,8 +4,7 @@ import {
   MongoClient,
   Document as MongoDbDocument,
   ObjectId,
-  Sort,
-  WithId
+  Sort
 } from 'mongodb';
 import logger from '../../../utils/logger';
 import { AlbumId, albumIdToString, convertStringToAlbumId } from '../Albums';
@@ -20,6 +19,8 @@ import {
   ListMediaItemsResponse,
   MediaItemNotFoundError,
   MediaItemsStore,
+  SampleMediaItemsRequest,
+  SampleMediaItemsResponse,
   SortByDirection,
   SortByField
 } from '../MediaItemsStore';
@@ -207,9 +208,65 @@ export class MongoDbMediaItemsStore implements MediaItemsStore {
     };
   }
 
+  async sampleMediaItems(
+    req: SampleMediaItemsRequest,
+    options?: { abortController?: AbortController }
+  ): Promise<SampleMediaItemsResponse> {
+    const filterObj: Filter<MongoDbDocument> = {};
+
+    if (req.albumId) {
+      filterObj['album_id'] = albumIdToString(req.albumId);
+    }
+    if (req.earliestDateTaken || req.latestDateTaken) {
+      filterObj['date_taken'] = {};
+      if (req.earliestDateTaken) {
+        filterObj['date_taken']['$gte'] = req.earliestDateTaken;
+      }
+      if (req.latestDateTaken) {
+        filterObj['date_taken']['$lte'] = req.latestDateTaken;
+      }
+    }
+    if (req.withinLocation) {
+      filterObj['location'] = {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [
+              req.withinLocation.longitude,
+              req.withinLocation.latitude
+            ]
+          },
+          $maxDistance: req.withinLocation.range
+        }
+      };
+    }
+
+    logger.debug(`Sample filter object: ${JSON.stringify(filterObj)}`);
+    logger.debug(`Sample size: ${req.pageSize}`);
+
+    const pipeline = [
+      { $match: filterObj },
+      { $sample: { size: req.pageSize } }
+    ];
+
+    const rawDocs = await this.collection
+      .aggregate(pipeline, { signal: options?.abortController?.signal })
+      .toArray();
+
+    const mediaItems = rawDocs.map((rawDoc) => {
+      const mediaItemId: MediaItemId = {
+        clientId: this.getClientId(),
+        objectId: rawDoc._id.toString()
+      };
+      return this.convertMongoDbDocToMediaItemInstance(mediaItemId, rawDoc);
+    });
+
+    return { mediaItems };
+  }
+
   private convertMongoDbDocToMediaItemInstance(
     id: MediaItemId,
-    doc: WithId<MongoDbDocument>
+    doc: MongoDbDocument
   ): MediaItem {
     const mediaItem: MediaItem = {
       id,
