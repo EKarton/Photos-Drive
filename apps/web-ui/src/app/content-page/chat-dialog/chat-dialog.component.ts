@@ -66,8 +66,8 @@ export class ChatDialogComponent implements AfterViewInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly subscription = new Subscription();
 
-  readonly isOpen$ = this.store.select(
-    dialogsState.selectIsDialogOpen(ChatDialogRequest),
+  readonly request$ = this.store.select(
+    dialogsState.selectTopDialogRequest(ChatDialogRequest),
   );
 
   readonly messages: Signal<readonly MessageUiData[]> = computed(() => {
@@ -109,8 +109,8 @@ export class ChatDialogComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.subscription.add(
-      this.isOpen$.subscribe((isOpen) => {
-        if (isOpen) {
+      this.request$.subscribe((request) => {
+        if (request) {
           this.myModal?.nativeElement?.showModal();
         } else {
           this.myModal?.nativeElement?.close();

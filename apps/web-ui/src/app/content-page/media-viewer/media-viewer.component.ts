@@ -3,7 +3,6 @@ import {
   AfterViewInit,
   Component,
   computed,
-  effect,
   ElementRef,
   inject,
   OnDestroy,
@@ -50,11 +49,8 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('modal') myModal?: ElementRef;
 
-  private readonly isOpen$ = this.store.select(
-    dialogsState.selectIsDialogOpen(MediaViewerRequest),
-  );
-  private readonly requests = this.store.selectSignal(
-    dialogsState.selectDialogRequests(MediaViewerRequest),
+  private readonly request$ = this.store.select(
+    dialogsState.selectTopDialogRequest(MediaViewerRequest),
   );
 
   readonly isShareSupported = !!this.navigator.share;
@@ -89,12 +85,13 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
   });
 
   constructor() {
-    effect(() => {
-      const request = this.requests();
-      if (request) {
-        this.mediaViewerStore.loadDetails(request.mediaItemId);
-      }
-    });
+    this.subscription.add(
+      this.request$.subscribe((request) => {
+        if (request) {
+          this.mediaViewerStore.loadDetails(request.mediaItemId);
+        }
+      }),
+    );
   }
 
   share(url: string, fileName: string) {
@@ -117,8 +114,8 @@ export class MediaViewerComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.subscription.add(
-      this.isOpen$.subscribe((isOpen) => {
-        if (isOpen) {
+      this.request$.subscribe((request) => {
+        if (request) {
           this.myModal?.nativeElement?.showModal();
         } else {
           this.myModal?.nativeElement?.close();

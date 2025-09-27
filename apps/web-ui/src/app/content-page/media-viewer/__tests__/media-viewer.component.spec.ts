@@ -134,8 +134,7 @@ describe('MediaViewerComponent', () => {
     );
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem1'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem1')],
       },
     });
     store.refreshState();
@@ -159,8 +158,7 @@ describe('MediaViewerComponent', () => {
 
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem3'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem3')],
       },
     });
     store.refreshState();
@@ -189,8 +187,7 @@ describe('MediaViewerComponent', () => {
 
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem1'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem1')],
       },
     });
     store.refreshState();
@@ -261,8 +258,7 @@ describe('MediaViewerComponent', () => {
     );
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem2'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem2')],
       },
     });
     store.refreshState();
@@ -336,8 +332,7 @@ describe('MediaViewerComponent', () => {
     );
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem1'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem1')],
       },
     });
     store.refreshState();
@@ -361,8 +356,7 @@ describe('MediaViewerComponent', () => {
     );
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem1'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem1')],
       },
     });
     store.refreshState();
@@ -391,8 +385,7 @@ describe('MediaViewerComponent', () => {
     );
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem2'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem2')],
       },
     });
     store.refreshState();
@@ -421,8 +414,7 @@ describe('MediaViewerComponent', () => {
     );
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem1'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem1')],
       },
     });
     store.refreshState();
@@ -445,8 +437,7 @@ describe('MediaViewerComponent', () => {
     );
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new MediaViewerRequest('mediaItem1'),
-        isOpen: true,
+        requests: [new MediaViewerRequest('mediaItem1')],
       },
     });
     store.refreshState();
