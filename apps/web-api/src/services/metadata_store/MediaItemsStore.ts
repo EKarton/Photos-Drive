@@ -43,6 +43,20 @@ export type ListMediaItemsResponse = {
   nextPageToken?: string;
 };
 
+/** Request params for {@code MediaItemsRepository.sampleMediaItems} */
+export type SampleMediaItemsRequest = {
+  albumId?: AlbumId;
+  earliestDateTaken?: Date;
+  latestDateTaken?: Date;
+  withinLocation?: WithinLocation;
+  pageSize: number;
+};
+
+/** Response for {@code MediaItemsRepository.sampleMediaItems} */
+export type SampleMediaItemsResponse = {
+  mediaItems: MediaItem[];
+};
+
 /** A class that stores the media items from the database. */
 export interface MediaItemsStore {
   getClientId(): string;
@@ -66,6 +80,11 @@ export interface MediaItemsStore {
     req: ListMediaItemsRequest,
     options?: { abortController?: AbortController }
   ): Promise<ListMediaItemsResponse>;
+
+  sampleMediaItems(
+    req: SampleMediaItemsRequest,
+    options?: { abortController?: AbortController }
+  ): Promise<SampleMediaItemsResponse>;
 }
 
 /** Represents an error for when an album is not found. */

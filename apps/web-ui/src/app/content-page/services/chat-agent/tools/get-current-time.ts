@@ -5,7 +5,11 @@ import { z } from 'zod';
 export const CurrentTimeInputSchema = z.object({});
 
 export const CurrentTimeOutputSchema = z.object({
-  timestamp: z.string().describe('The timestamp in ISO format'),
+  timestamp: z
+    .string()
+    .describe(
+      "The timestamp in ISO format. An example is '2025-09-27T23:45:30.123Z' which is September 27, 2025 in Zulu time.",
+    ),
 });
 
 export type CurrentTimeOutput = z.infer<typeof CurrentTimeOutputSchema>;

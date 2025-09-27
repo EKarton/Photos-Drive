@@ -27,6 +27,9 @@ import {
   RawMediaItemDetailsApiResponse,
 } from './types/media-item';
 import { RawMediaItem } from './types/media-item';
+import { SampleMediaItemsResponse } from './types/sample-media-items';
+import { RawSampleMediaItemsResponse } from './types/sample-media-items';
+import { SampleMediaItemsRequest } from './types/sample-media-items';
 import {
   RawVectorSearchMediaItemsResponse,
   VectorSearchMediaItemsRequest,
@@ -127,6 +130,47 @@ export class WebApiService {
         map((res) => ({
           mediaItems: res.mediaItems.map(this.convertRawMediaItemToMediaItem),
           nextPageToken: res.nextPageToken,
+        })),
+        toResult(),
+      );
+  }
+
+  sampleMediaItems(
+    accessToken: string,
+    request: SampleMediaItemsRequest,
+  ): Observable<Result<SampleMediaItemsResponse>> {
+    const url = `${environment.webApiEndpoint}/api/v1/media-items/sample`;
+
+    let params = new HttpParams();
+    if (request.albumId) {
+      params = params.set('albumId', request.albumId);
+    }
+    if (request.earliestDateTaken) {
+      params = params.set('earliest', request.earliestDateTaken.toISOString());
+    }
+    if (request.latestDateTaken) {
+      params = params.set('latest', request.latestDateTaken.toISOString());
+    }
+    if (request.locationRange) {
+      params = params
+        .set('latitude', request.locationRange.latitude)
+        .set('longitude', request.locationRange.longitude)
+        .set('range', request.locationRange.range);
+    }
+    if (request.pageSize) {
+      params = params.set('pageSize', request.pageSize);
+    }
+
+    return this.httpClient
+      .get<RawSampleMediaItemsResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params,
+      })
+      .pipe(
+        map((res) => ({
+          mediaItems: res.mediaItems.map(this.convertRawMediaItemToMediaItem),
         })),
         toResult(),
       );

@@ -847,6 +847,85 @@ describe('DistributedMediaItemsStore', () => {
       });
     });
   });
+
+  describe('sampleMediaItems', () => {
+    let id1: MediaItemId, id2: MediaItemId, id3: MediaItemId, id4: MediaItemId;
+    const albumId1: AlbumId = { clientId: 'c1', objectId: 'a1' };
+    const albumId2: AlbumId = { clientId: 'c2', objectId: 'a2' };
+
+    beforeEach(async () => {
+      // Insert several items into different albums/clients
+      const res1 = await mongoClient1
+        .db('photos_drive')
+        .collection('media_items')
+        .insertOne({
+          file_name: 'img1.jpg',
+          gphotos_client_id: 'g1',
+          gphotos_media_item_id: 'm1',
+          album_id: `${albumId1.clientId}:${albumId1.objectId}`,
+          width: 100,
+          height: 100,
+          date_taken: new Date('2025-01-01')
+        });
+      id1 = { clientId: 'client1', objectId: res1.insertedId.toString() };
+
+      const res2 = await mongoClient1
+        .db('photos_drive')
+        .collection('media_items')
+        .insertOne({
+          file_name: 'img2.jpg',
+          gphotos_client_id: 'g2',
+          gphotos_media_item_id: 'm2',
+          album_id: `${albumId2.clientId}:${albumId2.objectId}`,
+          width: 200,
+          height: 200,
+          date_taken: new Date('2025-02-02')
+        });
+      id2 = { clientId: 'client1', objectId: res2.insertedId.toString() };
+
+      const res3 = await mongoClient2
+        .db('photos_drive')
+        .collection('media_items')
+        .insertOne({
+          file_name: 'img3.jpg',
+          gphotos_client_id: 'g3',
+          gphotos_media_item_id: 'm3',
+          album_id: `${albumId1.clientId}:${albumId1.objectId}`,
+          width: 300,
+          height: 300,
+          date_taken: new Date('2025-03-03')
+        });
+      id3 = { clientId: 'client2', objectId: res3.insertedId.toString() };
+
+      const res4 = await mongoClient2
+        .db('photos_drive')
+        .collection('media_items')
+        .insertOne({
+          file_name: 'img4.jpg',
+          gphotos_client_id: 'g4',
+          gphotos_media_item_id: 'm4',
+          album_id: `${albumId2.clientId}:${albumId2.objectId}`,
+          width: 400,
+          height: 400,
+          date_taken: new Date('2025-04-04')
+        });
+      id4 = { clientId: 'client2', objectId: res4.insertedId.toString() };
+    });
+
+    it('returns exactly sampleSize random items', async () => {
+      const results = await mediaItemsRepo.sampleMediaItems({ pageSize: 4 });
+
+      expect(results.mediaItems).toHaveLength(4);
+      expect(results.mediaItems.map((x) => x.id.objectId).sort()).toEqual(
+        expect.arrayContaining([
+          id1.objectId,
+          id2.objectId,
+          id3.objectId,
+          id4.objectId
+        ])
+      );
+    });
+  });
 });
 
 describe('sortMediaItem', () => {

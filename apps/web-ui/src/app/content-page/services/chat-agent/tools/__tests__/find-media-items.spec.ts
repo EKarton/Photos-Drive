@@ -15,7 +15,7 @@ describe('FindPhotosTool', () => {
 
   beforeEach(() => {
     webApiServiceSpy = jasmine.createSpyObj<WebApiService>('WebApiService', [
-      'listMediaItems',
+      'sampleMediaItems',
     ]);
 
     TestBed.configureTestingModule({
@@ -47,7 +47,7 @@ describe('FindPhotosTool', () => {
       },
     ];
 
-    webApiServiceSpy.listMediaItems.and.returnValue(
+    webApiServiceSpy.sampleMediaItems.and.returnValue(
       of(toSuccess({ mediaItems: mockMediaItems })),
     );
 
@@ -61,7 +61,7 @@ describe('FindPhotosTool', () => {
 
     const result = await tool.func(input);
 
-    expect(webApiServiceSpy.listMediaItems).toHaveBeenCalledWith(fakeToken, {
+    expect(webApiServiceSpy.sampleMediaItems).toHaveBeenCalledWith(fakeToken, {
       earliestDateTaken: new Date('2023-01-01'),
       latestDateTaken: new Date('2023-01-31'),
       locationRange: {
@@ -85,7 +85,7 @@ describe('FindPhotosTool', () => {
   });
 
   it('should handle empty optional fields', async () => {
-    webApiServiceSpy.listMediaItems.and.returnValue(
+    webApiServiceSpy.sampleMediaItems.and.returnValue(
       of(toSuccess({ mediaItems: [] })),
     );
 
@@ -99,7 +99,7 @@ describe('FindPhotosTool', () => {
 
     const result = await tool.func(input);
 
-    expect(webApiServiceSpy.listMediaItems).toHaveBeenCalledWith(fakeToken, {
+    expect(webApiServiceSpy.sampleMediaItems).toHaveBeenCalledWith(fakeToken, {
       earliestDateTaken: undefined,
       latestDateTaken: undefined,
       locationRange: undefined,
@@ -110,7 +110,7 @@ describe('FindPhotosTool', () => {
   });
 
   it('should ignore locationRange if radius is 0', async () => {
-    webApiServiceSpy.listMediaItems.and.returnValue(
+    webApiServiceSpy.sampleMediaItems.and.returnValue(
       of(toSuccess({ mediaItems: [] })),
     );
 
@@ -124,7 +124,7 @@ describe('FindPhotosTool', () => {
 
     await tool.func(input);
 
-    expect(webApiServiceSpy.listMediaItems).toHaveBeenCalledWith(fakeToken, {
+    expect(webApiServiceSpy.sampleMediaItems).toHaveBeenCalledWith(fakeToken, {
       earliestDateTaken: undefined,
       latestDateTaken: undefined,
       locationRange: undefined,

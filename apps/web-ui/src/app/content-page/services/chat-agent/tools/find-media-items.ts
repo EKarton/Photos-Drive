@@ -72,7 +72,7 @@ export class FindMediaItemsTool extends DynamicStructuredTool {
 
         const response = await firstValueFrom(
           this.webApiService
-            .listMediaItems(accessToken, {
+            .sampleMediaItems(accessToken, {
               earliestDateTaken: input.earliest_date_taken
                 ? new Date(input.earliest_date_taken)
                 : undefined,

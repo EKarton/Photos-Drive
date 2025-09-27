@@ -816,4 +816,97 @@ describe('MongoDbMediaItemsStore', () => {
       });
     });
   });
+
+  describe('sampleMediaItems', () => {
+    const albumId1: AlbumId = {
+      clientId: '407f1f77bcf86cd799439001',
+      objectId: '407f1f77bcf86cd799439002'
+    };
+
+    const doc1 = {
+      _id: new ObjectId('507f1f77bcf86cd799439010'),
+      file_name: 'image1.jpg',
+      gphotos_client_id: 'gphotos_client_1',
+      gphotos_media_item_id: 'media_item_1',
+      album_id: `${albumId1.clientId}:${albumId1.objectId}`,
+      location: {
+        type: 'Point',
+        coordinates: [40.0, -70.0]
+      },
+      width: 1000,
+      height: 2000,
+      date_taken: new Date(2024, 4, 1)
+    };
+
+    const doc2 = {
+      _id: new ObjectId('507f1f77bcf86cd799439011'),
+      file_name: 'image2.jpg',
+      gphotos_client_id: 'gphotos_client_2',
+      gphotos_media_item_id: 'media_item_2',
+      album_id: `${albumId1.clientId}:${albumId1.objectId}`,
+      width: 10,
+      height: 20,
+      date_taken: new Date(2024, 4, 2)
+    };
+
+    let aggregateFn: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Mock aggregate() to fake Atlas vector search results
+      aggregateFn = jest
+        .spyOn(mediaItemsRepo['collection'], 'aggregate')
+        .mockReturnValue({
+          [Symbol.asyncIterator]: async function* () {
+            yield doc1;
+            yield doc2;
+          },
+          toArray: () => [doc1, doc2]
+        } as never);
+    });
+
+    it('should call aggregation pipeline and returns media items given optional query fields', async () => {
+      const res = await mediaItemsRepo.sampleMediaItems({
+        pageSize: 2
+      });
+
+      expect(res.mediaItems.length).toBe(2);
+      expect(aggregateFn).toHaveBeenCalledWith(
+        [{ $match: {} }, { $sample: { size: 2 } }],
+        { signal: undefined }
+      );
+    });
+
+    it('should call aggregation pipeline and returns media items given query fields are all populated', async () => {
+      const res = await mediaItemsRepo.sampleMediaItems({
+        albumId: albumId1,
+        earliestDateTaken: new Date(2024, 4, 3),
+        latestDateTaken: new Date(2024, 4, 3),
+        withinLocation: { latitude: 90, longitude: -49, range: 100 },
+        pageSize: 2
+      });
+
+      expect(res.mediaItems.length).toBe(2);
+      expect(aggregateFn).toHaveBeenCalledWith(
+        [
+          {
+            $match: {
+              album_id: '407f1f77bcf86cd799439001:407f1f77bcf86cd799439002',
+              date_taken: {
+                $gte: new Date(2024, 4, 3),
+                $lte: new Date(2024, 4, 3)
+              },
+              location: {
+                $near: {
+                  $geometry: { coordinates: [-49, 90], type: 'Point' },
+                  $maxDistance: 100
+                }
+              }
+            }
+          },
+          { $sample: { size: 2 } }
+        ],
+        { signal: undefined }
+      );
+    });
+  });
 });

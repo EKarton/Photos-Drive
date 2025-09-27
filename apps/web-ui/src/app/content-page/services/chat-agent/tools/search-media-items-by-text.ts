@@ -24,16 +24,20 @@ export const SearchPhotosByTextToolInputSchema = z.object({
   earliest_date_taken: z
     .string()
     .default('')
-    .describe('Earliest photo date (YYYY-MM-DD). Empty = no lower bound.'),
+    .describe(
+      'Earliest photo date (YYYY-MM-DD). An example is 2025-12-02 for December 2, 2025. Leave empty to apply no lower date limit.',
+    ),
   latest_date_taken: z
     .string()
     .default('')
-    .describe('Latest photo date (YYYY-MM-DD). Empty = no upper bound.'),
+    .describe(
+      'Latest photo date (YYYY-MM-DD). An example is 2025-12-02 for December 2, 2025. Leave empty to apply no upper date limit.',
+    ),
   within_media_item_ids: z
     .string()
     .default('')
     .describe(
-      'Comma-separated list of media item IDs to include in search. Empty = all.',
+      'Comma-separated list of media item IDs to include in search. Leave empty to apply to all media items.',
     ),
   top_k: z
     .number()
