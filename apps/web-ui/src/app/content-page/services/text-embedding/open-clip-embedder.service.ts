@@ -6,7 +6,7 @@ import {
   PreTrainedTokenizer,
   Tensor,
 } from '@huggingface/transformers';
-import { from, map, Observable, shareReplay, switchMap, tap } from 'rxjs';
+import { from, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 
 import { NAVIGATOR } from '../../../app.tokens';
 
@@ -16,20 +16,32 @@ export const MODEL_NAME = 'Xenova/clip-vit-large-patch14';
 export class OpenClipEmbedderService {
   private readonly navigator = inject(NAVIGATOR);
 
-  private model$: Observable<[PreTrainedTokenizer, PreTrainedModel]> = from(
-    this.loadModels(),
-  ).pipe(
-    shareReplay({ bufferSize: 1, refCount: true }),
-    tap(() => {
-      console.log(`Loaded ${MODEL_NAME}`);
-    }),
-  );
+  private model$: Observable<[PreTrainedTokenizer, PreTrainedModel] | null> =
+    from(this.isEnabled() ? this.loadModels() : Promise.resolve(null)).pipe(
+      shareReplay({ bufferSize: 1, refCount: true }),
+      tap((models) => {
+        if (models) {
+          console.log(`Loaded ${MODEL_NAME}`);
+        } else {
+          console.warn('Skipping model load due to low RAM or mobile device.');
+        }
+      }),
+    );
+
+  isEnabled(): boolean {
+    const isMobile =
+      /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+        this.navigator.userAgent,
+      );
+
+    return !isMobile;
+  }
 
   private loadModels(): Promise<[PreTrainedTokenizer, PreTrainedModel]> {
     console.log(`Loading ${MODEL_NAME}`);
 
     const device = this.selectBestDevice();
-    console.log('Device:', this.selectBestDevice());
+    console.log('Device:', device);
 
     return Promise.all([
       AutoTokenizer.from_pretrained(MODEL_NAME),
@@ -47,9 +59,15 @@ export class OpenClipEmbedderService {
   }
 
   /** Gets the text embeddings for a particular query */
-  getTextEmbedding(text: string): Observable<Float32Array> {
+  getTextEmbedding(text: string): Observable<Float32Array | null> {
     return this.model$.pipe(
-      switchMap(([tokenizer, textModel]) => {
+      switchMap((models) => {
+        if (!models) {
+          return of(null);
+        }
+
+        const [tokenizer, textModel] = models;
+
         const textInputs = tokenizer(text, {
           padding: true,
           truncation: true,

@@ -34,7 +34,10 @@ describe('OpenClipEmbedderService', () => {
     TestBed.configureTestingModule({
       providers: [
         OpenClipEmbedderService,
-        { provide: NAVIGATOR, useFactory: () => ({}) },
+        {
+          provide: NAVIGATOR,
+          useFactory: () => ({ userAgent: 'Mozilla/5.0' }),
+        },
       ],
     });
     const service = TestBed.inject(OpenClipEmbedderService);
@@ -45,11 +48,32 @@ describe('OpenClipEmbedderService', () => {
     });
   });
 
+  it('should return no text embeddings given user is on mobile browser', (done) => {
+    TestBed.configureTestingModule({
+      providers: [
+        OpenClipEmbedderService,
+        {
+          provide: NAVIGATOR,
+          useFactory: () => ({ userAgent: 'Android' }),
+        },
+      ],
+    });
+    const service = TestBed.inject(OpenClipEmbedderService);
+
+    service.getTextEmbedding('test').subscribe((embedding) => {
+      expect(embedding).toBeNull();
+      done();
+    });
+  });
+
   it('should select WebGPU if available', async () => {
     TestBed.configureTestingModule({
       providers: [
         OpenClipEmbedderService,
-        { provide: NAVIGATOR, useFactory: () => ({ gpu: true }) },
+        {
+          provide: NAVIGATOR,
+          useFactory: () => ({ gpu: true, userAgent: 'Mozilla/5.0' }),
+        },
       ],
     });
     TestBed.inject(OpenClipEmbedderService);
@@ -65,7 +89,7 @@ describe('OpenClipEmbedderService', () => {
       providers: [
         {
           provide: NAVIGATOR,
-          useFactory: () => undefined,
+          useFactory: () => ({ userAgent: 'Mozilla/5.0' }),
         },
         OpenClipEmbedderService,
       ],

@@ -64,7 +64,7 @@ ng generate --help
 
 ### Building
 
-To build the project run:
+To build a production-level project run:
 
 ```bash
 npm run build
