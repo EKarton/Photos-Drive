@@ -129,4 +129,18 @@ describe('SearchMediaItemsForTextTool', () => {
       date_taken: '2023-01-01T10:00:00.000Z',
     });
   });
+
+  it('should throw an error given text embedding returned null', async () => {
+    textEmbedderSpy.getTextEmbedding.and.returnValue(of(null));
+
+    const input: SearchPhotosByTextToolInputType = {
+      query: 'sunset beach',
+      earliest_date_taken: '',
+      latest_date_taken: '',
+      within_media_item_ids: '',
+      top_k: 5,
+    };
+
+    await expectAsync(tool.func(input)).toBeRejected();
+  });
 });

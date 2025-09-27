@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DynamicStructuredTool } from 'langchain/tools';
-import { combineLatest, firstValueFrom, switchMap } from 'rxjs';
+import { combineLatest, firstValueFrom, switchMap, throwError } from 'rxjs';
 import { z } from 'zod';
 
 import { selectAuthToken } from '../../../../auth/store/auth.state';
@@ -77,6 +77,11 @@ export class SearchMediaItemsByTextTool extends DynamicStructuredTool {
             this.openClipEmbedderService.getTextEmbedding(input.query),
           ]).pipe(
             switchMap(([accessToken, queryEmbedding]) => {
+              if (!queryEmbedding) {
+                return throwError(
+                  () => new Error('Failed to generate query embeddings'),
+                );
+              }
               return this.webApiService.vectorSearchMediaItems(accessToken, {
                 queryEmbedding,
                 earliestDateTaken: input.earliest_date_taken
@@ -99,5 +104,9 @@ export class SearchMediaItemsByTextTool extends DynamicStructuredTool {
         );
       },
     });
+  }
+
+  isEnabled(): boolean {
+    return this.openClipEmbedderService.isEnabled();
   }
 }

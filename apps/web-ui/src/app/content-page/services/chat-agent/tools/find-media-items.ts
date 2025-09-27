@@ -17,19 +17,19 @@ export const FindPhotosToolInputSchema = z.object({
     .string()
     .default('')
     .describe(
-      'Filter to include only photos taken on or after this date (format: YYYY-MM-DD). Leave empty to apply no lower date limit.',
+      'Filter to include only photos taken on or after this date in YYYY-MM-DD format. An example is 2025-12-02 for December 2, 2025. Leave empty to apply no lower date limit.',
     ),
   latest_date_taken: z
     .string()
     .default('')
     .describe(
-      'Filter to include only photos taken on or before this date (format: YYYY-MM-DD). Leave empty to apply no upper date limit.',
+      'Filter to include only photos taken on or before this date in YYYY-MM-DD format. An example is 2025-12-02 for December 2, 2025. Leave empty to apply no upper date limit.',
     ),
   within_geo_location: z
     .string()
     .default('')
     .describe(
-      "GPS coordinate as a string in 'latitude,longitude' format. If provided alongside a positive 'within_geo_range', only photos taken within that radius (in meters) around this location will be included. Leave empty to ignore location filtering.",
+      "GPS coordinate as a string in 'latitude,longitude' format. An example is '-87.60515833333332,41.892047222222224'. If provided alongside a positive 'within_geo_range', only photos taken within that radius (in meters) around this location will be included. Leave empty to ignore location filtering.",
     ),
   within_geo_range: z
     .number()

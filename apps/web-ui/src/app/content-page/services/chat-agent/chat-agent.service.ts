@@ -61,13 +61,14 @@ export class ChatAgentService {
   async loadAgent() {
     const parser = StructuredOutputParser.fromZodSchema(ResponseFormatSchema);
 
+    const tools = [this.getCurrentTimeTool, this.findMediaItemsTool];
+    if (this.searchMediaItemsForTextTool.isEnabled()) {
+      tools.push(this.searchMediaItemsForTextTool);
+    }
+
     this.agent = await createReactAgent({
       llm: this.chatGoogleGenerativeAI,
-      tools: [
-        this.getCurrentTimeTool,
-        this.searchMediaItemsForTextTool,
-        this.findMediaItemsTool,
-      ],
+      tools,
       checkpointSaver: this.memorySaver,
       responseFormat: parser,
     });
