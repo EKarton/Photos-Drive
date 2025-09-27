@@ -3,11 +3,8 @@ import { MediaViewerRequest } from '../../../media-viewer/media-viewer.request';
 import {
   DialogState,
   initialState,
-  selectAnyDialogRequest,
-  selectDialogRequests,
   selectDialogState,
-  selectIsAnyDialogOpen,
-  selectIsDialogOpen,
+  selectTopDialogRequest,
 } from '../dialogs.state';
 
 describe('Dialogs Selectors', () => {
@@ -17,139 +14,40 @@ describe('Dialogs Selectors', () => {
     expect(result).toEqual(initialState);
   });
 
-  describe('selectAnyDialogRequest', () => {
-    it('should return null when there is no request', () => {
-      const state: DialogState = { ...initialState, request: null };
-
-      const result = selectAnyDialogRequest().projector(state);
-
-      expect(result).toBeNull();
-    });
-
-    it('should return the dialog request when it exists', () => {
+  describe('selectTopDialogRequest', () => {
+    it('should return the request when the first request in the queue is an instance of the given ctor', () => {
       const request = new MediaViewerRequest('item123');
       const state: DialogState = {
-        ...initialState,
-        request,
+        requests: [request],
       };
 
-      const result = selectAnyDialogRequest().projector(state);
-
-      expect(result).toEqual(request);
-    });
-  });
-
-  describe('selectDialogRequests', () => {
-    it('should return the request when it is an instance of the given ctor', () => {
-      const request = new MediaViewerRequest('item123');
-      const state: DialogState = {
-        request,
-        isOpen: true,
-      };
-
-      const selector = selectDialogRequests(MediaViewerRequest);
+      const selector = selectTopDialogRequest(MediaViewerRequest);
       const result = selector.projector(state);
 
       expect(result).toBe(request);
     });
 
-    it('should return null when the request is not an instance of the given ctor', () => {
+    it('should return null when the first request in the queue is not an instance of the given ctor', () => {
       const request = new ChatDialogRequest();
       const state: DialogState = {
-        request,
-        isOpen: true,
+        requests: [request],
       };
 
-      const selector = selectDialogRequests(MediaViewerRequest);
+      const selector = selectTopDialogRequest(MediaViewerRequest);
       const result = selector.projector(state);
 
       expect(result).toBeNull();
     });
 
-    it('should return null when request is null', () => {
+    it('should return null when requests queue is empty', () => {
       const state: DialogState = {
-        request: null,
-        isOpen: false,
+        requests: [],
       };
 
-      const selector = selectDialogRequests(MediaViewerRequest);
+      const selector = selectTopDialogRequest(MediaViewerRequest);
       const result = selector.projector(state);
 
       expect(result).toBeNull();
-    });
-  });
-
-  describe('selectIsAnyDialogOpen', () => {
-    it('should return false when isOpen is false', () => {
-      const state: DialogState = { ...initialState, isOpen: false };
-
-      const result = selectIsAnyDialogOpen().projector(state);
-
-      expect(result).toBeFalse();
-    });
-
-    it('should return true when isOpen is true', () => {
-      const state: DialogState = {
-        ...initialState,
-        isOpen: true,
-      };
-
-      const result = selectIsAnyDialogOpen().projector(state);
-
-      expect(result).toBeTrue();
-    });
-  });
-
-  describe('selectIsDialogOpen', () => {
-    it('should return true if isOpen is true and request is instance of the given ctor', () => {
-      const request = new MediaViewerRequest('item123');
-      const state: DialogState = {
-        request,
-        isOpen: true,
-      };
-
-      const selector = selectIsDialogOpen(MediaViewerRequest);
-      const result = selector.projector(state);
-
-      expect(result).toBeTrue();
-    });
-
-    it('should return false if isOpen is false even if request is instance of the given ctor', () => {
-      const request = new MediaViewerRequest('item123');
-      const state: DialogState = {
-        request,
-        isOpen: false,
-      };
-
-      const selector = selectIsDialogOpen(MediaViewerRequest);
-      const result = selector.projector(state);
-
-      expect(result).toBeFalse();
-    });
-
-    it('should return false if request is not instance of the given ctor even if isOpen is true', () => {
-      const request = new ChatDialogRequest();
-      const state: DialogState = {
-        request,
-        isOpen: true,
-      };
-
-      const selector = selectIsDialogOpen(MediaViewerRequest);
-      const result = selector.projector(state);
-
-      expect(result).toBeFalse();
-    });
-
-    it('should return false if request is null and isOpen is true', () => {
-      const state: DialogState = {
-        request: null,
-        isOpen: true,
-      };
-
-      const selector = selectIsDialogOpen(MediaViewerRequest);
-      const result = selector.projector(state);
-
-      expect(result).toBeFalse();
     });
   });
 });

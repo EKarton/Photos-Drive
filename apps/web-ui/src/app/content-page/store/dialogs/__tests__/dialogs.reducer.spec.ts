@@ -12,8 +12,7 @@ describe('Dialogs Reducer', () => {
 
     const expectedState: DialogState = {
       ...initialState,
-      request,
-      isOpen: true,
+      requests: [request],
     };
     expect(state).toEqual(expectedState);
   });
@@ -21,8 +20,7 @@ describe('Dialogs Reducer', () => {
   it('should handle closeDialog action', () => {
     const initialStateWithRequest: DialogState = {
       ...initialState,
-      request: new MediaViewerRequest('item123'),
-      isOpen: true,
+      requests: [new MediaViewerRequest('item123')],
     };
 
     const action = closeDialog();
@@ -30,8 +28,7 @@ describe('Dialogs Reducer', () => {
 
     const expectedState: DialogState = {
       ...initialStateWithRequest,
-      request: null,
-      isOpen: false,
+      requests: [],
     };
     expect(state).toEqual(expectedState);
   });

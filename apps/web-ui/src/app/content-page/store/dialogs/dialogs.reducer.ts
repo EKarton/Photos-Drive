@@ -6,17 +6,15 @@ import { DialogState, FEATURE_KEY, initialState } from './dialogs.state';
 export const dialogReducer = createReducer(
   initialState,
 
-  on(openDialog, (_state, { request }): DialogState => {
+  on(openDialog, (state, { request }): DialogState => {
     return {
-      request,
-      isOpen: true,
+      requests: [...state.requests, request],
     };
   }),
 
-  on(closeDialog, (): DialogState => {
+  on(closeDialog, (state): DialogState => {
     return {
-      request: null,
-      isOpen: false,
+      requests: state.requests.slice(0, -1),
     };
   }),
 );

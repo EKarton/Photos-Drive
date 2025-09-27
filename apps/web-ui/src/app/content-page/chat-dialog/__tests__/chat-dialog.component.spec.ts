@@ -34,11 +34,10 @@ describe('ChatDialogComponent', () => {
     spyOn(store, 'dispatch');
   });
 
-  it('should open dialog when store isOpen is true for ChatDialogRequest', () => {
+  it('should open dialog when top dialog is a ChatDialogRequest', () => {
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new ChatDialogRequest(),
-        isOpen: true,
+        requests: [new ChatDialogRequest()],
       },
       [chatsState.FEATURE_KEY]: {
         messages: [],
@@ -53,11 +52,10 @@ describe('ChatDialogComponent', () => {
     expect(dialog.open).toBeTrue();
   });
 
-  it('should close dialog when store isOpen is false', () => {
+  it('should close dialog when top dialog is not a ChatDialogRequest', () => {
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: null,
-        isOpen: false,
+        requests: [],
       },
       [chatsState.FEATURE_KEY]: {
         messages: [],
@@ -75,8 +73,7 @@ describe('ChatDialogComponent', () => {
   it('should dispatch closeDialog action when close button clicked', () => {
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new ChatDialogRequest(),
-        isOpen: true,
+        requests: [new ChatDialogRequest()],
       },
       [chatsState.FEATURE_KEY]: {
         messages: [],
@@ -97,8 +94,7 @@ describe('ChatDialogComponent', () => {
     // Set state with some messages to show the "Clear chat" button
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new ChatDialogRequest(),
-        isOpen: true,
+        requests: [new ChatDialogRequest()],
       },
       [chatsState.FEATURE_KEY]: {
         messages: [
@@ -124,8 +120,7 @@ describe('ChatDialogComponent', () => {
   it('should dispatch sendUserMessage and reset input on valid search submit', () => {
     store.setState({
       [dialogsState.FEATURE_KEY]: {
-        request: new ChatDialogRequest(),
-        isOpen: true,
+        requests: [new ChatDialogRequest()],
       },
       Chats: {
         messages: [],
