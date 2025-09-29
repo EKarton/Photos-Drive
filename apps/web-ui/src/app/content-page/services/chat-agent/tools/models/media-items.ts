@@ -25,11 +25,6 @@ export const MediaItemModelSchema = z.object({
   location: GpsLocationModelSchema.optional().describe(
     'GPS location if available',
   ),
-  gphotos_media_item_id: z
-    .string()
-    .describe(
-      "Google Photos media item ID. An example of this is '67a5af7de6889a8ed488084f:AFvW37a83OL5LN95bUPU9JougXiT4bOz_SkmIcHCxSgE6BLKGrmzZu7J4xV7R4LI-H1SQblU9YNcMcAninJe92_DgjUsmBawWA'",
-    ),
   width: z.number().describe('Width of image/video in pixels'),
   height: z.number().describe('Height of image/video in pixels'),
   date_taken: z
@@ -58,7 +53,6 @@ export function domainToToolMediaItem(item: MediaItem): MediaItemModel {
     id: item.id,
     file_name: item.fileName,
     location: domainToGpsLocation(item.location),
-    gphotos_media_item_id: item.gPhotosMediaItemId,
     width: item.width,
     height: item.height,
     date_taken:

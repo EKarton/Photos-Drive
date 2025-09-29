@@ -42,7 +42,6 @@ describe('MediaItem model conversions', () => {
       expect(result).toEqual({
         id: '1',
         file_name: 'photo.jpg',
-        gphotos_media_item_id: 'g1',
         width: 1920,
         height: 1080,
         location: { latitude: 12.34, longitude: 56.78 },
@@ -104,7 +103,6 @@ describe('MediaItem model conversions', () => {
       const validItem: MediaItemModel = {
         id: '1',
         file_name: 'photo.jpg',
-        gphotos_media_item_id: 'g1',
         width: 100,
         height: 200,
         location: { latitude: 1, longitude: 2 },

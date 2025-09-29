@@ -77,7 +77,6 @@ describe('FindPhotosTool', () => {
       id: '1',
       file_name: 'test.jpg',
       location: { latitude: 10, longitude: 20 },
-      gphotos_media_item_id: 'g1',
       width: 1920,
       height: 1080,
       date_taken: '2023-01-01T00:00:00.000Z',
@@ -105,7 +104,6 @@ describe('FindPhotosTool', () => {
       locationRange: undefined,
       pageSize: 50,
     });
-
     expect(result.media_items).toEqual([]);
   });
 
