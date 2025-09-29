@@ -9,7 +9,6 @@ import { ThemeToggleButtonComponent } from '../themes/components/theme-toggle-bu
   selector: 'app-home-page',
   imports: [CommonModule, ThemeToggleButtonComponent],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.scss',
 })
 export class HomePageComponent {
   private readonly window: Window = inject(WINDOW);

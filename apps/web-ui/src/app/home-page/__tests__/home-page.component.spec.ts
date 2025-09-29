@@ -32,7 +32,9 @@ describe('HomePageComponent', () => {
   });
 
   it('should redirect to login URL on handleLoginClick', () => {
-    const button = fixture.nativeElement.querySelector('button');
+    const button = fixture.nativeElement.querySelector(
+      '[data-test-id="login-button"]',
+    );
     button.click();
 
     const expectedHref = `${environment.loginUrl}?select_account=true`;

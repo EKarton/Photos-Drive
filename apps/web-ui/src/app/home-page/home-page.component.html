@@ -46,7 +46,11 @@
         <p class="pt-2 pb-6 text-xl whitespace-nowrap">
           View your photos better
         </p>
-        <button class="btn btn-primary" (click)="handleLoginClick()">
+        <button
+          data-test-id="login-button"
+          class="btn btn-primary"
+          (click)="handleLoginClick()"
+        >
           Login
         </button>
       </div>
