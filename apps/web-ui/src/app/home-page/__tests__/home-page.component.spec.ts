@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 
 import { environment } from '../../../environments/environment';
 import { WINDOW } from '../../app.tokens';
+import { themeState } from '../../themes/store';
 import { HomePageComponent } from '../home-page.component';
 
 describe('HomePageComponent', () => {
@@ -19,6 +21,11 @@ describe('HomePageComponent', () => {
           provide: WINDOW,
           useValue: mockWindow,
         },
+        provideMockStore({
+          initialState: {
+            [themeState.FEATURE_KEY]: themeState.initialState,
+          },
+        }),
       ],
     }).compileComponents();
 
