@@ -1,26 +1,63 @@
-# Heatmap Design Doc
+# Heatmap One Pager Design
 
-## Problem
+## Background
 
-## Solutions
+We want to show a heatmap of the images on a globe. It should be able to:
 
-### Option 1 (Preferred): Use H3 spatial indexing
+1. Update the heatmap and a thumbnail of the images as the user zoom and pans on the globe efficiently
+2. Display a heatmap based on the region on the map
 
-### Option 2: Fetch N images one tile at a time
+## Design
 
-This approach is about breaking the globe / map into tiles at the current map's zoom level, and fetching an image at that tile.
+This approach is built on [Uber’s H3 geospatial index system](https://www.uber.com/blog/h3), where it breaks the globe / map into tiles at the current map's zoom level, and fetching an image at that tile.
 
-More specifically, we break the map into tiles via this pseudocode:
+More specifically, we first break the map into H3 tiles via this pseudocode:
 
+```py
+bounds = this.map.getBounds()
+zoom = Math.max(1, Math.floor(this.map.getZoom()))
+
+north = clampLat(bounds.getNorth())
+south = clampLat(bounds.getSouth())
+east = clampLng(bounds.getEast())
+west = clampLng(bounds.getWest())
+
+[xTop, yTop] = tilebelt.pointToTile(west, north, zoom)
+[xBottom, yBottom] = tilebelt.pointToTile(east, south, zoom)
+
+tiles = []
+
+for x in range(xTop, xBottom + 1):
+  for y in range(yTop, yBottom + 1):
+    const tile = f'{x}/{y}/{zoom}'
+    tiles.add(tile)
+
+return tiles
 ```
+
+where `map.getBounds()` returns the bounds of the map shown in the viewport in latitude and longitude coordinates, `tilebelt.pointToTile` maps the bounds of the viewport to the most left x, most right x, top y, and bottom y of the viewport, and then generate the  each tile is identified by `x/y/z` coordinates.
+
+Then, for each tile, we compute the number of H3 cells that reside in that tile. We then fetch the images in those cells. We can do so via this pseudocode:
+
+```py
+bbox = tilebelt.tileToBBOX([tile.x, tile.y, tile.z])
+polygon = [
+  [bbox[0], bbox[1]], # SW: [minLon, minLat]
+  [bbox[2], bbox[1]], # SE: [maxLon, minLat]
+  [bbox[2], bbox[3]], # NE: [maxLon, maxLat]
+  [bbox[0], bbox[3]], # NW: [minLon, maxLat]
+  [bbox[0], bbox[1]]  # Close polygon
+]
+h3_res = tileZoomToH3Resolution(tile.z)
+cell_ids = polygonToCells([polygon], h3Res, true)
+
+for cell_id in cell_ids:
+  find_image_in_cell(cell_id, h3_res)
 ```
 
-Then, for each tile, we fetch an image from that tile. We can do so via this pseudocode:
+where `tileZoomToH3Resolution` maps the map's zoom level to the H3 zoom level, and `polygonToCells` converts a tile into a list of cells inside that tile.
 
-```
-```
-
-Each time we add an image, we save the image's tile for every zoom level the map supports. We can do so via this pseudocode:
+Each time we add an image to the Photos Drive, we save the image's tile for every zoom level the map supports. We can do so via this pseudocode:
 
 ```py
 MAX_ZOOM_LEVEL = 24
@@ -35,35 +72,3 @@ for zoom_level in range(0, MAX_ZOOM_LEVEL + 1):
         image_id: image.id
     })
 ```
-
-Pros:
-
-- Fast:
-  - The browser can compute a list of tiles easily for a given map
-  - Fetching an image from a single tile is fast and cachable
-
-Cons:
-
-- At a particular zoom level, the browser can generate very large tiles, thereby creating a lot of blank spots when that tile only shows one image.
-- More storage needed: when we add an image to the system, we need to save 24 variants of that image's tile for the 24 different zoom levels.
-
-### Option 3: Load everything into UI
-
-This approach is about loading all the images for an album or across all albums in the UI.
-
-We already have an endpoint called /listMediaItems that will return a list of media items via pagination.
-We are already using this when displaying a list of images in list form.
-
-Pros:
-
-- Simple
-
-Cons:
-
-- Too slow; fetching 1M+ photos onto the browser is too slow.
-
-## Proposed Solution
-
-The proposed solution is (1) due to the reasons above.
-
-## Implementation
