@@ -26,18 +26,22 @@ This CLI will never delete content from your machine - it should only mirror the
 
 ## Getting Started
 
+### Pre-requisites
+
+- [PyEnv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation)
+- [Exiftool](https://exiftool.org/)
+
 ### Installation
 
-1. First, install a tool called [Exiftool](https://exiftool.org/)
-   - It's a tool used to parse through exif metadata in your photos / videos.
-
-2. Second, install torch and torchvision by running:
+1. Create a Python virtual environment using Python 3.12 and activate it by running:
 
    ```bash
-   pip3 install torch torchvision
+   pyenv shell 3.12.11
+   python3 -m venv .
+   source bin/activate
    ```
 
-3. Second, install this Python package by running:
+2. Next, install this Python package from [PyPi](https://pypi.org/project/photos_drive/) by running:
 
    ```bash
    pip3 install photos_drive
@@ -47,10 +51,12 @@ This CLI will never delete content from your machine - it should only mirror the
 
 1. First, you need to have the following:
 
-   1. A connection string to your MongoDB database (follow [this doc](./docs/create_mongodb_connection_string.md) for step-by-step instructions).
-   2. Your Google Account's client ID and client secrets (follow [this doc](./docs/create_google_client_id.md) for step-by-step instructions).
+   1. A connection string to your MongoDB database
+      - Follow [this doc](./docs/create_mongodb_connection_string.md) for instructions on how to create a MongoDB account and get its connection string.
+   2. Your Google OAuth2's client ID and client secrets
+      - Follow [this doc](./docs/create_google_client_id.md) for instructions on how to create a Google OAuth2 credentials.
 
-2. Next, to set up your infrastructure by running `photos_drive config init`.
+2. Next, to set up your infrastructure by running `photos_drive_cli config init`.
 
 3. It will ask you information on what the command will do.
 
@@ -60,11 +66,13 @@ This CLI will never delete content from your machine - it should only mirror the
 
 4. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
 
-   For simplicity, select `2`. It will then ask you to enter the file name of your config.
+   > For simplicity, select `1`. It will then ask you to enter the connection string of your MongoDB account.
 
    ![Config choices](./docs/images/setting-up-infra/config-choices.png)
 
-5. Next, it will ask you to add a MongoDB database to store your pictures / videos metadata. It will prompt you to enter a name for your database, and its read-write connection string:
+5. Next, it will ask you to add a MongoDB database to store your photos metadata. It will prompt you to enter a name for your database, and its read-write connection string and read-only connection string:
+
+   > For simplicity, we will use the same MongoDB account to store your photos metadata. Feel free to use a different connection string to store your photos metadata in another database.
 
    ![Adding MongoDB client](./docs/images/setting-up-infra/add-mongodb.png)
 
@@ -310,7 +318,7 @@ Please note that this project is used for educational purposes and is not intend
 
 Emilio Kartono, who made the entire project.
 
-CLI images were provided by <https://ray.so/>.
+CLI images were provided by <https://ray.so/> in Ice theme.
 
 ## License
 
