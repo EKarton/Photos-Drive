@@ -1,19 +1,7 @@
 # Setup
 
-This section outlines the steps needed to setup your own Photos Drive system.
+Follow these steps below in order:
 
-## Table of Contents
-
-1. Package installations
-2. Setting up your instance
-3. Adding more photo storage accounts
-
-## 1. Package Installations
-
-1. Install
-
-Install the [photos_drive](https://pypi.org/project/photos_drive/) Python package by running:
-
-```bash
-pip3 install photos_drive
-```
+1. [Setting up your infrastructure](./../apps/cli-client/docs/getting_started.md)
+2. [Setting up the web api](./../apps/web-api/docs/setup.md)
+3. [Setting up the web ui](./../apps/web-ui/README.md)
