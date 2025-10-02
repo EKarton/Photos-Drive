@@ -20,7 +20,7 @@ from photos_drive.cli.shared.inputs import (
 )
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.printer import (
-    pretty_print_processed_diffs,
+    pretty_print_diffs,
 )
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
@@ -60,7 +60,7 @@ config_exclusivity_callback = createMutuallyExclusiveGroup(2)
 @app.command()
 def sync(
     local_dir_path: str,
-    remote_albums_path: str,
+    remote_albums_path: str = '',
     config_file: Annotated[
         str | None,
         typer.Option(
@@ -127,13 +127,13 @@ def sync(
         print("No changes")
         return
 
-    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings(), BlipImageCaptions())
-    processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
-
-    pretty_print_processed_diffs(processed_diffs)
+    pretty_print_diffs(backup_diffs)
     if not prompt_user_for_yes_no_answer("Is this correct? (Y/N): "):
         print("Operation cancelled.")
         return
+
+    diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings(), BlipImageCaptions())
+    processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
 
     backup_results = __backup_diffs_to_system(
         config, processed_diffs, parallelize_uploads, batch_size
@@ -204,6 +204,7 @@ def __backup_diffs_to_system(
             logger.info(f'Backed up {num_chunks_completed} / {num_total_chunks} chunks')
             logger.debug(f"Batch results: {batch_results}")
 
+            num_chunks_completed += 1
             overall_results = __merge_results(overall_results, batch_results)
 
         except BaseException as e:
