@@ -66,52 +66,59 @@ This CLI will never delete content from your machine - it should only mirror the
 
 4. Next, the cli will prompt you to specify a place to store the configs. You can store it locally or on MongoDB.
 
-   > For simplicity, select `1`. It will then ask you to enter the connection string of your MongoDB account.
+   > For simplicity, select `MongoDB`. It will then ask you to enter the connection strings of your MongoDB account.
 
    ![Config choices](./docs/images/setting-up-infra/config-choices.png)
 
-5. Next, it will ask you to add a MongoDB database to store your photos metadata. It will prompt you to enter a name for your database, and its read-write connection string and read-only connection string:
+5. Next, it will ask you to add a database to store your photos metadata and photos map data. It will prompt you to enter a name for your database, the type of database (right now we only support MongoDB), and its read-write connection string and read-only connection string:
 
    > For simplicity, we will use the same MongoDB account to store your photos metadata. Feel free to use a different connection string to store your photos metadata in another database.
 
-   ![Adding MongoDB client](./docs/images/setting-up-infra/add-mongodb.png)
+   ![Adding database to Photos Metadata and Photos Map store](./docs/images/setting-up-infra/add-photos-metadata-map-store-db.png)
 
-6. Finally, it will ask you to add your Google Photos account to store your pictures / videos. It will prompt you to enter a name for your first Google Photos account, and a Google Photos Client ID and Google Photos Client Secret.
+6. Finally, it will ask you to add an account to store your photos. It will prompt you to enter your name for your account, the type of account (right now we only support Google Photos), and a Google Photos Client ID and Google Photos Client Secret.
 
-   ![Adding Google Photos account](./docs/images/setting-up-infra/add-gphotos.png)
+   ![Adding Google Photos account to store your photos](./docs/images/setting-up-infra/add-photos-account.png)
 
 7. After specifying the name, client ID, and client secret, it will return a URL to authenticate. Copy-paste the URL to your browser and follow the instructions on the browser:
 
    ![Google OAuth2 steps](./docs/images/setting-up-infra/google-oauth2.gif)
 
-8. It saves the config to `my-config.conf` to your current working directory.
+8. Finally, add a vector database to your vector store. It will prompt you to enter the name of your vector database, the type (right now, we only support MongoDB), and its connection strings:
+
+   > For simplicity, we will use the same MongoDB account to store your photos metadata. Feel free to use a different connection string to store your photos metadata in another database.
+
+   ![Add MongoDB as a vector database to the vector store](./docs/images/setting-up-infra/add-vector-db.png)
+
+9. All done! You have successfully set up a basic instance of your Photos Drive.
 
 ### Syncing your photos / videos
 
-1. From the previous step, assume you have `config.conf` as your config file, and assume your current working directory looks like this:
+1. From the previous step, assume you have your config in MongoDB, and assume your current working directory looks like this:
 
    ```bash
    .
-   ├── Archives
-   │   ├── Photos
-   │   │   ├── 2023
-   │   │   │   └── Wallpapers
-   │   │   │       └── 2023-11a Wallpaper.DNG
-   │   │   └── 2024
-   │   │       └── Wallpapers
-   │   │           ├── 2024-01a Wallpaper.jpg
-   │   │           ├── 2024-03-01 Wallpaper.jpg
-   │   │           ├── 2024-04-02 Wallpaper.DNG
-   │   │           └── 2024-05 Wallpaper.png
-   │   └── Random.jpg
-   └── my-config.conf
+   └──  Archives
+       ├── Photos
+       │   ├── 2023
+       │   │   └── Wallpapers
+       │   │       └── 2023-11a Wallpaper.DNG
+       │   └── 2024
+       │       └── Wallpapers
+       │           ├── 2024-01a Wallpaper.jpg
+       │           ├── 2024-03-01 Wallpaper.jpg
+       │           ├── 2024-04-02 Wallpaper.DNG
+       │           └── 2024-05 Wallpaper.png
+       └── Random.jpg
    ```
 
 2. To sync your photos / videos to the system, run:
 
    ```bash
-   photos_drive_cli sync --local_dir_path . --config_file config.conf
+   photos_drive_cli sync './Archives' Archives --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
+
+   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account
 
 3. It will then ask you to confirm if these are the contents that you want to upload to the system. Type in `yes`:
 
@@ -124,18 +131,16 @@ This CLI will never delete content from your machine - it should only mirror the
 5. If you want to sync your photos/videos in a particular path in the system, you can specify the `--remote_albums_path` field, like:
 
    ```bash
-   photos_drive_cli sync --local_dir_path ./Archives --remote_albums_path Archives  --config_file config.conf
+   photos_drive_cli sync './Archives' Archives  --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
 
    It will compare all contents under the local directory `./Archives` to all content under the albums path `Archives`.
 
-6. You can also upload photos / videos in parallel with the `--parallelize_uploads` flag, like:
+6. Experimental: You can also upload photos / videos in parallel with the `--parallelize_uploads` flag, like:
 
    ```bash
-   photos_drive_cli sync --local_dir_path . --config_file config.conf --parallelize_uploads
+   photos_drive_cli sync . --config-mongodb="<YOUR_CONNECTION_STRING>" --parallelize_uploads
    ```
-
-   though it is experimental right now.
 
 ### Adding custom content to Photos Drive
 
@@ -165,7 +170,7 @@ This CLI will never delete content from your machine - it should only mirror the
 2. You can run:
 
    ```bash
-   photos_drive_cli add ./Current --config_file my-config.conf
+   photos_drive_cli add ./Current --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
 
    and your system will add all contents under `./Current` without deleting any existing content in your system.
@@ -189,6 +194,8 @@ This CLI will never delete content from your machine - it should only mirror the
 
 ### Deleting content to Photos Drive
 
+> Note: The commands below **do not** delete any data from your machine. It only deletes data from the Photos Drive (in the cloud).
+
 1. Similarly, if your system has this content:
 
    ```bash
@@ -204,10 +211,10 @@ This CLI will never delete content from your machine - it should only mirror the
        └── Random.jpg
    ```
 
-2. If you want to delete the `Archives/Random.jpg` picture, you can run:
+2. If you want to delete the `Archives/Random.jpg` picture from the Photos Drive, you can run:
 
    ```bash
-   photos_drive_cli delete Archives/Random.jpg --config_file my-config.conf
+   photos_drive_cli delete Archives/Random.jpg --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
 
    and the photo `Archives/Random.jpg` will be deleted from the system.
@@ -215,7 +222,7 @@ This CLI will never delete content from your machine - it should only mirror the
 3. Similarly, if you want to delete everything under the `Archives/Photos` album, you can run:
 
    ```bash
-   photos_drive_cli delete Archives/Photos --config_file my-config.conf
+   photos_drive_cli delete Archives/Photos --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
 
    and the system will have these new contents:
@@ -235,7 +242,7 @@ Hence, the `clean` script is provided to clean up the system.
 Running:
 
 ```bash
-photos_drive_cli clean --config_file config.conf
+photos_drive_cli clean --config-mongodb="<YOUR_CONNECTION_STRING>"
 ```
 
 will:
@@ -249,7 +256,7 @@ will:
 In case you want to delete everything, you can run:
 
 ```bash
-photos_drive_cli teardown --config_file config.conf
+photos_drive_cli teardown --config-mongodb="<YOUR_CONNECTION_STRING>"
 ```
 
 It will delete all photos / videos from your system, and move all photos / videos in your Google Photo accounts to their `To delete` albums.
