@@ -6,60 +6,34 @@ Photos Drive is a unified photo management platform designed to connect and disp
 
 It syncs and uploads photos from your computer to configured databases and photo storage accounts using a CLI tool. A web UI then presents your photos in a list or map view, organized by nested albums that reflect the folder structure on your computer.
 
-## Architecture Overview
+## Features
 
-The system consists of three main applications:
+- [x] Upload photos directly to Google Photos from the CLI or the Photos Drive Python library.
+- [x] Easily compare photos stored locally with those in the cloud with the CLI.
+- [x] Integrate with existing systems using the Photos Drive python package.
+- [x] Browse folders and albums in the Web UI.
+- [x] View photos within a specific folder or across your entire library efficiently using lazy loading and pagination.
+- [x] Secure authentication to the Web UI using Google's OAuth2.
+- [x] Explore your photos on a map across all folders or within a folder to see where they were taken from.
+- [x] AI-powered search with Gemini + CLIP: find photos by objects, places, or descriptions.
 
-1. **[CLI Client](./apps/cli-client/README.md)**
-   A Python library and CLI tool that enables users to back up photos from their computer to the system.
+## Walkthrough
 
-2. **[Web API](./apps/web-api/README.md)**
-   Reads photo metadata from MongoDB and serves it to the Web UI via REST endpoints.
+Refer to [this doc](docs/walkthrough.md) for a detailed walkthrough. However, here are a few screenshots:
 
-3. **[Web UI](./apps/web-ui/README.md)**
-   A frontend application that fetches albums and photos from the Web API to display them to users in the browser.
+![photos-list-page](docs/images/images-list-view.png)
 
-## Technology Stack
+![maps-view](docs/images/map-view.png)
 
-* **Photo metadata storage:** MongoDB
-* **Photo blob storage:** Google Photos
-* **Authentication:** Google OAuth2 (between Web UI and Web API)
-* **Access control:** Allow list configured via environment variables (future plans include multi-user ACLs)
+![llm-view](docs/images/llm-view.png)
 
-## Databases
+## Installation
 
-There are two types of databases in the system:
+Refer to the [setup guide](./docs/setup.md) to learn how to set up your own Photos Drive system for your photos.
 
-### 1. Config Database
+## Internal Documentation
 
-Stores credentials and configuration details for metadata databases and photo storage accounts. Refer to [this guide](./docs/database_schema.md) for more info on their schemas.
-
-* **Root Album table**
-  Contains exactly one row, which points to the root album location.
-
-* **Google Photos Config table**
-  Stores credentials for Google Photos accounts
-
-* **MongoDB Metadata Database Config table**
-  Stores connection information for metadata databases
-
-### 2. Metadata Databases
-
-One or more MongoDB databases that store all photo and video metadata.
-
-* **Media Item table**
-  Stores metadata about each media item (photo or video)
-
-* **Albums table**
-  Stores information about albums and its album structure
-
-## Security and Access
-
-* The **Config Database is never exposed** to the Web UI or end users.
-* Metadata databases are accessed only through the Web API.
-* Authentication uses **Google OAuth2** between the Web UI and Web API.
-* The Web API uses an allow list (environment variable) to restrict access.
-* Future plans include support for multiple users and ACLs per user.
+Refer to the [internal documentation guide](./docs/internal/toc.md) to learn how this project was set up.
 
 ## Disclaimer
 
