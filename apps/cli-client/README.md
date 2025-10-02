@@ -26,18 +26,22 @@ This CLI will never delete content from your machine - it should only mirror the
 
 ## Getting Started
 
+### Pre-requisites
+
+- [PyEnv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation)
+- [Exiftool](https://exiftool.org/)
+
 ### Installation
 
-1. First, install a tool called [Exiftool](https://exiftool.org/), a tool used by this package to parse through exif metadata in your photos / videos.
-
-2. Second, create a Python virtual environment and activate it by running:
+1. Create a Python virtual environment using Python 3.12 and activate it by running:
 
    ```bash
+   pyenv shell 3.12.11
    python3 -m venv .
    source bin/activate
    ```
 
-3. Next, install this Python package from [PyPi](https://pypi.org/project/photos_drive/) by running:
+2. Next, install this Python package from [PyPi](https://pypi.org/project/photos_drive/) by running:
 
    ```bash
    pip3 install photos_drive
