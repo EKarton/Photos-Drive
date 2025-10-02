@@ -21,7 +21,7 @@ It syncs and uploads photos from your computer to configured databases and photo
 
 ## Walkthrough
 
-Refer to [this doc](docs/walkthrough.md) for a detailed walkthrough. Here are a few example views:
+Refer to [this doc](docs/walkthrough.md) for a detailed walkthrough. You can play around with the test app at <https://photosdrive-demo.netlify.app>. Here are a few example views:
 
 ![photos-list-page](docs/images/images-list-view.png)
 
