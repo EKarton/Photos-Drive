@@ -163,6 +163,8 @@ def __prompt_welcome():
         + "\n  1. A place to store your config files (MongoDB or in a config file).\n"
         + "\n  2. A place to store your photo metadata (MongoDB).\n"
         + "\n  3. A place to store your photos (Google Photos account).\n"
+        + "\n  4. A place to store your photos heatmap data (MongoDB).\n"
+        + "\n  5. A place to store your photo embeddings (MongoDB).\n"
         + "\n"
         + "Press [enter] to continue\n"
     )
@@ -184,8 +186,7 @@ def __prompt_which_config_type() -> str:
         print("\n  1. Mongo DB (mongodb)")
         print("\n  2. File (file)")
         print(
-            "\nThe config saves the accounts of where your photos metadata are, and"
-            "\nthe accounts of where your photos are"
+            "\nThe config saves the configurations of your MongoDB accounts, photo accounts, etc.
             "\n"
         )
 
