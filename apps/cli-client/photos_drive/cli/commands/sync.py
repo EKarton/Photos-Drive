@@ -204,6 +204,7 @@ def __backup_diffs_to_system(
             logger.info(f'Backed up {num_chunks_completed} / {num_total_chunks} chunks')
             logger.debug(f"Batch results: {batch_results}")
 
+            num_chunks_completed += 1
             overall_results = __merge_results(overall_results, batch_results)
 
         except BaseException as e:
