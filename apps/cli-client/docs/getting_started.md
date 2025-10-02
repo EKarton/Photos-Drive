@@ -9,7 +9,8 @@ This guide contains steps on how to get started with the Photos Drive CLI.
 - [Syncing your photos / videos](#syncing-your-photos--videos)
 - [Adding custom content](#adding-custom-content-to-photos-drive)
 - [Deleting custom content](#deleting-content-to-photos-drive)
-- [Cleaning](#cleaning-trailing-photos-drive)
+- [Scaling up](#scaling-up-photos-drive)
+- [Cleaning](#cleaning-photos-drive)
 - [Deleting everything](#deleting-all-content-in-photos-drive)
 
 ## Pre-requisites
@@ -104,7 +105,7 @@ This guide contains steps on how to get started with the Photos Drive CLI.
    photos_drive_cli sync './Archives' Archives --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
 
-   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account
+   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account containing the config.
 
 3. It will then ask you to confirm if these are the contents that you want to upload to the system. Type in `yes`:
 
@@ -159,7 +160,9 @@ This guide contains steps on how to get started with the Photos Drive CLI.
    photos_drive_cli add ./Current --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
 
-   and your system will add all contents under `./Current` without deleting any existing content in your system.
+   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account containing the config.
+
+   Your system will add all contents under `./Current` without deleting any existing content in your system.
 
 3. In other words, you will have these contents:
 
@@ -203,7 +206,9 @@ This guide contains steps on how to get started with the Photos Drive CLI.
    photos_drive_cli delete Archives/Random.jpg --config-mongodb="<YOUR_CONNECTION_STRING>"
    ```
 
-   and the photo `Archives/Random.jpg` will be deleted from the system.
+   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account containing the config.
+
+   The photo `Archives/Random.jpg` will be deleted from the system.
 
 3. Similarly, if you want to delete everything under the `Archives/Photos` album, you can run:
 
@@ -219,7 +224,57 @@ This guide contains steps on how to get started with the Photos Drive CLI.
        └── Random.jpg
    ```
 
-## Cleaning up Photos Drive
+## Scaling up Photos Drive
+
+Suppose you are running out of space in your metadata store / maps store / vector store / photos store. You can increase the amount of space by adding additional databases / photo accounts to your Photos Drive.
+
+### Adding photo accounts
+
+1. Suppose you want to add a new Google Photos account. You can do so by running:
+
+   ```shell
+   photos_drive_cli config add photos-account --config_mongodb="<YOUR_CONNECTION_STRING>"
+   ```
+
+   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account containing the config.
+
+   It will ask you to enter your name for your account, the type of account (right now we only support Google Photos), and a Google Photos Client ID and Google Photos Client Secret:
+
+   ![Scaling photo accounts](./images/scaling/scaling-photo-accounts.png)
+
+2. After specifying the name, client ID, and client secret, it will return a URL to authenticate. Copy-paste the URL to your browser and follow the instructions on the browser:
+
+   ![Google OAuth2 steps](./images/setting-up-infra/google-oauth2.gif)
+
+### Adding databases to Photos Metadata and Photos Map store
+
+1. Suppose you want to add a new database to metadata / maps store. You can do so by running:
+
+   ```shell
+   photos_drive_cli config add metadata-maps-db --config_mongodb="<YOUR_CONNECTION_STRING>"
+   ```
+
+   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account containing the config.
+
+2. It will prompt you to enter a name for your database, the type of database (right now we only support MongoDB), and its read-write connection string and read-only connection string:
+
+   ![Adding database to Photos Metadata and Photos Map store](./images/scaling/add-metadata-maps-db.png)
+
+### Adding databases to Vector store
+
+1. Suppose you want to add a new vector database to the Vector store. You can do so by running:
+
+   ```shell
+   photos_drive_cli config add vector-db --config_mongodb="<YOUR_CONNECTION_STRING>"
+   ```
+
+   where `<YOUR_CONNECTION_STRING>` is the connection string to your MongoDB account containing the config.
+
+2. It will prompt you to enter a name for your database, the type of database (right now we only support MongoDB), and its read-write connection string and read-only connection string:
+
+   ![Adding database to Vector store](./images/scaling/add-vector-db.png)
+
+## Cleaning Photos Drive
 
 In case any of the `sync`, `add`, or `delete` commands fail, there are data that can be cleaned up. Moreover, when a photo / video is deleted, due to the limitations of the Google Photos API, it will remain in your Google Photos account.
 

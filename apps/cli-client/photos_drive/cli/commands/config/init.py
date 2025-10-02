@@ -60,10 +60,10 @@ def init(
     metadata_db_name = prompt_user_for_non_empty_input_string(
         "Enter name of your database: "
     )
-    options = prompt_user_for_options(
+    option = prompt_user_for_options(
         "Which type of database do you want to add?", ['MongoDB']
     )
-    if options == 'MongoDB':
+    if option == 'MongoDB':
         mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
             "Enter your admin connection string: "
         )
@@ -77,16 +77,18 @@ def init(
                 read_only_connection_string=mongodb_r_connection_string,
             )
         )
+    else:
+        raise NotImplementedError(f'Photos account type {option} not supported')
 
     # Step 2: Ask for Google Photo account
     print("Next, let's add an account to store your photos.")
     photos_store_name = prompt_user_for_non_empty_input_string(
         "Enter name of your account: "
     )
-    options = prompt_user_for_options(
-        "Which type of blob storage do you want to add?", ['GooglePhotos']
+    option = prompt_user_for_options(
+        "Which type of account do you want to add?", ['GooglePhotos']
     )
-    if options == 'GooglePhotos':
+    if option == 'GooglePhotos':
         print("Now, time to log into your Google account for read+write access\n")
         gphotos_rw_credentials = prompt_user_for_gphotos_credentials()
         config.add_gphotos_config(
@@ -96,16 +98,18 @@ def init(
                 read_only_credentials=gphotos_rw_credentials,
             )
         )
+    else:
+        raise NotImplementedError(f'Photos account type {option} not supported')
 
     # Step 3: Ask for the vector store config
     print("Now let's add a vector database to the vector store.")
     vector_store_name = prompt_user_for_non_empty_input_string(
         "Enter name of your vector database: "
     )
-    options = prompt_user_for_options(
+    option = prompt_user_for_options(
         "Which type of database do you want to add?", ['MongoDB']
     )
-    if options == 'MongoDB':
+    if option == 'MongoDB':
         mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
             "Enter your admin connection string: "
         )
@@ -120,6 +124,8 @@ def init(
                 read_only_connection_string=mongodb_r_connection_string,
             )
         )
+    else:
+        raise NotImplementedError(f'Vector database type {option} not supported')
 
     # Step 3: Create root album
     print("Perfect! Setting up your accounts...")

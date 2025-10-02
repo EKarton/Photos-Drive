@@ -55,14 +55,14 @@ def view(
 
     config = build_config_from_options(config_file, config_mongodb)
 
-    print("MongoDB accounts:")
+    print("Metadata and Maps Database accounts:")
     for mongoDbConfig in config.get_mongodb_configs():
         richPrint(Pretty(asdict(mongoDbConfig)))
 
-    print("Google Photos accounts:")
+    print("Photo accounts:")
     for gPhotosConfig in config.get_gphotos_configs():
         richPrint(Pretty(asdict(gPhotosConfig)))
 
-    print("Vector Store accounts")
+    print("Vector Database accounts")
     for vectorStoreConfig in config.get_vector_store_configs():
         richPrint(Pretty(asdict(vectorStoreConfig)))
