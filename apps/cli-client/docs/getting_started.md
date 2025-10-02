@@ -219,7 +219,7 @@ This guide contains steps on how to get started with the Photos Drive CLI.
        └── Random.jpg
    ```
 
-## Cleaning trailing Photos Drive
+## Cleaning up Photos Drive
 
 In case any of the `sync`, `add`, or `delete` commands fail, there are data that can be cleaned up. Moreover, when a photo / video is deleted, due to the limitations of the Google Photos API, it will remain in your Google Photos account.
 
