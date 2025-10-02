@@ -2,6 +2,11 @@
 
 This guide illustrates the steps needed to get your Photos Drive web api up and running locally.
 
+## Table of Contents
+
+- [Setting up your .env file](#setting-up-your-env-file)
+- [Running the web api locally](#running-the-web-api-locally)
+
 ## Setting up your .env file
 
 1. First, create a Google OAuth2 project. Set up OAuth2 and get its client ID and client secrets.
