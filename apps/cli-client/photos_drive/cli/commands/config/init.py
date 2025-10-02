@@ -145,7 +145,6 @@ def __prompt_welcome():
         + "\n  3. A place to store your photos (Google Photos account).\n"
         + "\n  4. A place to store your photos map data (MongoDB).\n"
         + "\n  5. A place to store your photo embeddings (MongoDB).\n"
-        + "\n"
     )
     input("Press [enter] to continue")
 
