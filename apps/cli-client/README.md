@@ -28,16 +28,16 @@ This CLI will never delete content from your machine - it should only mirror the
 
 ### Installation
 
-1. First, install a tool called [Exiftool](https://exiftool.org/)
-   - It's a tool used to parse through exif metadata in your photos / videos.
+1. First, install a tool called [Exiftool](https://exiftool.org/), a tool used by this package to parse through exif metadata in your photos / videos.
 
-2. Second, install torch and torchvision by running:
+2. Second, create a Python virtual environment and activate it by running:
 
    ```bash
-   pip3 install torch torchvision
+   python3 -m venv .
+   source bin/activate
    ```
 
-3. Second, install this Python package by running:
+3. Next, install this Python package from [PyPi](https://pypi.org/project/photos_drive/) by running:
 
    ```bash
    pip3 install photos_drive
@@ -47,10 +47,12 @@ This CLI will never delete content from your machine - it should only mirror the
 
 1. First, you need to have the following:
 
-   1. A connection string to your MongoDB database (follow [this doc](./docs/create_mongodb_connection_string.md) for step-by-step instructions).
-   2. Your Google Account's client ID and client secrets (follow [this doc](./docs/create_google_client_id.md) for step-by-step instructions).
+   1. A connection string to your MongoDB database
+      - Follow [this doc](./docs/create_mongodb_connection_string.md) for instructions on how to create a MongoDB account and get its connection string.
+   2. Your Google OAuth2's client ID and client secrets
+      - Follow [this doc](./docs/create_google_client_id.md) for instructions on how to create a Google OAuth2 credentials.
 
-2. Next, to set up your infrastructure by running `photos_drive config init`.
+2. Next, to set up your infrastructure by running `photos_drive_cli config init`.
 
 3. It will ask you information on what the command will do.
 

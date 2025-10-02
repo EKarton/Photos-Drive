@@ -4,9 +4,13 @@
 
 This document outlines how to create your own connection string to your MongoDB database so that you can interact with your database via its APIs
 
+## Prerequisites
+
+- A MongoDB account (if you don't have one, you can create one for free at <https://www.mongodb.com/cloud/atlas/register>)
+
 ## Steps
 
-1. Go to <https://www.mongodb.com>, click on the login button, and log into your MongoDB account:
+1. Go to <https://www.mongodb.com>, click on the `Sign In` button, and log into your MongoDB account:
 
     ![Login 1](./images/creating-mongodb-connection-string/login-1.png)
 
@@ -32,7 +36,7 @@ This document outlines how to create your own connection string to your MongoDB 
 
     ![Create user 4](./images/creating-mongodb-connection-string/create-user-4.png)
 
-6. Now, click to the `Clusters` tab and click on the `Connect` button:
+6. Now, click on the `Clusters` tab and click on the `Connect` button:
 
     ![Connect 1](./images/creating-mongodb-connection-string/connect-1.png)
 
@@ -44,4 +48,4 @@ This document outlines how to create your own connection string to your MongoDB 
 
     ![Connect 3](./images/creating-mongodb-connection-string/connect-3.png)
 
-9. All done! You have made your connection string for your new user.
+9. All done! You have made your connection string for your new user. Copy this into a temporary note pad so you don't forget it.
