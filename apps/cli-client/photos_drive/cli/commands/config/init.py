@@ -186,7 +186,7 @@ def __prompt_which_config_type() -> str:
         print("\n  1. Mongo DB (mongodb)")
         print("\n  2. File (file)")
         print(
-            "\nThe config saves the configurations of your Photos Drive, such as your photo metadata accounts, photo accounts, etc.
+            "\nThe config saves the configurations of your Photos Drive, such as your photo metadata accounts, photo accounts, etc."
             "\n"
         )
 
