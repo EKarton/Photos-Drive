@@ -14,11 +14,9 @@ export async function verifyAuthorization() {
       next();
     } else {
       logger.debug(`User ${req.decodedAccessToken.id} is forbidden`);
-      res
-        .status(403)
-        .json({
-          error: `User ${req.decodedAccessToken.id} is authorized to view this request`
-        });
+      res.status(403).json({
+        error: `User ${req.decodedAccessToken.id} is not authorized to view this request`
+      });
     }
   };
 }
