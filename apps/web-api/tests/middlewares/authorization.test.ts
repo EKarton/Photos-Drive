@@ -93,6 +93,8 @@ describe('verifyAuthorization()', () => {
     const res = await request(app).get('/api/v1/protected-resource');
 
     expect(res.statusCode).toEqual(403);
-    expect(res.body).toEqual({ error: 'Not authorized to view this request' });
+    expect(res.body).toEqual({
+      error: 'User ABC is not authorized to view this request'
+    });
   });
 });

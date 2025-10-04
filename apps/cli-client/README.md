@@ -25,25 +25,25 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
 
 1. Ensure Python3, Pip, and Poetry are installed on your machine
 
-2. Install dependencies by running:
+1. Install dependencies by running:
 
    ```bash
    poetry install
    ```
 
-3. To lint your code, run:
+1. To lint your code, run:
 
    ```bash
    poetry run mypy . && poetry run flake8 && poetry run isort . && poetry run black .
    ```
 
-4. To run all tests and code coverage, run:
+1. To run all tests and code coverage, run:
 
    ```bash
    poetry run coverage run  --source=photos_drive -m pytest tests/ && poetry run coverage report -m
    ```
 
-5. To run tests and code coverage for a particular test file, run:
+1. To run tests and code coverage for a particular test file, run:
 
    ```bash
    poetry run coverage run --source=photos_drive -m pytest <insert-file-path> && poetry run coverage report -m
@@ -55,7 +55,7 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
    poetry run coverage run --source=photos_drive -m pytest tests/backup/test_backup_photos.py && poetry run coverage report -m
    ```
 
-6. To publish a new version of the app:
+1. To publish a new version of the app:
 
    1. First, bump up the package version by running:
 
@@ -69,13 +69,9 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
       poetry version patch
       ```
 
-   2. Then, create a pull request with the new version number.
+   1. Then, create a pull request with the new version number.
 
-   3. Once the pull request is submitted, go to <https://github.com/EKarton/photos-drive/actions/workflows/publish-cli-client.yaml>, click on the `Run workflow`, ensure that it's on the `main` branch, and click on `Run workflow`:
-
-      ![Screenshot of publish workflow](docs/images/publish-package/publish-cli-client-screenshot.png)
-
-   4. Once the action is complete, it will publish a new version of the app on <https://pypi.org/project/photos_drive_cli_client/>.
+   1. Once the pull request is submitted, it will publish a new version of the app on <https://pypi.org/project/photos_drive_cli_client/>.
 
 ## Usage
 
