@@ -29,7 +29,7 @@ This guide illustrates the steps needed to get your Photos Drive web api up and 
    ```bash
    export ACCESS_TOKEN_JWT_PRIVATE_KEY=$(tr -d '\n' < private.pem)
    export ACCESS_TOKEN_JWT_PUBLIC_KEY=$(tr -d '\n' < public.pem)
-   
+
    echo ${ACCESS_TOKEN_JWT_PUBLIC_KEY}
    echo ${ACCESS_TOKEN_JWT_PUBLIC_KEY}
    ```
@@ -63,7 +63,6 @@ This guide illustrates the steps needed to get your Photos Drive web api up and 
    ```
 
    where:
-
    - `YOUR_GOOGLE_OAUTH2_CLIENT_ID` and `YOUR_GOOGLE_OAUTH2_CLIENT_SECRET` is the client ID and client secret from step 1.
    - `YOUR_JWT_PUBLIC_KEY` and `YOUR_JWT_PRIVATE_KEY` is the public and private key generated from step 4.
    - `YOUR_READ_WRITE_CONNECTION_STRING_TO_THE_VAULT_IN_MONGODB` is the MongoDB connection string to the config, if your config is in MongoDB.
