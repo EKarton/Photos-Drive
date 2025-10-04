@@ -10,10 +10,7 @@ from pymongo import MongoClient
 from typer.testing import CliRunner
 
 from photos_drive.cli.app import build_app
-from photos_drive.cli.shared.inputs import (
-    READ_ONLY_SCOPES,
-    READ_WRITE_SCOPES,
-)
+from photos_drive.cli.shared.inputs import READ_WRITE_SCOPES
 from photos_drive.shared.metadata.album_id import AlbumId
 from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
     create_mock_mongo_client,
@@ -62,7 +59,7 @@ class TestAddCli(unittest.TestCase):
         patch.stopall()
         os.unlink(self.temp_file_path)
 
-    def test_add_gphotos(self):
+    def test_add_google_photos_account(self):
         # Test setup: mock getpass
         mock_get_pass = patch('getpass.getpass').start()
         mock_get_pass.side_effect = [
@@ -82,38 +79,29 @@ class TestAddCli(unittest.TestCase):
             client_secret="clientSecret1",
             scopes=READ_WRITE_SCOPES,
         )
-        mock_iaf_2 = MagicMock()
-        mock_iaf_2.credentials = Credentials(
-            token="abc",
-            refresh_token="def",
-            token_uri="python.com",
-            client_id="clientId2",
-            client_secret="clientSecret2",
-            scopes=READ_ONLY_SCOPES,
-        )
         mock_from_client_config = patch.object(
             InstalledAppFlow, 'from_client_config'
         ).start()
-        mock_from_client_config.side_effect = [mock_iaf_1, mock_iaf_2]
+        mock_from_client_config.side_effect = [mock_iaf_1]
 
         # Act: run the cli
         runner = CliRunner()
         app = build_app()
         result = runner.invoke(
             app,
-            ["config", "add", "gphotos", "--config-file", self.temp_file_path],
-            input="bob@gmail.com\n",
+            ["config", "add", "photos-account", "--config-file", self.temp_file_path],
+            input="bob@gmail.com\nGooglePhotos\n",
         )
 
         # Test assert: check on output
         self.assertEqual(
             result.output,
-            'Enter name of your Google Photos account: '
-            + 'Now, time to log into your Google account for read+write access\n'
-            + '\n'
-            + 'Now, time to log into your Google account for read only access\n'
-            + '\n'
-            + 'Successfully added your Google Photos account!\n',
+            'Enter name of your Photos account: '
+            + 'Which type of account do you want to add?: \n'
+            + ' 1 - GooglePhotos\n'
+            + 'Enter option: '
+            + 'Now, time to log into your Google account for read+write access\n\n'
+            + 'Successfully added your Google Photos account to Photos store!\n',
         )
         self.assertEqual(result.exit_code, 0)
 
@@ -127,11 +115,11 @@ class TestAddCli(unittest.TestCase):
             self.assertIn('read_write_client_id = clientId1', content)
             self.assertIn('read_write_client_secret = clientSecret1', content)
             self.assertIn('read_write_token_uri = google.com', content)
-            self.assertIn('read_only_token = abc', content)
-            self.assertIn('read_only_refresh_token = def', content)
-            self.assertIn('read_only_client_id = clientId2', content)
-            self.assertIn('read_only_client_secret = clientSecret2', content)
-            self.assertIn('read_only_token_uri = python.com', content)
+            self.assertIn('read_only_token = 123', content)
+            self.assertIn('read_only_refresh_token = 456', content)
+            self.assertIn('read_only_client_id = clientId1', content)
+            self.assertIn('read_only_client_secret = clientSecret1', content)
+            self.assertIn('read_only_token_uri = google.com', content)
 
     def test_add_mongodb(self):
         # Test setup: mock MongoClient
@@ -151,15 +139,18 @@ class TestAddCli(unittest.TestCase):
         app = build_app()
         result = runner.invoke(
             app,
-            ["config", "add", "mongodb", "--config-file", self.temp_file_path],
-            input="bob@gmail.com\n",
+            ["config", "add", "metadata-maps-db", "--config-file", self.temp_file_path],
+            input="bob@gmail.com\nMongoDB\n",
         )
 
         # Test assert: check on output
         self.assertEqual(
             result.output,
-            'Enter name of your Mongo DB account: '
-            + 'Successfully added your Mongo DB account!\n',
+            'Enter name of your database: '
+            + 'Which type of database do you want to add?: \n'
+            + ' 1 - MongoDB\n'
+            + 'Enter option: '
+            + 'Successfully added your Mongo DB account to Metadata / Maps store!\n',
         )
         self.assertEqual(result.exit_code, 0)
 
