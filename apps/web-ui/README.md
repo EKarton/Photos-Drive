@@ -5,40 +5,43 @@
 
 ## Description
 
-This project is a web app for Photos Drive. This web app allows users to list and see their photos and videos on a web browser. This web app will only read photos and videos and never modify anything in the database.
-
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
+This project is a web ui for Photos Drive. This web ui allows users to list and see their photos and videos on a web browser. This web ui will only read photos and videos and never modify anything in the database.
 
 ## Getting Started
 
 ### Installation
 
-1. First, install angular by running:
+1. First, get the Gemini API key by following [this guide](./docs/generate_gemini_api_key.md)
+
+1. Next, install angular by running:
 
     ```bash
     npm install -g @angular/cli
     ```
 
-2. Next, install the project's dependencies by running:
+1. Then, install the project's dependencies by running:
 
     ```bash
     npm install
     ```
 
-3. Then, create a `.env` file to store your environment variables, like:
+1. Then, create a `.env` file to store your environment variables, like:
 
     ```text
     NG_APP_LOGIN_URL=http://localhost:3000/auth/v1/google
     NG_APP_WEB_API_ENDPOINT=http://localhost:3000
+
+    NG_APP_GEMINI_API_KEY="YOUR_GEMINI_KEY"
+    NG_APP_GEMINI_MODEL="gemini-2.5-flash"
     ```
 
     where:
     - `NG_APP_LOGIN_URL`: is the login url of your [web-api](./../web-api)
     - `NG_APP_WEB_API_ENDPOINT`: is the domain of your [web-api](./../web-api)
-    - `NG_APP_GEMINI_API_KEY`: is the Gemini API key
-    - `NG_APP_GEMINI_MODEL`: is the Gemini model (ex: 'gemini-2.5-flash')
+    - `NG_APP_GEMINI_API_KEY`: is the Gemini API key from the first step
+    - `NG_APP_GEMINI_MODEL`: is the Gemini model to use (ex: 'gemini-2.5-flash')
 
-4. Next, run:
+1. Next, run:
 
     ```bash
     npm run dev
