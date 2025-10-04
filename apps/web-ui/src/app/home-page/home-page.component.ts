@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 
 import { environment } from '../../environments/environment';
 import { WINDOW } from '../app.tokens';
@@ -12,6 +12,13 @@ import { ThemeToggleButtonComponent } from '../themes/components/theme-toggle-bu
 })
 export class HomePageComponent {
   private readonly window: Window = inject(WINDOW);
+
+  readonly isScrolled = signal(false);
+
+  @HostListener('window:scroll', [])
+  onScroll() {
+    this.isScrolled.set(this.window.pageYOffset > 0);
+  }
 
   handleLoginClick() {
     this.window.location.href = `${environment.loginUrl}?select_account=true`;
