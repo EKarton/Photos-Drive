@@ -1,8 +1,13 @@
 <div class="min-h-screen bg-base-300 text-base-content pb-20">
   <header
-    class="sticky top-0 w-full z-50 bg-opacity-90 backdrop-blur-xl shadow-md"
+    class="sticky top-0 w-full backdrop-blur-xl"
+    [ngClass]="{
+      'bg-base-300 shadow-none': !isScrolled(),
+      'bg-base-100 shadow-md': isScrolled(),
+    }"
+    style="z-index: 50"
   >
-    <div class="navbar px-8 flex justify-between items-center">
+    <div class="navbar container mx-auto p-4 flex justify-between items-center">
       <div class="flex items-center gap-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -17,12 +22,12 @@
             clip-rule="evenodd"
           />
         </svg>
-        <span class="text-l font-bold">Photos Drive</span>
+        <span class="text-l font-bold hidden md:inline">Photos Drive</span>
       </div>
       <div>
         <app-theme-toggle-button />
         <a
-          class="btn btn-link"
+          class="btn btn-link hidden md:inline"
           href="https://github.com/EKarton/Photos-Drive"
           target="_blank"
         >
@@ -35,12 +40,9 @@
     </div>
   </header>
 
-  <main>
-    <div
-      class="flex items-center justify-center w-full flex-col gap-2 lg:flex-row"
-      style="height: calc(100vh - 4rem)"
-    >
-      <div class="lg:ml-32">
+  <main class="container mx-auto p-4">
+    <div class="flex items-center w-full flex-col gap-2 lg:flex-row">
+      <div>
         <h1 class="text-3xl font-bold whitespace-nowrap">Photos Drive</h1>
         <p class="pt-2 pb-6 text-xl whitespace-nowrap">
           View your photos better
@@ -60,7 +62,7 @@
       />
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-16 mx-32 my-32">
+    <div class="flex flex-col lg:flex-row gap-16 my-32">
       <div class="flex flex-col gap-4">
         <div class="flex flex-row items-center gap-2">
           <svg
@@ -139,7 +141,7 @@
       <div
         class="flex items-center w-full flex-col gap-2 lg:flex-row-reverse lg:h-full"
       >
-        <div class="lg:mr-32">
+        <div>
           <p class="text-3xl font-bold whitespace-nowrap">Intelligent Search</p>
           <p class="pt-3 text-xl">
             Search for photos using Gemini and Agentic Search
@@ -155,7 +157,7 @@
       <div
         class="flex items-center w-full flex-col gap-2 lg:flex-row lg:h-full"
       >
-        <div class="lg:ml-32">
+        <div>
           <p class="text-3xl font-bold whitespace-nowrap">
             View your photos better
           </p>
@@ -173,7 +175,7 @@
       <div
         class="flex items-center w-full flex-col gap-2 lg:flex-row-reverse lg:h-full"
       >
-        <div class="lg:mr-32">
+        <div>
           <p class="text-3xl font-bold whitespace-nowrap">Embedded Viewer</p>
           <p class="pt-3 text-xl">
             View, share, download images and videos in high resolution
@@ -187,7 +189,7 @@
       </div>
 
       <div class="flex items-center w-full flex-col gap-2 lg:flex-row">
-        <div class="lg:ml-32">
+        <div>
           <p class="text-3xl font-bold whitespace-nowrap">Mobile Friendly</p>
           <p class="pt-3 text-xl">
             Easily access your images and videos from your phone
@@ -250,7 +252,7 @@
       <div
         class="flex items-center w-full flex-col gap-2 lg:flex-row-reverse lg:h-full"
       >
-        <div class="lg:mr-32">
+        <div>
           <p class="text-3xl font-bold whitespace-nowrap">Dark mode</p>
           <p class="pt-3 text-xl">Ease your eyes with dark theme</p>
         </div>

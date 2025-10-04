@@ -12,7 +12,7 @@ describe('HomePageComponent', () => {
   let mockWindow: Window;
 
   beforeEach(async () => {
-    mockWindow = { location: { href: '' } } as Window;
+    mockWindow = { location: { href: '' }, pageYOffset: 0 } as Window;
 
     await TestBed.configureTestingModule({
       imports: [HomePageComponent],
@@ -36,6 +36,57 @@ describe('HomePageComponent', () => {
 
   it('should create component', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have no shadow and bg-base-300 initially', () => {
+    const header: HTMLElement = fixture.nativeElement.querySelector('header');
+
+    expect(header.classList.contains('shadow-none')).toBeTrue();
+    expect(header.classList.contains('bg-base-300')).toBeTrue();
+    expect(header.classList.contains('shadow-md')).toBeFalse();
+    expect(header.classList.contains('bg-base-100')).toBeFalse();
+  });
+
+  it('should add shadow and bg-base-100 when scrolled', () => {
+    const header: HTMLElement = fixture.nativeElement.querySelector('header');
+
+    // Simulate scroll down
+    Object.defineProperty(mockWindow, 'pageYOffset', {
+      configurable: true,
+      get: () => 100,
+    });
+    window.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+
+    expect(header.classList.contains('shadow-md')).toBeTrue();
+    expect(header.classList.contains('bg-base-100')).toBeTrue();
+    expect(header.classList.contains('shadow-none')).toBeFalse();
+    expect(header.classList.contains('bg-base-300')).toBeFalse();
+  });
+
+  it('should remove shadow and revert to bg-base-300 when scroll is at top', () => {
+    const header: HTMLElement = fixture.nativeElement.querySelector('header');
+
+    // Scroll down first
+    Object.defineProperty(mockWindow, 'pageYOffset', {
+      configurable: true,
+      get: () => 100,
+    });
+    window.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+
+    // Scroll back to top
+    Object.defineProperty(mockWindow, 'pageYOffset', {
+      configurable: true,
+      get: () => 0,
+    });
+    window.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+
+    expect(header.classList.contains('shadow-none')).toBeTrue();
+    expect(header.classList.contains('bg-base-300')).toBeTrue();
+    expect(header.classList.contains('shadow-md')).toBeFalse();
+    expect(header.classList.contains('bg-base-200')).toBeFalse();
   });
 
   it('should redirect to login URL on handleLoginClick', () => {
