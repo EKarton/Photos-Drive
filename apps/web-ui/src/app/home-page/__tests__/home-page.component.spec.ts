@@ -44,10 +44,10 @@ describe('HomePageComponent', () => {
     expect(header.classList.contains('shadow-none')).toBeTrue();
     expect(header.classList.contains('bg-base-300')).toBeTrue();
     expect(header.classList.contains('shadow-md')).toBeFalse();
-    expect(header.classList.contains('bg-base-100')).toBeFalse();
+    expect(header.classList.contains('bg-base-200')).toBeFalse();
   });
 
-  it('should add shadow and bg-base-100 when scrolled', () => {
+  it('should add shadow and bg-base-200 when scrolled', () => {
     const header: HTMLElement = fixture.nativeElement.querySelector('header');
 
     // Simulate scroll down
@@ -59,7 +59,7 @@ describe('HomePageComponent', () => {
     fixture.detectChanges();
 
     expect(header.classList.contains('shadow-md')).toBeTrue();
-    expect(header.classList.contains('bg-base-100')).toBeTrue();
+    expect(header.classList.contains('bg-base-200')).toBeTrue();
     expect(header.classList.contains('shadow-none')).toBeFalse();
     expect(header.classList.contains('bg-base-300')).toBeFalse();
   });
