@@ -21,13 +21,25 @@ It syncs and uploads photos from your computer to configured databases and photo
 
 ## Walkthrough
 
-Refer to [this doc](docs/walkthrough.md) for a detailed walkthrough. You can play around with the test app at <https://photosdrive-demo.netlify.app>. Here are a few examples of what it looks like:
+Refer to [this doc](docs/walkthrough.md) for a detailed walkthrough. You can play around with the test app at <https://photosdrive-demo.netlify.app>. Here are a few examples of what the flow will look like:
 
-![photos-list-page](docs/images/images-list-view.png)
+1. Run this command on your machine with your photos:
 
-![maps-view](docs/images/map-view.png)
+    ```bash
+    photos_drive_cli sync . --config-mongodb="mongodb+srv://123"
+    ```
 
-![llm-view](docs/images/llm-view.png)
+1. It will give you a diff of photos to upload:
+
+    ![Image of diff](./docs/images/sync_diff.png)
+
+1. Once it's synced, it can be viewed on the web app:
+
+    ![photos-list-page](docs/images/images-list-view.png)
+
+    ![maps-view](docs/images/map-view.png)
+
+    ![llm-view](docs/images/llm-view.png)
 
 ## Installation
 
