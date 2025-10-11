@@ -198,56 +198,23 @@
           </p>
         </div>
         <div class="carousel rounded-box w-full h-full gap-4 p-4">
-          <div class="carousel-item">
-            <div class="mockup-phone border-[#ff8938] h-[fit-content]">
-              <div class="mockup-phone-display h-[fit-content]">
-                <img
-                  src="/assets/home-page/images-list-view-mobile.png"
-                  alt="Images list view on mobile screen"
-                />
-              </div>
+          @let images =
+            [
+              '/assets/home-page/images-list-view-mobile.png',
+              '/assets/home-page/llm-chat-mobile.png',
+              '/assets/home-page/map-view-mobile.png',
+              '/assets/home-page/folder-view-mobile.png',
+              '/assets/home-page/image-viewer-mobile.png',
+            ];
+          @for (image of images; track image) {
+            <div class="carousel-item">
+              <img
+                [src]="image"
+                alt="Wiew on mobile screen"
+                class="object-contain max-h-[60vh] w-auto"
+              />
             </div>
-          </div>
-          <div class="carousel-item">
-            <div class="mockup-phone border-[#ff8938] h-[fit-content]">
-              <div class="mockup-phone-display h-[fit-content]">
-                <img
-                  src="/assets/home-page/llm-chat-mobile.png"
-                  alt="Intelligent search on mobile screen"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <div class="mockup-phone border-[#ff8938] h-[fit-content]">
-              <div class="mockup-phone-display h-[fit-content]">
-                <img
-                  src="/assets/home-page/map-view-mobile.png"
-                  alt="Map view on mobile screen"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <div class="mockup-phone border-[#ff8938] h-[fit-content]">
-              <div class="mockup-phone-display h-[fit-content]">
-                <img
-                  src="/assets/home-page/folder-view-mobile.png"
-                  alt="Folders on mobile screen"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <div class="mockup-phone border-[#ff8938] h-[fit-content]">
-              <div class="mockup-phone-display h-[fit-content]">
-                <img
-                  src="/assets/home-page/image-viewer-mobile.png"
-                  alt="Image viewer on mobile screen"
-                />
-              </div>
-            </div>
-          </div>
+          }
         </div>
       </div>
 
