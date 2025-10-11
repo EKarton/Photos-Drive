@@ -17,7 +17,7 @@ export class HomePageComponent {
 
   @HostListener('window:scroll', [])
   onScroll() {
-    this.isScrolled.set(this.window.pageYOffset > 0);
+    this.isScrolled.set(this.window.pageYOffset > 50);
   }
 
   handleLoginClick() {
