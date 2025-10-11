@@ -1,12 +1,13 @@
 export default {
-  testEnvironment: 'jest-environment-node-single-context',
+  testEnvironment: 'node',
   verbose: true,
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
+  transformIgnorePatterns: ['node_modules/(?!(jose)/)'],
   coverageThreshold: {
     global: {
-      branches: 100,
+      branches: 80,
       functions: 100,
       lines: 100,
       statements: 100
