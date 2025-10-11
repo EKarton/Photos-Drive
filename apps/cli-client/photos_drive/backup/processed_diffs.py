@@ -183,7 +183,7 @@ class DiffsProcessor:
         # (ex: ../../Photos/2010/Dog becomes Photos/2010/Dog)
         pos = -1
         for i, x in enumerate(album_name):
-            if x.isalpha():
+            if x != '.' and x != os.sep:
                 pos = i
                 break
         album_name = album_name[pos:]

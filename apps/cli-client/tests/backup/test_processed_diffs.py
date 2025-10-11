@@ -209,6 +209,8 @@ class TestDiffsProcessor(unittest.TestCase):
             album_name='Photos/2010',
             file_name='dog.png',
             file_size=1000,
+            width=1000,
+            height=2000,
             location=GpsLocation(latitude=100, longitude=200),
             date_taken=datetime(2010, 2, 2),
             mime_type="image/png",
@@ -221,6 +223,8 @@ class TestDiffsProcessor(unittest.TestCase):
         self.assertEqual(processed_diffs[0].album_name, 'Photos/2010')
         self.assertEqual(processed_diffs[0].file_name, 'dog.png')
         self.assertEqual(processed_diffs[0].file_size, 1000)
+        self.assertEqual(processed_diffs[0].width, 1000)
+        self.assertEqual(processed_diffs[0].height, 2000)
         self.assertEqual(processed_diffs[0].location, GpsLocation(100, 200))
         self.assertEqual(
             processed_diffs[0].file_hash, compute_file_hash(test_file_path)
