@@ -109,6 +109,9 @@ class AlbumsRepositoryImpl(AlbumsRepository):
             raise ValueError(f"Unable to delete album: Album {id} not found")
 
     def delete_many_albums(self, ids: list[AlbumId]):
+        if len(ids) == 0:
+            return
+
         client_id_to_object_ids: Dict[ObjectId, list[ObjectId]] = {}
         for id in ids:
             if id.client_id not in client_id_to_object_ids:

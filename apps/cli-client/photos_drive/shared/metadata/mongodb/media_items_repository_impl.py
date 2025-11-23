@@ -299,6 +299,9 @@ class MediaItemsRepositoryImpl(MediaItemsRepository):
             raise ValueError(f"Unable to delete media item: {id} not found")
 
     def delete_many_media_items(self, ids: list[MediaItemId]):
+        if len(ids) == 0:
+            return
+
         client_id_to_object_ids: Dict[ObjectId, list[ObjectId]] = {}
         for id in ids:
             if id.client_id not in client_id_to_object_ids:

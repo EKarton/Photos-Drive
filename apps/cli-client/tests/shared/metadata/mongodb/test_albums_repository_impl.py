@@ -141,6 +141,9 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
                 )
             )
 
+    def test_delete_many_albums_with_no_albums_does_not_throw_error(self):
+        self.repo.delete_many_albums([])
+
     def test_delete_many_albums__with_non_existent_albums__raises_value_error(self):
         # Prepare test data
         existing_album_id = AlbumId(
