@@ -96,6 +96,10 @@ class TestMongoDbVectorStore(unittest.TestCase):
         )
         self.assertIsInstance(stored_doc["embedding"], Binary)
 
+    def test_add_media_item_embeddings_with_no_documents(self):
+        docs = self.store.add_media_item_embeddings([])
+        self.assertEqual(len(docs), 0)
+
     def test_delete_documents_removes_from_mock(self):
         embedding = self._make_embedding(1.2)
         self.store.add_media_item_embeddings(
@@ -116,6 +120,9 @@ class TestMongoDbVectorStore(unittest.TestCase):
             {"media_item_id": media_item_id_to_string(MOCK_MEDIA_ITEM_ID_1)}
         )
         self.assertIsNone(deleted)
+
+    def test_delete_media_item_embeddings_by_media_item_ids_with_no_documents(self):
+        self.store.delete_media_item_embeddings_by_media_item_ids([])
 
     def test_get_relevent_documents_returns_up_to_k(self):
         num_docs = 10

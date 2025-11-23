@@ -110,6 +110,9 @@ class MongoDbVectorStore(BaseVectorStore):
     def add_media_item_embeddings(
         self, requests: list[CreateMediaItemEmbeddingRequest]
     ) -> list[MediaItemEmbedding]:
+        if len(requests) == 0:
+            return []
+
         documents_to_insert = []
         for req in requests:
             data_object = {
@@ -140,6 +143,9 @@ class MongoDbVectorStore(BaseVectorStore):
     def delete_media_item_embeddings_by_media_item_ids(
         self, media_item_ids: list[MediaItemId]
     ):
+        if len(media_item_ids) == 0:
+            return
+
         filter_obj = {
             "media_item_id": {
                 "$in": [

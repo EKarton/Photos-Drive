@@ -653,6 +653,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             )
             self.assertIsNone(deleted_media)
 
+    def test_delete_many_media_items_with_no_documents_throws_no_errors(self):
+        self.repo.delete_many_media_items([])
+
     def test_delete_many_media_items_partial_failure(self):
         ids_to_delete = [
             MediaItemId(self.mongodb_client_id, ObjectId()),
