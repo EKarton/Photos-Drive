@@ -141,6 +141,12 @@ class BaseVectorStore(ABC):
         '''
 
     @abstractmethod
+    def get_store_name(self) -> str:
+        '''
+        Returns the name for this store
+        '''
+
+    @abstractmethod
     def get_available_space(self) -> int:
         '''
         Returns the available space left in this store.

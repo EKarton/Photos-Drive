@@ -41,8 +41,12 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
         self.store1_id = ObjectId()
         self.store2_id = ObjectId()
 
+        self.store1_name = 'Store 1'
+        self.store2_name = 'Store 1'
+
         self.store1 = MongoDbVectorStore(
             store_id=self.store1_id,
+            store_name=self.store1_name,
             mongodb_client=self.mock_client1,
             db_name=self.db_name,
             collection_name=self.collection_name,
@@ -51,6 +55,7 @@ class TestDistributedVectorStoreWithMongoDbVectorStore(unittest.TestCase):
 
         self.store2 = MongoDbVectorStore(
             store_id=self.store2_id,
+            store_name=self.store2_name,
             mongodb_client=self.mock_client2,
             db_name=self.db_name,
             collection_name=self.collection_name,

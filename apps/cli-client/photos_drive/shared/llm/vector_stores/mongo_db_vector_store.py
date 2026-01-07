@@ -37,6 +37,7 @@ class MongoDbVectorStore(BaseVectorStore):
     def __init__(
         self,
         store_id: ObjectId,
+        store_name: str,
         mongodb_client: MongoClient | MockMongoClient,
         db_name: str,
         collection_name: str,
@@ -44,6 +45,7 @@ class MongoDbVectorStore(BaseVectorStore):
         embedding_index_name: str = EMBEDDING_INDEX_NAME,
     ):
         self._store_id = store_id
+        self._store_name = store_name
         self._mongodb_client = mongodb_client
         self._db_name = db_name
         self._collection_name = collection_name
@@ -93,6 +95,10 @@ class MongoDbVectorStore(BaseVectorStore):
     @override
     def get_store_id(self) -> ObjectId:
         return self._store_id
+
+    @override
+    def get_store_name(self) -> str:
+        return self._store_name
 
     @override
     def get_available_space(self) -> int:

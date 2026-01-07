@@ -15,17 +15,26 @@ from photos_drive.shared.metadata.media_item_id import (
 
 DEFAULT_VECTOR_STORE_ID = ObjectId()
 
+DEFAULT_VECTOR_STORE_NAME = "My vector store"
+
 
 class FakeVectorStore(BaseVectorStore):
     '''Represents a fake vector store. It's for testing purposes.'''
 
-    def __init__(self, store_id=DEFAULT_VECTOR_STORE_ID):
+    def __init__(
+        self, store_id=DEFAULT_VECTOR_STORE_ID, store_name=DEFAULT_VECTOR_STORE_NAME
+    ):
         self.__store_id: ObjectId = store_id
+        self.__store_name: str = store_name
         self.__id_to_embeddings: dict[MediaItemEmbeddingId, MediaItemEmbedding] = {}
 
     @override
     def get_store_id(self) -> ObjectId:
         return self.__store_id
+
+    @override
+    def get_store_name(self) -> str:
+        return self.__store_name
 
     @override
     def get_available_space(self) -> int:
