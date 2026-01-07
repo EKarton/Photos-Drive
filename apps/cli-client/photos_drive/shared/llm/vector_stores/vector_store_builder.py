@@ -25,6 +25,7 @@ def config_to_mongodb_vector_store(
 ) -> MongoDbVectorStore:
     return MongoDbVectorStore(
         store_id=config.id,
+        store_name=config.name,
         mongodb_client=MongoClient(config.read_write_connection_string),
         db_name='photos_drive',
         collection_name="media_item_embeddings",

@@ -32,6 +32,10 @@ class DistributedVectorStore(BaseVectorStore):
         raise NotImplementedError("There is no object ID for this store")
 
     @override
+    def get_store_name(self) -> str:
+        raise NotImplementedError("There is no name for this store")
+
+    @override
     def get_available_space(self) -> int:
         return sum(store.get_available_space() for store in self.stores)
 

@@ -1,5 +1,6 @@
 import logging
 
+from photos_drive.shared.llm.vector_stores import vector_store_builder
 from prettytable import PrettyTable
 from pymongo import MongoClient
 import typer
@@ -65,6 +66,9 @@ def usage(
     print(__get_mongodb_accounts_table(config))
     print("")
 
+    print(__get_vector_store_accounts_table(config))
+    print("")
+
     gphotos_repo = GPhotosClientsRepository.build_from_config(config)
     print(__get_gphoto_clients_table(gphotos_repo))
 
@@ -92,6 +96,34 @@ def __get_mongodb_accounts_table(config: Config) -> PrettyTable:
 
         table.add_row(
             [mongodb_config.id, mongodb_config.name, free_space, usage, num_objects]
+        )
+
+    # Left align the columns
+    for col in table.align:
+        table.align[col] = "l"
+
+    return table
+
+
+def __get_vector_store_accounts_table(config: Config) -> PrettyTable:
+    vector_stores = [
+        vector_store_builder.config_to_vector_store(vector_store_config)
+        for vector_store_config in config.get_vector_store_configs()
+    ]
+
+    table = PrettyTable(title="VectorDB accounts")
+    table.field_names = [
+        "ID",
+        "Name",
+        "Free space remaining",
+    ]
+    for vector_store in vector_stores:
+        table.add_row(
+            [
+                vector_store.get_store_id(),
+                vector_store.get_store_name(),
+                vector_store.get_available_space(),
+            ]
         )
 
     # Left align the columns

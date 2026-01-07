@@ -31,11 +31,13 @@ class TestMongoDbVectorStore(unittest.TestCase):
 
         # Create the vector store instance pointing to mock DB and collection
         self.store_id = ObjectId()
+        self.store_name = "My store"
         self.embedding_dimensions = 16
         self.collection_name = "test_embeddings"
 
         self.store = MongoDbVectorStore(
             store_id=self.store_id,
+            store_name=self.store_name,
             mongodb_client=self.mock_client,
             db_name="photos_drive",
             collection_name=self.collection_name,
@@ -45,6 +47,7 @@ class TestMongoDbVectorStore(unittest.TestCase):
     def test_init_does_not_make_two_collections(self):
         MongoDbVectorStore(
             store_id=self.store_id,
+            store_name=self.store_name,
             mongodb_client=self.mock_client,
             db_name="photos_drive",
             collection_name=self.collection_name,
