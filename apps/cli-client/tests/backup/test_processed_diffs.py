@@ -273,5 +273,17 @@ class TestDiffsProcessor(unittest.TestCase):
             processor = DiffsProcessor(FakeImageEmbedder(), FakeImageCaptions())
             processor.process_raw_diffs([diff])
 
+    def test_process_raw_diffs_invalid_diff(self):
+        diff = Diff(
+            modifier="+",
+            file_path=self.__get_file_path('image-with-invalid-date.jpg'),
+        )
+
+        with self.assertRaisesRegex(
+            ValueError, "Invalid date 2021:02:30 24:59:00 at .*"
+        ):
+            processor = DiffsProcessor(FakeImageEmbedder(), FakeImageCaptions())
+            processor.process_raw_diffs([diff])
+
     def __get_file_path(self, file_name: str) -> str:
         return f"./tests/backup/resources/test_processed_diffs_files/{file_name}"

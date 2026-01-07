@@ -307,7 +307,14 @@ class DiffsProcessor:
                         or raw_metadata.get('MediaCreateDate')
                     )
                     if date_str:
-                        date_taken = datetime.strptime(date_str, '%Y:%m:%d %H:%M:%S')
+                        try:
+                            date_taken = datetime.strptime(
+                                date_str, '%Y:%m:%d %H:%M:%S'
+                            )
+                        except Exception as e:
+                            raise ValueError(
+                                f"Invalid date {date_str} at {diffs[i].file_path}"
+                            ) from e
                     else:
                         date_taken = datetime(1970, 1, 1)
 
