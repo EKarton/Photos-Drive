@@ -19,7 +19,7 @@ from photos_drive.shared.storage.gphotos.media_items import (
     VideoProcessingStatus,
 )
 
-PHOTO_FILE_PATH = "./tests/shared/blob_store/gphotos/resources/small-image.jpg"
+PHOTO_FILE_PATH = "./tests/shared/storage/gphotos/resources/small-image.jpg"
 
 MOCK_CREDENTIALS = Credentials(
     token="token123",
