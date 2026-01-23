@@ -34,7 +34,7 @@ from photos_drive.shared.metadata.albums.repository.mongodb import (
 from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.maps.repository.mongodb import (
+from photos_drive.shared.maps.repository.mongodb import (
     MapCellsRepositoryImpl,
 )
 from photos_drive.shared.metadata.media_items.repository.mongodb import (

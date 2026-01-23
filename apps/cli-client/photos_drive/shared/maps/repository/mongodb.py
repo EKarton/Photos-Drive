@@ -8,7 +8,7 @@ from photos_drive.shared.metadata.albums.album_id import album_id_to_string
 from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.maps.repository.base import MapCellsRepository
+from photos_drive.shared.maps.repository.base import MapCellsRepository
 from photos_drive.shared.metadata.media_items.media_item import MediaItem
 from photos_drive.shared.metadata.media_items.media_item_id import (
     MediaItemId,

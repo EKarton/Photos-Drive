@@ -30,7 +30,7 @@ from photos_drive.shared.metadata.clients.base import (
 from photos_drive.shared.metadata.clients.transactions_context import (
     TransactionsContext,
 )
-from photos_drive.shared.metadata.maps.repository.base import MapCellsRepository
+from photos_drive.shared.maps.repository.base import MapCellsRepository
 from photos_drive.shared.metadata.media_items.media_item import MediaItem
 from photos_drive.shared.metadata.media_items.repository.base import (
     CreateMediaItemRequest,

@@ -11,6 +11,7 @@ from photos_drive.shared.config.config import Config
 from photos_drive.shared.metadata.clients.base import (
     ClientsRepository,
 )
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
 logger = logging.getLogger(__name__)
 
@@ -103,17 +104,7 @@ class MongoDbClientsRepository(ClientsRepository):
         free_spaces = []
 
         for client_id, client in self.__id_to_client.items():
-            db = client["photos_drive"]
-            db_stats = db.command({'dbStats': 1, 'freeStorage': 1})
-            raw_total_free_storage = db_stats["totalFreeStorageSize"]
-
-            # Handle case of free tier: they return 0 for `totalFreeStorageSize`
-            # even though it is 512 MB
-            free_space = raw_total_free_storage
-            if raw_total_free_storage == 0:
-                free_space = BYTES_512MB - db_stats["storageSize"]
-
-            free_spaces.append((ObjectId(client_id), free_space))
+            free_spaces.append((ObjectId(client_id), get_free_space(client)))
 
         return free_spaces
 

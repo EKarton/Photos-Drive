@@ -7,7 +7,7 @@ from photos_drive.shared.metadata.albums.album_id import AlbumId, album_id_to_st
 from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.maps.repository.mongodb import (
+from photos_drive.shared.maps.repository.mongodb import (
     MAX_CELL_RESOLUTION,
     MapCellsRepositoryImpl,
 )
