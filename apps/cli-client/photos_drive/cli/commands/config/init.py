@@ -12,22 +12,22 @@ from photos_drive.cli.shared.inputs import (
     prompt_user_for_options,
 )
 from photos_drive.cli.shared.logging import setup_logging
-from photos_drive.shared.config.config import (
+from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     AddMongoDbVectorStoreConfigRequest,
     Config,
 )
-from photos_drive.shared.config.config_from_file import (
+from photos_drive.shared.core.config.config_from_file import (
     ConfigFromFile,
 )
-from photos_drive.shared.config.config_from_mongodb import (
+from photos_drive.shared.core.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
-from photos_drive.shared.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.metadata.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
 

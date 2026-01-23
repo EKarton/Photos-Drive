@@ -9,23 +9,23 @@ from photos_drive.diff.get_diffs import (
     LocalFile,
     RemoteFile,
 )
-from photos_drive.shared.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.core.metadata.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.media_items.repository.base import (
+from photos_drive.shared.core.metadata.media_items.repository.base import (
     CreateMediaItemRequest,
 )
-from photos_drive.shared.metadata.media_items.repository.mongodb import (
+from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
-from photos_drive.shared.metadata.testing import (
+from photos_drive.shared.core.metadata.testing import (
     create_mock_mongo_client,
 )
-from photos_drive.shared.storage.gphotos.testing import (
+from photos_drive.shared.core.storage.gphotos.testing import (
     FakeGPhotosClient,
     FakeItemsRepository,
 )

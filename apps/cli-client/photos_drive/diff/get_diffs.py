@@ -5,17 +5,17 @@ import logging
 import os
 from typing import cast
 
-from photos_drive.shared.config.config import Config
-from photos_drive.shared.metadata.albums.album_id import AlbumId
-from photos_drive.shared.metadata.albums.albums import Album
-from photos_drive.shared.metadata.albums.repository.base import (
+from photos_drive.shared.core.config.config import Config
+from photos_drive.shared.core.metadata.albums.album_id import AlbumId
+from photos_drive.shared.core.metadata.albums.albums import Album
+from photos_drive.shared.core.metadata.albums.repository.base import (
     AlbumsRepository,
 )
-from photos_drive.shared.metadata.media_items.repository.base import (
+from photos_drive.shared.core.metadata.media_items.repository.base import (
     FindMediaItemRequest,
     MediaItemsRepository,
 )
-from photos_drive.shared.storage.gphotos.valid_file_extensions import (
+from photos_drive.shared.core.storage.gphotos.valid_file_extensions import (
     MEDIA_ITEM_FILE_EXTENSIONS,
 )
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash

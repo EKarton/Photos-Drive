@@ -8,22 +8,22 @@ from pymongo import MongoClient
 from typer.testing import CliRunner
 
 from photos_drive.cli.app import build_app
-from photos_drive.shared.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.metadata.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.testing.mock_mongo_client import (
+from photos_drive.shared.core.metadata.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
-from photos_drive.shared.storage.gphotos.clients_repository import (
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from photos_drive.shared.storage.gphotos.testing import (
+from photos_drive.shared.core.storage.gphotos.testing import (
     FakeItemsRepository,
 )
-from photos_drive.shared.storage.gphotos.testing.fake_client import (
+from photos_drive.shared.core.storage.gphotos.testing.fake_client import (
     FakeGPhotosClient,
 )
 

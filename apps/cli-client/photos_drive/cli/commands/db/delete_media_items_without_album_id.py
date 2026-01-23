@@ -8,7 +8,7 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
 

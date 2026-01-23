@@ -14,8 +14,8 @@ from photos_drive.cli.shared.inputs import (
     READ_ONLY_SCOPES,
     READ_WRITE_SCOPES,
 )
-from photos_drive.shared.metadata.albums.album_id import AlbumId
-from photos_drive.shared.metadata.testing.mock_mongo_client import (
+from photos_drive.shared.core.metadata.albums.album_id import AlbumId
+from photos_drive.shared.core.metadata.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 

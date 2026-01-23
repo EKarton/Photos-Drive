@@ -11,16 +11,16 @@ from photos_drive.cli.shared.printer import pretty_print_items_to_delete
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.metadata.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.media_items.repository.mongodb import (
+from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
-from photos_drive.shared.storage.gphotos.clients_repository import (
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

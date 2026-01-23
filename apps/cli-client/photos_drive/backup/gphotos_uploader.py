@@ -6,7 +6,7 @@ import logging
 from bson.objectid import ObjectId
 from tqdm import tqdm
 
-from photos_drive.shared.storage.gphotos.clients_repository import (
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

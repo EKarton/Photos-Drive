@@ -5,24 +5,24 @@ from typing import Dict, Optional
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.config.config import Config
-from photos_drive.shared.metadata.albums.album_id import AlbumId
-from photos_drive.shared.metadata.albums.albums_pruner import AlbumsPruner
-from photos_drive.shared.metadata.albums.repository.base import AlbumsRepository
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.config.config import Config
+from photos_drive.shared.core.metadata.albums.album_id import AlbumId
+from photos_drive.shared.core.metadata.albums.albums_pruner import AlbumsPruner
+from photos_drive.shared.core.metadata.albums.repository.base import AlbumsRepository
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.clients.transactions_context import (
+from photos_drive.shared.core.metadata.clients.transactions_context import (
     TransactionsContext,
 )
-from photos_drive.shared.metadata.media_items.media_item_id import MediaItemId
-from photos_drive.shared.metadata.media_items.repository.base import (
+from photos_drive.shared.core.metadata.media_items.media_item_id import MediaItemId
+from photos_drive.shared.core.metadata.media_items.repository.base import (
     FindMediaItemRequest,
     MediaItemsRepository,
 )
-from photos_drive.shared.storage.gphotos.albums import Album as GAlbum
-from photos_drive.shared.storage.gphotos.client import GPhotosClientV2
-from photos_drive.shared.storage.gphotos.clients_repository import (
+from photos_drive.shared.core.storage.gphotos.albums import Album as GAlbum
+from photos_drive.shared.core.storage.gphotos.client import GPhotosClientV2
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

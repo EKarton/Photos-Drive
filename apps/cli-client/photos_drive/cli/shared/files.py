@@ -1,6 +1,6 @@
 import os
 
-from photos_drive.shared.storage.gphotos.valid_file_extensions import (
+from photos_drive.shared.core.storage.gphotos.valid_file_extensions import (
     MEDIA_ITEM_FILE_EXTENSIONS,
 )
 

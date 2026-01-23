@@ -18,27 +18,27 @@ from photos_drive.cli.shared.printer import pretty_print_diffs
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
-from photos_drive.shared.llm.models.open_clip_image_embeddings import (
+from photos_drive.shared.features.llm.models.blip_image_captions import BlipImageCaptions
+from photos_drive.shared.features.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
-from photos_drive.shared.llm.vector_stores import vector_store_builder
-from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
+from photos_drive.shared.features.llm.vector_stores import vector_store_builder
+from photos_drive.shared.features.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
-from photos_drive.shared.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.metadata.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.maps.repository.mongodb import (
+from photos_drive.shared.features.maps.repository.mongodb import (
     MapCellsRepositoryImpl,
 )
-from photos_drive.shared.metadata.media_items.repository.mongodb import (
+from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
-from photos_drive.shared.storage.gphotos.clients_repository import (
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

@@ -14,21 +14,21 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.metadata.albums.album_id import AlbumId
-from photos_drive.shared.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.metadata.albums.album_id import AlbumId
+from photos_drive.shared.core.metadata.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.media_items.repository.base import (
+from photos_drive.shared.core.metadata.media_items.repository.base import (
     FindMediaItemRequest,
     UpdateMediaItemRequest,
 )
-from photos_drive.shared.metadata.media_items.repository.mongodb import (
+from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
-from photos_drive.shared.storage.gphotos.valid_file_extensions import (
+from photos_drive.shared.core.storage.gphotos.valid_file_extensions import (
     IMAGE_FILE_EXTENSIONS,
     VIDEO_FILE_EXTENSIONS,
 )

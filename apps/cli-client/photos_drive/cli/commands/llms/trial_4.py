@@ -14,20 +14,20 @@ from photos_drive.cli.commands.llms.tools.find_similar_photos import (
 from photos_drive.cli.commands.llms.tools.search_photos_by_text import (
     SearchPhotosByTextTool,
 )
-from photos_drive.shared.config.config import Config
-from photos_drive.shared.llm.models.open_clip_image_embeddings import (
+from photos_drive.shared.core.config.config import Config
+from photos_drive.shared.features.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
-from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
+from photos_drive.shared.features.llm.vector_stores.distributed_vector_store import (
     DistributedVectorStore,
 )
-from photos_drive.shared.llm.vector_stores.vector_store_builder import (
+from photos_drive.shared.features.llm.vector_stores.vector_store_builder import (
     config_to_vector_store,
 )
-from photos_drive.shared.metadata.clients.mongodb import (
+from photos_drive.shared.core.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.media_items.repository.mongodb import (
+from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
 
