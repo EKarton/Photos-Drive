@@ -1,6 +1,5 @@
 import logging
 
-from photos_drive.shared.llm.vector_stores import vector_store_builder
 from prettytable import PrettyTable
 from pymongo import MongoClient
 import typer
@@ -16,6 +15,7 @@ from photos_drive.shared.blob_store.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 from photos_drive.shared.config.config import Config
+from photos_drive.shared.llm.vector_stores import vector_store_builder
 from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
     BYTES_512MB,
 )
