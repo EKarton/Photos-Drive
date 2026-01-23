@@ -24,10 +24,10 @@ from photos_drive.shared.config.config_from_file import (
 from photos_drive.shared.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
+from photos_drive.shared.metadata.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
 
@@ -130,7 +130,7 @@ def init(
     # Step 3: Create root album
     print("Perfect! Setting up your accounts...")
     mongodb_repo = MongoDbClientsRepository.build_from_config(config)
-    albums_repo = AlbumsRepositoryImpl(mongodb_repo)
+    albums_repo = MongoDBAlbumsRepository(mongodb_repo)
     root_album = albums_repo.create_album(album_name="", parent_album_id=None)
     config.set_root_album_id(root_album.id)
 

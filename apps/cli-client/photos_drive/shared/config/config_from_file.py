@@ -19,7 +19,7 @@ from photos_drive.shared.config.config import (
     UpdateVectorStoreConfigRequest,
     VectorStoreConfig,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.albums.album_id import AlbumId
 
 GPHOTOS_CONFIG_TYPE = "gphotos_config"
 MONGODB_CONFIG_TYPE = "mongodb_config"

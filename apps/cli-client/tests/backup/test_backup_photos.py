@@ -6,38 +6,38 @@ from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from photos_drive.backup.backup_photos import PhotosBackup
 from photos_drive.backup.processed_diffs import ProcessedDiff
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
-from photos_drive.shared.blob_store.gphotos.testing import (
-    FakeGPhotosClient,
-    FakeItemsRepository,
-)
 from photos_drive.shared.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.llm.models.testing.fake_image_captions import FAKE_CAPTIONS
 from photos_drive.shared.llm.models.testing.fake_image_embedder import FAKE_EMBEDDING
 from photos_drive.shared.llm.vector_stores.testing.fake_vector_store import (
     FakeVectorStore,
 )
-from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
-    MapCellsRepositoryImpl,
+from photos_drive.shared.metadata.albums.album_id import album_id_to_string
+from photos_drive.shared.metadata.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.album_id import album_id_to_string
-from photos_drive.shared.metadata.gps_location import GpsLocation
-from photos_drive.shared.metadata.media_items_repository import (
-    CreateMediaItemRequest,
-)
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.metadata.maps.repository.mongodb import (
+    MapCellsRepositoryImpl,
 )
-from photos_drive.shared.metadata.mongodb.testing import (
+from photos_drive.shared.metadata.media_items.gps_location import GpsLocation
+from photos_drive.shared.metadata.media_items.repository.base import (
+    CreateMediaItemRequest,
+)
+from photos_drive.shared.metadata.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.metadata.testing import (
     create_mock_mongo_client,
+)
+from photos_drive.shared.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.storage.gphotos.testing import (
+    FakeGPhotosClient,
+    FakeItemsRepository,
 )
 
 parametrize_use_parallel_uploads = parametrize(
@@ -74,8 +74,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
 
@@ -299,8 +299,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
 
@@ -434,8 +434,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
 
@@ -574,8 +574,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
 
@@ -676,8 +676,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
 
@@ -807,8 +807,8 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
 

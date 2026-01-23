@@ -11,13 +11,13 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
 from photos_drive.shared.config.config import Config
 from photos_drive.shared.llm.vector_stores import vector_store_builder
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.clients.mongodb import (
     BYTES_512MB,
+)
+from photos_drive.shared.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
 )
 
 logger = logging.getLogger(__name__)

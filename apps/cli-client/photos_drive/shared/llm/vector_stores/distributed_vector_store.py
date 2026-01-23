@@ -11,7 +11,7 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     MediaItemEmbedding,
     QueryMediaItemEmbeddingRequest,
 )
-from photos_drive.shared.metadata.media_item_id import (
+from photos_drive.shared.metadata.media_items.media_item_id import (
     MediaItemId,
 )
 

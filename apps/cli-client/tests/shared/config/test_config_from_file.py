@@ -14,7 +14,7 @@ from photos_drive.shared.config.config import (
 from photos_drive.shared.config.config_from_file import (
     ConfigFromFile,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.albums.album_id import AlbumId
 
 
 class TestConfigFromFile(unittest.TestCase):

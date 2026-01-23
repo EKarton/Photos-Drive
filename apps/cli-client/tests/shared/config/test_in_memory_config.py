@@ -11,7 +11,7 @@ from photos_drive.shared.config.config import (
     UpdateMongoDbConfigRequest,
 )
 from photos_drive.shared.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.albums.album_id import AlbumId
 
 
 class TestInMemoryConfig(unittest.TestCase):

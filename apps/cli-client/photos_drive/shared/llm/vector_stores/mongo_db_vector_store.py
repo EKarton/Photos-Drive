@@ -20,7 +20,7 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
 )
-from photos_drive.shared.metadata.media_item_id import (
+from photos_drive.shared.metadata.media_items.media_item_id import (
     MediaItemId,
     media_item_id_to_string,
     parse_string_to_media_item_id,

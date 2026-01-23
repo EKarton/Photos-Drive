@@ -7,10 +7,10 @@ from photos_drive.backup.gphotos_uploader import (
     GPhotosMediaItemUploaderImpl,
     UploadRequest,
 )
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
+from photos_drive.shared.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
-from photos_drive.shared.blob_store.gphotos.testing import (
+from photos_drive.shared.storage.gphotos.testing import (
     FakeGPhotosClient,
     FakeItemsRepository,
 )

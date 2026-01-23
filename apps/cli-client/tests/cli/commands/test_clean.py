@@ -8,30 +8,30 @@ from bson import ObjectId
 from typer.testing import CliRunner
 
 from photos_drive.cli.app import build_app
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
-from photos_drive.shared.blob_store.gphotos.testing import (
-    FakeItemsRepository,
-)
-from photos_drive.shared.blob_store.gphotos.testing.fake_client import (
-    FakeGPhotosClient,
-)
 from photos_drive.shared.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.metadata.media_items_repository import (
-    CreateMediaItemRequest,
+from photos_drive.shared.metadata.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.metadata.media_items.repository.base import (
+    CreateMediaItemRequest,
 )
-from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
+from photos_drive.shared.metadata.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.metadata.testing.mock_mongo_client import (
     create_mock_mongo_client,
+)
+from photos_drive.shared.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.storage.gphotos.testing import (
+    FakeItemsRepository,
+)
+from photos_drive.shared.storage.gphotos.testing.fake_client import (
+    FakeGPhotosClient,
 )
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
@@ -50,8 +50,8 @@ class TestCleanCli(unittest.TestCase):
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, self.gphotos_client)
 
-        self.albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        self.albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         self.root_album = self.albums_repo.create_album('', None)

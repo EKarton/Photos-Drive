@@ -3,7 +3,7 @@ from typing import Dict
 from bson import ObjectId
 
 from photos_drive.backup.processed_diffs import ProcessedDiff
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
+from photos_drive.shared.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

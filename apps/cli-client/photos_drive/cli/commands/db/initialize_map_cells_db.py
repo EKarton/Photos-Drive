@@ -8,14 +8,14 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
-    MapCellsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.metadata.maps.repository.mongodb import (
+    MapCellsRepositoryImpl,
+)
+from photos_drive.shared.metadata.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def initialize_map_cells_db(
             [("cell_id", 1), ("album_id", 1), ("media_item_id", 1)]
         )
 
-    media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
     tiles_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
     for media_item in media_items_repo.get_all_media_items():
         if media_item.location is not None:

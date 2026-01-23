@@ -24,11 +24,11 @@ from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
 from photos_drive.shared.llm.vector_stores.vector_store_builder import (
     config_to_vector_store,
 )
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.metadata.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.metadata.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
 )
 
 
@@ -47,7 +47,7 @@ def trial_4(config: Config):
 
     # Set up the repos
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
     vector_store = DistributedVectorStore(
         stores=[
             config_to_vector_store(

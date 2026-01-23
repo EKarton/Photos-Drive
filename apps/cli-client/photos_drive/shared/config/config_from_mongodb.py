@@ -21,7 +21,7 @@ from photos_drive.shared.config.config import (
     UpdateVectorStoreConfigRequest,
     VectorStoreConfig,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.albums.album_id import AlbumId
 
 logger = logging.getLogger(__name__)
 

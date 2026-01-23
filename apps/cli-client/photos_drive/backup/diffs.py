@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Optional
 
-from photos_drive.shared.metadata.gps_location import GpsLocation
+from photos_drive.shared.metadata.media_items.gps_location import GpsLocation
 
 '''
 The valid modifiers of a Diff. "-" means a removal from the system, and "+" means

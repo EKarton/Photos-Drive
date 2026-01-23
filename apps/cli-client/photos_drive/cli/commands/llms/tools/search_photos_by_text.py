@@ -18,8 +18,12 @@ from photos_drive.shared.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     QueryMediaItemEmbeddingRequest,
 )
-from photos_drive.shared.metadata.media_item_id import parse_string_to_media_item_id
-from photos_drive.shared.metadata.media_items_repository import MediaItemsRepository
+from photos_drive.shared.metadata.media_items.media_item_id import (
+    parse_string_to_media_item_id,
+)
+from photos_drive.shared.metadata.media_items.repository.base import (
+    MediaItemsRepository,
+)
 
 DEFAULT_PROMPT = '''
 Use this tool to search for photos based on a natural language description.

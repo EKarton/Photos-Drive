@@ -16,7 +16,7 @@ from photos_drive.shared.config.config import (
     UpdateMongoDbConfigRequest,
     VectorStoreConfig,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
+from photos_drive.shared.metadata.albums.album_id import AlbumId
 
 
 class InMemoryConfig(Config):

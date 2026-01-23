@@ -29,20 +29,20 @@ from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
 from photos_drive.shared.llm.vector_stores.vector_store_builder import (
     config_to_vector_store,
 )
-from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.media_item_id import MediaItemId
-from photos_drive.shared.metadata.media_items_repository import (
+from photos_drive.shared.metadata.albums.album_id import AlbumId
+from photos_drive.shared.metadata.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
+)
+from photos_drive.shared.metadata.clients.mongodb import (
+    MongoDbClientsRepository,
+)
+from photos_drive.shared.metadata.media_items.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items.repository.base import (
     FindMediaItemRequest,
     UpdateMediaItemRequest,
 )
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
-)
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.metadata.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -93,8 +93,8 @@ def generate_embeddings(
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-    media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+    albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
     vector_store = DistributedVectorStore(
         stores=[
             config_to_vector_store(

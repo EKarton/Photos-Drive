@@ -17,7 +17,7 @@ from photos_drive.shared.llm.vector_stores.mongo_db_vector_store import (
 from photos_drive.shared.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
 )
-from photos_drive.shared.metadata.media_item_id import MediaItemId
+from photos_drive.shared.metadata.media_items.media_item_id import MediaItemId
 
 MOCK_MEDIA_ITEM_ID_1 = MediaItemId(ObjectId(), ObjectId())
 
