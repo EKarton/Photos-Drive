@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import concurrent
 from dataclasses import dataclass
 import logging
+from tqdm import tqdm
 
 from bson.objectid import ObjectId
 
@@ -56,18 +57,20 @@ class GPhotosMediaItemUploaderImpl:
         """
         media_item_ids = []
 
-        for request in upload_requests:
-            client = self.__gphotos_client_repo.get_client_by_id(
-                request.gphotos_client_id
-            )
-            upload_token = client.media_items().upload_photo_in_chunks(
-                request.file_path, request.file_name
-            )
-            upload_result = client.media_items().add_uploaded_photos_to_gphotos(
-                [upload_token]
-            )
-            media_item_id = upload_result.newMediaItemResults[0].mediaItem.id
-            media_item_ids.append(media_item_id)
+        with tqdm(total=len(upload_requests), desc="Uploading photos") as pbar:
+            for request in upload_requests:
+                client = self.__gphotos_client_repo.get_client_by_id(
+                    request.gphotos_client_id
+                )
+                upload_token = client.media_items().upload_photo_in_chunks(
+                    request.file_path, request.file_name
+                )
+                upload_result = client.media_items().add_uploaded_photos_to_gphotos(
+                    [upload_token]
+                )
+                media_item_id = upload_result.newMediaItemResults[0].mediaItem.id
+                media_item_ids.append(media_item_id)
+                pbar.update(1)
 
         return media_item_ids
 
@@ -98,13 +101,15 @@ class GPhotosMediaItemParallelUploaderImpl:
             }
 
             media_item_ids = [''] * len(upload_requests)
-            for future in concurrent.futures.as_completed(future_to_request):
-                client_id, upload_token, index = future.result()
-                client = self.__gphotos_client_repo.get_client_by_id(client_id)
-                result = client.media_items().add_uploaded_photos_to_gphotos(
-                    [upload_token]
-                )
-                media_item_ids[index] = result.newMediaItemResults[0].mediaItem.id
+            with tqdm(total=len(upload_requests), desc="Uploading photos") as pbar:
+                for future in concurrent.futures.as_completed(future_to_request):
+                    client_id, upload_token, index = future.result()
+                    client = self.__gphotos_client_repo.get_client_by_id(client_id)
+                    result = client.media_items().add_uploaded_photos_to_gphotos(
+                        [upload_token]
+                    )
+                    media_item_ids[index] = result.newMediaItemResults[0].mediaItem.id
+                    pbar.update(1)
 
             return media_item_ids
 
