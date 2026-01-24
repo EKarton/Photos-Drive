@@ -1,7 +1,8 @@
+from pymongo.mongo_client import MongoClient
+
 from photos_drive.shared.features.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
 )
-from pymongo.mongo_client import MongoClient
 
 BYTES_512MB = 536870912
 

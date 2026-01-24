@@ -15,9 +15,6 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.databases.mongodb import (
-    MongoDBClientsRepository,
-)
 from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -29,6 +26,9 @@ from photos_drive.shared.core.config.config_from_file import (
 )
 from photos_drive.shared.core.config.config_from_mongodb import (
     ConfigFromMongoDb,
+)
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 
 logger = logging.getLogger(__name__)

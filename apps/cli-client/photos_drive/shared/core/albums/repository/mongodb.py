@@ -1,4 +1,3 @@
-from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from typing import Any, Mapping, cast
 
 from bson.objectid import ObjectId
@@ -19,6 +18,7 @@ from photos_drive.shared.core.albums.repository.base import (
 from photos_drive.shared.core.databases.mongodb import (
     MongoDBClientsRepository,
 )
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
 
 class MongoDBAlbumsRepository(AlbumsRepository):

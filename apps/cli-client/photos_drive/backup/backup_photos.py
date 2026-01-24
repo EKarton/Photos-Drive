@@ -19,11 +19,11 @@ from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
 from photos_drive.shared.core.albums.repository.base import (
     AlbumsRepository,
 )
-from photos_drive.shared.core.databases.transactions import (
-    TransactionsRepository,
-    TransactionsContext,
-)
 from photos_drive.shared.core.config.config import Config
+from photos_drive.shared.core.databases.transactions import (
+    TransactionsContext,
+    TransactionsRepository,
+)
 from photos_drive.shared.core.media_items.media_item import MediaItem
 from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,

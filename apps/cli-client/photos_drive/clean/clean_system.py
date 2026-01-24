@@ -8,13 +8,13 @@ from bson.objectid import ObjectId
 from photos_drive.shared.core.albums.album_id import AlbumId
 from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
 from photos_drive.shared.core.albums.repository.base import AlbumsRepository
+from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.databases.mongodb import (
     MongoDBClientsRepository,
 )
 from photos_drive.shared.core.databases.transactions import (
     TransactionsContext,
 )
-from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.media_items.media_item_id import MediaItemId
 from photos_drive.shared.core.media_items.repository.base import (
     FindMediaItemRequest,

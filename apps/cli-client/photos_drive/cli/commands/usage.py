@@ -5,7 +5,6 @@ from pymongo import MongoClient
 import typer
 from typing_extensions import Annotated
 
-from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from photos_drive.clean.clean_system import TRASH_ALBUM_TITLE
 from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.logging import setup_logging
@@ -17,6 +16,7 @@ from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 from photos_drive.shared.features.llm.vector_stores import vector_store_builder
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
 logger = logging.getLogger(__name__)
 

@@ -2,10 +2,8 @@ from typing import cast
 
 from bson.objectid import ObjectId
 import h3
-
 from pymongo import MongoClient
 
-from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from photos_drive.shared.core.albums.album_id import album_id_to_string
 from photos_drive.shared.core.databases.mongodb import (
     MongoDBClientsRepository,
@@ -16,6 +14,7 @@ from photos_drive.shared.core.media_items.media_item_id import (
     media_item_id_to_string,
 )
 from photos_drive.shared.features.maps.repository.base import MapCellsRepository
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
 MAX_CELL_RESOLUTION = 15
 

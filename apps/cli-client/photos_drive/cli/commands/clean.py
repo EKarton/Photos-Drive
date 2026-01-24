@@ -11,20 +11,14 @@ from photos_drive.cli.shared.printer import pretty_print_items_to_delete
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.core.albums.repository.mongodb import (
-    MongoDBAlbumsRepository,
-)
 from photos_drive.shared.core.albums.repository.union import (
-    UnionAlbumsRepository,
+    create_union_albums_repository_from_db_clients,
 )
 from photos_drive.shared.core.databases.mongodb import (
     MongoDBClientsRepository,
 )
-from photos_drive.shared.core.media_items.repository.mongodb import (
-    MongoDBMediaItemsRepository,
-)
 from photos_drive.shared.core.media_items.repository.union import (
-    UnionMediaItemsRepository,
+    create_union_media_items_repository_from_db_clients,
 )
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
@@ -74,19 +68,11 @@ def clean(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    transaction_repository = MongoDBClientsRepository.build_from_config(config)
+    mongodb_clients_repo = MongoDBClientsRepository.build_from_config(config)
     gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
-    albums_repo = UnionAlbumsRepository(
-        [
-            MongoDBAlbumsRepository(client_id, client, transaction_repository)
-            for (client_id, client) in transaction_repository.get_all_clients()
-        ]
-    )
-    media_items_repo = UnionMediaItemsRepository(
-        [
-            MongoDBMediaItemsRepository(client_id, client, transaction_repository)
-            for (client_id, client) in transaction_repository.get_all_clients()
-        ]
+    albums_repo = create_union_albums_repository_from_db_clients(mongodb_clients_repo)
+    media_items_repo = create_union_media_items_repository_from_db_clients(
+        mongodb_clients_repo
     )
 
     # Clean up
@@ -95,7 +81,7 @@ def clean(
         albums_repo,
         media_items_repo,
         gphoto_clients_repo,
-        transaction_repository,
+        mongodb_clients_repo,
     )
     items_to_delete = cleaner.find_item_to_delete()
     pretty_print_items_to_delete(items_to_delete)

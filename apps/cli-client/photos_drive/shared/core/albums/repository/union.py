@@ -10,6 +10,8 @@ from photos_drive.shared.core.albums.repository.base import (
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
+from photos_drive.shared.core.albums.repository.mongodb import MongoDBAlbumsRepository
+from photos_drive.shared.core.databases.mongodb import MongoDBClientsRepository
 
 
 class UnionAlbumsRepository(AlbumsRepository):
@@ -102,3 +104,24 @@ class UnionAlbumsRepository(AlbumsRepository):
         for repo in self._repositories:
             total += repo.count_child_albums(album_id)
         return total
+
+
+def create_union_albums_repository_from_db_clients(
+    mongodb_clients_repo: MongoDBClientsRepository,
+) -> UnionAlbumsRepository:
+    """
+    Creates a UnionAlbumsRepository from a list of database clients.
+
+    Args:
+        mongodb_clients_repo (MongoDBClientsRepository):
+            The repository of MongoDB clients.
+
+    Returns:
+        UnionAlbumsRepository: A UnionAlbumsRepository.
+    """
+    return UnionAlbumsRepository(
+        [
+            MongoDBAlbumsRepository(client_id, client, mongodb_clients_repo)
+            for (client_id, client) in mongodb_clients_repo.get_all_clients()
+        ]
+    )

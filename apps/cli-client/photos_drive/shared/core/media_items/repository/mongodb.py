@@ -1,4 +1,3 @@
-from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from datetime import datetime
 import logging
 from typing import Any, Mapping, cast
@@ -30,6 +29,7 @@ from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
     embedding_id_to_string,
     parse_string_to_embedding_id,
 )
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
 logger = logging.getLogger(__name__)
 

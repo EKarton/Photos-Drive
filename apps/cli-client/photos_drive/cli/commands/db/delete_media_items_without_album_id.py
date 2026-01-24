@@ -1,4 +1,3 @@
-from photos_drive.shared.core.databases.mongodb import MongoDBClientsRepository
 import logging
 
 import typer
@@ -9,6 +8,7 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
+from photos_drive.shared.core.databases.mongodb import MongoDBClientsRepository
 
 logger = logging.getLogger(__name__)
 

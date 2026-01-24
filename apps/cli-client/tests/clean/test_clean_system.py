@@ -12,10 +12,10 @@ from photos_drive.shared.core.albums.album_id import AlbumId
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
+from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.core.databases.mongodb import (
     MongoDBClientsRepository,
 )
-from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,
 )
