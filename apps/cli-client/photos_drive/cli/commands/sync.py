@@ -29,7 +29,6 @@ from photos_drive.diff.get_diffs import DiffResults, FolderSyncDiff
 from photos_drive.shared.core.albums.repository.union import (
     create_union_albums_repository_from_db_clients,
 )
-from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.databases.mongodb import MongoDBClientsRepository
 from photos_drive.shared.core.media_items.repository.union import (
     create_union_media_items_repository_from_db_clients,
@@ -136,11 +135,34 @@ def sync(
         print("Operation cancelled.")
         return
 
+    # Process the diffs
     diff_processor = DiffsProcessor(OpenCLIPImageEmbeddings(), BlipImageCaptions())
     processed_diffs = diff_processor.process_raw_diffs(backup_diffs)
 
+    gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
+    map_cells_repository = create_union_map_cells_repository_from_db_clients(
+        mongodb_clients_repo
+    )
+    vector_store = DistributedVectorStore(
+        [
+            vector_store_builder.config_to_vector_store(vector_store_config)
+            for vector_store_config in config.get_vector_store_configs()
+        ]
+    )
+
+    backup_service = PhotosBackup(
+        config,
+        albums_repo,
+        media_items_repo,
+        map_cells_repository,
+        vector_store,
+        gphoto_clients_repo,
+        mongodb_clients_repo,
+        parallelize_uploads,
+    )
+
     backup_results = __backup_diffs_to_system(
-        config, processed_diffs, parallelize_uploads, batch_size
+        backup_service, processed_diffs, batch_size
     )
     print("Sync complete.")
     print(f"Albums created: {backup_results.num_albums_created}")
@@ -167,9 +189,8 @@ def __convert_diff_results_to_backup_diffs(diff_results: DiffResults) -> list[Di
 
 
 def __backup_diffs_to_system(
-    config: Config,
+    backup_service: PhotosBackup,
     processed_diffs: list[ProcessedDiff],
-    parallelize_uploads: bool,
     batch_size: int,
 ) -> BackupResults:
     overall_results = BackupResults(0, 0, 0, 0, 0)
@@ -179,36 +200,6 @@ def __backup_diffs_to_system(
     for batch in __chunked(processed_diffs, batch_size):
         try:
             logger.info(f'Backing up chunk {num_chunks_completed} / {num_total_chunks}')
-            mongodb_clients_repo = MongoDBClientsRepository.build_from_config(config)
-            gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
-            albums_repo = create_union_albums_repository_from_db_clients(
-                mongodb_clients_repo
-            )
-            media_items_repo = create_union_media_items_repository_from_db_clients(
-                mongodb_clients_repo
-            )
-            map_cells_repository = create_union_map_cells_repository_from_db_clients(
-                mongodb_clients_repo
-            )
-            vector_store = DistributedVectorStore(
-                [
-                    vector_store_builder.config_to_vector_store(vector_store_config)
-                    for vector_store_config in config.get_vector_store_configs()
-                ]
-            )
-
-            # Process the diffs
-            backup_service = PhotosBackup(
-                config,
-                albums_repo,
-                media_items_repo,
-                map_cells_repository,
-                vector_store,
-                gphoto_clients_repo,
-                mongodb_clients_repo,
-                parallelize_uploads,
-            )
-
             batch_results = backup_service.backup(batch)
 
             logger.info(f'Backed up {num_chunks_completed} / {num_total_chunks} chunks')
