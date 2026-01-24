@@ -17,7 +17,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
 from photos_drive.shared.core.albums.repository.union import (
     UnionAlbumsRepository,
 )
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.media_items.repository.mongodb import (

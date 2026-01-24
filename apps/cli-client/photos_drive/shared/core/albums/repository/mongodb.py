@@ -16,7 +16,7 @@ from photos_drive.shared.core.albums.repository.base import (
     UpdatedAlbumFields,
     logger,
 )
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
 

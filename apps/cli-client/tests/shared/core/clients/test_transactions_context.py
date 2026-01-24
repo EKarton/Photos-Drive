@@ -4,10 +4,10 @@ from unittest.mock import Mock
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
-from photos_drive.shared.core.clients.transactions_context import (
+from photos_drive.shared.core.database.transactions_context import (
     TransactionsContext,
 )
 from photos_drive.shared.core.testing import (

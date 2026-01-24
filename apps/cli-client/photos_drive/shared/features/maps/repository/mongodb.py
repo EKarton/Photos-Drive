@@ -7,7 +7,7 @@ from pymongo import MongoClient
 
 from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from photos_drive.shared.core.albums.album_id import album_id_to_string
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.media_items.media_item import MediaItem

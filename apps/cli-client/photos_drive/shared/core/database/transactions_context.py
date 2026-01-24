@@ -1,7 +1,7 @@
 import logging
 from types import TracebackType
 
-from photos_drive.shared.core.clients.base import (
+from photos_drive.shared.core.database.base import (
     TransactionRepository,
 )
 

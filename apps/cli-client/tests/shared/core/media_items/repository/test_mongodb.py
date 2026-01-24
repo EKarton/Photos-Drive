@@ -9,7 +9,7 @@ from photos_drive.shared.core.albums.album_id import (
     AlbumId,
     album_id_to_string,
 )
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.media_items.gps_location import (

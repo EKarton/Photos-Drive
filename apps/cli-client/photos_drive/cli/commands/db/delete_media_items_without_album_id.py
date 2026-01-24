@@ -1,4 +1,4 @@
-from photos_drive.shared.core.clients.mongodb import MongoDbTransactionRepository
+from photos_drive.shared.core.database.mongodb import MongoDbTransactionRepository
 import logging
 
 import typer

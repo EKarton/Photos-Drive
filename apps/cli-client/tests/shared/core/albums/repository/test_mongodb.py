@@ -12,7 +12,7 @@ from photos_drive.shared.core.albums.repository.base import (
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.testing import (

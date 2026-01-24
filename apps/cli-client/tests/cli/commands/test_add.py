@@ -10,7 +10,7 @@ from photos_drive.cli.app import build_app
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.storage.gphotos.clients_repository import (

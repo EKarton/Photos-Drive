@@ -7,7 +7,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 
-from photos_drive.shared.core.clients.base import (
+from photos_drive.shared.core.database.base import (
     TransactionRepository,
 )
 from photos_drive.shared.core.config.config import Config

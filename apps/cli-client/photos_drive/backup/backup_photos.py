@@ -19,10 +19,10 @@ from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
 from photos_drive.shared.core.albums.repository.base import (
     AlbumsRepository,
 )
-from photos_drive.shared.core.clients.base import (
+from photos_drive.shared.core.database.base import (
     TransactionRepository,
 )
-from photos_drive.shared.core.clients.transactions_context import (
+from photos_drive.shared.core.database.transactions_context import (
     TransactionsContext,
 )
 from photos_drive.shared.core.config.config import Config

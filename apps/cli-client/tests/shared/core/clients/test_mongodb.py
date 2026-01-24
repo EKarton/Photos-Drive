@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 import mongomock
 from pymongo import MongoClient
 
-from photos_drive.shared.core.clients.mongodb import (
+from photos_drive.shared.core.database.mongodb import (
     MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.config.config import (
