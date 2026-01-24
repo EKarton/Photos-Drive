@@ -186,6 +186,9 @@ class DiffsProcessor:
             if x != '.' and x != os.sep:
                 pos = i
                 break
+        if pos == -1:
+            return ""
+
         album_name = album_name[pos:]
 
         # Convert album names like Photos\2010\Dog to Photos/2010/Dog

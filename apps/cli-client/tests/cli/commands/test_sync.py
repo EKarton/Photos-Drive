@@ -1,9 +1,9 @@
 import os
-import tempfile
 import unittest
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-import numpy as np
+import tempfile
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -14,6 +14,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
 from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
+from photos_drive.shared.core.media_items.repository.base import CreateMediaItemRequest
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
@@ -38,7 +39,7 @@ from photos_drive.shared.features.llm.vector_stores.testing.fake_vector_store im
 )
 
 
-class TestAddCli(unittest.TestCase):
+class TestSyncCli(unittest.TestCase):
     def setUp(self):
         # 1. Set up mock MongoDB
         self.mongodb_client_id = ObjectId()
@@ -61,29 +62,19 @@ class TestAddCli(unittest.TestCase):
             self.gphotos_client_id, self.fake_gphotos_client
         )
 
-        # 3. Initialize repositories for assertions later
+        # 3. Initialize repositories for assertion support (not for the Cli itself which uses mocks)
         self.albums_repo = MongoDBAlbumsRepository(
+            self.mongodb_client_id, self.mongodb_clients_repo
+        )
+        self.media_items_repo = MongoDBMediaItemsRepository(
             self.mongodb_client_id, self.mongodb_clients_repo
         )
         # Create root album
         self.root_album = self.albums_repo.create_album("", None)
 
-        # 4. Create temporary test files
-        self.test_dir = tempfile.TemporaryDirectory()
-        self.image1_path = os.path.join(self.test_dir.name, "image1.jpg")
-        with open(self.image1_path, "wb") as f:
-            f.write(b"fake image data 1")
-
-        self.sub_dir = os.path.join(self.test_dir.name, "Summer2025")
-        os.makedirs(self.sub_dir)
-        self.image2_path = os.path.join(self.sub_dir, "image2.png")
-        with open(self.image2_path, "wb") as f:
-            f.write(b"fake image data 2")
-
-        # 5. Build fake config file
-        self.config_file = tempfile.NamedTemporaryFile(delete=False, suffix=".ini")
-        self.config_file_path = self.config_file.name
-        self.config_file.close()
+        # 4. Build fake config file
+        self.config_dir = tempfile.TemporaryDirectory()
+        self.config_file_path = os.path.join(self.config_dir.name, "config.ini")
         with open(self.config_file_path, "w") as f:
             f.write(
                 f"[{self.mongodb_client_id}]\n"
@@ -117,7 +108,7 @@ class TestAddCli(unittest.TestCase):
                 + "path = memory\n"
             )
 
-        # 6. Apply patches
+        # 5. Apply patches
         self.patchers = [
             patch.object(
                 MongoDbClientsRepository,
@@ -130,24 +121,22 @@ class TestAddCli(unittest.TestCase):
                 return_value=self.gphotos_clients_repo,
             ),
             patch(
-                "photos_drive.cli.commands.add.prompt_user_for_yes_no_answer",
+                "photos_drive.cli.commands.sync.prompt_user_for_yes_no_answer",
                 return_value=True,
             ),
             patch(
-                "photos_drive.cli.commands.add.OpenCLIPImageEmbeddings",
+                "photos_drive.cli.commands.sync.OpenCLIPImageEmbeddings",
                 return_value=FakeImageEmbedder(),
             ),
             patch(
-                "photos_drive.cli.commands.add.BlipImageCaptions",
+                "photos_drive.cli.commands.sync.BlipImageCaptions",
                 return_value=FakeImageCaptions(),
             ),
             patch(
-                "photos_drive.cli.commands.add.DistributedVectorStore",
+                "photos_drive.cli.commands.sync.DistributedVectorStore",
                 return_value=FakeVectorStore(),
             ),
-            # Mocking magic to avoid libmagic dependency issues in some environments
             patch("magic.from_file", return_value="image/jpeg"),
-            # Mocking PIL and ExifTool to avoid real file processing
             patch("PIL.Image.open", return_value=MagicMock()),
             patch(
                 "photos_drive.backup.processed_diffs.get_width_height_of_image",
@@ -164,83 +153,98 @@ class TestAddCli(unittest.TestCase):
     def tearDown(self):
         for patcher in self.patchers:
             patcher.stop()
-        os.unlink(self.config_file_path)
-        self.test_dir.cleanup()
+        self.config_dir.cleanup()
 
-    def test_add_single_file(self):
+    def test_sync_additions(self):
         runner = CliRunner()
         app = build_app()
 
-        # Act
-        result = runner.invoke(
-            app, ["add", self.image1_path, "--config-file", self.config_file_path]
-        )
+        with runner.isolated_filesystem():
+            # Create a local file that is NOT in MongoDB or GPhotos
+            filename = "new_image.jpg"
+            with open(filename, "wb") as f:
+                f.write(b"new data")
 
-        # Assert
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("Items added: 1", result.stdout)
+            # Act
+            result = runner.invoke(
+                app, args=["sync", ".", "--config-file", self.config_file_path]
+            )
 
-        # Verify MongoDB state
-        media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
-        docs = list(media_items_coll.find({}))
-        self.assertEqual(len(docs), 1)
-        self.assertEqual(docs[0]["file_name"], "image1.jpg")
-        self.assertEqual(docs[0]["gphotos_client_id"], str(self.gphotos_client_id))
+            # Assert
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("Media items created: 1", result.stdout)
 
-        # Verify Google Photos state
-        gitems = self.fake_gphotos_client.media_items().search_for_media_items()
-        self.assertEqual(len(gitems), 1)
-        self.assertEqual(gitems[0].filename, "image1.jpg")
+            # Verify MongoDB has the item
+            media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
+            self.assertEqual(media_items_coll.count_documents({}), 1)
+            self.assertEqual(media_items_coll.find_one()["file_name"], filename)
 
-    def test_add_directory(self):
+    def test_sync_deletions(self):
         runner = CliRunner()
         app = build_app()
 
-        # Act
-        result = runner.invoke(
-            app,
-            args=["add", self.test_dir.name, "--config-file", self.config_file_path],
-        )
+        with runner.isolated_filesystem():
+            # Seed MongoDB and GPhotos with an item that is NOT local
+            filename = "gone_locally.jpg"
 
-        # Assert
-        self.assertEqual(result.exit_code, 0)
-        # Note: get_media_file_paths_from_path will find both image1.jpg and Summer2025/image2.png
-        self.assertIn("Items added: 2", result.stdout)
+            # GPhotos seed
+            up = self.fake_gphotos_client.media_items().upload_photo(filename, filename)
+            res = self.fake_gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+                [up]
+            )
+            g_id = res.newMediaItemResults[0].mediaItem.id
 
-        # Verify MongoDB state
-        media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
-        docs = list(media_items_coll.find({}))
-        self.assertEqual(len(docs), 2)
-        filenames = {doc["file_name"] for doc in docs}
-        self.assertIn("image1.jpg", filenames)
-        self.assertIn("image2.png", filenames)
+            # MongoDB seed
+            self.media_items_repo.create_media_item(
+                CreateMediaItemRequest(
+                    file_name=filename,
+                    file_hash=b"h1",
+                    location=None,
+                    gphotos_client_id=self.gphotos_client_id,
+                    gphotos_media_item_id=g_id,
+                    album_id=self.root_album.id,
+                    width=800,
+                    height=600,
+                    date_taken=datetime(2025, 1, 1),
+                    embedding_id=None,
+                )
+            )
 
-        # Verify Albums are created for subdirectories
-        albums_coll = self.mock_mongo_client["photos_drive"]["albums"]
-        album_docs = list(albums_coll.find({"name": "Summer2025"}))
-        self.assertEqual(len(album_docs), 1)
+            # Act
+            result = runner.invoke(
+                app, ["sync", ".", "--config-file", self.config_file_path]
+            )
 
-        # Verify Google Photos state
-        gitems = self.fake_gphotos_client.media_items().search_for_media_items()
-        self.assertEqual(len(gitems), 2)
+            # Assert
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("Media items deleted: 1", result.stdout)
 
-    def test_add_cancelled_by_user(self):
+            # Verify MongoDB is empty
+            media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
+            self.assertEqual(media_items_coll.count_documents({}), 0)
+
+    def test_sync_cancelled(self):
         with patch(
-            "photos_drive.cli.commands.add.prompt_user_for_yes_no_answer",
+            "photos_drive.cli.commands.sync.prompt_user_for_yes_no_answer",
             return_value=False,
         ):
             runner = CliRunner()
             app = build_app()
 
-            # Act
-            result = runner.invoke(
-                app, ["add", self.image1_path, "--config-file", self.config_file_path]
-            )
+            with runner.isolated_filesystem():
+                filename = "new.jpg"
+                with open(filename, "wb") as f:
+                    f.write(b"data")
 
-            # Assert
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("Operation cancelled.", result.stdout)
+                # Act
+                result = runner.invoke(
+                    app, ["sync", ".", "--config-file", self.config_file_path]
+                )
 
-            # Verify no items added
-            media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
-            self.assertEqual(media_items_coll.count_documents({}), 0)
+                # Assert
+                self.assertEqual(result.exit_code, 0)
+                self.assertIn("Operation cancelled.", result.stdout)
+
+                # Verify MongoDB still empty
+                media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
+                self.assertEqual(media_items_coll.count_documents({}), 0)

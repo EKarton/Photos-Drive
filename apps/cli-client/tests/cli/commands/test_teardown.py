@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
 import os
-import tempfile
 import unittest
-from unittest.mock import patch
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
 
+import tempfile
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -14,10 +14,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
 from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.core.media_items.repository.base import (
-    CreateMediaItemRequest,
-)
+from photos_drive.shared.core.media_items.repository.base import CreateMediaItemRequest
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
@@ -25,10 +22,8 @@ from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 from photos_drive.shared.core.storage.gphotos.testing import (
-    FakeItemsRepository,
-)
-from photos_drive.shared.core.storage.gphotos.testing.fake_client import (
     FakeGPhotosClient,
+    FakeItemsRepository,
 )
 from photos_drive.shared.core.testing.mock_mongo_client import (
     create_mock_mongo_client,
@@ -39,137 +34,235 @@ MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 class TestTeardownCli(unittest.TestCase):
     def setUp(self):
-        # Test setup 1: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_client_id = ObjectId()
-        mongodb_clients_repo.add_mongodb_client(
-            mongodb_client_id, create_mock_mongo_client(1000)
-        )
-        gphotos_client_id = ObjectId()
-        self.fake_gitems_repo = FakeItemsRepository()
-        self.gphotos_client = FakeGPhotosClient(self.fake_gitems_repo, 'bob@gmail.com')
-        gphotos_clients_repo = GPhotosClientsRepository()
-        gphotos_clients_repo.add_gphotos_client(gphotos_client_id, self.gphotos_client)
-
-        self.albums_repo = MongoDBAlbumsRepository(
-            mongodb_client_id, mongodb_clients_repo
-        )
-        self.media_items_repo = MongoDBMediaItemsRepository(
-            mongodb_client_id, mongodb_clients_repo
+        # 1. Set up mock MongoDB and GPhotos environments
+        # Client 1
+        self.mongodb_client_id_1 = ObjectId()
+        self.mock_mongo_client_1 = create_mock_mongo_client(1000)
+        self.gphotos_client_id_1 = ObjectId()
+        self.fake_gitems_repo_1 = FakeItemsRepository()
+        self.fake_gphotos_client_1 = FakeGPhotosClient(
+            self.fake_gitems_repo_1, "client1@gmail.com"
         )
 
-        # Test setup 2: Set up the root album
-        self.root_album = self.albums_repo.create_album('', None)
-        config = InMemoryConfig()
-        config.set_root_album_id(self.root_album.id)
-
-        # Test setup 3: Attach 'Archives' in root album but others not
-        self.archives_album = self.albums_repo.create_album(
-            'Archives', self.root_album.id
+        # Client 2
+        self.mongodb_client_id_2 = ObjectId()
+        self.mock_mongo_client_2 = create_mock_mongo_client(1000)
+        self.gphotos_client_id_2 = ObjectId()
+        self.fake_gitems_repo_2 = FakeItemsRepository()
+        self.fake_gphotos_client_2 = FakeGPhotosClient(
+            self.fake_gitems_repo_2, "client2@gmail.com"
         )
-        self.albums_repo.create_album('Photos', None)
-        self.albums_repo.create_album('2010', None)
-        self.albums_repo.create_album('2011', None)
 
-        # Test setup 4: Add an image to Archives
-        dog_upload_token = self.gphotos_client.media_items().upload_photo(
-            './Archives/dog.png', 'dog.png'
+        self.mongodb_clients_repo = MongoDbClientsRepository()
+        self.mongodb_clients_repo.add_mongodb_client(
+            self.mongodb_client_id_1, self.mock_mongo_client_1
         )
-        media_items_results = (
-            self.gphotos_client.media_items().add_uploaded_photos_to_gphotos(
-                [dog_upload_token]
+        self.mongodb_clients_repo.add_mongodb_client(
+            self.mongodb_client_id_2, self.mock_mongo_client_2
+        )
+
+        self.gphotos_clients_repo = GPhotosClientsRepository()
+        self.gphotos_clients_repo.add_gphotos_client(
+            self.gphotos_client_id_1, self.fake_gphotos_client_1
+        )
+        self.gphotos_clients_repo.add_gphotos_client(
+            self.gphotos_client_id_2, self.fake_gphotos_client_2
+        )
+
+        # 2. Initialize repositories for seeding
+        self.albums_repo_1 = MongoDBAlbumsRepository(
+            self.mongodb_client_id_1, self.mongodb_clients_repo
+        )
+        self.media_items_repo_1 = MongoDBMediaItemsRepository(
+            self.mongodb_client_id_1, self.mongodb_clients_repo
+        )
+
+        # Create root album for Client 1
+        self.root_album_1 = self.albums_repo_1.create_album("", None)
+
+        # 3. Build fake config file
+        self.config_dir = tempfile.TemporaryDirectory()
+        self.config_file_path = os.path.join(self.config_dir.name, "config.ini")
+        with open(self.config_file_path, "w") as f:
+            f.write(
+                f"[{self.mongodb_client_id_1}]\n"
+                + "type = mongodb_config\n"
+                + "name = Client1DB\n"
+                + "read_write_connection_string = mongodb://localhost:27017\n"
+                + "read_only_connection_string = mongodb://localhost:27016\n"
+                + "\n"
+                + f"[{self.gphotos_client_id_1}]\n"
+                + "type = gphotos_config\n"
+                + "name = Client1GP\n"
+                + "read_write_token = t1\n"
+                + "read_write_refresh_token = r1\n"
+                + "read_write_client_id = id1\n"
+                + "read_write_client_secret = s1\n"
+                + "read_write_token_uri = https://oauth2.googleapis.com/token\n"
+                + "\n"
+                + f"[{self.mongodb_client_id_2}]\n"
+                + "type = mongodb_config\n"
+                + "name = Client2DB\n"
+                + "read_write_connection_string = mongodb://localhost:27017\n"
+                + "read_only_connection_string = mongodb://localhost:27016\n"
+                + "\n"
+                + f"[{self.gphotos_client_id_2}]\n"
+                + "type = gphotos_config\n"
+                + "name = Client2GP\n"
+                + "read_write_token = t2\n"
+                + "read_write_refresh_token = r2\n"
+                + "read_write_client_id = id2\n"
+                + "read_write_client_secret = s2\n"
+                + "read_write_token_uri = https://oauth2.googleapis.com/token\n"
+                + "\n"
+                + f"[{ObjectId()}]\n"
+                + "type = root_album\n"
+                + f"client_id = {self.root_album_1.id.client_id}\n"
+                + f"object_id = {self.root_album_1.id.object_id}\n"
             )
+
+        # 4. Apply global patches
+        self.patchers = [
+            patch.object(
+                MongoDbClientsRepository,
+                "build_from_config",
+                return_value=self.mongodb_clients_repo,
+            ),
+            patch.object(
+                GPhotosClientsRepository,
+                "build_from_config",
+                return_value=self.gphotos_clients_repo,
+            ),
+            patch(
+                "photos_drive.cli.commands.teardown.prompt_user_for_yes_no_answer",
+                return_value=True,
+            ),
+            patch("magic.from_file", return_value="image/jpeg"),
+        ]
+        for patcher in self.patchers:
+            patcher.start()
+
+    def tearDown(self):
+        for patcher in self.patchers:
+            patcher.stop()
+        self.config_dir.cleanup()
+
+    def test_teardown_success(self):
+        # 1. Seed Client 1
+        sub_album = self.albums_repo_1.create_album("Sub", self.root_album_1.id)
+        up = self.fake_gphotos_client_1.media_items().upload_photo("d.jpg", "d.jpg")
+        res = self.fake_gphotos_client_1.media_items().add_uploaded_photos_to_gphotos(
+            [up]
         )
-        self.dog_media_item = self.media_items_repo.create_media_item(
+        self.media_items_repo_1.create_media_item(
             CreateMediaItemRequest(
-                file_name='dog.png',
-                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
+                file_name="d.jpg",
+                file_hash=b"h",
                 location=None,
-                gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=media_items_results.newMediaItemResults[
-                    0
-                ].mediaItem.id,
-                album_id=self.archives_album.id,
+                gphotos_client_id=self.gphotos_client_id_1,
+                gphotos_media_item_id=res.newMediaItemResults[0].mediaItem.id,
+                album_id=sub_album.id,
                 width=100,
-                height=200,
+                height=100,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
             )
         )
 
-        # Test setup: build fake config file
-        self.temp_file = tempfile.NamedTemporaryFile(delete=False)
-        self.temp_file_path = self.temp_file.name
-        self.temp_file.close()
-        with open(self.temp_file_path, 'w') as f:
-            f.write(
-                f'[{mongodb_client_id}]\n'
-                + 'type = mongodb_config\n'
-                + 'name = TestMongoDB\n'
-                + 'read_write_connection_string = mongodb://localhost:27017\n'
-                + 'read_only_connection_string = mongodb://localhost:27016\n'
-                + '\n'
-                + f'[{gphotos_client_id}]\n'
-                + 'type = gphotos_config\n'
-                + 'name = TestGPhotos\n'
-                + 'read_write_token = test_token\n'
-                + 'read_write_refresh_token = test_refresh_token\n'
-                + 'read_write_client_id = test_client_id\n'
-                + 'read_write_client_secret = test_client_secret\n'
-                + 'read_write_token_uri = https://oauth2.googleapis.com/token\n'
-                + 'read_only_token = test_token_2\n'
-                + 'read_only_refresh_token = test_refresh_token_2\n'
-                + 'read_only_client_id = test_client_id_2\n'
-                + 'read_only_client_secret = test_client_secret_2\n'
-                + 'read_only_token_uri = https://oauth2.googleapis.com/token\n'
-                + '\n'
-                + '[5f50c31e8a7d4b1c9c9b0b1c]\n'
-                + 'type = root_album\n'
-                + f'client_id = {self.root_album.id.client_id}\n'
-                + f'object_id = {self.root_album.id.object_id}\n'
-            )
+        # 2. Seed Client 2 (no root album registered in config, but global teardown hits all)
+        albums_repo_2 = MongoDBAlbumsRepository(
+            self.mongodb_client_id_2, self.mongodb_clients_repo
+        )
+        albums_repo_2.create_album("Other", None)
 
-        patch.object(
-            MongoDbClientsRepository,
-            'build_from_config',
-            return_value=mongodb_clients_repo,
-        ).start()
-
-        patch.object(
-            GPhotosClientsRepository,
-            'build_from_config',
-            return_value=gphotos_clients_repo,
-        ).start()
-
-    def tearDown(self):
-        patch.stopall()
-        os.unlink(self.temp_file_path)
-
-    def test_teardown(self):
         runner = CliRunner()
         app = build_app()
+
+        # Act
         result = runner.invoke(
-            app, ["teardown", "--config-file", self.temp_file_path], input="Yes\n"
+            app, args=["teardown", "--config-file", self.config_file_path]
         )
 
-        # Assert: check output
+        # Assert
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(
-            "Do you want to delete everything this tool has ever created? (Y/N): ",
-            result.stdout,
+
+        # Verify MongoDB: Only root album for client 1 remains
+        self.assertEqual(
+            self.mock_mongo_client_1["photos_drive"]["albums"].count_documents({}), 1
+        )
+        self.assertEqual(
+            self.mock_mongo_client_1["photos_drive"]["media_items"].count_documents({}),
+            0,
+        )
+        self.assertEqual(
+            self.mock_mongo_client_2["photos_drive"]["albums"].count_documents({}), 0
         )
 
-        # Assert: check everything is deleted (except for root album)
-        self.assertEqual(len(self.albums_repo.get_all_albums()), 1)
-        self.assertEqual(len(self.media_items_repo.get_all_media_items()), 0)
+        # Verify GPhotos: "To delete" album created and item moved
+        albums_1 = self.fake_gphotos_client_1.albums().list_albums()
+        self.assertTrue(any(a.title == "To delete" for a in albums_1))
+        trash_album = next(a for a in albums_1 if a.title == "To delete")
+        media_in_trash = (
+            self.fake_gphotos_client_1.media_items().search_for_media_items(
+                trash_album.id
+            )
+        )
+        self.assertEqual(len(media_in_trash), 1)
 
-        # Assert: all gmedia items moved to trash folder
-        trash_album = next(
-            filter(lambda x: x.title, self.gphotos_client.albums().list_albums())
+    def test_teardown_cancelled(self):
+        with patch(
+            "photos_drive.cli.commands.teardown.prompt_user_for_yes_no_answer",
+            return_value=False,
+        ):
+            # Seed an album
+            self.albums_repo_1.create_album("KeepMe", self.root_album_1.id)
+
+            runner = CliRunner()
+            app = build_app()
+
+            # Act
+            result = runner.invoke(
+                app, args=["teardown", "--config-file", self.config_file_path]
+            )
+
+            # Assert
+            self.assertEqual(result.exit_code, 0)
+            # Album should still exist
+            self.assertEqual(
+                self.mock_mongo_client_1["photos_drive"]["albums"].count_documents(
+                    {"name": "KeepMe"}
+                ),
+                1,
+            )
+
+    def test_teardown_reuse_trash_album(self):
+        # 1. Pre-create "To delete" album
+        self.fake_gphotos_client_1.albums().create_album("To delete")
+
+        # 2. Seed an item
+        up = self.fake_gphotos_client_1.media_items().upload_photo("x.jpg", "x.jpg")
+        self.fake_gphotos_client_1.media_items().add_uploaded_photos_to_gphotos([up])
+
+        runner = CliRunner()
+        app = build_app()
+
+        # Act
+        result = runner.invoke(
+            app, args=["teardown", "--config-file", self.config_file_path]
         )
-        all_media_items = self.gphotos_client.media_items().search_for_media_items()
-        media_items_in_trash = self.gphotos_client.media_items().search_for_media_items(
-            trash_album.id
+
+        # Assert
+        self.assertEqual(result.exit_code, 0)
+        # Should still only have one "To delete" album
+        albums = [
+            a
+            for a in self.fake_gphotos_client_1.albums().list_albums()
+            if a.title == "To delete"
+        ]
+        self.assertEqual(len(albums), 1)
+        media_in_trash = (
+            self.fake_gphotos_client_1.media_items().search_for_media_items(
+                albums[0].id
+            )
         )
-        self.assertEqual(len(all_media_items), 1)
-        self.assertEqual(len(media_items_in_trash), 1)
+        self.assertEqual(len(media_in_trash), 1)

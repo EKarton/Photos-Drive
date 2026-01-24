@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
 import os
-import tempfile
 import unittest
-from unittest.mock import patch
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
 
+import tempfile
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -14,10 +14,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
 from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.core.media_items.repository.base import (
-    CreateMediaItemRequest,
-)
+from photos_drive.shared.core.media_items.repository.base import CreateMediaItemRequest
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
@@ -25,10 +22,8 @@ from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 from photos_drive.shared.core.storage.gphotos.testing import (
-    FakeItemsRepository,
-)
-from photos_drive.shared.core.storage.gphotos.testing.fake_client import (
     FakeGPhotosClient,
+    FakeItemsRepository,
 )
 from photos_drive.shared.core.testing.mock_mongo_client import (
     create_mock_mongo_client,
@@ -39,132 +34,228 @@ MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 
 class TestCleanCli(unittest.TestCase):
     def setUp(self):
-        # Test setup 1: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_client_id = ObjectId()
-        mongodb_clients_repo.add_mongodb_client(
-            mongodb_client_id, create_mock_mongo_client(1000)
+        # 1. Set up mock MongoDB and GPhotos environments
+        self.mongodb_client_id = ObjectId()
+        self.mock_mongo_client = create_mock_mongo_client(1000 * 1024 * 1024)
+        self.mongodb_clients_repo = MongoDbClientsRepository()
+        self.mongodb_clients_repo.add_mongodb_client(
+            self.mongodb_client_id, self.mock_mongo_client
         )
-        gphotos_client_id = ObjectId()
-        self.gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
-        gphotos_clients_repo = GPhotosClientsRepository()
-        gphotos_clients_repo.add_gphotos_client(gphotos_client_id, self.gphotos_client)
 
+        self.gphotos_client_id = ObjectId()
+        self.fake_gitems_repo = FakeItemsRepository()
+        self.fake_gphotos_client = FakeGPhotosClient(
+            self.fake_gitems_repo, "test@gmail.com"
+        )
+        self.gphotos_clients_repo = GPhotosClientsRepository()
+        self.gphotos_clients_repo.add_gphotos_client(
+            self.gphotos_client_id, self.fake_gphotos_client
+        )
+
+        # 2. Initialize repositories for seeding
         self.albums_repo = MongoDBAlbumsRepository(
-            mongodb_client_id, mongodb_clients_repo
+            self.mongodb_client_id, self.mongodb_clients_repo
         )
-        media_items_repo = MongoDBMediaItemsRepository(
-            mongodb_client_id, mongodb_clients_repo
+        self.media_items_repo = MongoDBMediaItemsRepository(
+            self.mongodb_client_id, self.mongodb_clients_repo
         )
+        # Create root album (linked to config)
+        self.root_album = self.albums_repo.create_album("", None)
 
-        # Test setup 2: Set up the root album
-        self.root_album = self.albums_repo.create_album('', None)
-        config = InMemoryConfig()
-        config.set_root_album_id(self.root_album.id)
-
-        # Test setup 3: Attach 'Archives' in root album but others not
-        self.archives_album = self.albums_repo.create_album(
-            'Archives', self.root_album.id
-        )
-        self.albums_repo.create_album('Photos', None)
-        self.albums_repo.create_album('2010', None)
-        self.albums_repo.create_album('2011', None)
-
-        # Test setup 4: Add an image to Archives
-        dog_upload_token = self.gphotos_client.media_items().upload_photo(
-            './Archives/dog.png', 'dog.png'
-        )
-        media_items_results = (
-            self.gphotos_client.media_items().add_uploaded_photos_to_gphotos(
-                [dog_upload_token]
+        # 3. Build fake config file
+        self.config_dir = tempfile.TemporaryDirectory()
+        self.config_file_path = os.path.join(self.config_dir.name, "config.ini")
+        with open(self.config_file_path, "w") as f:
+            f.write(
+                f"[{self.mongodb_client_id}]\n"
+                + "type = mongodb_config\n"
+                + "name = TestMongoDB\n"
+                + "read_write_connection_string = mongodb://localhost:27017\n"
+                + "read_only_connection_string = mongodb://localhost:27016\n"
+                + "\n"
+                + f"[{self.gphotos_client_id}]\n"
+                + "type = gphotos_config\n"
+                + "name = TestGPhotos\n"
+                + "read_write_token = test_token\n"
+                + "read_write_refresh_token = test_refresh_token\n"
+                + "read_write_client_id = test_client_id\n"
+                + "read_write_client_secret = test_client_secret\n"
+                + "read_write_token_uri = https://oauth2.googleapis.com/token\n"
+                + "\n"
+                + f"[{ObjectId()}]\n"
+                + "type = root_album\n"
+                + f"client_id = {self.root_album.id.client_id}\n"
+                + f"object_id = {self.root_album.id.object_id}\n"
+                + "\n"
+                + f"[{ObjectId()}]\n"
+                + "type = vector_store_config\n"
+                + "name = TestVectorStore\n"
+                + "path = memory\n"
             )
+
+        # 4. Apply global patches
+        self.patchers = [
+            patch.object(
+                MongoDbClientsRepository,
+                "build_from_config",
+                return_value=self.mongodb_clients_repo,
+            ),
+            patch.object(
+                GPhotosClientsRepository,
+                "build_from_config",
+                return_value=self.gphotos_clients_repo,
+            ),
+            patch(
+                "photos_drive.cli.commands.clean.prompt_user_for_yes_no_answer",
+                return_value=True,
+            ),
+            patch("magic.from_file", return_value="image/jpeg"),
+        ]
+        for patcher in self.patchers:
+            patcher.start()
+
+    def tearDown(self):
+        for patcher in self.patchers:
+            patcher.stop()
+        self.config_dir.cleanup()
+
+    def test_clean_orphaned_albums_and_items(self):
+        # 1. Seed reachables
+        reachable_album = self.albums_repo.create_album("Reachable", self.root_album.id)
+
+        # 2. Seed orphaned data (unlinked from root BFS)
+        unreachable_album = self.albums_repo.create_album("Orphan", None)
+
+        # Unreachable GPhotos item
+        up = self.fake_gphotos_client.media_items().upload_photo("orph.jpg", "orph.jpg")
+        res = self.fake_gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+            [up]
         )
-        self.dog_media_item = media_items_repo.create_media_item(
+        orph_g_id = res.newMediaItemResults[0].mediaItem.id
+
+        # Reachable GPhotos item (metadata exists in DB linked to root)
+        up_ok = self.fake_gphotos_client.media_items().upload_photo("ok.jpg", "ok.jpg")
+        res_ok = self.fake_gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+            [up_ok]
+        )
+        ok_g_id = res_ok.newMediaItemResults[0].mediaItem.id
+
+        self.media_items_repo.create_media_item(
             CreateMediaItemRequest(
-                file_name='dog.png',
-                file_hash=b'\x8a\x19\xdd\xdeg\xdd\x96\xf2',
+                file_name="ok.jpg",
+                file_hash=b"h1",
                 location=None,
-                gphotos_client_id=ObjectId(gphotos_client_id),
-                gphotos_media_item_id=media_items_results.newMediaItemResults[
-                    0
-                ].mediaItem.id,
-                album_id=self.archives_album.id,
+                gphotos_client_id=self.gphotos_client_id,
+                gphotos_media_item_id=ok_g_id,
+                album_id=reachable_album.id,
                 width=100,
-                height=200,
+                height=100,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
             )
         )
 
-        # Test setup 5: build fake config file
-        self.temp_file = tempfile.NamedTemporaryFile(delete=False)
-        self.temp_file_path = self.temp_file.name
-        self.temp_file.close()
-        with open(self.temp_file_path, 'w') as f:
-            f.write(
-                f'[{mongodb_client_id}]\n'
-                + 'type = mongodb_config\n'
-                + 'name = TestMongoDB\n'
-                + 'read_write_connection_string = mongodb://localhost:27017\n'
-                + 'read_only_connection_string = mongodb://localhost:27016\n'
-                + '\n'
-                + f'[{gphotos_client_id}]\n'
-                + 'type = gphotos_config\n'
-                + 'name = TestGPhotos\n'
-                + 'read_write_token = test_token\n'
-                + 'read_write_refresh_token = test_refresh_token\n'
-                + 'read_write_client_id = test_client_id\n'
-                + 'read_write_client_secret = test_client_secret\n'
-                + 'read_write_token_uri = https://oauth2.googleapis.com/token\n'
-                + 'read_only_token = test_token_2\n'
-                + 'read_only_refresh_token = test_refresh_token_2\n'
-                + 'read_only_client_id = test_client_id_2\n'
-                + 'read_only_client_secret = test_client_secret_2\n'
-                + 'read_only_token_uri = https://oauth2.googleapis.com/token\n'
-                + '\n'
-                + '[5f50c31e8a7d4b1c9c9b0b1c]\n'
-                + 'type = root_album\n'
-                + f'client_id = {self.root_album.id.client_id}\n'
-                + f'object_id = {self.root_album.id.object_id}\n'
-            )
+        # 3. Seed unreferenced media item in DB (GPhotos ID doesn't exist anymore or just unlinked)
+        # Actually SystemCleaner checks reachable Gmedia items.
+        # If reachable DB item's Gmedia ID is NOT in GPhotos, it might fail or just keep it?
+        # SystemCleaner.__find_content_to_keep filters items whose gphotos_media_item_id is not in all_gphoto_media_item_ids.
 
-        patch.object(
-            MongoDbClientsRepository,
-            'build_from_config',
-            return_value=mongodb_clients_repo,
-        ).start()
-
-        patch.object(
-            GPhotosClientsRepository,
-            'build_from_config',
-            return_value=gphotos_clients_repo,
-        ).start()
-
-    def tearDown(self):
-        patch.stopall()
-        os.unlink(self.temp_file_path)
-
-    def test_clean(self):
         runner = CliRunner()
         app = build_app()
+
+        # Act
         result = runner.invoke(
-            app, ["clean", "--config-file", self.temp_file_path], input="Yes\n"
+            app, args=["clean", "--config-file", self.config_file_path]
         )
 
-        # Assert: check output
+        # Assert
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Cleanup success!", result.stdout)
+
+        # Verify orphaned album deleted
+        self.assertEqual(
+            self.mock_mongo_client["photos_drive"]["albums"].count_documents(
+                {"name": "Orphan"}
+            ),
+            0,
+        )
+        # Verify reachable album kept
+        self.assertEqual(
+            self.mock_mongo_client["photos_drive"]["albums"].count_documents(
+                {"name": "Reachable"}
+            ),
+            1,
+        )
+
+        # Verify unreferenced GPhotos item moved to trash
+        albums = self.fake_gphotos_client.albums().list_albums()
+        trash_album = next(a for a in albums if a.title == "To delete")
+        media_in_trash = self.fake_gphotos_client.media_items().search_for_media_items(
+            trash_album.id
+        )
+        self.assertEqual(len(media_in_trash), 1)
+        self.assertEqual(media_in_trash[0].id, orph_g_id)
+
+    def test_clean_cancelled(self):
+        with patch(
+            "photos_drive.cli.commands.clean.prompt_user_for_yes_no_answer",
+            return_value=False,
+        ):
+            # Seed unreachable album
+            self.albums_repo.create_album("Orphan", None)
+
+            runner = CliRunner()
+            app = build_app()
+
+            # Act
+            result = runner.invoke(
+                app, args=["clean", "--config-file", self.config_file_path]
+            )
+
+            # Assert
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("Operation cancelled.", result.stdout)
+            # Album should still exist
+            self.assertEqual(
+                self.mock_mongo_client["photos_drive"]["albums"].count_documents(
+                    {"name": "Orphan"}
+                ),
+                1,
+            )
+
+    def test_clean_nothing_to_do(self):
+        # Only reachable items
+        reachable_album = self.albums_repo.create_album("Reachable", self.root_album.id)
+        up = self.fake_gphotos_client.media_items().upload_photo("ok.jpg", "ok.jpg")
+        res = self.fake_gphotos_client.media_items().add_uploaded_photos_to_gphotos(
+            [up]
+        )
+
+        self.media_items_repo.create_media_item(
+            CreateMediaItemRequest(
+                file_name="ok.jpg",
+                file_hash=b"h1",
+                location=None,
+                gphotos_client_id=self.gphotos_client_id,
+                gphotos_media_item_id=res.newMediaItemResults[0].mediaItem.id,
+                album_id=reachable_album.id,
+                width=100,
+                height=100,
+                date_taken=MOCK_DATE_TAKEN,
+                embedding_id=None,
+            )
+        )
+
+        runner = CliRunner()
+        app = build_app()
+
+        # Act
+        result = runner.invoke(
+            app, args=["clean", "--config-file", self.config_file_path]
+        )
+
+        # Assert
+        self.assertEqual(result.exit_code, 0)
         self.assertIn("Number of media items deleted: 0", result.stdout)
-        self.assertIn("Number of albums deleted: 3", result.stdout)
+        self.assertIn("Number of albums deleted: 0", result.stdout)
         self.assertIn("Number of Google Photos items trashed: 0", result.stdout)
-
-        # Assert: check that there are only 2 albums: root and Archives
-        albums = self.albums_repo.get_all_albums()
-        self.assertEqual(len(albums), 2)
-        self.assertEqual(albums[0].id, self.root_album.id)
-        self.assertEqual(albums[1].id, self.archives_album.id)
-
-        # Assert: check that there is only one photo: dog.png
-        gmedia_items = self.gphotos_client.media_items().search_for_media_items()
-        self.assertEqual(len(gmedia_items), 1)
-        self.assertEqual(gmedia_items[0].filename, 'dog.png')

@@ -258,7 +258,8 @@ class PhotosBackup:
         """
         root_diffs_tree_node = DiffsTreeNode()
         for diff in diffs:
-            albums_queue = deque(diff.album_name.split("/"))
+            album_segments = [s for s in diff.album_name.split("/") if s]
+            albums_queue = deque(album_segments)
             cur_diffs_tree_node = root_diffs_tree_node
 
             while len(albums_queue) > 0:
