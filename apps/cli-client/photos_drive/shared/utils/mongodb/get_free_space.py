@@ -1,14 +1,19 @@
 from pymongo.mongo_client import MongoClient
 
+from photos_drive.shared.features.llm.vector_stores.testing.mock_mongo_client import (
+    MockMongoClient,
+)
+
 BYTES_512MB = 536870912
 
 
-def get_free_space(mongodb_client: MongoClient) -> int:
+def get_free_space(mongodb_client: MongoClient | MockMongoClient) -> int:
     '''
     Returns the amount of free space in a Mongodb client
 
     Args:
-        mongodb_client (MongoClient): The MongoDB client
+        mongodb_client (MongoClient | MockMongoClient):
+            The MongoDB client
 
     Returns:
         int: The amount of space left

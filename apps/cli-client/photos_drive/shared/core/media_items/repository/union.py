@@ -4,6 +4,7 @@ from typing import Mapping
 from bson.objectid import ObjectId
 
 from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.databases.mongodb import MongoDBClientsRepository
 from photos_drive.shared.core.media_items.media_item import MediaItem
 from photos_drive.shared.core.media_items.media_item_id import MediaItemId
 from photos_drive.shared.core.media_items.repository.base import (
@@ -11,6 +12,9 @@ from photos_drive.shared.core.media_items.repository.base import (
     FindMediaItemRequest,
     MediaItemsRepository,
     UpdateMediaItemRequest,
+)
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
 )
 
 
@@ -91,3 +95,24 @@ class UnionMediaItemsRepository(MediaItemsRepository):
             if client_id not in self._client_id_to_repo:
                 raise ValueError(f"No repository found for client {client_id}")
             self._client_id_to_repo[client_id].delete_many_media_items(client_ids)
+
+
+def create_union_media_items_repository_from_db_clients(
+    mongodb_clients_repo: MongoDBClientsRepository,
+) -> UnionMediaItemsRepository:
+    """
+    Creates a UnionMediaItemsRepository from a list of database clients.
+
+    Args:
+        mongodb_clients_repo (MongoDBClientsRepository):
+            The repository of MongoDB clients.
+
+    Returns:
+        UnionMediaItemsRepository: A UnionMediaItemsRepository.
+    """
+    return UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, client, mongodb_clients_repo)
+            for (client_id, client) in mongodb_clients_repo.get_all_clients()
+        ]
+    )

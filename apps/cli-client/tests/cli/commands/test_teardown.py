@@ -11,8 +11,8 @@ from photos_drive.cli.app import build_app
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.repository.base import CreateMediaItemRequest
 from photos_drive.shared.core.media_items.repository.mongodb import (
@@ -53,7 +53,7 @@ class TestTeardownCli(unittest.TestCase):
             self.fake_gitems_repo_2, "client2@gmail.com"
         )
 
-        self.mongodb_clients_repo = MongoDbClientsRepository()
+        self.mongodb_clients_repo = MongoDBClientsRepository()
         self.mongodb_clients_repo.add_mongodb_client(
             self.mongodb_client_id_1, self.mock_mongo_client_1
         )
@@ -71,10 +71,14 @@ class TestTeardownCli(unittest.TestCase):
 
         # 2. Initialize repositories for seeding
         self.albums_repo_1 = MongoDBAlbumsRepository(
-            self.mongodb_client_id_1, self.mongodb_clients_repo
+            self.mongodb_client_id_1,
+            self.mock_mongo_client_1,
+            self.mongodb_clients_repo,
         )
         self.media_items_repo_1 = MongoDBMediaItemsRepository(
-            self.mongodb_client_id_1, self.mongodb_clients_repo
+            self.mongodb_client_id_1,
+            self.mock_mongo_client_1,
+            self.mongodb_clients_repo,
         )
 
         # Create root album for Client 1
@@ -124,7 +128,7 @@ class TestTeardownCli(unittest.TestCase):
         # 4. Apply global patches
         self.patchers = [
             patch.object(
-                MongoDbClientsRepository,
+                MongoDBClientsRepository,
                 "build_from_config",
                 return_value=self.mongodb_clients_repo,
             ),
@@ -167,7 +171,9 @@ class TestTeardownCli(unittest.TestCase):
 
         # 2. Seed Client 2
         albums_repo_2 = MongoDBAlbumsRepository(
-            self.mongodb_client_id_2, self.mongodb_clients_repo
+            self.mongodb_client_id_2,
+            self.mongodb_clients_repo.get_client_by_id(self.mongodb_client_id_2),
+            self.mongodb_clients_repo,
         )
         albums_repo_2.create_album("Other", None)
 

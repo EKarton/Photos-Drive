@@ -10,10 +10,10 @@ from photos_drive.shared.core.albums.album_id import album_id_to_string
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
-)
 from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
+)
 from photos_drive.shared.core.media_items.gps_location import GpsLocation
 from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,
@@ -71,7 +71,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
         mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
 
@@ -84,16 +84,28 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_1_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_1_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -306,7 +318,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
         mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
 
@@ -319,16 +331,28 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_1_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_1_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -451,7 +475,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
         mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
 
@@ -464,16 +488,26 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_1_id, mongodb_client_1, mongodb_clients_repo
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -606,7 +640,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         mongodb_client_id = ObjectId()
         mongodb_client = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
 
         gphotos_client_id = ObjectId()
@@ -614,16 +648,28 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -718,7 +764,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         mongodb_client_id = ObjectId()
         mongodb_client = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
 
         gphotos_client_id = ObjectId()
@@ -726,16 +772,28 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -859,7 +917,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         mongodb_client_id = ObjectId()
         mongodb_client = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
 
         gphotos_client_id = ObjectId()
@@ -867,16 +925,28 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )

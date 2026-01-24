@@ -11,8 +11,8 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.storage.gphotos.client import GPhotosClientV2
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
@@ -67,7 +67,7 @@ def teardown(
         return
 
     config = build_config_from_options(config_file, config_mongodb)
-    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    mongodb_clients_repo = MongoDBClientsRepository.build_from_config(config)
     gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
     root_album_id = config.get_root_album_id()
 

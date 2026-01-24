@@ -1,28 +1,11 @@
 from abc import ABC, abstractmethod
+import logging
+from types import TracebackType
 
-from bson.objectid import ObjectId
+logger = logging.getLogger(__name__)
 
 
-class ClientsRepository(ABC):
-    @abstractmethod
-    def find_id_of_client_with_most_space(self) -> ObjectId:
-        """
-        Returns the client ID with the most amount of space.
-
-        Returns:
-            ObjectId: the client ID with the most amount of space.
-        """
-
-    @abstractmethod
-    def get_free_space_for_all_clients(self) -> list[tuple[ObjectId, int]]:
-        '''
-        Returns a list of free spaces for each client ID.
-
-        Returns:
-            tuple[ObjectId, int]: A list tuples, where each tuple is a client ID
-                and their free space
-        '''
-
+class TransactionsRepository(ABC):
     @abstractmethod
     def start_transactions(self):
         '''
@@ -47,3 +30,25 @@ class ClientsRepository(ABC):
         Commits the transactions and ends the session.
         Note: it must call start_transactions() first before calling this method.
         '''
+
+
+class TransactionsContext:
+    def __init__(self, repo: TransactionsRepository):
+        self.__repo = repo
+
+    def __enter__(self):
+        self.__repo.start_transactions()
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ):
+        if exc_type:
+            logger.error(f"Aborting transaction due to error: {exc_value}")
+            self.__repo.abort_and_end_transactions()
+            logger.error("Transaction aborted")
+        else:
+            self.__repo.commit_and_end_transactions()
+            logger.debug("Commited transactions")

@@ -4,8 +4,8 @@ import unittest
 from bson import ObjectId
 
 from photos_drive.shared.core.albums.album_id import AlbumId, album_id_to_string
-from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.gps_location import GpsLocation
 from photos_drive.shared.core.media_items.media_item import MediaItem
@@ -46,9 +46,11 @@ class TestMongoDBMapCellsRepository(unittest.TestCase):
 
     def setUp(self):
         self.mongo_client = create_mock_mongo_client()
-        self.clients_repo = MongoDbClientsRepository()
+        self.clients_repo = MongoDBClientsRepository()
         self.clients_repo.add_mongodb_client(MONGO_CLIENT_ID, self.mongo_client)
-        self.repo = MongoDBMapCellsRepository(MONGO_CLIENT_ID, self.clients_repo)
+        self.repo = MongoDBMapCellsRepository(
+            MONGO_CLIENT_ID, self.mongo_client, self.clients_repo
+        )
 
     def test_add_media_item__inserts_cells_at_all_resolutions(self):
         self.repo.add_media_item(MEDIA_ITEM)

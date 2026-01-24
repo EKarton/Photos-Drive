@@ -4,10 +4,10 @@ from unittest.mock import Mock
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
-from photos_drive.shared.core.clients.transactions_context import (
+from photos_drive.shared.core.databases.transactions import (
     TransactionsContext,
 )
 from photos_drive.shared.core.testing import (
@@ -21,7 +21,7 @@ class TestTransactionsContext(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbClientsRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
 
@@ -40,7 +40,7 @@ class TestTransactionsContext(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbClientsRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
 
