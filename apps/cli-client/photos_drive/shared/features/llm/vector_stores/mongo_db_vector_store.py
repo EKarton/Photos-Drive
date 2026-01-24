@@ -10,6 +10,7 @@ from pymongo.errors import CollectionInvalid
 from pymongo.operations import SearchIndexModel
 from typing_extensions import override
 
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from photos_drive.shared.core.media_items.media_item_id import (
     MediaItemId,
     media_item_id_to_string,
@@ -27,8 +28,6 @@ from photos_drive.shared.features.llm.vector_stores.testing.mock_mongo_client im
 )
 
 logger = logging.getLogger(__name__)
-
-BYTES_512MB = 536870912
 
 EMBEDDING_INDEX_NAME = 'vector_index'
 
@@ -102,15 +101,7 @@ class MongoDbVectorStore(BaseVectorStore):
 
     @override
     def get_available_space(self) -> int:
-        db = self._mongodb_client[self._db_name]
-        db_stats = db.command({'dbStats': 1, 'freeStorage': 1})
-        raw_total_free_storage = db_stats.get("totalFreeStorageSize", 0)
-
-        if raw_total_free_storage == 0:
-            # Fallback: just use arbitrary 512MB limit if unavailable
-            raw_total_free_storage = BYTES_512MB - db_stats.get("storageSize", 0)
-
-        return raw_total_free_storage
+        return get_free_space(self._mongodb_client)
 
     @override
     def add_media_item_embeddings(

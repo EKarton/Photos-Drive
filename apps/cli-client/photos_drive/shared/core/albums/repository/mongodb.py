@@ -37,7 +37,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
             client_id (ObjectId): The client ID that this repo is connected to.
             mongodb_client (pymongo.MongoClient): The MongoDB client.
             mongodb_transactions_repository (MongoDbTransactionRepository):
-                A repo of mongo db clients that stores transactions.
+                A repo of transactions from all MongoDB clients.
         """
         self._client_id = client_id
         self._mongodb_transactions_repository = mongodb_transactions_repository

@@ -48,7 +48,9 @@ class TestMongoDBMapCellsRepository(unittest.TestCase):
         self.mongo_client = create_mock_mongo_client()
         self.clients_repo = MongoDbTransactionRepository()
         self.clients_repo.add_mongodb_client(MONGO_CLIENT_ID, self.mongo_client)
-        self.repo = MongoDBMapCellsRepository(MONGO_CLIENT_ID, self.clients_repo)
+        self.repo = MongoDBMapCellsRepository(
+            MONGO_CLIENT_ID, self.mongo_client, self.clients_repo
+        )
 
     def test_add_media_item__inserts_cells_at_all_resolutions(self):
         self.repo.add_media_item(MEDIA_ITEM)

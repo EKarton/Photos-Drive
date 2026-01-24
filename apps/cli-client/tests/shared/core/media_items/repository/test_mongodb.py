@@ -63,7 +63,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             self.mongodb_client_id, self.mongodb_client
         )
         self.repo = MongoDBMediaItemsRepository(
-            self.mongodb_client_id, self.mongodb_clients_repo
+            self.mongodb_client_id, self.mongodb_client, self.mongodb_clients_repo
         )
 
     def test_get_media_item_by_id(self):

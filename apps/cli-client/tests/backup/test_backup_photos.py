@@ -91,13 +91,21 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -330,13 +338,21 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -477,13 +493,21 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -631,13 +655,21 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -747,13 +779,21 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
@@ -892,13 +932,21 @@ class TestPhotosBackup(ParametrizedTestCase):
         )
         media_items_repo = UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                MongoDBMediaItemsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
         map_cells_repo = UnionMapCellsRepository(
             [
-                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                MongoDBMapCellsRepository(
+                    client_id,
+                    mongodb_clients_repo.get_client_by_id(client_id),
+                    mongodb_clients_repo,
+                )
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )

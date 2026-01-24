@@ -63,7 +63,11 @@ class SystemCleanerTests(unittest.TestCase):
             mongodb_clients_repo.get_client_by_id(client_id),
             mongodb_clients_repo,
         )
-        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -151,7 +155,11 @@ class SystemCleanerTests(unittest.TestCase):
             mongodb_clients_repo.get_client_by_id(client_id),
             mongodb_clients_repo,
         )
-        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -276,7 +284,11 @@ class SystemCleanerTests(unittest.TestCase):
             mongodb_clients_repo.get_client_by_id(client_id),
             mongodb_clients_repo,
         )
-        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -405,7 +417,11 @@ class SystemCleanerTests(unittest.TestCase):
             mongodb_clients_repo.get_client_by_id(client_id),
             mongodb_clients_repo,
         )
-        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -459,7 +475,11 @@ class SystemCleanerTests(unittest.TestCase):
             mongodb_clients_repo.get_client_by_id(client_id),
             mongodb_clients_repo,
         )
-        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -548,7 +568,11 @@ class SystemCleanerTests(unittest.TestCase):
             mongodb_clients_repo.get_client_by_id(client_id),
             mongodb_clients_repo,
         )
-        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
 
         # Test setup 2: Set up the root album and archives album
         root_album = albums_repo.create_album('', None)

@@ -5,14 +5,12 @@ from pymongo import MongoClient
 import typer
 from typing_extensions import Annotated
 
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from photos_drive.clean.clean_system import TRASH_ALBUM_TITLE
 from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
-)
-from photos_drive.shared.core.clients.mongodb import (
-    BYTES_512MB,
 )
 from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
@@ -86,13 +84,9 @@ def __get_mongodb_accounts_table(config: Config) -> PrettyTable:
         client: MongoClient = MongoClient(mongodb_config.read_write_connection_string)
         db = client["photos_drive"]
         db_stats = db.command({"dbStats": 1, 'freeStorage': 1})
-        raw_total_free_storage = db_stats["totalFreeStorageSize"]
         usage = db_stats["storageSize"]
         num_objects = db_stats['objects']
-
-        free_space = raw_total_free_storage
-        if raw_total_free_storage == 0:
-            free_space = BYTES_512MB - usage
+        free_space = get_free_space(client)
 
         table.add_row(
             [mongodb_config.id, mongodb_config.name, free_space, usage, num_objects]

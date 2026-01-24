@@ -14,8 +14,6 @@ from photos_drive.shared.core.config.config import Config
 
 logger = logging.getLogger(__name__)
 
-BYTES_512MB = 536870912
-
 
 class MongoDbTransactionRepository(TransactionRepository):
     def __init__(self) -> None:

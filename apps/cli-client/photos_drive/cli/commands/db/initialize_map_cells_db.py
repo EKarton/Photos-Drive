@@ -78,14 +78,14 @@ def initialize_map_cells_db(
 
     media_items_repo = UnionMediaItemsRepository(
         [
-            MongoDBMediaItemsRepository(client_id, transaction_repository)
-            for (client_id, _) in transaction_repository.get_all_clients()
+            MongoDBMediaItemsRepository(client_id, client, transaction_repository)
+            for (client_id, client) in transaction_repository.get_all_clients()
         ]
     )
     tiles_repo = UnionMapCellsRepository(
         [
-            MongoDBMapCellsRepository(client_id, transaction_repository)
-            for (client_id, _) in transaction_repository.get_all_clients()
+            MongoDBMapCellsRepository(client_id, client, transaction_repository)
+            for (client_id, client) in transaction_repository.get_all_clients()
         ]
     )
     for media_item in media_items_repo.get_all_media_items():

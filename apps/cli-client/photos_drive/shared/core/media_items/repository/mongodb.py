@@ -42,7 +42,8 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
     def __init__(
         self,
         client_id: ObjectId,
-        mongodb_clients_repository: MongoDbTransactionRepository,
+        mongodb_client: pymongo.MongoClient,
+        mongodb_transactions_repository: MongoDbTransactionRepository,
         location_index_name=LOCATION_INDEX_NAME,
     ):
         """
@@ -50,14 +51,13 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
 
         Args:
             client_id (ObjectId): The client ID that this repo is connected to.
-            mongodb_clients_repository (MongoDbTransactionRepository):
-                A repo of mongo db clients that stores transactions.
+            mongodb_client (pymongo.MongoClient): The MongoDB client.
+            mongodb_transactions_repository (MongoDbTransactionRepository):
+                A repo of transactions from all MongoDB clients.
         """
         self._client_id = client_id
-        self._mongodb_clients_repository = mongodb_clients_repository
-        self._mongodb_client = self._mongodb_clients_repository.get_client_by_id(
-            client_id
-        )
+        self._mongodb_transactions_repository = mongodb_transactions_repository
+        self._mongodb_client = mongodb_client
         self._collection = self._mongodb_client["photos_drive"]["media_items"]
 
         if not self.__has_location_index(self._collection, location_index_name):
@@ -80,7 +80,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         if id.client_id != self._client_id:
             raise ValueError(f"Media item {id} belongs to a different client")
 
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id,
         )
         raw_item = cast(
@@ -95,7 +95,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
     def get_all_media_items(self) -> list[MediaItem]:
         media_items: list[MediaItem] = []
 
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id,
         )
         for doc in self._collection.find(filter={}, session=session):
@@ -142,7 +142,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
                 }
             }
 
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id,
         )
         query = self._collection.find(filter=mongo_filter, session=session)
@@ -158,7 +158,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         return media_items
 
     def get_num_media_items_in_album(self, album_id: AlbumId) -> int:
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id,
         )
         return self._collection.count_documents(
@@ -166,7 +166,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         )
 
     def create_media_item(self, request: CreateMediaItemRequest) -> MediaItem:
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id,
         )
 
@@ -272,7 +272,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         if len(operations) == 0:
             return
 
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id,
         )
         result = self._collection.bulk_write(requests=operations, session=session)
@@ -287,7 +287,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         if id.client_id != self._client_id:
             raise ValueError(f"Media item {id} belongs to a different client")
 
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id
         )
         result = self._collection.delete_one({"_id": id.object_id}, session=session)
@@ -305,7 +305,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
                 raise ValueError(f"Media item {id} belongs to a different client")
             object_ids.append(id.object_id)
 
-        session = self._mongodb_clients_repository.get_session_for_client_id(
+        session = self._mongodb_transactions_repository.get_session_for_client_id(
             self._client_id
         )
         result = self._collection.delete_many(

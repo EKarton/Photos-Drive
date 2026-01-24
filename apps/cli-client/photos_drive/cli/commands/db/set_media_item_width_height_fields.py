@@ -106,8 +106,8 @@ def set_media_item_width_height_fields(
     )
     media_items_repo = UnionMediaItemsRepository(
         [
-            MongoDBMediaItemsRepository(client_id, transaction_repository)
-            for (client_id, _) in transaction_repository.get_all_clients()
+            MongoDBMediaItemsRepository(client_id, client, transaction_repository)
+            for (client_id, client) in transaction_repository.get_all_clients()
         ]
     )
 

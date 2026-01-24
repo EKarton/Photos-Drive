@@ -76,7 +76,9 @@ class TestTeardownCli(unittest.TestCase):
             self.mongodb_clients_repo,
         )
         self.media_items_repo_1 = MongoDBMediaItemsRepository(
-            self.mongodb_client_id_1, self.mongodb_clients_repo
+            self.mongodb_client_id_1,
+            self.mock_mongo_client_1,
+            self.mongodb_clients_repo,
         )
 
         # Create root album for Client 1
