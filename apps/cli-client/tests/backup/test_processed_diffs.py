@@ -8,6 +8,7 @@ from photos_drive.backup.processed_diffs import (
     DiffsProcessor,
     ProcessedDiff,
 )
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
 from photos_drive.shared.features.llm.models.testing.fake_image_captions import (
     FAKE_CAPTIONS,
     FakeImageCaptions,
@@ -16,7 +17,6 @@ from photos_drive.shared.features.llm.models.testing.fake_image_embedder import 
     FAKE_EMBEDDING,
     FakeImageEmbedder,
 )
-from photos_drive.shared.core.metadata.media_items.gps_location import GpsLocation
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
 
 MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)

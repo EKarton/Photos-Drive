@@ -4,7 +4,7 @@ import uuid
 
 from dacite import from_dict
 
-from photos_drive.shared.core.metadata.albums.albums import Album
+from photos_drive.shared.core.albums.albums import Album
 from photos_drive.shared.core.storage.gphotos.media_items import (
     MediaItem,
     UploadedPhotosToGPhotosResult,

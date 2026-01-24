@@ -2,15 +2,15 @@ from bson.objectid import ObjectId
 import numpy as np
 from typing_extensions import override
 
+from photos_drive.shared.core.media_items.media_item_id import (
+    MediaItemId,
+)
 from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,
     MediaItemEmbedding,
     MediaItemEmbeddingId,
     QueryMediaItemEmbeddingRequest,
-)
-from photos_drive.shared.core.metadata.media_items.media_item_id import (
-    MediaItemId,
 )
 
 DEFAULT_VECTOR_STORE_ID = ObjectId()

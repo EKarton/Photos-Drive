@@ -10,6 +10,11 @@ from pymongo.errors import CollectionInvalid
 from pymongo.operations import SearchIndexModel
 from typing_extensions import override
 
+from photos_drive.shared.core.media_items.media_item_id import (
+    MediaItemId,
+    media_item_id_to_string,
+    parse_string_to_media_item_id,
+)
 from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     CreateMediaItemEmbeddingRequest,
@@ -19,11 +24,6 @@ from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
 )
 from photos_drive.shared.features.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
-)
-from photos_drive.shared.core.metadata.media_items.media_item_id import (
-    MediaItemId,
-    media_item_id_to_string,
-    parse_string_to_media_item_id,
 )
 
 logger = logging.getLogger(__name__)

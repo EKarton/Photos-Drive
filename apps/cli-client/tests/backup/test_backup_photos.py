@@ -6,7 +6,31 @@ from unittest_parametrize import ParametrizedTestCase, parametrize
 
 from photos_drive.backup.backup_photos import PhotosBackup
 from photos_drive.backup.processed_diffs import ProcessedDiff
+from photos_drive.shared.core.albums.album_id import album_id_to_string
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
+)
+from photos_drive.shared.core.clients.mongodb import (
+    MongoDbClientsRepository,
+)
 from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
+from photos_drive.shared.core.media_items.repository.base import (
+    CreateMediaItemRequest,
+)
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.testing import (
+    FakeGPhotosClient,
+    FakeItemsRepository,
+)
+from photos_drive.shared.core.testing import (
+    create_mock_mongo_client,
+)
 from photos_drive.shared.features.llm.models.testing.fake_image_captions import (
     FAKE_CAPTIONS,
 )
@@ -16,32 +40,8 @@ from photos_drive.shared.features.llm.models.testing.fake_image_embedder import 
 from photos_drive.shared.features.llm.vector_stores.testing.fake_vector_store import (
     FakeVectorStore,
 )
-from photos_drive.shared.core.metadata.albums.album_id import album_id_to_string
-from photos_drive.shared.core.metadata.albums.repository.mongodb import (
-    MongoDBAlbumsRepository,
-)
-from photos_drive.shared.core.metadata.clients.mongodb import (
-    MongoDbClientsRepository,
-)
 from photos_drive.shared.features.maps.repository.mongodb import (
     MapCellsRepositoryImpl,
-)
-from photos_drive.shared.core.metadata.media_items.gps_location import GpsLocation
-from photos_drive.shared.core.metadata.media_items.repository.base import (
-    CreateMediaItemRequest,
-)
-from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
-    MongoDBMediaItemsRepository,
-)
-from photos_drive.shared.core.metadata.testing import (
-    create_mock_mongo_client,
-)
-from photos_drive.shared.core.storage.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
-from photos_drive.shared.core.storage.gphotos.testing import (
-    FakeGPhotosClient,
-    FakeItemsRepository,
 )
 
 parametrize_use_parallel_uploads = parametrize(

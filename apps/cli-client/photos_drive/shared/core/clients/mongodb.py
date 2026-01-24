@@ -7,10 +7,10 @@ from pymongo.mongo_client import MongoClient
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 
-from photos_drive.shared.core.config.config import Config
-from photos_drive.shared.core.metadata.clients.base import (
+from photos_drive.shared.core.clients.base import (
     ClientsRepository,
 )
+from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
 logger = logging.getLogger(__name__)

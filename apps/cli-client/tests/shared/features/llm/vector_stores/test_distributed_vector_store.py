@@ -4,6 +4,7 @@ import unittest
 from bson.objectid import ObjectId
 import numpy as np
 
+from photos_drive.shared.core.media_items.media_item_id import MediaItemId
 from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
     CreateMediaItemEmbeddingRequest,
     QueryMediaItemEmbeddingRequest,
@@ -17,7 +18,6 @@ from photos_drive.shared.features.llm.vector_stores.mongo_db_vector_store import
 from photos_drive.shared.features.llm.vector_stores.testing.mock_mongo_client import (
     MockMongoClient,
 )
-from photos_drive.shared.core.metadata.media_items.media_item_id import MediaItemId
 
 MOCK_MEDIA_ITEM_ID_1 = MediaItemId(ObjectId(), ObjectId())
 

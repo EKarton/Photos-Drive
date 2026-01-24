@@ -3,19 +3,19 @@ import unittest
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId, album_id_to_string
-from photos_drive.shared.core.metadata.albums.repository.base import (
+from photos_drive.shared.core.albums.album_id import AlbumId, album_id_to_string
+from photos_drive.shared.core.albums.repository.base import (
     AlbumsRepository,
     UpdateAlbumRequest,
     UpdatedAlbumFields,
 )
-from photos_drive.shared.core.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.core.metadata.testing import (
+from photos_drive.shared.core.testing import (
     create_mock_mongo_client,
 )
 

@@ -7,9 +7,11 @@ import numpy as np
 
 from photos_drive.backup.diffs_assignments import DiffsAssigner
 from photos_drive.backup.processed_diffs import ProcessedDiff
-from photos_drive.shared.features.llm.models.testing.fake_image_captions import FAKE_CAPTIONS
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
+)
+from photos_drive.shared.features.llm.models.testing.fake_image_captions import (
+    FAKE_CAPTIONS,
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'

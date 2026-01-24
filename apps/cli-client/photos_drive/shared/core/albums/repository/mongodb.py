@@ -4,19 +4,19 @@ from typing import Any, Dict, Mapping, cast
 from bson.objectid import ObjectId
 import pymongo
 
-from photos_drive.shared.core.metadata.albums.album_id import (
+from photos_drive.shared.core.albums.album_id import (
     AlbumId,
     album_id_to_string,
     parse_string_to_album_id,
 )
-from photos_drive.shared.core.metadata.albums.albums import Album
-from photos_drive.shared.core.metadata.albums.repository.base import (
+from photos_drive.shared.core.albums.albums import Album
+from photos_drive.shared.core.albums.repository.base import (
     AlbumsRepository,
     UpdateAlbumRequest,
     UpdatedAlbumFields,
     logger,
 )
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
 

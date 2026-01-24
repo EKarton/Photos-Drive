@@ -6,15 +6,15 @@ from bson.objectid import ObjectId
 import mongomock
 from pymongo import MongoClient
 
+from photos_drive.shared.core.clients.mongodb import (
+    BYTES_512MB,
+    MongoDbClientsRepository,
+)
 from photos_drive.shared.core.config.config import (
     AddMongoDbConfigRequest,
 )
 from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.core.metadata.clients.mongodb import (
-    BYTES_512MB,
-    MongoDbClientsRepository,
-)
-from photos_drive.shared.core.metadata.testing import (
+from photos_drive.shared.core.testing import (
     create_mock_mongo_client,
 )
 

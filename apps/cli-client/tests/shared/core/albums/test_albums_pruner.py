@@ -3,25 +3,25 @@ import unittest
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.core.metadata.albums.albums_pruner import AlbumsPruner
-from photos_drive.shared.core.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
+from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.core.metadata.media_items.repository.base import (
+from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,
 )
-from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
+from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
-)
-from photos_drive.shared.core.metadata.testing import (
-    create_mock_mongo_client,
 )
 from photos_drive.shared.core.storage.gphotos.testing import (
     FakeGPhotosClient,
     FakeItemsRepository,
+)
+from photos_drive.shared.core.testing import (
+    create_mock_mongo_client,
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'

@@ -8,22 +8,19 @@ from photos_drive.clean.clean_system import (
     GPhotosMediaItemKey,
     SystemCleaner,
 )
-from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
-from photos_drive.shared.core.metadata.albums.repository.mongodb import (
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.core.metadata.media_items.repository.base import (
+from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,
 )
-from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
+from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
-)
-from photos_drive.shared.core.metadata.testing.mock_mongo_client import (
-    create_mock_mongo_client,
 )
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
@@ -33,6 +30,9 @@ from photos_drive.shared.core.storage.gphotos.testing import (
 )
 from photos_drive.shared.core.storage.gphotos.testing.fake_client import (
     FakeGPhotosClient,
+)
+from photos_drive.shared.core.testing.mock_mongo_client import (
+    create_mock_mongo_client,
 )
 
 MOCK_FILE_HASH = b'\x8a\x19\xdd\xdeg\xdd\x96\xf2'

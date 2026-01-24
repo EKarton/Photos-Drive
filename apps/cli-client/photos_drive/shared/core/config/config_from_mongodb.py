@@ -6,6 +6,7 @@ from google.oauth2.credentials import Credentials
 from pymongo.mongo_client import MongoClient
 from typing_extensions import override
 
+from photos_drive.shared.core.albums.album_id import AlbumId
 from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -21,7 +22,6 @@ from photos_drive.shared.core.config.config import (
     UpdateVectorStoreConfigRequest,
     VectorStoreConfig,
 )
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
 
 logger = logging.getLogger(__name__)
 

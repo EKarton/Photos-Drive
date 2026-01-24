@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import logging
 from typing import Optional
 
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
-from photos_drive.shared.core.metadata.albums.albums import Album
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.albums import Album
 
 logger = logging.getLogger(__name__)
 

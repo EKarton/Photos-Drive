@@ -4,6 +4,7 @@ import unittest
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 
+from photos_drive.shared.core.albums.album_id import AlbumId
 from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -14,8 +15,7 @@ from photos_drive.shared.core.config.config import (
 from photos_drive.shared.core.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
-from photos_drive.shared.core.metadata.testing import (
+from photos_drive.shared.core.testing import (
     create_mock_mongo_client,
 )
 

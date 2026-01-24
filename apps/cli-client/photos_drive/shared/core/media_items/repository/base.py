@@ -5,11 +5,13 @@ from typing import Optional
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.features.llm.vector_stores.base_vector_store import MediaItemEmbeddingId
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
-from photos_drive.shared.core.metadata.media_items.gps_location import GpsLocation
-from photos_drive.shared.core.metadata.media_items.media_item import MediaItem
-from photos_drive.shared.core.metadata.media_items.media_item_id import MediaItemId
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
+from photos_drive.shared.core.media_items.media_item import MediaItem
+from photos_drive.shared.core.media_items.media_item_id import MediaItemId
+from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
+    MediaItemEmbeddingId,
+)
 
 
 @dataclass(frozen=True)

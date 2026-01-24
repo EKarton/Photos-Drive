@@ -34,7 +34,7 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
 1. To lint your code, run:
 
    ```bash
-   poetry run mypy . && poetry run flake8 && poetry run isort . && poetry run black .
+   poetry run mypy . && poetry run flake8 . && poetry run isort . && poetry run black .
    ```
 
 1. To run all tests and code coverage, run:

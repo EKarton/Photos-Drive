@@ -13,8 +13,8 @@ from photos_drive.cli.commands.llms.tools.media_item import (
     MediaItemModel,
     dataclass_to_pydantic_media_item,
 )
-from photos_drive.shared.core.metadata.media_items.gps_location import GpsLocation
-from photos_drive.shared.core.metadata.media_items.repository.base import (
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
+from photos_drive.shared.core.media_items.repository.base import (
     FindMediaItemRequest,
     LocationRange,
     MediaItemsRepository,

@@ -5,7 +5,7 @@ from typing import Optional
 from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.album_id import AlbumId
 
 
 @dataclass(frozen=True)

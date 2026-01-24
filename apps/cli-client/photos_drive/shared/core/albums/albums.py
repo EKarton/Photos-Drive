@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.album_id import AlbumId
 
 
 @dataclass(frozen=True)

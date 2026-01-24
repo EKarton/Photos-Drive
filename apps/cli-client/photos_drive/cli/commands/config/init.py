@@ -12,6 +12,12 @@ from photos_drive.cli.shared.inputs import (
     prompt_user_for_options,
 )
 from photos_drive.cli.shared.logging import setup_logging
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
+)
+from photos_drive.shared.core.clients.mongodb import (
+    MongoDbClientsRepository,
+)
 from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -23,12 +29,6 @@ from photos_drive.shared.core.config.config_from_file import (
 )
 from photos_drive.shared.core.config.config_from_mongodb import (
     ConfigFromMongoDb,
-)
-from photos_drive.shared.core.metadata.albums.repository.mongodb import (
-    MongoDBAlbumsRepository,
-)
-from photos_drive.shared.core.metadata.clients.mongodb import (
-    MongoDbClientsRepository,
 )
 
 logger = logging.getLogger(__name__)

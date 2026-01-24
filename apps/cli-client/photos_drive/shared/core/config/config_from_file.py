@@ -4,6 +4,7 @@ from bson.objectid import ObjectId
 from google.oauth2.credentials import Credentials
 from typing_extensions import override
 
+from photos_drive.shared.core.albums.album_id import AlbumId
 from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -19,7 +20,6 @@ from photos_drive.shared.core.config.config import (
     UpdateVectorStoreConfigRequest,
     VectorStoreConfig,
 )
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
 
 GPHOTOS_CONFIG_TYPE = "gphotos_config"
 MONGODB_CONFIG_TYPE = "mongodb_config"

@@ -7,28 +7,28 @@ from bson import Binary
 from bson.objectid import ObjectId
 import pymongo
 
-from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
-    embedding_id_to_string,
-    parse_string_to_embedding_id,
-)
-from photos_drive.shared.core.metadata.albums.album_id import (
+from photos_drive.shared.core.albums.album_id import (
     AlbumId,
     album_id_to_string,
     parse_string_to_album_id,
 )
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.core.metadata.media_items.gps_location import GpsLocation
-from photos_drive.shared.core.metadata.media_items.media_item import (
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
+from photos_drive.shared.core.media_items.media_item import (
     MediaItem,
 )
-from photos_drive.shared.core.metadata.media_items.media_item_id import MediaItemId
-from photos_drive.shared.core.metadata.media_items.repository.base import (
+from photos_drive.shared.core.media_items.media_item_id import MediaItemId
+from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,
     FindMediaItemRequest,
     MediaItemsRepository,
     UpdateMediaItemRequest,
+)
+from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
+    embedding_id_to_string,
+    parse_string_to_embedding_id,
 )
 
 logger = logging.getLogger(__name__)

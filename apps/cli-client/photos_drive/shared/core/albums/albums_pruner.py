@@ -1,8 +1,8 @@
 from typing import cast
 
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
-from photos_drive.shared.core.metadata.albums.repository.base import AlbumsRepository
-from photos_drive.shared.core.metadata.media_items.repository.base import (
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.repository.base import AlbumsRepository
+from photos_drive.shared.core.media_items.repository.base import (
     MediaItemsRepository,
 )
 

@@ -3,21 +3,21 @@ import unittest
 
 from bson import ObjectId
 
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId, album_id_to_string
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.albums.album_id import AlbumId, album_id_to_string
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
+from photos_drive.shared.core.media_items.media_item import MediaItem
+from photos_drive.shared.core.media_items.media_item_id import (
+    MediaItemId,
+    media_item_id_to_string,
+)
+from photos_drive.shared.core.testing import create_mock_mongo_client
 from photos_drive.shared.features.maps.repository.mongodb import (
     MAX_CELL_RESOLUTION,
     MapCellsRepositoryImpl,
 )
-from photos_drive.shared.core.metadata.media_items.gps_location import GpsLocation
-from photos_drive.shared.core.metadata.media_items.media_item import MediaItem
-from photos_drive.shared.core.metadata.media_items.media_item_id import (
-    MediaItemId,
-    media_item_id_to_string,
-)
-from photos_drive.shared.core.metadata.testing import create_mock_mongo_client
 
 MONGO_CLIENT_ID = ObjectId("5f50c31e8a7d4b1c9c9b0b1a")
 

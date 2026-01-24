@@ -16,7 +16,24 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.features.llm.models.blip_image_captions import BlipImageCaptions
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
+)
+from photos_drive.shared.core.clients.mongodb import (
+    MongoDbClientsRepository,
+)
+from photos_drive.shared.core.media_items.media_item_id import MediaItemId
+from photos_drive.shared.core.media_items.repository.base import (
+    FindMediaItemRequest,
+    UpdateMediaItemRequest,
+)
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.features.llm.models.blip_image_captions import (
+    BlipImageCaptions,
+)
 from photos_drive.shared.features.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
 )
@@ -28,21 +45,6 @@ from photos_drive.shared.features.llm.vector_stores.distributed_vector_store imp
 )
 from photos_drive.shared.features.llm.vector_stores.vector_store_builder import (
     config_to_vector_store,
-)
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
-from photos_drive.shared.core.metadata.albums.repository.mongodb import (
-    MongoDBAlbumsRepository,
-)
-from photos_drive.shared.core.metadata.clients.mongodb import (
-    MongoDbClientsRepository,
-)
-from photos_drive.shared.core.metadata.media_items.media_item_id import MediaItemId
-from photos_drive.shared.core.metadata.media_items.repository.base import (
-    FindMediaItemRequest,
-    UpdateMediaItemRequest,
-)
-from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
-    MongoDBMediaItemsRepository,
 )
 
 logger = logging.getLogger(__name__)

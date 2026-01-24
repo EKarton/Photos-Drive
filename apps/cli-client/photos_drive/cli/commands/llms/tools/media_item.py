@@ -2,10 +2,10 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from photos_drive.shared.core.metadata.albums import album_id
-from photos_drive.shared.core.metadata.media_items.gps_location import GpsLocation
-from photos_drive.shared.core.metadata.media_items.media_item import MediaItem
-from photos_drive.shared.core.metadata.media_items.media_item_id import (
+from photos_drive.shared.core.albums import album_id
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
+from photos_drive.shared.core.media_items.media_item import MediaItem
+from photos_drive.shared.core.media_items.media_item_id import (
     media_item_id_to_string,
 )
 

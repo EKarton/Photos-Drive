@@ -6,7 +6,7 @@ from typing import Optional
 from bson.objectid import ObjectId
 import numpy as np
 
-from photos_drive.shared.core.metadata.media_items.media_item_id import MediaItemId
+from photos_drive.shared.core.media_items.media_item_id import MediaItemId
 
 
 @dataclass(frozen=True)

@@ -2,7 +2,7 @@ import unittest
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.core.metadata.media_items.media_item_id import (
+from photos_drive.shared.core.media_items.media_item_id import (
     MediaItemId,
     media_item_id_to_string,
     parse_string_to_media_item_id,

@@ -4,7 +4,9 @@ from photos_drive.shared.core.config.config import (
     MongoDbVectorStoreConfig,
     VectorStoreConfig,
 )
-from photos_drive.shared.features.llm.vector_stores.base_vector_store import BaseVectorStore
+from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
+    BaseVectorStore,
+)
 from photos_drive.shared.features.llm.vector_stores.mongo_db_vector_store import (
     MongoDbVectorStore,
 )

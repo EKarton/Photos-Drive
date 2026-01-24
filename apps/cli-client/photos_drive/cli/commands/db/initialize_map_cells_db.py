@@ -8,14 +8,14 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
+)
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
 )
 from photos_drive.shared.features.maps.repository.mongodb import (
     MapCellsRepositoryImpl,
-)
-from photos_drive.shared.core.metadata.media_items.repository.mongodb import (
-    MongoDBMediaItemsRepository,
 )
 
 logger = logging.getLogger(__name__)

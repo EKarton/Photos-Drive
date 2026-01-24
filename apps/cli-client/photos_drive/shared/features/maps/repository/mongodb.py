@@ -4,16 +4,16 @@ from typing import Dict, cast
 from bson.objectid import ObjectId
 import h3
 
-from photos_drive.shared.core.metadata.albums.album_id import album_id_to_string
-from photos_drive.shared.core.metadata.clients.mongodb import (
+from photos_drive.shared.core.albums.album_id import album_id_to_string
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.features.maps.repository.base import MapCellsRepository
-from photos_drive.shared.core.metadata.media_items.media_item import MediaItem
-from photos_drive.shared.core.metadata.media_items.media_item_id import (
+from photos_drive.shared.core.media_items.media_item import MediaItem
+from photos_drive.shared.core.media_items.media_item_id import (
     MediaItemId,
     media_item_id_to_string,
 )
+from photos_drive.shared.features.maps.repository.base import MapCellsRepository
 
 MAX_CELL_RESOLUTION = 15
 

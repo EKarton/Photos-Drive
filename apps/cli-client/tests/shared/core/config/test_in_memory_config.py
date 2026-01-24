@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from bson import ObjectId
 from google.oauth2.credentials import Credentials
 
+from photos_drive.shared.core.albums.album_id import AlbumId
 from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
@@ -11,7 +12,6 @@ from photos_drive.shared.core.config.config import (
     UpdateMongoDbConfigRequest,
 )
 from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.core.metadata.albums.album_id import AlbumId
 
 
 class TestInMemoryConfig(unittest.TestCase):

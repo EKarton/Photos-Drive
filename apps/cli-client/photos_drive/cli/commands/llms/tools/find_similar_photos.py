@@ -13,16 +13,16 @@ from photos_drive.cli.commands.llms.tools.media_item import (
     MediaItemModel,
     dataclass_to_pydantic_media_item,
 )
+from photos_drive.shared.core.media_items.media_item_id import (
+    parse_string_to_media_item_id,
+)
+from photos_drive.shared.core.media_items.repository.base import (
+    MediaItemsRepository,
+)
 from photos_drive.shared.features.llm.models.image_embeddings import ImageEmbeddings
 from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
     BaseVectorStore,
     QueryMediaItemEmbeddingRequest,
-)
-from photos_drive.shared.core.metadata.media_items.media_item_id import (
-    parse_string_to_media_item_id,
-)
-from photos_drive.shared.core.metadata.media_items.repository.base import (
-    MediaItemsRepository,
 )
 
 DEFAULT_PROMPT = '''

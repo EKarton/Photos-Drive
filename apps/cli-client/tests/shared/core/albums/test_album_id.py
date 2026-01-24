@@ -2,7 +2,7 @@ import unittest
 
 from bson.objectid import ObjectId
 
-from photos_drive.shared.core.metadata.albums.album_id import (
+from photos_drive.shared.core.albums.album_id import (
     AlbumId,
     album_id_to_string,
     parse_string_to_album_id,
