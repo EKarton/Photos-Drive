@@ -33,7 +33,7 @@ from photos_drive.shared.core.albums.repository.union import (
     UnionAlbumsRepository,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.media_items.repository.mongodb import (
@@ -124,11 +124,11 @@ def sync(
     )
 
     config = build_config_from_options(config_file, config_mongodb)
-    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
     albums_repo = UnionAlbumsRepository(
         [
-            MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            MongoDBAlbumsRepository(client_id, transaction_repository)
+            for (client_id, _) in transaction_repository.get_all_clients()
         ]
     )
     diff_comparator = FolderSyncDiff(
@@ -136,8 +136,8 @@ def sync(
         albums_repo=albums_repo,
         media_items_repo=UnionMediaItemsRepository(
             [
-                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
-                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                MongoDBMediaItemsRepository(client_id, transaction_repository)
+                for (client_id, _) in transaction_repository.get_all_clients()
             ]
         ),
     )
@@ -197,24 +197,26 @@ def __backup_diffs_to_system(
     for batch in __chunked(processed_diffs, batch_size):
         try:
             logger.info(f'Backing up chunk {num_chunks_completed} / {num_total_chunks}')
-            mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+            transaction_repository = MongoDbTransactionRepository.build_from_config(
+                config
+            )
             gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
             albums_repo = UnionAlbumsRepository(
                 [
-                    MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-                    for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                    MongoDBAlbumsRepository(client_id, transaction_repository)
+                    for (client_id, _) in transaction_repository.get_all_clients()
                 ]
             )
             media_items_repo = UnionMediaItemsRepository(
                 [
-                    MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
-                    for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                    MongoDBMediaItemsRepository(client_id, transaction_repository)
+                    for (client_id, _) in transaction_repository.get_all_clients()
                 ]
             )
             map_cells_repository = UnionMapCellsRepository(
                 [
-                    MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
-                    for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                    MongoDBMapCellsRepository(client_id, transaction_repository)
+                    for (client_id, _) in transaction_repository.get_all_clients()
                 ]
             )
             vector_store = DistributedVectorStore(
@@ -232,7 +234,7 @@ def __backup_diffs_to_system(
                 map_cells_repository,
                 vector_store,
                 gphoto_clients_repo,
-                mongodb_clients_repo,
+                transaction_repository,
                 parallelize_uploads,
             )
 

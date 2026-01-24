@@ -8,17 +8,16 @@ from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 
 from photos_drive.shared.core.clients.base import (
-    ClientsRepository,
+    TransactionRepository,
 )
 from photos_drive.shared.core.config.config import Config
-from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
 logger = logging.getLogger(__name__)
 
 BYTES_512MB = 536870912
 
 
-class MongoDbClientsRepository(ClientsRepository):
+class MongoDbTransactionRepository(TransactionRepository):
     def __init__(self) -> None:
         self.__id_to_client: Dict[str, MongoClient] = {}
         self.__client_id_to_session: dict[ObjectId, ClientSession] = {}
@@ -27,17 +26,17 @@ class MongoDbClientsRepository(ClientsRepository):
     @staticmethod
     def build_from_config(
         config: Config,
-    ) -> "MongoDbClientsRepository":
+    ) -> "MongoDbTransactionRepository":
         """
-        A factory method that builds the MongoDbClientsRepository from the config.
+        A factory method that builds the MongoDbTransactionRepository from the config.
 
         Args:
             config (Config): The config
 
         Returns:
-            MongoDbClientsRepository: An instance of the Mongo DB clients repo.
+            MongoDbTransactionRepository: An instance of the Mongo DB clients repo.
         """
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
 
         for mongodb_config in config.get_mongodb_configs():
             mongodb_client: MongoClient = MongoClient(
@@ -82,31 +81,6 @@ class MongoDbClientsRepository(ClientsRepository):
         if str_id not in self.__id_to_client:
             raise ValueError(f"Cannot find MongoDB client {id}")
         return self.__id_to_client[str_id]
-
-    def find_id_of_client_with_most_space(self) -> ObjectId:
-        best_client_id = None
-        most_unused_space = float("-inf")
-
-        for client_id, free_space in self.get_free_space_for_all_clients():
-            if free_space <= 0:
-                continue
-
-            if free_space > most_unused_space:
-                best_client_id = client_id
-                most_unused_space = free_space
-
-        if best_client_id is None:
-            raise ValueError("No MongoDB client found with free space!")
-
-        return best_client_id
-
-    def get_free_space_for_all_clients(self) -> list[tuple[ObjectId, int]]:
-        free_spaces = []
-
-        for client_id, client in self.__id_to_client.items():
-            free_spaces.append((ObjectId(client_id), get_free_space(client)))
-
-        return free_spaces
 
     def get_all_clients(self) -> list[tuple[ObjectId, MongoClient]]:
         """

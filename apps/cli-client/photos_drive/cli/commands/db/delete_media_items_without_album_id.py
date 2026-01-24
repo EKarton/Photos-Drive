@@ -1,3 +1,4 @@
+from photos_drive.shared.core.clients.mongodb import MongoDbTransactionRepository
 import logging
 
 import typer
@@ -7,9 +8,6 @@ from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
-)
-from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,9 +54,9 @@ def delete_media_items_without_album_id(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
 
-    for _, client in mongodb_clients_repo.get_all_clients():
+    for _, client in transaction_repository.get_all_clients():
         for obj in client['photos_drive']['media_items'].find({}):
             if 'album_id' not in obj:
                 print('Deleting', obj)

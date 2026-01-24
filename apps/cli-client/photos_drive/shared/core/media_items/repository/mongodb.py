@@ -13,7 +13,7 @@ from photos_drive.shared.core.albums.album_id import (
     parse_string_to_album_id,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.media_items.gps_location import GpsLocation
 from photos_drive.shared.core.media_items.media_item import (
@@ -42,7 +42,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
     def __init__(
         self,
         client_id: ObjectId,
-        mongodb_clients_repository: MongoDbClientsRepository,
+        mongodb_clients_repository: MongoDbTransactionRepository,
         location_index_name=LOCATION_INDEX_NAME,
     ):
         """
@@ -50,7 +50,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
 
         Args:
             client_id (ObjectId): The client ID that this repo is connected to.
-            mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
+            mongodb_clients_repository (MongoDbTransactionRepository): A repo of mongo db
                 clients that stores albums.
         """
         self._client_id = client_id

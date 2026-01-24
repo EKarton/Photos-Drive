@@ -13,7 +13,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.core.media_items.repository.base import (
@@ -50,7 +50,7 @@ class FolderSyncDiffTests(TestCase):
         config = InMemoryConfig()
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
@@ -112,7 +112,7 @@ class FolderSyncDiffTests(TestCase):
         config = InMemoryConfig()
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
@@ -196,7 +196,7 @@ class FolderSyncDiffTests(TestCase):
         config = InMemoryConfig()
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
@@ -251,7 +251,7 @@ class FolderSyncDiffTests(TestCase):
         config = InMemoryConfig()
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
@@ -304,7 +304,7 @@ class FolderSyncDiffTests(TestCase):
         config = InMemoryConfig()
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
@@ -393,7 +393,7 @@ class FolderSyncDiffTests(TestCase):
         config = InMemoryConfig()
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)

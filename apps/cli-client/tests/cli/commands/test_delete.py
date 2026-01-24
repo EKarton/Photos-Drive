@@ -12,7 +12,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.media_items.repository.base import CreateMediaItemRequest
 from photos_drive.shared.core.media_items.repository.mongodb import (
@@ -46,7 +46,7 @@ class TestDeleteCli(unittest.TestCase):
         self.mock_mongo_client = create_mock_mongo_client(
             1000 * 1024 * 1024
         )  # 1GB free
-        self.mongodb_clients_repo = MongoDbClientsRepository()
+        self.mongodb_clients_repo = MongoDbTransactionRepository()
         self.mongodb_clients_repo.add_mongodb_client(
             self.mongodb_client_id, self.mock_mongo_client
         )
@@ -111,7 +111,7 @@ class TestDeleteCli(unittest.TestCase):
         # 6. Apply patches
         self.patchers = [
             patch.object(
-                MongoDbClientsRepository,
+                MongoDbTransactionRepository,
                 "build_from_config",
                 return_value=self.mongodb_clients_repo,
             ),

@@ -9,7 +9,7 @@ from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
@@ -68,9 +68,9 @@ def initialize_map_cells_db(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
 
-    for _, client in mongodb_clients_repo.get_all_clients():
+    for _, client in transaction_repository.get_all_clients():
         client['photos_drive']['tiles'].delete_many({})
         client['photos_drive']['map_cells'].create_index(
             [("cell_id", 1), ("album_id", 1), ("media_item_id", 1)]
@@ -78,14 +78,14 @@ def initialize_map_cells_db(
 
     media_items_repo = UnionMediaItemsRepository(
         [
-            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
-            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            MongoDBMediaItemsRepository(client_id, transaction_repository)
+            for (client_id, _) in transaction_repository.get_all_clients()
         ]
     )
     tiles_repo = UnionMapCellsRepository(
         [
-            MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
-            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            MongoDBMapCellsRepository(client_id, transaction_repository)
+            for (client_id, _) in transaction_repository.get_all_clients()
         ]
     )
     for media_item in media_items_repo.get_all_media_items():

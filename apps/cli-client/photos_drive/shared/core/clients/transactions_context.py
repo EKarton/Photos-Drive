@@ -2,14 +2,14 @@ import logging
 from types import TracebackType
 
 from photos_drive.shared.core.clients.base import (
-    ClientsRepository,
+    TransactionRepository,
 )
 
 logger = logging.getLogger(__name__)
 
 
 class TransactionsContext:
-    def __init__(self, repo: ClientsRepository):
+    def __init__(self, repo: TransactionRepository):
         self.__repo = repo
 
     def __enter__(self):

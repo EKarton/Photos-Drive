@@ -12,7 +12,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.media_items.repository.base import CreateMediaItemRequest
 from photos_drive.shared.core.media_items.repository.mongodb import (
@@ -37,7 +37,7 @@ class TestCleanCli(unittest.TestCase):
         # 1. Set up mock MongoDB and GPhotos environments
         self.mongodb_client_id = ObjectId()
         self.mock_mongo_client = create_mock_mongo_client(1000 * 1024 * 1024)
-        self.mongodb_clients_repo = MongoDbClientsRepository()
+        self.mongodb_clients_repo = MongoDbTransactionRepository()
         self.mongodb_clients_repo.add_mongodb_client(
             self.mongodb_client_id, self.mock_mongo_client
         )
@@ -96,7 +96,7 @@ class TestCleanCli(unittest.TestCase):
         # 4. Apply global patches
         self.patchers = [
             patch.object(
-                MongoDbClientsRepository,
+                MongoDbTransactionRepository,
                 "build_from_config",
                 return_value=self.mongodb_clients_repo,
             ),

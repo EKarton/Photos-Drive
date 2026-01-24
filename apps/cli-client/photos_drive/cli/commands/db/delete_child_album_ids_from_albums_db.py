@@ -9,7 +9,7 @@ from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,9 +56,9 @@ def delete_child_album_ids_from_albums_db(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
 
-    for _, client in mongodb_clients_repo.get_all_clients():
+    for _, client in transaction_repository.get_all_clients():
         for obj in client['photos_drive']['albums'].find({}):
             filter_obj = {"_id": obj["_id"]}
             update_obj = {"$unset": {"child_album_ids": 1}}

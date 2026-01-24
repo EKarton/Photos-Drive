@@ -17,7 +17,7 @@ from photos_drive.shared.core.albums.repository.base import (
     logger,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 
 
@@ -27,14 +27,14 @@ class MongoDBAlbumsRepository(AlbumsRepository):
     def __init__(
         self,
         client_id: ObjectId,
-        mongodb_clients_repository: MongoDbClientsRepository,
+        mongodb_clients_repository: MongoDbTransactionRepository,
     ):
         """
         Creates a AlbumsRepository
 
         Args:
             client_id (ObjectId): The client ID that this repo is connected to.
-            mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
+            mongodb_clients_repository (MongoDbTransactionRepository): A repo of mongo db
                 clients that stores albums.
         """
         self._client_id = client_id

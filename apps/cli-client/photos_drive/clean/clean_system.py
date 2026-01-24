@@ -9,7 +9,7 @@ from photos_drive.shared.core.albums.album_id import AlbumId
 from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
 from photos_drive.shared.core.albums.repository.base import AlbumsRepository
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.clients.transactions_context import (
     TransactionsContext,
@@ -80,7 +80,7 @@ class SystemCleaner:
         albums_repo: AlbumsRepository,
         media_items_repo: MediaItemsRepository,
         gphotos_clients_repo: GPhotosClientsRepository,
-        mongodb_clients_repo: MongoDbClientsRepository,
+        mongodb_clients_repo: MongoDbTransactionRepository,
     ):
         self.__config = config
         self.__albums_repo = albums_repo

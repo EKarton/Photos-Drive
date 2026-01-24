@@ -12,7 +12,7 @@ from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
@@ -31,7 +31,7 @@ from photos_drive.shared.core.testing.mock_mongo_client import (
 class TestUsageCli(unittest.TestCase):
     def setUp(self):
         # Test setup 1: Build the wrapper objects
-        mongodb_clients_repo = MongoDbClientsRepository()
+        mongodb_clients_repo = MongoDbTransactionRepository()
         mongodb_client_id = ObjectId()
         mongodb_client = create_mock_mongo_client(1000)
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
@@ -85,7 +85,7 @@ class TestUsageCli(unittest.TestCase):
         patch.object(MongoClient, '__new__', return_value=mongodb_client).start()
 
         patch.object(
-            MongoDbClientsRepository,
+            MongoDbTransactionRepository,
             'build_from_config',
             return_value=mongodb_clients_repo,
         ).start()

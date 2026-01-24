@@ -36,8 +36,6 @@ class UnionMapCellsRepository(MapCellsRepository):
         if not media_item.location:
             raise ValueError(f"No gps location for media item {media_item}")
 
-        # Find the repository with the most free space
-        # Note: This simple strategy mirrors the UnionAlbumsRepository implementation.
         target_repo = max(
             self._repositories, key=lambda repo: repo.get_available_free_space()
         )

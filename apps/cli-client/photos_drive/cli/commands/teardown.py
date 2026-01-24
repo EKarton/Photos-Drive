@@ -12,7 +12,7 @@ from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from photos_drive.shared.core.clients.mongodb import (
-    MongoDbClientsRepository,
+    MongoDbTransactionRepository,
 )
 from photos_drive.shared.core.storage.gphotos.client import GPhotosClientV2
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
@@ -67,12 +67,12 @@ def teardown(
         return
 
     config = build_config_from_options(config_file, config_mongodb)
-    mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
     gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
     root_album_id = config.get_root_album_id()
 
     # Delete all albums from DB except for the root album
-    for id, client in mongodb_clients_repo.get_all_clients():
+    for id, client in transaction_repository.get_all_clients():
         if root_album_id.client_id == id:
             client["photos_drive"]["albums"].delete_many(
                 {"_id": {"$ne": root_album_id.object_id}}
@@ -81,7 +81,7 @@ def teardown(
             client["photos_drive"]["albums"].delete_many({})
 
     # Delete all media items from the DB
-    for _, client in mongodb_clients_repo.get_all_clients():
+    for _, client in transaction_repository.get_all_clients():
         client["photos_drive"]["media_items"].delete_many({})
 
     # Put all the photos that Google Photos has uploaded into a folder

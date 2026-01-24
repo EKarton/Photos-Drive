@@ -20,7 +20,7 @@ from photos_drive.shared.core.albums.repository.base import (
     AlbumsRepository,
 )
 from photos_drive.shared.core.clients.base import (
-    ClientsRepository,
+    TransactionRepository,
 )
 from photos_drive.shared.core.clients.transactions_context import (
     TransactionsContext,
@@ -82,7 +82,7 @@ class PhotosBackup:
         map_cells_repo: MapCellsRepository,
         vector_store: BaseVectorStore,
         gphotos_client_repo: GPhotosClientsRepository,
-        clients_repo: ClientsRepository,
+        clients_repo: TransactionRepository,
         parallelize_uploads: bool = False,
     ):
         self.__config = config
