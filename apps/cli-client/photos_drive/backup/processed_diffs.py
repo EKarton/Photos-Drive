@@ -12,9 +12,9 @@ import numpy as np
 from tqdm import tqdm
 
 from photos_drive.backup.diffs import Diff, Modifier
-from photos_drive.shared.llm.models.image_captions import ImageCaptions
-from photos_drive.shared.llm.models.image_embeddings import ImageEmbeddings
-from photos_drive.shared.metadata.gps_location import GpsLocation
+from photos_drive.shared.core.media_items.gps_location import GpsLocation
+from photos_drive.shared.features.llm.models.image_captions import ImageCaptions
+from photos_drive.shared.features.llm.models.image_embeddings import ImageEmbeddings
 from photos_drive.shared.utils.dimensions.cv2_video_dimensions import (
     get_width_height_of_video,
 )
@@ -186,6 +186,9 @@ class DiffsProcessor:
             if x != '.' and x != os.sep:
                 pos = i
                 break
+        if pos == -1:
+            return ""
+
         album_name = album_name[pos:]
 
         # Convert album names like Photos\2010\Dog to Photos/2010/Dog

@@ -5,10 +5,10 @@ import mongomock
 from pymongo import MongoClient
 
 from photos_drive.cli.shared.config import build_config_from_options
-from photos_drive.shared.config.config_from_file import (
+from photos_drive.shared.core.config.config_from_file import (
     ConfigFromFile,
 )
-from photos_drive.shared.config.config_from_mongodb import (
+from photos_drive.shared.core.config.config_from_mongodb import (
     ConfigFromMongoDb,
 )
 

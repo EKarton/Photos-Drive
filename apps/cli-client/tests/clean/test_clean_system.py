@@ -8,30 +8,30 @@ from photos_drive.clean.clean_system import (
     GPhotosMediaItemKey,
     SystemCleaner,
 )
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
 )
-from photos_drive.shared.blob_store.gphotos.testing import (
-    FakeItemsRepository,
-)
-from photos_drive.shared.blob_store.gphotos.testing.fake_client import (
-    FakeGPhotosClient,
-)
-from photos_drive.shared.config.inmemory_config import InMemoryConfig
-from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.media_items_repository import (
-    CreateMediaItemRequest,
-)
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
+from photos_drive.shared.core.media_items.repository.base import (
+    CreateMediaItemRequest,
 )
-from photos_drive.shared.metadata.mongodb.testing.mock_mongo_client import (
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.testing import (
+    FakeItemsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.testing.fake_client import (
+    FakeGPhotosClient,
+)
+from photos_drive.shared.core.testing.mock_mongo_client import (
     create_mock_mongo_client,
 )
 
@@ -49,16 +49,17 @@ class SystemCleanerTests(unittest.TestCase):
     def test_clean_deletes_unattached_albums(self):
         # Test setup 1: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(
-            ObjectId(), create_mock_mongo_client(1000)
-        )
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(
+            client_id, create_mock_mongo_client(1000)
+        )
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -135,13 +136,14 @@ class SystemCleanerTests(unittest.TestCase):
     def test_clean_with_trash_album_deletes_unattached_media_items(self):
         # Test setup 1: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -255,13 +257,14 @@ class SystemCleanerTests(unittest.TestCase):
     def test_clean_moves_unattached_gmedia_items_to_trash_album(self):
         # Test setup 1: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -379,13 +382,14 @@ class SystemCleanerTests(unittest.TestCase):
     def test_clean_prunes_albums(self):
         # Test setup 1: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -428,13 +432,14 @@ class SystemCleanerTests(unittest.TestCase):
     ):
         # Test setup 1: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 2: Set up the root album
         root_album = albums_repo.create_album('', None)
@@ -512,13 +517,14 @@ class SystemCleanerTests(unittest.TestCase):
     def test_clean_fixes_albums_with_false_gmedia_item_ids(self):
         # Test setup 1: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
-        albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-        media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 2: Set up the root album and archives album
         root_album = albums_repo.create_album('', None)

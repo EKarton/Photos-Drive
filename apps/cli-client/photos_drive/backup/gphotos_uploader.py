@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 import concurrent
 from dataclasses import dataclass
 import logging
-from tqdm import tqdm
 
 from bson.objectid import ObjectId
+from tqdm import tqdm
 
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
 

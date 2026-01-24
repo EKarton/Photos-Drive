@@ -16,33 +16,41 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
-from photos_drive.shared.llm.models.open_clip_image_embeddings import (
-    OpenCLIPImageEmbeddings,
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
 )
-from photos_drive.shared.llm.vector_stores.base_vector_store import (
-    CreateMediaItemEmbeddingRequest,
+from photos_drive.shared.core.albums.repository.union import (
+    UnionAlbumsRepository,
 )
-from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
-    DistributedVectorStore,
+from photos_drive.shared.core.clients.mongodb import (
+    MongoDbClientsRepository,
 )
-from photos_drive.shared.llm.vector_stores.vector_store_builder import (
-    config_to_vector_store,
-)
-from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.media_item_id import MediaItemId
-from photos_drive.shared.metadata.media_items_repository import (
+from photos_drive.shared.core.media_items.media_item_id import MediaItemId
+from photos_drive.shared.core.media_items.repository.base import (
     FindMediaItemRequest,
     UpdateMediaItemRequest,
 )
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
 )
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.features.llm.models.blip_image_captions import (
+    BlipImageCaptions,
+)
+from photos_drive.shared.features.llm.models.open_clip_image_embeddings import (
+    OpenCLIPImageEmbeddings,
+)
+from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
+    CreateMediaItemEmbeddingRequest,
+)
+from photos_drive.shared.features.llm.vector_stores.distributed_vector_store import (
+    DistributedVectorStore,
+)
+from photos_drive.shared.features.llm.vector_stores.vector_store_builder import (
+    config_to_vector_store,
 )
 
 logger = logging.getLogger(__name__)
@@ -93,8 +101,18 @@ def generate_embeddings(
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-    media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+    albums_repo = UnionAlbumsRepository(
+        [
+            MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
+    media_items_repo = UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     vector_store = DistributedVectorStore(
         stores=[
             config_to_vector_store(

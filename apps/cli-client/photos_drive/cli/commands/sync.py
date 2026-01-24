@@ -26,29 +26,40 @@ from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
 from photos_drive.diff.get_diffs import DiffResults, FolderSyncDiff
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
 )
-from photos_drive.shared.config.config import Config
-from photos_drive.shared.llm.models.blip_image_captions import BlipImageCaptions
-from photos_drive.shared.llm.models.open_clip_image_embeddings import (
-    OpenCLIPImageEmbeddings,
+from photos_drive.shared.core.albums.repository.union import (
+    UnionAlbumsRepository,
 )
-from photos_drive.shared.llm.vector_stores import vector_store_builder
-from photos_drive.shared.llm.vector_stores.distributed_vector_store import (
-    DistributedVectorStore,
-)
-from photos_drive.shared.maps.mongodb.map_cells_repository_impl import (
-    MapCellsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.core.config.config import Config
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.features.llm.models.blip_image_captions import (
+    BlipImageCaptions,
+)
+from photos_drive.shared.features.llm.models.open_clip_image_embeddings import (
+    OpenCLIPImageEmbeddings,
+)
+from photos_drive.shared.features.llm.vector_stores import vector_store_builder
+from photos_drive.shared.features.llm.vector_stores.distributed_vector_store import (
+    DistributedVectorStore,
+)
+from photos_drive.shared.features.maps.repository.mongodb import (
+    MongoDBMapCellsRepository,
+)
+from photos_drive.shared.features.maps.repository.union import (
+    UnionMapCellsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -114,10 +125,21 @@ def sync(
 
     config = build_config_from_options(config_file, config_mongodb)
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
+    albums_repo = UnionAlbumsRepository(
+        [
+            MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     diff_comparator = FolderSyncDiff(
         config=config,
-        albums_repo=AlbumsRepositoryImpl(mongodb_clients_repo),
-        media_items_repo=MediaItemsRepositoryImpl(mongodb_clients_repo),
+        albums_repo=albums_repo,
+        media_items_repo=UnionMediaItemsRepository(
+            [
+                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        ),
     )
     diff_results = diff_comparator.get_diffs(local_dir_path, remote_albums_path)
     logger.debug(f'Diff results: {diff_results}')
@@ -177,9 +199,24 @@ def __backup_diffs_to_system(
             logger.info(f'Backing up chunk {num_chunks_completed} / {num_total_chunks}')
             mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
             gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
-            albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-            media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
-            map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
+            albums_repo = UnionAlbumsRepository(
+                [
+                    MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+                    for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                ]
+            )
+            media_items_repo = UnionMediaItemsRepository(
+                [
+                    MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                    for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                ]
+            )
+            map_cells_repository = UnionMapCellsRepository(
+                [
+                    MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                    for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                ]
+            )
             vector_store = DistributedVectorStore(
                 [
                     vector_store_builder.config_to_vector_store(vector_store_config)

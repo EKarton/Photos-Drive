@@ -5,16 +5,18 @@ import logging
 import os
 from typing import cast
 
-from photos_drive.shared.blob_store.gphotos.valid_file_extensions import (
-    MEDIA_ITEM_FILE_EXTENSIONS,
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.albums import Album
+from photos_drive.shared.core.albums.repository.base import (
+    AlbumsRepository,
 )
-from photos_drive.shared.config.config import Config
-from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.albums import Album
-from photos_drive.shared.metadata.albums_repository import AlbumsRepository
-from photos_drive.shared.metadata.media_items_repository import (
+from photos_drive.shared.core.config.config import Config
+from photos_drive.shared.core.media_items.repository.base import (
     FindMediaItemRequest,
     MediaItemsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.valid_file_extensions import (
+    MEDIA_ITEM_FILE_EXTENSIONS,
 )
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
 

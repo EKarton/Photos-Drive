@@ -1,0 +1,48 @@
+from typing import Mapping
+
+from bson.objectid import ObjectId
+
+from photos_drive.shared.core.media_items.media_item import MediaItem
+from photos_drive.shared.core.media_items.media_item_id import MediaItemId
+from photos_drive.shared.features.maps.repository.base import MapCellsRepository
+
+MAX_CELL_RESOLUTION = 15
+
+
+class UnionMapCellsRepository(MapCellsRepository):
+    """
+    An implementation of MapCellsRepository that federates multiple repositories.
+    """
+
+    def __init__(self, repositories: list[MapCellsRepository]):
+        """
+        Creates a UnionMapCellsRepository.
+
+        Args:
+            repositories (list[MapCellsRepository]): A list of repositories to federate.
+        """
+        self._repositories = repositories
+        self._client_id_to_repo: Mapping[ObjectId, MapCellsRepository] = {
+            repo.get_client_id(): repo for repo in repositories
+        }
+
+    def get_client_id(self) -> ObjectId:
+        raise NotImplementedError("Union repository does not have a single client ID")
+
+    def get_available_free_space(self) -> int:
+        return sum(repo.get_available_free_space() for repo in self._repositories)
+
+    def add_media_item(self, media_item: MediaItem):
+        if not media_item.location:
+            raise ValueError(f"No gps location for media item {media_item}")
+
+        # Find the repository with the most free space
+        # Note: This simple strategy mirrors the UnionAlbumsRepository implementation.
+        target_repo = max(
+            self._repositories, key=lambda repo: repo.get_available_free_space()
+        )
+        target_repo.add_media_item(media_item)
+
+    def remove_media_item(self, media_item_id: MediaItemId):
+        for repo in self._repositories:
+            repo.remove_media_item(media_item_id)

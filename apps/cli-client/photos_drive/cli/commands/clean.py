@@ -11,17 +11,23 @@ from photos_drive.cli.shared.printer import pretty_print_items_to_delete
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
 )
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
+from photos_drive.shared.core.albums.repository.union import (
+    UnionAlbumsRepository,
 )
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
+from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
-from photos_drive.shared.metadata.mongodb.media_items_repository_impl import (
-    MediaItemsRepositoryImpl,
+from photos_drive.shared.core.media_items.repository.mongodb import (
+    MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
+)
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -70,8 +76,18 @@ def clean(
     config = build_config_from_options(config_file, config_mongodb)
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
     gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
-    albums_repo = AlbumsRepositoryImpl(mongodb_clients_repo)
-    media_items_repo = MediaItemsRepositoryImpl(mongodb_clients_repo)
+    albums_repo = UnionAlbumsRepository(
+        [
+            MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
+    media_items_repo = UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
 
     # Clean up
     cleaner = SystemCleaner(

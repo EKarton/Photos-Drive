@@ -13,31 +13,33 @@ from photos_drive.backup.gphotos_uploader import (
     UploadRequest,
 )
 from photos_drive.backup.processed_diffs import ProcessedDiff
-from photos_drive.shared.blob_store.gphotos.clients_repository import (
-    GPhotosClientsRepository,
-)
-from photos_drive.shared.config.config import Config
-from photos_drive.shared.llm.vector_stores.base_vector_store import (
-    BaseVectorStore,
-    CreateMediaItemEmbeddingRequest,
-)
-from photos_drive.shared.maps.map_cells_repository import MapCellsRepository
-from photos_drive.shared.metadata.album_id import AlbumId
-from photos_drive.shared.metadata.albums import Album
-from photos_drive.shared.metadata.albums_pruner import AlbumsPruner
-from photos_drive.shared.metadata.albums_repository import (
+from photos_drive.shared.core.albums.album_id import AlbumId
+from photos_drive.shared.core.albums.albums import Album
+from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
+from photos_drive.shared.core.albums.repository.base import (
     AlbumsRepository,
 )
-from photos_drive.shared.metadata.clients_repository import (
+from photos_drive.shared.core.clients.base import (
     ClientsRepository,
 )
-from photos_drive.shared.metadata.media_items import MediaItem
-from photos_drive.shared.metadata.media_items_repository import (
+from photos_drive.shared.core.clients.transactions_context import (
+    TransactionsContext,
+)
+from photos_drive.shared.core.config.config import Config
+from photos_drive.shared.core.media_items.media_item import MediaItem
+from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,
     FindMediaItemRequest,
     MediaItemsRepository,
 )
-from photos_drive.shared.metadata.transactions_context import TransactionsContext
+from photos_drive.shared.core.storage.gphotos.clients_repository import (
+    GPhotosClientsRepository,
+)
+from photos_drive.shared.features.llm.vector_stores.base_vector_store import (
+    BaseVectorStore,
+    CreateMediaItemEmbeddingRequest,
+)
+from photos_drive.shared.features.maps.repository.base import MapCellsRepository
 
 logger = logging.getLogger(__name__)
 
@@ -256,7 +258,8 @@ class PhotosBackup:
         """
         root_diffs_tree_node = DiffsTreeNode()
         for diff in diffs:
-            albums_queue = deque(diff.album_name.split("/"))
+            album_segments = [s for s in diff.album_name.split("/") if s]
+            albums_queue = deque(album_segments)
             cur_diffs_tree_node = root_diffs_tree_node
 
             while len(albums_queue) > 0:

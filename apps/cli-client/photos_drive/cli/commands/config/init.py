@@ -12,23 +12,23 @@ from photos_drive.cli.shared.inputs import (
     prompt_user_for_options,
 )
 from photos_drive.cli.shared.logging import setup_logging
-from photos_drive.shared.config.config import (
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
+)
+from photos_drive.shared.core.clients.mongodb import (
+    MongoDbClientsRepository,
+)
+from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
     AddMongoDbConfigRequest,
     AddMongoDbVectorStoreConfigRequest,
     Config,
 )
-from photos_drive.shared.config.config_from_file import (
+from photos_drive.shared.core.config.config_from_file import (
     ConfigFromFile,
 )
-from photos_drive.shared.config.config_from_mongodb import (
+from photos_drive.shared.core.config.config_from_mongodb import (
     ConfigFromMongoDb,
-)
-from photos_drive.shared.metadata.mongodb.albums_repository_impl import (
-    AlbumsRepositoryImpl,
-)
-from photos_drive.shared.metadata.mongodb.clients_repository_impl import (
-    MongoDbClientsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -130,7 +130,8 @@ def init(
     # Step 3: Create root album
     print("Perfect! Setting up your accounts...")
     mongodb_repo = MongoDbClientsRepository.build_from_config(config)
-    albums_repo = AlbumsRepositoryImpl(mongodb_repo)
+    client_id, _ = mongodb_repo.get_all_clients()[0]
+    albums_repo = MongoDBAlbumsRepository(client_id, mongodb_repo)
     root_album = albums_repo.create_album(album_name="", parent_album_id=None)
     config.set_root_album_id(root_album.id)
 
