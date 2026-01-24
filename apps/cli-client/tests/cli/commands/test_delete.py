@@ -64,7 +64,7 @@ class TestDeleteCli(unittest.TestCase):
 
         # 3. Initialize repositories
         self.albums_repo = MongoDBAlbumsRepository(
-            self.mongodb_client_id, self.mongodb_clients_repo
+            self.mongodb_client_id, self.mock_mongo_client, self.mongodb_clients_repo
         )
         self.media_items_repo = MongoDBMediaItemsRepository(
             self.mongodb_client_id, self.mongodb_clients_repo

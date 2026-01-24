@@ -84,7 +84,11 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_1_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_1_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
                 MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
@@ -319,7 +323,11 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_1_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_1_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
                 MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
@@ -464,7 +472,9 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_1_id, mongodb_client_1, mongodb_clients_repo
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
                 MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
@@ -614,7 +624,11 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
                 MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
@@ -726,7 +740,11 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
                 MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
@@ -867,7 +885,11 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_id,
+            mongodb_clients_repo.get_client_by_id(mongodb_client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = UnionMediaItemsRepository(
             [
                 MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)

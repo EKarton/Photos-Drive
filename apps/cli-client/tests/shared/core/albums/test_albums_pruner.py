@@ -35,7 +35,11 @@ class AlbumsPrunerTests(unittest.TestCase):
         mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup: Set up the existing albums
@@ -68,7 +72,11 @@ class AlbumsPrunerTests(unittest.TestCase):
         mongodb_clients_repo = MongoDbTransactionRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
@@ -138,7 +146,11 @@ class AlbumsPrunerTests(unittest.TestCase):
         mongodb_clients_repo.add_mongodb_client(
             client_id, create_mock_mongo_client(1000)
         )
-        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(
+            client_id,
+            mongodb_clients_repo.get_client_by_id(client_id),
+            mongodb_clients_repo,
+        )
         media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums

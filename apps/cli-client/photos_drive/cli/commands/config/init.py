@@ -130,8 +130,8 @@ def init(
     # Step 3: Create root album
     print("Perfect! Setting up your accounts...")
     transaction_repository = MongoDbTransactionRepository.build_from_config(config)
-    client_id, _ = transaction_repository.get_all_clients()[0]
-    albums_repo = MongoDBAlbumsRepository(client_id, transaction_repository)
+    client_id, client = transaction_repository.get_all_clients()[0]
+    albums_repo = MongoDBAlbumsRepository(client_id, client, transaction_repository)
     root_album = albums_repo.create_album(album_name="", parent_album_id=None)
     config.set_root_album_id(root_album.id)
 

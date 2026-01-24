@@ -29,7 +29,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.mongo_clients_repo = MongoDbTransactionRepository()
         self.mongo_clients_repo.add_mongodb_client(MONGO_CLIENT_ID, self.mock_client)
         self.repo: AlbumsRepository = MongoDBAlbumsRepository(
-            MONGO_CLIENT_ID, self.mongo_clients_repo
+            MONGO_CLIENT_ID, self.mock_client, self.mongo_clients_repo
         )
 
     def test_get_album_by_id(self):

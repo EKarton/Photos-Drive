@@ -50,8 +50,8 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
 
         Args:
             client_id (ObjectId): The client ID that this repo is connected to.
-            mongodb_clients_repository (MongoDbTransactionRepository): A repo of mongo db
-                clients that stores albums.
+            mongodb_clients_repository (MongoDbTransactionRepository):
+                A repo of mongo db clients that stores transactions.
         """
         self._client_id = client_id
         self._mongodb_clients_repository = mongodb_clients_repository

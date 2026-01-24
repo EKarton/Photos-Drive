@@ -71,7 +71,9 @@ class TestTeardownCli(unittest.TestCase):
 
         # 2. Initialize repositories for seeding
         self.albums_repo_1 = MongoDBAlbumsRepository(
-            self.mongodb_client_id_1, self.mongodb_clients_repo
+            self.mongodb_client_id_1,
+            self.mock_mongo_client_1,
+            self.mongodb_clients_repo,
         )
         self.media_items_repo_1 = MongoDBMediaItemsRepository(
             self.mongodb_client_id_1, self.mongodb_clients_repo
@@ -167,7 +169,9 @@ class TestTeardownCli(unittest.TestCase):
 
         # 2. Seed Client 2
         albums_repo_2 = MongoDBAlbumsRepository(
-            self.mongodb_client_id_2, self.mongodb_clients_repo
+            self.mongodb_client_id_2,
+            self.mongodb_clients_repo.get_client_by_id(self.mongodb_client_id_2),
+            self.mongodb_clients_repo,
         )
         albums_repo_2.create_album("Other", None)
 
