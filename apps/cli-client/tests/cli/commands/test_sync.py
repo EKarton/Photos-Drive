@@ -1,3 +1,5 @@
+from typing import Any
+from typing import cast
 from datetime import datetime
 import os
 import tempfile
@@ -175,7 +177,9 @@ class TestSyncCli(unittest.TestCase):
             # Verify MongoDB has the item
             media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
             self.assertEqual(media_items_coll.count_documents({}), 1)
-            self.assertEqual(media_items_coll.find_one()["file_name"], filename)
+            self.assertEqual(
+                cast(Any, media_items_coll.find_one())["file_name"], filename
+            )
 
     def test_sync_deletions(self):
         runner = CliRunner()
