@@ -53,7 +53,9 @@ class TestCleanCli(unittest.TestCase):
         self.albums_repo = MongoDBAlbumsRepository(
             mongodb_client_id, mongodb_clients_repo
         )
-        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(
+            mongodb_client_id, mongodb_clients_repo
+        )
 
         # Test setup 2: Set up the root album
         self.root_album = self.albums_repo.create_album('', None)

@@ -17,9 +17,18 @@ from photos_drive.cli.commands.llms.tools.search_photos_by_text import (
 from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
+from photos_drive.shared.core.albums.repository.mongodb import (
+    MongoDBAlbumsRepository,
+)
+from photos_drive.shared.core.albums.repository.union import (
+    UnionAlbumsRepository,
+)
 from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
+)
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
 )
 from photos_drive.shared.features.llm.models.open_clip_image_embeddings import (
     OpenCLIPImageEmbeddings,
@@ -47,7 +56,18 @@ def trial_4(config: Config):
 
     # Set up the repos
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
-    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+    albums_repo = UnionAlbumsRepository(
+        [
+            MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
+    media_items_repo = UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     vector_store = DistributedVectorStore(
         stores=[
             config_to_vector_store(

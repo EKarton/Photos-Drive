@@ -54,7 +54,7 @@ class FolderSyncDiffTests(TestCase):
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup: create content on the cloud
         root_album = albums_repo.create_album('', None)
@@ -116,7 +116,7 @@ class FolderSyncDiffTests(TestCase):
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup: create content on the cloud
         root_album = albums_repo.create_album(album_name='', parent_album_id=None)
@@ -200,7 +200,7 @@ class FolderSyncDiffTests(TestCase):
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup: create content on the cloud
         root_album = albums_repo.create_album('', None)
@@ -255,7 +255,7 @@ class FolderSyncDiffTests(TestCase):
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup: create content on the cloud
         root_album = albums_repo.create_album('', None)
@@ -308,7 +308,7 @@ class FolderSyncDiffTests(TestCase):
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup: create content on the cloud
         root_album = albums_repo.create_album('', None)
@@ -397,7 +397,7 @@ class FolderSyncDiffTests(TestCase):
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
-        media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+        media_items_repo = MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
 
         # Test setup: create content on the cloud
         root_album = albums_repo.create_album('', None)

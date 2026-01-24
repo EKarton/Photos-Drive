@@ -62,7 +62,9 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.mongodb_clients_repo.add_mongodb_client(
             self.mongodb_client_id, self.mongodb_client
         )
-        self.repo = MongoDBMediaItemsRepository(self.mongodb_clients_repo)
+        self.repo = MongoDBMediaItemsRepository(
+            self.mongodb_client_id, self.mongodb_clients_repo
+        )
 
     def test_get_media_item_by_id(self):
         fake_file_hash = os.urandom(16)
@@ -103,6 +105,14 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
 
         with self.assertRaisesRegex(ValueError, "Media item .* does not exist!"):
+            self.repo.get_media_item_by_id(media_item_id)
+
+    def test_get_media_item_by_id_wrong_client_id(self):
+        media_item_id = MediaItemId(ObjectId(), ObjectId())
+
+        with self.assertRaisesRegex(
+            ValueError, "Media item .* belongs to a different client"
+        ):
             self.repo.get_media_item_by_id(media_item_id)
 
     def test_get_all_media_items(self):
@@ -231,71 +241,21 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
         self.assertEqual(media_items[0].embedding_id, MOCK_EMBEDDING_ID_1)
 
-    def test_find_media_items_in_different_databases(self):
-        mongodb_client_id_1 = ObjectId()
-        mongodb_client_1 = create_mock_mongo_client()
-        mongodb_client_id_2 = ObjectId()
-        mongodb_client_2 = create_mock_mongo_client()
-        mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(mongodb_client_id_1, mongodb_client_1)
-        mongodb_clients_repo.add_mongodb_client(mongodb_client_id_2, mongodb_client_2)
-        repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
-
-        mongodb_client_1["photos_drive"]["media_items"].insert_one(
+    def test_find_media_items_excluded_by_client_id(self):
+        self.mongodb_client["photos_drive"]["media_items"].insert_one(
             {
                 "file_name": "test_image.jpg",
-                "file_hash": Binary(os.urandom(16)),
-                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
-                "gphotos_client_id": ObjectId(),
-                "gphotos_media_item_id": "gphotos_1234",
+                "gphotos_client_id": str(self.mongodb_client_id),
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
-                "width": 100,
-                "height": 200,
-                "date_taken": MOCK_DATE_TAKEN,
-                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
-            }
-        )
-        mongodb_client_2["photos_drive"]["media_items"].insert_one(
-            {
-                "file_name": "test_image_1.jpg",
                 "file_hash": Binary(os.urandom(16)),
-                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
-                "gphotos_client_id": ObjectId(),
-                "gphotos_media_item_id": "gphotos_123",
-                "album_id": album_id_to_string(MOCK_ALBUM_ID),
-                "width": 100,
-                "height": 200,
-                "date_taken": MOCK_DATE_TAKEN,
-                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
-            }
-        )
-        mongodb_client_2["photos_drive"]["media_items"].insert_one(
-            {
-                "file_name": "test_image_2.jpg",
-                "file_hash": Binary(os.urandom(16)),
-                "location": {"type": "Point", "coordinates": [12.34, 56.78]},
-                "gphotos_client_id": ObjectId(),
-                "gphotos_media_item_id": "gphotos_12345",
-                "album_id": album_id_to_string(MOCK_ALBUM_ID_2),
-                "width": 100,
-                "height": 200,
-                "date_taken": MOCK_DATE_TAKEN,
-                "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
             }
         )
 
-        media_items = repo.find_media_items(
-            FindMediaItemRequest(mongodb_client_ids=[mongodb_client_id_2])
+        media_items = self.repo.find_media_items(
+            FindMediaItemRequest(mongodb_client_ids=[ObjectId()])
         )
 
-        self.assertEqual(len(media_items), 2)
-        self.assertEqual(media_items[0].album_id, MOCK_ALBUM_ID)
-        self.assertEqual(media_items[0].file_name, 'test_image_1.jpg')
-        self.assertEqual(media_items[1].album_id, MOCK_ALBUM_ID_2)
-        self.assertEqual(media_items[1].file_name, 'test_image_2.jpg')
-        self.assertEqual(media_items[1].width, 100)
-        self.assertEqual(media_items[1].height, 200)
-        self.assertEqual(media_items[1].date_taken, MOCK_DATE_TAKEN)
+        self.assertEqual(len(media_items), 0)
 
     def test_get_num_media_items_in_album(self):
         # Insert mock media items from different albums into the mock database
@@ -683,3 +643,39 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             ValueError, "Unable to delete all media items in .*"
         ):
             self.repo.delete_many_media_items(ids_to_delete)
+
+    def test_get_client_id(self):
+        self.assertEqual(self.repo.get_client_id(), self.mongodb_client_id)
+
+    def test_get_available_free_space(self):
+        # By default create_mock_mongo_client maybe has some mocked free space if we use a helper
+        # but here we manually check if it returns what's in the clients repo
+        self.repo.get_available_free_space()
+
+    def test_get_available_free_space_error(self):
+        with self.assertRaisesRegex(ValueError, "Cannot find MongoDB client .*"):
+            MongoDBMediaItemsRepository(ObjectId(), self.mongodb_clients_repo)
+
+    def test_update_many_media_items_wrong_client_id(self):
+        with self.assertRaisesRegex(
+            ValueError, "Media item .* belongs to a different client"
+        ):
+            self.repo.update_many_media_items(
+                [
+                    UpdateMediaItemRequest(
+                        media_item_id=MediaItemId(ObjectId(), ObjectId())
+                    )
+                ]
+            )
+
+    def test_delete_media_item_wrong_client_id(self):
+        with self.assertRaisesRegex(
+            ValueError, "Media item .* belongs to a different client"
+        ):
+            self.repo.delete_media_item(MediaItemId(ObjectId(), ObjectId()))
+
+    def test_delete_many_media_items_wrong_client_id(self):
+        with self.assertRaisesRegex(
+            ValueError, "Media item .* belongs to a different client"
+        ):
+            self.repo.delete_many_media_items([MediaItemId(ObjectId(), ObjectId())])

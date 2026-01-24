@@ -34,6 +34,9 @@ from photos_drive.shared.core.media_items.repository.base import (
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
+)
 from photos_drive.shared.features.llm.models.blip_image_captions import (
     BlipImageCaptions,
 )
@@ -104,7 +107,12 @@ def generate_embeddings(
             for (client_id, _) in mongodb_clients_repo.get_all_clients()
         ]
     )
-    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+    media_items_repo = UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     vector_store = DistributedVectorStore(
         stores=[
             config_to_vector_store(

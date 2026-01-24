@@ -30,6 +30,9 @@ from photos_drive.shared.core.clients.mongodb import (
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
+)
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
@@ -101,7 +104,12 @@ def delete(
             for (client_id, _) in mongodb_clients_repo.get_all_clients()
         ]
     )
-    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+    media_items_repo = UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
     vector_store = DistributedVectorStore(
         [

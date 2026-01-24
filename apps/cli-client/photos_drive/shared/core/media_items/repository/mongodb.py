@@ -41,6 +41,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
 
     def __init__(
         self,
+        client_id: ObjectId,
         mongodb_clients_repository: MongoDbClientsRepository,
         location_index_name=LOCATION_INDEX_NAME,
     ):
@@ -48,69 +49,76 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         Creates a MediaItemsRepository
 
         Args:
+            client_id (ObjectId): The client ID that this repo is connected to.
             mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
                 clients that stores albums.
         """
+        self._client_id = client_id
         self._mongodb_clients_repository = mongodb_clients_repository
+        self._collection = self._mongodb_clients_repository.get_client_by_id(client_id)[
+            "photos_drive"
+        ]["media_items"]
 
-        for _, client in self._mongodb_clients_repository.get_all_clients():
-            collection = client["photos_drive"]["media_items"]
-            if not self.__has_location_index(collection, location_index_name):
-                self.__create_location_index(collection, location_index_name)
+        if not self.__has_location_index(self._collection, location_index_name):
+            self.__create_location_index(self._collection, location_index_name)
+
+    def get_client_id(self) -> ObjectId:
+        return self._client_id
+
+    def get_available_free_space(self) -> int:
+        for (
+            client_id,
+            free_space,
+        ) in self._mongodb_clients_repository.get_free_space_for_all_clients():
+            if client_id == self._client_id:
+                return free_space
+
+        raise ValueError(f"Unable to find free space for client {self._client_id}")
 
     def __has_location_index(self, collection, index_name):
-        return any(
-            [index["name"] == index_name for index in collection.list_search_indexes()]
-        )
+        return any([index["name"] == index_name for index in collection.list_indexes()])
 
     def __create_location_index(self, collection, index_name):
         collection.create_index([("location", "2dsphere")], name=index_name)
         logger.debug(f'Created location index {index_name}')
 
     def get_media_item_by_id(self, id: MediaItemId) -> MediaItem:
-        client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
+        if id.client_id != self._client_id:
+            raise ValueError(f"Media item {id} belongs to a different client")
+
         session = self._mongodb_clients_repository.get_session_for_client_id(
-            id.client_id,
+            self._client_id,
         )
         raw_item = cast(
             dict,
-            client["photos_drive"]["media_items"].find_one(
-                filter={"_id": id.object_id}, session=session
-            ),
+            self._collection.find_one(filter={"_id": id.object_id}, session=session),
         )
         if raw_item is None:
             raise ValueError(f"Media item {id} does not exist!")
 
-        return self.__parse_raw_document_to_media_item_obj(id.client_id, raw_item)
+        return self.__parse_raw_document_to_media_item_obj(self._client_id, raw_item)
 
     def get_all_media_items(self) -> list[MediaItem]:
         media_items: list[MediaItem] = []
 
-        for client_id, client in self._mongodb_clients_repository.get_all_clients():
-            session = self._mongodb_clients_repository.get_session_for_client_id(
-                client_id,
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            self._client_id,
+        )
+        for doc in self._collection.find(filter={}, session=session):
+            raw_item = cast(dict, doc)
+            media_item = self.__parse_raw_document_to_media_item_obj(
+                self._client_id, raw_item
             )
-            for doc in client["photos_drive"]["media_items"].find(
-                filter={}, session=session
-            ):
-                raw_item = cast(dict, doc)
-                media_item = self.__parse_raw_document_to_media_item_obj(
-                    client_id, raw_item
-                )
-                media_items.append(media_item)
+            media_items.append(media_item)
 
         return media_items
 
     def find_media_items(self, request: FindMediaItemRequest) -> list[MediaItem]:
-        all_clients = self._mongodb_clients_repository.get_all_clients()
-        if request.mongodb_client_ids is not None:
-            clients = [
-                (client_id, client)
-                for client_id, client in all_clients
-                if client_id in request.mongodb_client_ids
-            ]
-        else:
-            clients = all_clients
+        if (
+            request.mongodb_client_ids is not None
+            and self._client_id not in request.mongodb_client_ids
+        ):
+            return []
 
         mongo_filter: dict[str, Any] = {}
         if request.album_id:
@@ -140,41 +148,32 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
                 }
             }
 
-        media_items = []
-        for client_id, client in clients:
-            session = self._mongodb_clients_repository.get_session_for_client_id(
-                client_id,
-            )
-            query = client['photos_drive']['media_items'].find(
-                filter=mongo_filter, session=session
-            )
-            if request.limit:
-                query = query.limit(request.limit)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            self._client_id,
+        )
+        query = self._collection.find(filter=mongo_filter, session=session)
+        if request.limit:
+            query = query.limit(request.limit)
 
-            for raw_item in query:
-                media_items.append(
-                    self.__parse_raw_document_to_media_item_obj(client_id, raw_item)
-                )
+        media_items = []
+        for raw_item in query:
+            media_items.append(
+                self.__parse_raw_document_to_media_item_obj(self._client_id, raw_item)
+            )
 
         return media_items
 
     def get_num_media_items_in_album(self, album_id: AlbumId) -> int:
-        total = 0
-        for client_id, client in self._mongodb_clients_repository.get_all_clients():
-            session = self._mongodb_clients_repository.get_session_for_client_id(
-                client_id,
-            )
-            total += client['photos_drive']['media_items'].count_documents(
-                filter={'album_id': album_id_to_string(album_id)}, session=session
-            )
-
-        return total
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            self._client_id,
+        )
+        return self._collection.count_documents(
+            filter={'album_id': album_id_to_string(album_id)}, session=session
+        )
 
     def create_media_item(self, request: CreateMediaItemRequest) -> MediaItem:
-        client_id = self._mongodb_clients_repository.find_id_of_client_with_most_space()
-        client = self._mongodb_clients_repository.get_client_by_id(client_id)
         session = self._mongodb_clients_repository.get_session_for_client_id(
-            client_id,
+            self._client_id,
         )
 
         data_object: Any = {
@@ -197,12 +196,14 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         if request.embedding_id:
             data_object["embedding_id"] = embedding_id_to_string(request.embedding_id)
 
-        insert_result = client["photos_drive"]["media_items"].insert_one(
+        insert_result = self._collection.insert_one(
             document=data_object, session=session
         )
 
         return MediaItem(
-            id=MediaItemId(client_id=client_id, object_id=insert_result.inserted_id),
+            id=MediaItemId(
+                client_id=self._client_id, object_id=insert_result.inserted_id
+            ),
             file_name=request.file_name,
             file_hash=request.file_hash,
             location=request.location,
@@ -216,10 +217,13 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         )
 
     def update_many_media_items(self, requests: list[UpdateMediaItemRequest]):
-        client_id_to_operations: Dict[ObjectId, list[pymongo.UpdateOne]] = defaultdict(
-            list
-        )
+        operations: list[pymongo.UpdateOne] = []
         for request in requests:
+            if request.media_item_id.client_id != self._client_id:
+                raise ValueError(
+                    f"Media item {request.media_item_id} belongs to a different client"
+                )
+
             filter_query: Mapping = {
                 "_id": request.media_item_id.object_id,
             }
@@ -269,31 +273,30 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
             operation = pymongo.UpdateOne(
                 filter=filter_query, update=set_query, upsert=False
             )
-            client_id_to_operations[request.media_item_id.client_id].append(operation)
+            operations.append(operation)
 
-        for client_id, operations in client_id_to_operations.items():
-            client = self._mongodb_clients_repository.get_client_by_id(client_id)
-            session = self._mongodb_clients_repository.get_session_for_client_id(
-                client_id,
-            )
-            result = client["photos_drive"]["media_items"].bulk_write(
-                requests=operations, session=session
-            )
+        if len(operations) == 0:
+            return
 
-            if result.matched_count != len(operations):
-                raise ValueError(
-                    f"Unable to update all media items: {result.matched_count} "
-                    + f"vs {len(operations)}"
-                )
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            self._client_id,
+        )
+        result = self._collection.bulk_write(requests=operations, session=session)
+
+        if result.matched_count != len(operations):
+            raise ValueError(
+                f"Unable to update all media items: {result.matched_count} "
+                + f"vs {len(operations)}"
+            )
 
     def delete_media_item(self, id: MediaItemId):
-        client = self._mongodb_clients_repository.get_client_by_id(id.client_id)
+        if id.client_id != self._client_id:
+            raise ValueError(f"Media item {id} belongs to a different client")
+
         session = self._mongodb_clients_repository.get_session_for_client_id(
-            id.client_id
+            self._client_id
         )
-        result = client["photos_drive"]["media_items"].delete_one(
-            {"_id": id.object_id}, session=session
-        )
+        result = self._collection.delete_one({"_id": id.object_id}, session=session)
 
         if result.deleted_count != 1:
             raise ValueError(f"Unable to delete media item: {id} not found")
@@ -302,24 +305,21 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         if len(ids) == 0:
             return
 
-        client_id_to_object_ids: Dict[ObjectId, list[ObjectId]] = {}
+        object_ids: list[ObjectId] = []
         for id in ids:
-            if id.client_id not in client_id_to_object_ids:
-                client_id_to_object_ids[id.client_id] = []
+            if id.client_id != self._client_id:
+                raise ValueError(f"Media item {id} belongs to a different client")
+            object_ids.append(id.object_id)
 
-            client_id_to_object_ids[id.client_id].append(id.object_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            self._client_id
+        )
+        result = self._collection.delete_many(
+            filter={"_id": {"$in": object_ids}}, session=session
+        )
 
-        for client_id, object_ids in client_id_to_object_ids.items():
-            client = self._mongodb_clients_repository.get_client_by_id(client_id)
-            session = self._mongodb_clients_repository.get_session_for_client_id(
-                client_id
-            )
-            result = client["photos_drive"]["media_items"].delete_many(
-                filter={"_id": {"$in": object_ids}}, session=session
-            )
-
-            if result.deleted_count != len(object_ids):
-                raise ValueError(f"Unable to delete all media items in {object_ids}")
+        if result.deleted_count != len(object_ids):
+            raise ValueError(f"Unable to delete all media items in {object_ids}")
 
     def __parse_raw_document_to_media_item_obj(
         self, client_id: ObjectId, raw_item: Mapping[str, Any]

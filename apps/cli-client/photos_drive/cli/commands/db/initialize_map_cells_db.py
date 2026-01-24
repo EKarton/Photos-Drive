@@ -14,6 +14,9 @@ from photos_drive.shared.core.clients.mongodb import (
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
+)
 from photos_drive.shared.features.maps.repository.mongodb import (
     MapCellsRepositoryImpl,
 )
@@ -70,7 +73,12 @@ def initialize_map_cells_db(
             [("cell_id", 1), ("album_id", 1), ("media_item_id", 1)]
         )
 
-    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+    media_items_repo = UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     tiles_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
     for media_item in media_items_repo.get_all_media_items():
         if media_item.location is not None:

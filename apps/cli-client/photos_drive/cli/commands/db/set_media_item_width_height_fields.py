@@ -31,6 +31,9 @@ from photos_drive.shared.core.media_items.repository.base import (
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
+)
 from photos_drive.shared.core.storage.gphotos.valid_file_extensions import (
     IMAGE_FILE_EXTENSIONS,
     VIDEO_FILE_EXTENSIONS,
@@ -101,7 +104,12 @@ def set_media_item_width_height_fields(
             for (client_id, _) in mongodb_clients_repo.get_all_clients()
         ]
     )
-    media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+    media_items_repo = UnionMediaItemsRepository(
+        [
+            MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
 
     update_media_item_requests: list[UpdateMediaItemRequest] = []
     root_album_id = config.get_root_album_id()

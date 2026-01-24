@@ -133,6 +133,24 @@ class MediaItemsRepository(ABC):
     """
 
     @abstractmethod
+    def get_client_id(self) -> ObjectId:
+        """
+        Returns the client ID of the repository.
+
+        Returns:
+            ObjectId: The client ID.
+        """
+
+    @abstractmethod
+    def get_available_free_space(self) -> int:
+        """
+        Returns the available free space in bytes.
+
+        Returns:
+            int: The available free space in bytes.
+        """
+
+    @abstractmethod
     def get_media_item_by_id(self, id: MediaItemId) -> MediaItem:
         """
         Returns the media item by ID.

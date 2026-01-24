@@ -39,6 +39,9 @@ from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
 )
+from photos_drive.shared.core.media_items.repository.union import (
+    UnionMediaItemsRepository,
+)
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
 )
@@ -128,7 +131,12 @@ def sync(
     diff_comparator = FolderSyncDiff(
         config=config,
         albums_repo=albums_repo,
-        media_items_repo=MongoDBMediaItemsRepository(mongodb_clients_repo),
+        media_items_repo=UnionMediaItemsRepository(
+            [
+                MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        ),
     )
     diff_results = diff_comparator.get_diffs(local_dir_path, remote_albums_path)
     logger.debug(f'Diff results: {diff_results}')
@@ -194,7 +202,12 @@ def __backup_diffs_to_system(
                     for (client_id, _) in mongodb_clients_repo.get_all_clients()
                 ]
             )
-            media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
+            media_items_repo = UnionMediaItemsRepository(
+                [
+                    MongoDBMediaItemsRepository(client_id, mongodb_clients_repo)
+                    for (client_id, _) in mongodb_clients_repo.get_all_clients()
+                ]
+            )
             map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
             vector_store = DistributedVectorStore(
                 [
