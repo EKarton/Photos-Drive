@@ -51,7 +51,9 @@ class TestTeardownCli(unittest.TestCase):
         gphotos_clients_repo = GPhotosClientsRepository()
         gphotos_clients_repo.add_gphotos_client(gphotos_client_id, self.gphotos_client)
 
-        self.albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        self.albums_repo = MongoDBAlbumsRepository(
+            mongodb_client_id, mongodb_clients_repo
+        )
         self.media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup 2: Set up the root album

@@ -28,7 +28,9 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         self.mock_client = create_mock_mongo_client()
         self.mongo_clients_repo = MongoDbClientsRepository()
         self.mongo_clients_repo.add_mongodb_client(MONGO_CLIENT_ID, self.mock_client)
-        self.repo: AlbumsRepository = MongoDBAlbumsRepository(self.mongo_clients_repo)
+        self.repo: AlbumsRepository = MongoDBAlbumsRepository(
+            MONGO_CLIENT_ID, self.mongo_clients_repo
+        )
 
     def test_get_album_by_id(self):
         # Prepare test data
@@ -164,43 +166,6 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         # Test
         with self.assertRaises(ValueError):
             self.repo.delete_many_albums([existing_album_id, non_existent_album_id])
-
-    def test_delete_many_albums__with_albums_from_different_clients(self):
-        # Prepare test data
-        mongo_client_id_2 = ObjectId("5f50c31e8a7d4b1c9c9b0b1c")
-        album_id_1 = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1b"))
-        album_id_2 = AlbumId(mongo_client_id_2, ObjectId("5f50c31e8a7d4b1c9c9b0b1d"))
-        mock_client_2 = create_mock_mongo_client()
-        self.mongo_clients_repo.add_mongodb_client(mongo_client_id_2, mock_client_2)
-        self.mock_client["photos_drive"]["albums"].insert_one(
-            {
-                "_id": album_id_1.object_id,
-                "name": "Album 1",
-                "parent_album_id": None,
-            }
-        )
-        mock_client_2["photos_drive"]["albums"].insert_one(
-            {
-                "_id": album_id_2.object_id,
-                "name": "Album 2",
-                "parent_album_id": None,
-            }
-        )
-
-        # Test
-        self.repo.delete_many_albums([album_id_1, album_id_2])
-
-        # Assert
-        self.assertIsNone(
-            self.mock_client["photos_drive"]["albums"].find_one(
-                {"_id": album_id_1.object_id}
-            )
-        )
-        self.assertIsNone(
-            mock_client_2["photos_drive"]["albums"].find_one(
-                {"_id": album_id_2.object_id}
-            )
-        )
 
     def test_delete_album__with_valid_id(self):
         # Prepare test data

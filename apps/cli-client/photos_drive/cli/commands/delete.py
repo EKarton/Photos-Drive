@@ -21,6 +21,9 @@ from photos_drive.cli.shared.typer import (
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
+from photos_drive.shared.core.albums.repository.union import (
+    UnionAlbumsRepository,
+)
 from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
 )
@@ -92,7 +95,12 @@ def delete(
     config = build_config_from_options(config_file, config_mongodb)
     mongodb_clients_repo = MongoDbClientsRepository.build_from_config(config)
     gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
-    albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+    albums_repo = UnionAlbumsRepository(
+        [
+            MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
     map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
     vector_store = DistributedVectorStore(

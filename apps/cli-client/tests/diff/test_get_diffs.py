@@ -51,8 +51,9 @@ class FolderSyncDiffTests(TestCase):
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
@@ -112,8 +113,9 @@ class FolderSyncDiffTests(TestCase):
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
@@ -195,8 +197,9 @@ class FolderSyncDiffTests(TestCase):
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
@@ -249,8 +252,9 @@ class FolderSyncDiffTests(TestCase):
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
@@ -301,8 +305,9 @@ class FolderSyncDiffTests(TestCase):
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup: create content on the cloud
@@ -389,8 +394,9 @@ class FolderSyncDiffTests(TestCase):
         gphotos_client_id = ObjectId()
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup: create content on the cloud

@@ -78,7 +78,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
@@ -303,7 +303,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
@@ -438,7 +438,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo.add_gphotos_client(gphotos_client_1_id, gphotos_client_1)
         gphotos_client_repo.add_gphotos_client(gphotos_client_2_id, gphotos_client_2)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_client_1_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
@@ -578,7 +578,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
@@ -680,7 +680,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()
@@ -811,7 +811,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         gphotos_client_repo = GPhotosClientsRepository()
         gphotos_client_repo.add_gphotos_client(gphotos_client_id, gphotos_client)
 
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(mongodb_client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
         map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
         vector_store = FakeVectorStore()

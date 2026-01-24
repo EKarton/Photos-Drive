@@ -33,8 +33,9 @@ class AlbumsPrunerTests(unittest.TestCase):
     def test_prune_album__descendants_all_empty_albums(self):
         # Test setup: Build the objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup: Set up the existing albums
@@ -65,8 +66,9 @@ class AlbumsPrunerTests(unittest.TestCase):
 
         # Test setup 2: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
-        mongodb_clients_repo.add_mongodb_client(ObjectId(), create_mock_mongo_client())
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        client_id = ObjectId()
+        mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
@@ -132,10 +134,11 @@ class AlbumsPrunerTests(unittest.TestCase):
 
         # Test setup 2: Build the wrapper objects
         mongodb_clients_repo = MongoDbClientsRepository()
+        client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(
-            ObjectId(), create_mock_mongo_client(1000)
+            client_id, create_mock_mongo_client(1000)
         )
-        albums_repo = MongoDBAlbumsRepository(mongodb_clients_repo)
+        albums_repo = MongoDBAlbumsRepository(client_id, mongodb_clients_repo)
         media_items_repo = MongoDBMediaItemsRepository(mongodb_clients_repo)
 
         # Test setup 3: Set up the existing albums
