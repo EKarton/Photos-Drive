@@ -1,9 +1,9 @@
-import os
-import unittest
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
-
+import os
 import tempfile
+import unittest
+from unittest.mock import patch
+
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -105,10 +105,6 @@ class TestCleanCli(unittest.TestCase):
                 "build_from_config",
                 return_value=self.gphotos_clients_repo,
             ),
-            patch(
-                "photos_drive.cli.commands.clean.prompt_user_for_yes_no_answer",
-                return_value=True,
-            ),
             patch("magic.from_file", return_value="image/jpeg"),
         ]
         for patcher in self.patchers:
@@ -124,7 +120,7 @@ class TestCleanCli(unittest.TestCase):
         reachable_album = self.albums_repo.create_album("Reachable", self.root_album.id)
 
         # 2. Seed orphaned data (unlinked from root BFS)
-        unreachable_album = self.albums_repo.create_album("Orphan", None)
+        self.albums_repo.create_album("Orphan", None)
 
         # Unreachable GPhotos item
         up = self.fake_gphotos_client.media_items().upload_photo("orph.jpg", "orph.jpg")
@@ -155,17 +151,14 @@ class TestCleanCli(unittest.TestCase):
             )
         )
 
-        # 3. Seed unreferenced media item in DB (GPhotos ID doesn't exist anymore or just unlinked)
-        # Actually SystemCleaner checks reachable Gmedia items.
-        # If reachable DB item's Gmedia ID is NOT in GPhotos, it might fail or just keep it?
-        # SystemCleaner.__find_content_to_keep filters items whose gphotos_media_item_id is not in all_gphoto_media_item_ids.
-
         runner = CliRunner()
         app = build_app()
 
         # Act
         result = runner.invoke(
-            app, args=["clean", "--config-file", self.config_file_path]
+            app,
+            args=["clean", "--config-file", self.config_file_path],
+            input="y\n",
         )
 
         # Assert
@@ -197,31 +190,29 @@ class TestCleanCli(unittest.TestCase):
         self.assertEqual(media_in_trash[0].id, orph_g_id)
 
     def test_clean_cancelled(self):
-        with patch(
-            "photos_drive.cli.commands.clean.prompt_user_for_yes_no_answer",
-            return_value=False,
-        ):
-            # Seed unreachable album
-            self.albums_repo.create_album("Orphan", None)
+        # Seed unreachable album
+        self.albums_repo.create_album("Orphan", None)
 
-            runner = CliRunner()
-            app = build_app()
+        runner = CliRunner()
+        app = build_app()
 
-            # Act
-            result = runner.invoke(
-                app, args=["clean", "--config-file", self.config_file_path]
-            )
+        # Act
+        result = runner.invoke(
+            app,
+            args=["clean", "--config-file", self.config_file_path],
+            input="n\n",
+        )
 
-            # Assert
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("Operation cancelled.", result.stdout)
-            # Album should still exist
-            self.assertEqual(
-                self.mock_mongo_client["photos_drive"]["albums"].count_documents(
-                    {"name": "Orphan"}
-                ),
-                1,
-            )
+        # Assert
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Operation cancelled.", result.stdout)
+        # Album should still exist
+        self.assertEqual(
+            self.mock_mongo_client["photos_drive"]["albums"].count_documents(
+                {"name": "Orphan"}
+            ),
+            1,
+        )
 
     def test_clean_nothing_to_do(self):
         # Only reachable items
@@ -251,7 +242,9 @@ class TestCleanCli(unittest.TestCase):
 
         # Act
         result = runner.invoke(
-            app, args=["clean", "--config-file", self.config_file_path]
+            app,
+            args=["clean", "--config-file", self.config_file_path],
+            input="y\n",
         )
 
         # Assert

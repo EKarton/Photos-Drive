@@ -18,7 +18,10 @@ from photos_drive.shared.core.media_items.repository.union import (
     UnionMediaItemsRepository,
 )
 from photos_drive.shared.features.maps.repository.mongodb import (
-    MapCellsRepositoryImpl,
+    MongoDBMapCellsRepository,
+)
+from photos_drive.shared.features.maps.repository.union import (
+    UnionMapCellsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,7 +82,12 @@ def initialize_map_cells_db(
             for (client_id, _) in mongodb_clients_repo.get_all_clients()
         ]
     )
-    tiles_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+    tiles_repo = UnionMapCellsRepository(
+        [
+            MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     for media_item in media_items_repo.get_all_media_items():
         if media_item.location is not None:
             tiles_repo.add_media_item(media_item)

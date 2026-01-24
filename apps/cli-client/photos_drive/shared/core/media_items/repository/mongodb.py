@@ -1,7 +1,7 @@
-from collections import defaultdict
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from datetime import datetime
 import logging
-from typing import Any, Dict, Mapping, cast
+from typing import Any, Mapping, cast
 
 from bson import Binary
 from bson.objectid import ObjectId
@@ -55,9 +55,10 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         """
         self._client_id = client_id
         self._mongodb_clients_repository = mongodb_clients_repository
-        self._collection = self._mongodb_clients_repository.get_client_by_id(client_id)[
-            "photos_drive"
-        ]["media_items"]
+        self._mongodb_client = self._mongodb_clients_repository.get_client_by_id(
+            client_id
+        )
+        self._collection = self._mongodb_client["photos_drive"]["media_items"]
 
         if not self.__has_location_index(self._collection, location_index_name):
             self.__create_location_index(self._collection, location_index_name)
@@ -66,14 +67,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         return self._client_id
 
     def get_available_free_space(self) -> int:
-        for (
-            client_id,
-            free_space,
-        ) in self._mongodb_clients_repository.get_free_space_for_all_clients():
-            if client_id == self._client_id:
-                return free_space
-
-        raise ValueError(f"Unable to find free space for client {self._client_id}")
+        return get_free_space(self._mongodb_client)
 
     def __has_location_index(self, collection, index_name):
         return any([index["name"] == index_name for index in collection.list_indexes()])

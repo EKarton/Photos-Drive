@@ -16,7 +16,8 @@ from photos_drive.shared.core.media_items.repository.base import (
 
 class UnionMediaItemsRepository(MediaItemsRepository):
     """
-    An implementation of MediaItemsRepository that federates multiple repositories.
+    An implementation of MediaItemsRepository that
+    federates multiple repositories.
     """
 
     def __init__(self, repositories: list[MediaItemsRepository]):
@@ -24,7 +25,8 @@ class UnionMediaItemsRepository(MediaItemsRepository):
         Creates a UnionMediaItemsRepository.
 
         Args:
-            repositories (list[MediaItemsRepository]): A list of repositories to federate.
+            repositories (list[MediaItemsRepository]):
+                A list of repositories to federate.
         """
         self._repositories = repositories
         self._client_id_to_repo: Mapping[ObjectId, MediaItemsRepository] = {
@@ -55,23 +57,11 @@ class UnionMediaItemsRepository(MediaItemsRepository):
         return all_items
 
     def get_num_media_items_in_album(self, album_id: AlbumId) -> int:
-        # We need to sum across all repositories because an album ID is unique to a client,
-        # but the union repo doesn't assume which client the album belongs to here
-        # (though usually AlbumId.client_id tells us).
-        # Actually, since album_id has client_id, we could optimize:
-        if album_id.client_id in self._client_id_to_repo:
-            return self._client_id_to_repo[
-                album_id.client_id
-            ].get_num_media_items_in_album(album_id)
-
-        # Fallback to search all (shouldn't happen if AlbumId is correctly used)
-        total = 0
-        for repo in self._repositories:
-            total += repo.get_num_media_items_in_album(album_id)
-        return total
+        return sum(
+            repo.get_num_media_items_in_album(album_id) for repo in self._repositories
+        )
 
     def create_media_item(self, request: CreateMediaItemRequest) -> MediaItem:
-        # Find the repository with the most free space
         target_repo = max(
             self._repositories, key=lambda repo: repo.get_available_free_space()
         )

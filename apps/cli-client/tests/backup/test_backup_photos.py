@@ -44,7 +44,10 @@ from photos_drive.shared.features.llm.vector_stores.testing.fake_vector_store im
     FakeVectorStore,
 )
 from photos_drive.shared.features.maps.repository.mongodb import (
-    MapCellsRepositoryImpl,
+    MongoDBMapCellsRepository,
+)
+from photos_drive.shared.features.maps.repository.union import (
+    UnionMapCellsRepository,
 )
 
 parametrize_use_parallel_uploads = parametrize(
@@ -88,7 +91,12 @@ class TestPhotosBackup(ParametrizedTestCase):
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
-        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = UnionMapCellsRepository(
+            [
+                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        )
         vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the root album
@@ -318,7 +326,12 @@ class TestPhotosBackup(ParametrizedTestCase):
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
-        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = UnionMapCellsRepository(
+            [
+                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        )
         vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums
@@ -458,7 +471,12 @@ class TestPhotosBackup(ParametrizedTestCase):
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
-        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = UnionMapCellsRepository(
+            [
+                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        )
         vector_store = FakeVectorStore()
 
         # Test setup 3: Set up the existing albums
@@ -603,7 +621,12 @@ class TestPhotosBackup(ParametrizedTestCase):
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
-        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = UnionMapCellsRepository(
+            [
+                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        )
         vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums
@@ -710,7 +733,12 @@ class TestPhotosBackup(ParametrizedTestCase):
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
-        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = UnionMapCellsRepository(
+            [
+                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        )
         vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums
@@ -846,7 +874,12 @@ class TestPhotosBackup(ParametrizedTestCase):
                 for (client_id, _) in mongodb_clients_repo.get_all_clients()
             ]
         )
-        map_cells_repo = MapCellsRepositoryImpl(mongodb_clients_repo)
+        map_cells_repo = UnionMapCellsRepository(
+            [
+                MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+                for (client_id, _) in mongodb_clients_repo.get_all_clients()
+            ]
+        )
         vector_store = FakeVectorStore()
 
         # Test setup 2: Set up the existing albums

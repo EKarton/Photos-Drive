@@ -1,9 +1,9 @@
-import os
-import unittest
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
-
+import os
 import tempfile
+import unittest
+from unittest.mock import patch
+
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -133,10 +133,6 @@ class TestTeardownCli(unittest.TestCase):
                 "build_from_config",
                 return_value=self.gphotos_clients_repo,
             ),
-            patch(
-                "photos_drive.cli.commands.teardown.prompt_user_for_yes_no_answer",
-                return_value=True,
-            ),
             patch("magic.from_file", return_value="image/jpeg"),
         ]
         for patcher in self.patchers:
@@ -169,7 +165,7 @@ class TestTeardownCli(unittest.TestCase):
             )
         )
 
-        # 2. Seed Client 2 (no root album registered in config, but global teardown hits all)
+        # 2. Seed Client 2
         albums_repo_2 = MongoDBAlbumsRepository(
             self.mongodb_client_id_2, self.mongodb_clients_repo
         )
@@ -180,7 +176,9 @@ class TestTeardownCli(unittest.TestCase):
 
         # Act
         result = runner.invoke(
-            app, args=["teardown", "--config-file", self.config_file_path]
+            app,
+            args=["teardown", "--config-file", self.config_file_path],
+            input="y\n",
         )
 
         # Assert
@@ -210,30 +208,28 @@ class TestTeardownCli(unittest.TestCase):
         self.assertEqual(len(media_in_trash), 1)
 
     def test_teardown_cancelled(self):
-        with patch(
-            "photos_drive.cli.commands.teardown.prompt_user_for_yes_no_answer",
-            return_value=False,
-        ):
-            # Seed an album
-            self.albums_repo_1.create_album("KeepMe", self.root_album_1.id)
+        # Seed an album
+        self.albums_repo_1.create_album("KeepMe", self.root_album_1.id)
 
-            runner = CliRunner()
-            app = build_app()
+        runner = CliRunner()
+        app = build_app()
 
-            # Act
-            result = runner.invoke(
-                app, args=["teardown", "--config-file", self.config_file_path]
-            )
+        # Act
+        result = runner.invoke(
+            app,
+            args=["teardown", "--config-file", self.config_file_path],
+            input="n\n",
+        )
 
-            # Assert
-            self.assertEqual(result.exit_code, 0)
-            # Album should still exist
-            self.assertEqual(
-                self.mock_mongo_client_1["photos_drive"]["albums"].count_documents(
-                    {"name": "KeepMe"}
-                ),
-                1,
-            )
+        # Assert
+        self.assertEqual(result.exit_code, 0)
+        # Album should still exist
+        self.assertEqual(
+            self.mock_mongo_client_1["photos_drive"]["albums"].count_documents(
+                {"name": "KeepMe"}
+            ),
+            1,
+        )
 
     def test_teardown_reuse_trash_album(self):
         # 1. Pre-create "To delete" album
@@ -248,7 +244,9 @@ class TestTeardownCli(unittest.TestCase):
 
         # Act
         result = runner.invoke(
-            app, args=["teardown", "--config-file", self.config_file_path]
+            app,
+            args=["teardown", "--config-file", self.config_file_path],
+            input="y\n",
         )
 
         # Assert

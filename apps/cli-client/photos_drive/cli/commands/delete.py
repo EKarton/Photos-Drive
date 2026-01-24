@@ -47,7 +47,10 @@ from photos_drive.shared.features.llm.vector_stores.distributed_vector_store imp
     DistributedVectorStore,
 )
 from photos_drive.shared.features.maps.repository.mongodb import (
-    MapCellsRepositoryImpl,
+    MongoDBMapCellsRepository,
+)
+from photos_drive.shared.features.maps.repository.union import (
+    UnionMapCellsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -110,7 +113,12 @@ def delete(
             for (client_id, _) in mongodb_clients_repo.get_all_clients()
         ]
     )
-    map_cells_repository = MapCellsRepositoryImpl(mongodb_clients_repo)
+    map_cells_repository = UnionMapCellsRepository(
+        [
+            MongoDBMapCellsRepository(client_id, mongodb_clients_repo)
+            for (client_id, _) in mongodb_clients_repo.get_all_clients()
+        ]
+    )
     vector_store = DistributedVectorStore(
         [
             vector_store_builder.config_to_vector_store(vector_store_config)

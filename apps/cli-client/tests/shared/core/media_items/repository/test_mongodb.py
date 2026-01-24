@@ -648,13 +648,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(self.repo.get_client_id(), self.mongodb_client_id)
 
     def test_get_available_free_space(self):
-        # By default create_mock_mongo_client maybe has some mocked free space if we use a helper
-        # but here we manually check if it returns what's in the clients repo
-        self.repo.get_available_free_space()
-
-    def test_get_available_free_space_error(self):
-        with self.assertRaisesRegex(ValueError, "Cannot find MongoDB client .*"):
-            MongoDBMediaItemsRepository(ObjectId(), self.mongodb_clients_repo)
+        self.assertGreater(self.repo.get_available_free_space(), 0)
 
     def test_update_many_media_items_wrong_client_id(self):
         with self.assertRaisesRegex(

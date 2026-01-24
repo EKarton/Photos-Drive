@@ -6,7 +6,6 @@ from photos_drive.cli.commands import (
     config,
     db,
     delete,
-    llm,
     sync,
     teardown,
     usage,
@@ -24,7 +23,6 @@ def build_app() -> typer.Typer:
     app.add_typer(clean.app)
     app.add_typer(teardown.app)
     app.add_typer(usage.app)
-    app.add_typer(llm.app)
 
     return app
 

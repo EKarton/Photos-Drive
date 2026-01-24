@@ -3,7 +3,6 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -13,9 +12,6 @@ from photos_drive.shared.core.albums.repository.mongodb import (
 )
 from photos_drive.shared.core.clients.mongodb import (
     MongoDbClientsRepository,
-)
-from photos_drive.shared.core.media_items.repository.mongodb import (
-    MongoDBMediaItemsRepository,
 )
 from photos_drive.shared.core.storage.gphotos.clients_repository import (
     GPhotosClientsRepository,
@@ -130,10 +126,6 @@ class TestAddCli(unittest.TestCase):
                 return_value=self.gphotos_clients_repo,
             ),
             patch(
-                "photos_drive.cli.commands.add.prompt_user_for_yes_no_answer",
-                return_value=True,
-            ),
-            patch(
                 "photos_drive.cli.commands.add.OpenCLIPImageEmbeddings",
                 return_value=FakeImageEmbedder(),
             ),
@@ -173,7 +165,9 @@ class TestAddCli(unittest.TestCase):
 
         # Act
         result = runner.invoke(
-            app, ["add", self.image1_path, "--config-file", self.config_file_path]
+            app,
+            args=["add", self.image1_path, "--config-file", self.config_file_path],
+            input="y\n",
         )
 
         # Assert
@@ -200,11 +194,13 @@ class TestAddCli(unittest.TestCase):
         result = runner.invoke(
             app,
             args=["add", self.test_dir.name, "--config-file", self.config_file_path],
+            input="y\n",
         )
 
         # Assert
         self.assertEqual(result.exit_code, 0)
-        # Note: get_media_file_paths_from_path will find both image1.jpg and Summer2025/image2.png
+        # Note: get_media_file_paths_from_path will find both
+        # image1.jpg and Summer2025/image2.png
         self.assertIn("Items added: 2", result.stdout)
 
         # Verify MongoDB state
@@ -234,7 +230,9 @@ class TestAddCli(unittest.TestCase):
 
             # Act
             result = runner.invoke(
-                app, ["add", self.image1_path, "--config-file", self.config_file_path]
+                app,
+                args=["add", self.image1_path, "--config-file", self.config_file_path],
+                input="n\n",
             )
 
             # Assert

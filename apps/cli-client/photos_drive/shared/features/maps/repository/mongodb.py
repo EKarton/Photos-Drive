@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, cast
+from typing import cast
 
 from bson.objectid import ObjectId
 import h3
@@ -18,18 +18,34 @@ from photos_drive.shared.features.maps.repository.base import MapCellsRepository
 MAX_CELL_RESOLUTION = 15
 
 
-class MapCellsRepositoryImpl(MapCellsRepository):
-    """Implementation class for MapCellsRepository."""
+class MongoDBMapCellsRepository(MapCellsRepository):
+    """Implementation class for MapCellsRepository using a single MongoDB client."""
 
-    def __init__(self, mongodb_clients_repository: MongoDbClientsRepository):
+    def __init__(
+        self, client_id: ObjectId, mongodb_clients_repository: MongoDbClientsRepository
+    ):
         """
-        Creates a CellsRepositoryImpl
+        Creates a MongoDBMapCellsRepository
 
         Args:
+            client_id (ObjectId): The ID of the mongo db client that stores the tiles.
             mongodb_clients_repository (MongoDbClientsRepository): A repo of mongo db
-                clients that stores the tiles.
+                clients.
         """
-        self.mongodb_clients_repository = mongodb_clients_repository
+        self._client_id = client_id
+        self._mongodb_clients_repository = mongodb_clients_repository
+
+    def get_client_id(self) -> ObjectId:
+        return self._client_id
+
+    def get_available_free_space(self) -> int:
+        for (
+            client_id,
+            free_space,
+        ) in self._mongodb_clients_repository.get_free_space_for_all_clients():
+            if client_id == self._client_id:
+                return free_space
+        return -sys.maxsize - 1
 
     def add_media_item(self, media_item: MediaItem):
         if not media_item.location:
@@ -45,64 +61,33 @@ class MapCellsRepositoryImpl(MapCellsRepository):
             for res in range(0, MAX_CELL_RESOLUTION + 1)
         )
 
-        client_id_to_cell_ids: Dict[ObjectId, set[str]] = {}
-        free_spaces = self.mongodb_clients_repository.get_free_space_for_all_clients()
-        for cell_id in cell_ids:
-            best_free_space = -sys.maxsize - 1
-            best_client_id = None
-            best_idx = None
+        client = self._mongodb_clients_repository.get_client_by_id(self._client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            self._client_id,
+        )
 
-            for i in range(len(free_spaces)):
-                client_id, free_space = free_spaces[i]
-                if free_space <= 0:
-                    continue
+        docs = [
+            {
+                "cell_id": cid,
+                "album_id": album_id_to_string(media_item.album_id),
+                "media_item_id": media_item_id_to_string(media_item.id),
+            }
+            for cid in cell_ids
+        ]
 
-                if free_space > best_free_space:
-                    best_free_space = free_space
-                    best_client_id = client_id
-                    best_idx = i
-
-            if best_client_id is None or best_idx is None:
-                raise ValueError("Unable to find space to insert h3 map cells")
-
-            if best_client_id not in client_id_to_cell_ids:
-                client_id_to_cell_ids[best_client_id] = set()
-            client_id_to_cell_ids[best_client_id].add(cell_id)
-
-            # Decrement the free space for the chosen client
-            free_spaces[best_idx] = (best_client_id, best_free_space - 1)
-
-        for client_id, client_id_cell_ids in client_id_to_cell_ids.items():
-            client_id = (
-                self.mongodb_clients_repository.find_id_of_client_with_most_space()
-            )
-            client = self.mongodb_clients_repository.get_client_by_id(client_id)
-            session = self.mongodb_clients_repository.get_session_for_client_id(
-                client_id,
-            )
-
-            docs = [
-                {
-                    "cell_id": cell_id,
-                    "album_id": album_id_to_string(media_item.album_id),
-                    "media_item_id": media_item_id_to_string(media_item.id),
-                }
-                for cell_id in client_id_cell_ids
-            ]
-
-            client["photos_drive"]["map_cells"].insert_many(
-                docs,
-                session=session,
-            )
+        client["photos_drive"]["map_cells"].insert_many(
+            docs,
+            session=session,
+        )
 
     def remove_media_item(self, media_item_id: MediaItemId):
-        for client_id, client in self.mongodb_clients_repository.get_all_clients():
-            session = self.mongodb_clients_repository.get_session_for_client_id(
-                client_id,
-            )
-            client['photos_drive']['map_cells'].delete_many(
-                filter={
-                    "media_item_id": media_item_id_to_string(media_item_id),
-                },
-                session=session,
-            )
+        client = self._mongodb_clients_repository.get_client_by_id(self._client_id)
+        session = self._mongodb_clients_repository.get_session_for_client_id(
+            self._client_id,
+        )
+        client["photos_drive"]["map_cells"].delete_many(
+            filter={
+                "media_item_id": media_item_id_to_string(media_item_id),
+            },
+            session=session,
+        )

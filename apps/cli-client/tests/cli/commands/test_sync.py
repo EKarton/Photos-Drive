@@ -1,9 +1,9 @@
-import os
-import unittest
 from datetime import datetime
+import os
+import tempfile
+import unittest
 from unittest.mock import MagicMock, patch
 
-import tempfile
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -62,7 +62,7 @@ class TestSyncCli(unittest.TestCase):
             self.gphotos_client_id, self.fake_gphotos_client
         )
 
-        # 3. Initialize repositories for assertion support (not for the Cli itself which uses mocks)
+        # 3. Initialize repositories for assertion support
         self.albums_repo = MongoDBAlbumsRepository(
             self.mongodb_client_id, self.mongodb_clients_repo
         )
@@ -121,10 +121,6 @@ class TestSyncCli(unittest.TestCase):
                 return_value=self.gphotos_clients_repo,
             ),
             patch(
-                "photos_drive.cli.commands.sync.prompt_user_for_yes_no_answer",
-                return_value=True,
-            ),
-            patch(
                 "photos_drive.cli.commands.sync.OpenCLIPImageEmbeddings",
                 return_value=FakeImageEmbedder(),
             ),
@@ -167,7 +163,9 @@ class TestSyncCli(unittest.TestCase):
 
             # Act
             result = runner.invoke(
-                app, args=["sync", ".", "--config-file", self.config_file_path]
+                app,
+                args=["sync", ".", "--config-file", self.config_file_path],
+                input="y\n",
             )
 
             # Assert
@@ -212,7 +210,9 @@ class TestSyncCli(unittest.TestCase):
 
             # Act
             result = runner.invoke(
-                app, ["sync", ".", "--config-file", self.config_file_path]
+                app,
+                ["sync", ".", "--config-file", self.config_file_path],
+                input="y\n",
             )
 
             # Assert
@@ -224,27 +224,25 @@ class TestSyncCli(unittest.TestCase):
             self.assertEqual(media_items_coll.count_documents({}), 0)
 
     def test_sync_cancelled(self):
-        with patch(
-            "photos_drive.cli.commands.sync.prompt_user_for_yes_no_answer",
-            return_value=False,
-        ):
-            runner = CliRunner()
-            app = build_app()
+        runner = CliRunner()
+        app = build_app()
 
-            with runner.isolated_filesystem():
-                filename = "new.jpg"
-                with open(filename, "wb") as f:
-                    f.write(b"data")
+        with runner.isolated_filesystem():
+            filename = "new.jpg"
+            with open(filename, "wb") as f:
+                f.write(b"data")
 
-                # Act
-                result = runner.invoke(
-                    app, ["sync", ".", "--config-file", self.config_file_path]
-                )
+            # Act
+            result = runner.invoke(
+                app,
+                ["sync", ".", "--config-file", self.config_file_path],
+                input="n\n",
+            )
 
-                # Assert
-                self.assertEqual(result.exit_code, 0)
-                self.assertIn("Operation cancelled.", result.stdout)
+            # Assert
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("Operation cancelled.", result.stdout)
 
-                # Verify MongoDB still empty
-                media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
-                self.assertEqual(media_items_coll.count_documents({}), 0)
+            # Verify MongoDB still empty
+            media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
+            self.assertEqual(media_items_coll.count_documents({}), 0)

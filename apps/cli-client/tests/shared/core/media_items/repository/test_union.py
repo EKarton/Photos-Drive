@@ -100,10 +100,22 @@ class TestUnionMediaItemsRepository(unittest.TestCase):
         self.mock_repo_1.update_many_media_items.assert_called_once_with([req_1])
         self.mock_repo_2.update_many_media_items.assert_called_once_with([req_2])
 
+    def test_update_many_media_items_raises_error_if_client_not_found(self):
+        req_1 = UpdateMediaItemRequest(
+            media_item_id=MediaItemId(ObjectId(), ObjectId())
+        )
+        with self.assertRaisesRegex(ValueError, "No repository found for client"):
+            self.repo.update_many_media_items([req_1])
+
     def test_delete_media_item_calls_correct_repo(self):
         media_item_id = MediaItemId(self.client_id_1, ObjectId())
         self.repo.delete_media_item(media_item_id)
         self.mock_repo_1.delete_media_item.assert_called_once_with(media_item_id)
+
+    def test_delete_media_item_raises_error_if_client_not_found(self):
+        media_item_id = MediaItemId(ObjectId(), ObjectId())
+        with self.assertRaisesRegex(ValueError, "No repository found for client"):
+            self.repo.delete_media_item(media_item_id)
 
     def test_delete_many_media_items_batches_by_client(self):
         id_1 = MediaItemId(self.client_id_1, ObjectId())
@@ -112,3 +124,8 @@ class TestUnionMediaItemsRepository(unittest.TestCase):
 
         self.mock_repo_1.delete_many_media_items.assert_called_once_with([id_1])
         self.mock_repo_2.delete_many_media_items.assert_called_once_with([id_2])
+
+    def test_delete_many_media_items_raises_error_if_client_not_found(self):
+        id_1 = MediaItemId(ObjectId(), ObjectId())
+        with self.assertRaisesRegex(ValueError, "No repository found for client"):
+            self.repo.delete_many_media_items([id_1])

@@ -16,7 +16,7 @@ from photos_drive.shared.core.media_items.media_item_id import (
 from photos_drive.shared.core.testing import create_mock_mongo_client
 from photos_drive.shared.features.maps.repository.mongodb import (
     MAX_CELL_RESOLUTION,
-    MapCellsRepositoryImpl,
+    MongoDBMapCellsRepository,
 )
 
 MONGO_CLIENT_ID = ObjectId("5f50c31e8a7d4b1c9c9b0b1a")
@@ -42,13 +42,13 @@ MEDIA_ITEM = MediaItem(
 )
 
 
-class TestMapCellsRepositoryImpl(unittest.TestCase):
+class TestMongoDBMapCellsRepository(unittest.TestCase):
 
     def setUp(self):
         self.mongo_client = create_mock_mongo_client()
         self.clients_repo = MongoDbClientsRepository()
         self.clients_repo.add_mongodb_client(MONGO_CLIENT_ID, self.mongo_client)
-        self.repo = MapCellsRepositoryImpl(self.clients_repo)
+        self.repo = MongoDBMapCellsRepository(MONGO_CLIENT_ID, self.clients_repo)
 
     def test_add_media_item__inserts_cells_at_all_resolutions(self):
         self.repo.add_media_item(MEDIA_ITEM)
@@ -63,18 +63,6 @@ class TestMapCellsRepositoryImpl(unittest.TestCase):
                 cell["media_item_id"], media_item_id_to_string(MEDIA_ITEM_ID)
             )
             self.assertIsNotNone(cell["cell_id"])
-
-    def test_add_media_item_on_no_available_mongodb_client(self):
-        mongo_client = create_mock_mongo_client(total_free_storage_size=-1)
-        clients_repo = MongoDbClientsRepository()
-        clients_repo.add_mongodb_client(MONGO_CLIENT_ID, mongo_client)
-        repo = MapCellsRepositoryImpl(clients_repo)
-
-        with self.assertRaises(ValueError) as context:
-            repo.add_media_item(MEDIA_ITEM)
-        self.assertIn(
-            "Unable to find space to insert h3 map cells", str(context.exception)
-        )
 
     def test_add_media_item__raises_with_no_location(self):
         media_item = MediaItem(

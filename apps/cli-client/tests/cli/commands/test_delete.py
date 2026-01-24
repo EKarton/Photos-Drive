@@ -1,9 +1,9 @@
-import os
-import unittest
 from datetime import datetime
+import os
+import tempfile
+import unittest
 from unittest.mock import MagicMock, patch
 
-import tempfile
 from bson import ObjectId
 from typer.testing import CliRunner
 
@@ -121,10 +121,6 @@ class TestDeleteCli(unittest.TestCase):
                 return_value=self.gphotos_clients_repo,
             ),
             patch(
-                "photos_drive.cli.commands.delete.prompt_user_for_yes_no_answer",
-                return_value=True,
-            ),
-            patch(
                 "photos_drive.cli.commands.delete.OpenCLIPImageEmbeddings",
                 return_value=FakeImageEmbedder(),
             ),
@@ -190,7 +186,9 @@ class TestDeleteCli(unittest.TestCase):
 
             # Act
             result = runner.invoke(
-                app, args=["delete", filename, "--config-file", self.config_file_path]
+                app,
+                args=["delete", filename, "--config-file", self.config_file_path],
+                input="y\n",
             )
 
             # Assert
@@ -269,7 +267,9 @@ class TestDeleteCli(unittest.TestCase):
             # Act
             # "delete ." will find everything under the isolated FS root
             result = runner.invoke(
-                app, args=["delete", ".", "--config-file", self.config_file_path]
+                app,
+                args=["delete", ".", "--config-file", self.config_file_path],
+                input="y\n",
             )
 
             # Assert
@@ -285,43 +285,40 @@ class TestDeleteCli(unittest.TestCase):
             self.assertEqual(albums_coll.count_documents({"name": "Summer"}), 0)
 
     def test_delete_cancelled_by_user(self):
-        with patch(
-            "photos_drive.cli.commands.delete.prompt_user_for_yes_no_answer",
-            return_value=False,
-        ):
-            runner = CliRunner()
-            app = build_app()
+        runner = CliRunner()
+        app = build_app()
 
-            with runner.isolated_filesystem():
-                filename = "image1.jpg"
-                with open(filename, "wb") as f:
-                    f.write(b"d")
+        with runner.isolated_filesystem():
+            filename = "image1.jpg"
+            with open(filename, "wb") as f:
+                f.write(b"d")
 
-                self.media_items_repo.create_media_item(
-                    CreateMediaItemRequest(
-                        file_name=filename,
-                        file_hash=b"h",
-                        location=None,
-                        gphotos_client_id=self.gphotos_client_id,
-                        gphotos_media_item_id="some_id",
-                        album_id=self.root_album.id,
-                        width=800,
-                        height=600,
-                        date_taken=datetime(2025, 1, 1),
-                        embedding_id=None,
-                    )
+            self.media_items_repo.create_media_item(
+                CreateMediaItemRequest(
+                    file_name=filename,
+                    file_hash=b"h",
+                    location=None,
+                    gphotos_client_id=self.gphotos_client_id,
+                    gphotos_media_item_id="some_id",
+                    album_id=self.root_album.id,
+                    width=800,
+                    height=600,
+                    date_taken=datetime(2025, 1, 1),
+                    embedding_id=None,
                 )
+            )
 
-                # Act
-                result = runner.invoke(
-                    app,
-                    args=["delete", filename, "--config-file", self.config_file_path],
-                )
+            # Act
+            result = runner.invoke(
+                app,
+                args=["delete", filename, "--config-file", self.config_file_path],
+                input="n\n",
+            )
 
-                # Assert
-                self.assertEqual(result.exit_code, 0)
-                self.assertIn("Operation cancelled.", result.stdout)
+            # Assert
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("Operation cancelled.", result.stdout)
 
-                # Verify no items deleted
-                media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
-                self.assertEqual(media_items_coll.count_documents({}), 1)
+            # Verify no items deleted
+            media_items_coll = self.mock_mongo_client["photos_drive"]["media_items"]
+            self.assertEqual(media_items_coll.count_documents({}), 1)

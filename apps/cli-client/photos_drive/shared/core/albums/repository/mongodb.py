@@ -1,5 +1,5 @@
-from collections import defaultdict
-from typing import Any, Dict, Mapping, cast
+from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
+from typing import Any, Mapping, cast
 
 from bson.objectid import ObjectId
 import pymongo
@@ -39,22 +39,16 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         """
         self._client_id = client_id
         self._mongodb_clients_repository = mongodb_clients_repository
-        self._collection = self._mongodb_clients_repository.get_client_by_id(client_id)[
-            "photos_drive"
-        ]["albums"]
+        self._mongodb_client = self._mongodb_clients_repository.get_client_by_id(
+            client_id
+        )
+        self._collection = self._mongodb_client["photos_drive"]["albums"]
 
     def get_client_id(self) -> ObjectId:
         return self._client_id
 
     def get_available_free_space(self) -> int:
-        for (
-            client_id,
-            free_space,
-        ) in self._mongodb_clients_repository.get_free_space_for_all_clients():
-            if client_id == self._client_id:
-                return free_space
-
-        raise ValueError(f"Unable to find free space for client {self._client_id}")
+        return get_free_space(self._mongodb_client)
 
     def get_album_by_id(self, id: AlbumId) -> Album:
         if id.client_id != self._client_id:
