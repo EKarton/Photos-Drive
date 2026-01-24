@@ -11,8 +11,8 @@ from photos_drive.cli.app import build_app
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.repository.base import CreateMediaItemRequest
 from photos_drive.shared.core.media_items.repository.mongodb import (
@@ -53,7 +53,7 @@ class TestTeardownCli(unittest.TestCase):
             self.fake_gitems_repo_2, "client2@gmail.com"
         )
 
-        self.mongodb_clients_repo = MongoDbTransactionRepository()
+        self.mongodb_clients_repo = MongoDBClientsRepository()
         self.mongodb_clients_repo.add_mongodb_client(
             self.mongodb_client_id_1, self.mock_mongo_client_1
         )
@@ -128,7 +128,7 @@ class TestTeardownCli(unittest.TestCase):
         # 4. Apply global patches
         self.patchers = [
             patch.object(
-                MongoDbTransactionRepository,
+                MongoDBClientsRepository,
                 "build_from_config",
                 return_value=self.mongodb_clients_repo,
             ),

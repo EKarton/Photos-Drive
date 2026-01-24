@@ -1,4 +1,4 @@
-from photos_drive.shared.core.database.mongodb import MongoDbTransactionRepository
+from photos_drive.shared.core.databases.mongodb import MongoDBClientsRepository
 import logging
 
 import typer
@@ -54,7 +54,7 @@ def delete_media_items_without_album_id(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
+    transaction_repository = MongoDBClientsRepository.build_from_config(config)
 
     for _, client in transaction_repository.get_all_clients():
         for obj in client['photos_drive']['media_items'].find({}):

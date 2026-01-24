@@ -8,8 +8,8 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ def delete_child_album_ids_from_albums_db(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
+    transaction_repository = MongoDBClientsRepository.build_from_config(config)
 
     for _, client in transaction_repository.get_all_clients():
         for obj in client['photos_drive']['albums'].find({}):

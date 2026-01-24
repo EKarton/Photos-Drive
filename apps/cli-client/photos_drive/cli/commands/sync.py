@@ -32,8 +32,8 @@ from photos_drive.shared.core.albums.repository.mongodb import (
 from photos_drive.shared.core.albums.repository.union import (
     UnionAlbumsRepository,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.media_items.repository.mongodb import (
@@ -124,7 +124,7 @@ def sync(
     )
 
     config = build_config_from_options(config_file, config_mongodb)
-    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
+    transaction_repository = MongoDBClientsRepository.build_from_config(config)
     albums_repo = UnionAlbumsRepository(
         [
             MongoDBAlbumsRepository(client_id, client, transaction_repository)
@@ -197,9 +197,7 @@ def __backup_diffs_to_system(
     for batch in __chunked(processed_diffs, batch_size):
         try:
             logger.info(f'Backing up chunk {num_chunks_completed} / {num_total_chunks}')
-            transaction_repository = MongoDbTransactionRepository.build_from_config(
-                config
-            )
+            transaction_repository = MongoDBClientsRepository.build_from_config(config)
             gphoto_clients_repo = GPhotosClientsRepository.build_from_config(config)
             albums_repo = UnionAlbumsRepository(
                 [

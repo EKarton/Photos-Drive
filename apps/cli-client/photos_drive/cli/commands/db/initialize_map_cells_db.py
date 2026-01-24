@@ -8,8 +8,8 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.cli.shared.typer import (
     createMutuallyExclusiveGroup,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.repository.mongodb import (
     MongoDBMediaItemsRepository,
@@ -68,7 +68,7 @@ def initialize_map_cells_db(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
+    transaction_repository = MongoDBClientsRepository.build_from_config(config)
 
     for _, client in transaction_repository.get_all_clients():
         client['photos_drive']['tiles'].delete_many({})

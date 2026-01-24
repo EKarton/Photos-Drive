@@ -23,8 +23,8 @@ from photos_drive.shared.core.albums.repository.mongodb import (
 from photos_drive.shared.core.albums.repository.union import (
     UnionAlbumsRepository,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.repository.base import (
     FindMediaItemRequest,
@@ -89,7 +89,7 @@ def set_media_item_date_taken_fields(
 
     # Set up the repos
     config = build_config_from_options(config_file, config_mongodb)
-    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
+    transaction_repository = MongoDBClientsRepository.build_from_config(config)
     albums_repo = UnionAlbumsRepository(
         [
             MongoDBAlbumsRepository(client_id, client, transaction_repository)

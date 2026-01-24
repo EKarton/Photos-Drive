@@ -12,8 +12,8 @@ from photos_drive.shared.core.albums.album_id import (
     album_id_to_string,
     parse_string_to_album_id,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.gps_location import GpsLocation
 from photos_drive.shared.core.media_items.media_item import (
@@ -43,7 +43,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         self,
         client_id: ObjectId,
         mongodb_client: pymongo.MongoClient,
-        mongodb_transactions_repository: MongoDbTransactionRepository,
+        mongodb_transactions_repository: MongoDBClientsRepository,
         location_index_name=LOCATION_INDEX_NAME,
     ):
         """
@@ -52,7 +52,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
         Args:
             client_id (ObjectId): The client ID that this repo is connected to.
             mongodb_client (pymongo.MongoClient): The MongoDB client.
-            mongodb_transactions_repository (MongoDbTransactionRepository):
+            mongodb_transactions_repository (MongoDBClientsRepository):
                 A repo of transactions from all MongoDB clients.
         """
         self._client_id = client_id

@@ -15,8 +15,8 @@ from photos_drive.cli.shared.logging import setup_logging
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.config.config import (
     AddGPhotosConfigRequest,
@@ -129,7 +129,7 @@ def init(
 
     # Step 3: Create root album
     print("Perfect! Setting up your accounts...")
-    transaction_repository = MongoDbTransactionRepository.build_from_config(config)
+    transaction_repository = MongoDBClientsRepository.build_from_config(config)
     client_id, client = transaction_repository.get_all_clients()[0]
     albums_repo = MongoDBAlbumsRepository(client_id, client, transaction_repository)
     root_album = albums_repo.create_album(album_name="", parent_album_id=None)

@@ -16,8 +16,8 @@ from photos_drive.shared.core.albums.repository.base import (
     UpdatedAlbumFields,
     logger,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 
 
@@ -28,7 +28,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         self,
         client_id: ObjectId,
         mongodb_client: pymongo.MongoClient,
-        mongodb_transactions_repository: MongoDbTransactionRepository,
+        mongodb_transactions_repository: MongoDBClientsRepository,
     ):
         """
         Creates a AlbumsRepository
@@ -36,7 +36,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         Args:
             client_id (ObjectId): The client ID that this repo is connected to.
             mongodb_client (pymongo.MongoClient): The MongoDB client.
-            mongodb_transactions_repository (MongoDbTransactionRepository):
+            mongodb_transactions_repository (MongoDBClientsRepository):
                 A repo of transactions from all MongoDB clients.
         """
         self._client_id = client_id

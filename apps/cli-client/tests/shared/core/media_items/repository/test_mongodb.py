@@ -9,8 +9,8 @@ from photos_drive.shared.core.albums.album_id import (
     AlbumId,
     album_id_to_string,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.gps_location import (
     GpsLocation,
@@ -58,7 +58,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
     def setUp(self):
         self.mongodb_client_id = ObjectId()
         self.mongodb_client = create_mock_mongo_client()
-        self.mongodb_clients_repo = MongoDbTransactionRepository()
+        self.mongodb_clients_repo = MongoDBClientsRepository()
         self.mongodb_clients_repo.add_mongodb_client(
             self.mongodb_client_id, self.mongodb_client
         )

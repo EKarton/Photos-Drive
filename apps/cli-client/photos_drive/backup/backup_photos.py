@@ -19,10 +19,10 @@ from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
 from photos_drive.shared.core.albums.repository.base import (
     AlbumsRepository,
 )
-from photos_drive.shared.core.database.base import (
-    TransactionRepository,
+from photos_drive.shared.core.databases.transactions import (
+    TransactionsRepository,
 )
-from photos_drive.shared.core.database.transactions_context import (
+from photos_drive.shared.core.databases.transactions import (
     TransactionsContext,
 )
 from photos_drive.shared.core.config.config import Config
@@ -82,7 +82,7 @@ class PhotosBackup:
         map_cells_repo: MapCellsRepository,
         vector_store: BaseVectorStore,
         gphotos_client_repo: GPhotosClientsRepository,
-        clients_repo: TransactionRepository,
+        clients_repo: TransactionsRepository,
         parallelize_uploads: bool = False,
     ):
         self.__config = config

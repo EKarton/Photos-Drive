@@ -10,8 +10,8 @@ from photos_drive.shared.core.albums.album_id import album_id_to_string
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.config.inmemory_config import InMemoryConfig
 from photos_drive.shared.core.media_items.gps_location import GpsLocation
@@ -71,7 +71,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
         mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
 
@@ -318,7 +318,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
         mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
 
@@ -475,7 +475,7 @@ class TestPhotosBackup(ParametrizedTestCase):
         mongodb_client_2_id = ObjectId()
         mongodb_client_1 = create_mock_mongo_client(1000)
         mongodb_client_2 = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_1_id, mongodb_client_1)
         mongodb_clients_repo.add_mongodb_client(mongodb_client_2_id, mongodb_client_2)
 
@@ -640,7 +640,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         mongodb_client_id = ObjectId()
         mongodb_client = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
 
         gphotos_client_id = ObjectId()
@@ -764,7 +764,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         mongodb_client_id = ObjectId()
         mongodb_client = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
 
         gphotos_client_id = ObjectId()
@@ -917,7 +917,7 @@ class TestPhotosBackup(ParametrizedTestCase):
 
         mongodb_client_id = ObjectId()
         mongodb_client = create_mock_mongo_client(1000)
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         mongodb_clients_repo.add_mongodb_client(mongodb_client_id, mongodb_client)
 
         gphotos_client_id = ObjectId()

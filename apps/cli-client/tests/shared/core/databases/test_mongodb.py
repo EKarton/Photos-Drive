@@ -6,8 +6,8 @@ from bson.objectid import ObjectId
 import mongomock
 from pymongo import MongoClient
 
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.config.config import (
     AddMongoDbConfigRequest,
@@ -18,7 +18,7 @@ from photos_drive.shared.core.testing import (
 )
 
 
-class TestMongoDbTransactionRepository(unittest.TestCase):
+class TestMongoDBClientsRepository(unittest.TestCase):
 
     @patch.object(MongoClient, '__init__', return_value=None)
     @patch.object(MongoClient, '__new__', return_value=mongomock.MongoClient())
@@ -41,7 +41,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
             )
         )
 
-        repo = MongoDbTransactionRepository.build_from_config(mock_config)
+        repo = MongoDBClientsRepository.build_from_config(mock_config)
         clients = repo.get_all_clients()
 
         self.assertEqual(len(clients), 2)
@@ -53,7 +53,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
     def test_add_mongodb_client__adds_mongodb_client_to_repo(self):
         client_id = ObjectId()
         client = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id, client)
 
         # Verify that the client was added successfully
@@ -63,7 +63,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
     def test_add_mongodb_client__duplicate_mongodb_clients_added__throws_error(self):
         client_id = ObjectId()
         client = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id, client)
 
         with self.assertRaisesRegex(ValueError, "Mongo DB Client ID .* already exists"):
@@ -73,7 +73,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
     def test_add_mongodb_client__in_transaction__throws_error(self):
         client_id = ObjectId()
         client = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.start_transactions()
 
         with self.assertRaisesRegex(ValueError, "Transaction is still in progress"):
@@ -81,7 +81,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
 
     def test_get_client_by_id__invalid_id__throws_error(self):
         non_existent_id = ObjectId()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
 
         with self.assertRaisesRegex(ValueError, "Cannot find MongoDB client .*"):
             repo.get_client_by_id(non_existent_id)
@@ -91,7 +91,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
 
@@ -106,7 +106,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
 
@@ -120,7 +120,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
         repo.start_transactions()
@@ -133,7 +133,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
         repo.start_transactions()
@@ -154,7 +154,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
         repo.start_transactions()
@@ -167,7 +167,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
 
@@ -179,7 +179,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
         repo.start_transactions()
@@ -198,7 +198,7 @@ class TestMongoDbTransactionRepository(unittest.TestCase):
         client_id_2 = ObjectId()
         client_1 = create_mock_mongo_client()
         client_2 = create_mock_mongo_client()
-        repo = MongoDbTransactionRepository()
+        repo = MongoDBClientsRepository()
         repo.add_mongodb_client(client_id_1, client_1)
         repo.add_mongodb_client(client_id_2, client_2)
 

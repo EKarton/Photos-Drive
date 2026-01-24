@@ -7,8 +7,8 @@ from photos_drive.shared.core.albums.albums_pruner import AlbumsPruner
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.repository.base import (
     CreateMediaItemRequest,
@@ -32,7 +32,7 @@ MOCK_DATE_TAKEN = datetime(2025, 6, 6, 14, 30, 0, tzinfo=timezone.utc)
 class AlbumsPrunerTests(unittest.TestCase):
     def test_prune_album__descendants_all_empty_albums(self):
         # Test setup: Build the objects
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(
@@ -73,7 +73,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
 
         # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(client_id, create_mock_mongo_client())
         albums_repo = MongoDBAlbumsRepository(
@@ -149,7 +149,7 @@ class AlbumsPrunerTests(unittest.TestCase):
         gphotos_client = FakeGPhotosClient(FakeItemsRepository(), 'bob@gmail.com')
 
         # Test setup 2: Build the wrapper objects
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
         client_id = ObjectId()
         mongodb_clients_repo.add_mongodb_client(
             client_id, create_mock_mongo_client(1000)

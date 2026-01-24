@@ -7,8 +7,8 @@ from pymongo import MongoClient
 
 from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 from photos_drive.shared.core.albums.album_id import album_id_to_string
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.media_items.media_item import MediaItem
 from photos_drive.shared.core.media_items.media_item_id import (
@@ -27,7 +27,7 @@ class MongoDBMapCellsRepository(MapCellsRepository):
         self,
         client_id: ObjectId,
         mongodb_client: MongoClient,
-        mongodb_transactions_repository: MongoDbTransactionRepository,
+        mongodb_transactions_repository: MongoDBClientsRepository,
     ):
         """
         Creates a MongoDBMapCellsRepository
@@ -35,7 +35,7 @@ class MongoDBMapCellsRepository(MapCellsRepository):
         Args:
             client_id (ObjectId): The ID of the mongo db client that stores the tiles.
             mongodb_client (MongoClient): The MongoDB client.
-            mongodb_transactions_repository (MongoDbTransactionRepository):
+            mongodb_transactions_repository (MongoDBClientsRepository):
                 A repo of mongo db clients.
         """
         self._client_id = client_id

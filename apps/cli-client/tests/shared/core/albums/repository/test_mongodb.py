@@ -12,8 +12,8 @@ from photos_drive.shared.core.albums.repository.base import (
 from photos_drive.shared.core.albums.repository.mongodb import (
     MongoDBAlbumsRepository,
 )
-from photos_drive.shared.core.database.mongodb import (
-    MongoDbTransactionRepository,
+from photos_drive.shared.core.databases.mongodb import (
+    MongoDBClientsRepository,
 )
 from photos_drive.shared.core.testing import (
     create_mock_mongo_client,
@@ -26,7 +26,7 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
 
     def setUp(self):
         self.mock_client = create_mock_mongo_client()
-        self.mongo_clients_repo = MongoDbTransactionRepository()
+        self.mongo_clients_repo = MongoDBClientsRepository()
         self.mongo_clients_repo.add_mongodb_client(MONGO_CLIENT_ID, self.mock_client)
         self.repo: AlbumsRepository = MongoDBAlbumsRepository(
             MONGO_CLIENT_ID, self.mock_client, self.mongo_clients_repo

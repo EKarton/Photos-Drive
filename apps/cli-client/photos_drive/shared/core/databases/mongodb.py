@@ -7,15 +7,15 @@ from pymongo.mongo_client import MongoClient
 from pymongo.read_concern import ReadConcern
 from pymongo.write_concern import WriteConcern
 
-from photos_drive.shared.core.database.base import (
-    TransactionRepository,
+from photos_drive.shared.core.databases.transactions import (
+    TransactionsRepository,
 )
 from photos_drive.shared.core.config.config import Config
 
 logger = logging.getLogger(__name__)
 
 
-class MongoDbTransactionRepository(TransactionRepository):
+class MongoDBClientsRepository(TransactionsRepository):
     def __init__(self) -> None:
         self.__id_to_client: Dict[str, MongoClient] = {}
         self.__client_id_to_session: dict[ObjectId, ClientSession] = {}
@@ -24,17 +24,17 @@ class MongoDbTransactionRepository(TransactionRepository):
     @staticmethod
     def build_from_config(
         config: Config,
-    ) -> "MongoDbTransactionRepository":
+    ) -> "MongoDBClientsRepository":
         """
-        A factory method that builds the MongoDbTransactionRepository from the config.
+        A factory method that builds the MongoDBClientsRepository from the config.
 
         Args:
             config (Config): The config
 
         Returns:
-            MongoDbTransactionRepository: An instance of the Mongo DB clients repo.
+            MongoDBClientsRepository: An instance of the Mongo DB clients repo.
         """
-        mongodb_clients_repo = MongoDbTransactionRepository()
+        mongodb_clients_repo = MongoDBClientsRepository()
 
         for mongodb_config in config.get_mongodb_configs():
             mongodb_client: MongoClient = MongoClient(
