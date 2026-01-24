@@ -21,8 +21,6 @@ from photos_drive.shared.core.albums.repository.base import (
 )
 from photos_drive.shared.core.databases.transactions import (
     TransactionsRepository,
-)
-from photos_drive.shared.core.databases.transactions import (
     TransactionsContext,
 )
 from photos_drive.shared.core.config.config import Config
