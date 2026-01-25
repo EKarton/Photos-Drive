@@ -58,7 +58,7 @@ jobs:
     steps:
       - name: Deploy web app to Render.com 
         run: |
-          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_TEST_APP_HOOK_URL }}"
 
   deploy-prod-app:
     name: Deploy to Prod Environment
