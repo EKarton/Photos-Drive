@@ -13,6 +13,8 @@ jobs:
   deploy:
     name: Deploy to Test Environment
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Deploy web app to Render.com 
