@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "photos_drive"
-version = "9.1.1"
+version = "9.1.2"
 description = ""
 authors = ["Emilio Kartono <e.kartonoe@gmail.com>"]
 readme = "README.md"
