@@ -1,16 +1,14 @@
 ##################################################################
-# A Github action used to deploy to Azure
-# More info at https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
-# Azure info at https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-docker-to-azure-app-service
+# A Github action used to build and push the Web API Docker image
 ##################################################################
 
-name: Deploy to Azure
+name: Publish Web API
 on:
   push:
     branches: [main]
     paths:
       - "apps/web-api/**"
-      - ".github/workflows/deploy-web-api.yaml"
+      - ".github/workflows/publish-web-api.yaml"
 
 permissions:
   id-token: write
@@ -18,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and package app
+    name: Build, package, and publish the Web API to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout GitHub Action"
@@ -50,23 +48,3 @@ jobs:
           file: ./apps/web-api/Dockerfile
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
-
-  deploy-test-app:
-    name: Deploy to Test Environment
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy web app to Render.com 
-        run: |
-          curl -f -X POST "${{ secrets.RENDER_DEPLOY_TEST_APP_HOOK_URL }}"
-
-  deploy-prod-app:
-    name: Deploy to Prod Environment
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy web app using Azure credentials
-        uses: azure/webapps-deploy@v3
-        with:
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: "docker.io/ekarton/photos-drive-webapi:latest"
