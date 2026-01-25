@@ -51,8 +51,17 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
 
-  deploy:
-    name: Deploy to Azure
+  deploy-test-app:
+    name: Deploy to Test Environment
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy web app to Render.com 
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+  deploy-prod-app:
+    name: Deploy to Prod Environment
     needs: build
     runs-on: ubuntu-latest
     steps:
