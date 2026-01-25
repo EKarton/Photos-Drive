@@ -16,9 +16,9 @@ from photos_drive.shared.core.databases.transactions import (
 logger = logging.getLogger(__name__)
 
 
-class MongoDBSessionsRepository(ABC):
+class MongoDBSessionsProvider(ABC):
     '''
-    This class is a repository for all MongoDB sessions.
+    This class is a provider to fetch MongoDB sessions for a particular MongoDB client.
     '''
 
     @abstractmethod
@@ -35,7 +35,7 @@ class MongoDBSessionsRepository(ABC):
         pass
 
 
-class MongoDBClientsRepository(MongoDBSessionsRepository, TransactionsManager):
+class MongoDBClientsRepository(MongoDBSessionsProvider, TransactionsManager):
     '''
     This class is a repository for MongoDB clients and its sessions.
     '''

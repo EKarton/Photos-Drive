@@ -16,7 +16,7 @@ from photos_drive.shared.core.albums.repository.base import (
     logger,
 )
 from photos_drive.shared.core.databases.mongodb import (
-    MongoDBSessionsRepository,
+    MongoDBSessionsProvider,
 )
 from photos_drive.shared.utils.mongodb.get_free_space import get_free_space
 
@@ -28,7 +28,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         self,
         client_id: ObjectId,
         mongodb_client: pymongo.MongoClient,
-        mongodb_sessions_repository: MongoDBSessionsRepository,
+        mongodb_sessions_provider: MongoDBSessionsProvider,
     ):
         """
         Creates a AlbumsRepository
@@ -36,12 +36,12 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         Args:
             client_id (ObjectId): The client ID that this repo is connected to.
             mongodb_client (pymongo.MongoClient): The MongoDB client.
-            mongodb_sessions_repository (MongoDBSessionsRepository):
-                A repo of sessions from all MongoDB clients.
+            mongodb_sessions_provider (MongoDBSessionsProvider):
+                A provider of sessions from all MongoDB clients.
         """
         self._client_id = client_id
         self._mongodb_client = mongodb_client
-        self._mongodb_sessions_repository = mongodb_sessions_repository
+        self._mongodb_sessions_provider = mongodb_sessions_provider
         self._collection = self._mongodb_client["photos_drive"]["albums"]
 
     def get_client_id(self) -> ObjectId:
@@ -54,7 +54,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         if id.client_id != self._client_id:
             raise ValueError(f"Album {id} belongs to a different client")
 
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id
         )
         raw_item = cast(
@@ -69,7 +69,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
 
     def get_all_albums(self) -> list[Album]:
         albums: list[Album] = []
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         for doc in self._collection.find(filter={}, session=session):
@@ -84,7 +84,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         album_name: str,
         parent_album_id: AlbumId | None,
     ) -> Album:
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
 
@@ -110,7 +110,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         if id.client_id != self._client_id:
             raise ValueError(f"Album {id} belongs to a different client")
 
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         result = self._collection.delete_one(
@@ -134,7 +134,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
                 )
             object_ids.append(id.object_id)
 
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         result = self._collection.delete_many(
@@ -165,7 +165,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
 
         logger.debug(f"Updating {album_id} with new fields: {set_query}")
 
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         result = self._collection.update_one(
@@ -203,7 +203,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
             )
             operations.append(operation)
 
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         result = self._collection.bulk_write(requests=operations, session=session)
@@ -218,7 +218,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         mongo_filter = {'parent_album_id': album_id_to_string(album_id)}
 
         albums = []
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         for raw_item in self._collection.find(filter=mongo_filter, session=session):
@@ -229,7 +229,7 @@ class MongoDBAlbumsRepository(AlbumsRepository):
         return albums
 
     def count_child_albums(self, album_id: AlbumId) -> int:
-        session = self._mongodb_sessions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         return self._collection.count_documents(
