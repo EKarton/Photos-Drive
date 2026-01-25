@@ -67,14 +67,11 @@ def init(
         mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
             "Enter your admin connection string: "
         )
-        mongodb_r_connection_string = prompt_user_for_mongodb_connection_string(
-            "Enter your read-only connection string: "
-        )
         config.add_mongodb_config(
             AddMongoDbConfigRequest(
                 name=metadata_db_name,
                 read_write_connection_string=mongodb_rw_connection_string,
-                read_only_connection_string=mongodb_r_connection_string,
+                read_only_connection_string=mongodb_rw_connection_string,
             )
         )
     else:
@@ -107,21 +104,18 @@ def init(
         "Enter name of your vector database: "
     )
     option = prompt_user_for_options(
-        "Which type of database do you want to add?", ['MongoDB']
+        "Which type of vector database do you want to add?", ['MongoDB']
     )
     if option == 'MongoDB':
         mongodb_rw_connection_string = prompt_user_for_mongodb_connection_string(
             "Enter your admin connection string: "
-        )
-        mongodb_r_connection_string = prompt_user_for_mongodb_connection_string(
-            "Enter your read-only connection string: "
         )
 
         config.add_vector_store_config(
             AddMongoDbVectorStoreConfigRequest(
                 name=vector_store_name,
                 read_write_connection_string=mongodb_rw_connection_string,
-                read_only_connection_string=mongodb_r_connection_string,
+                read_only_connection_string=mongodb_rw_connection_string,
             )
         )
     else:
@@ -147,11 +141,10 @@ def __prompt_welcome():
     print(
         "Welcome!\n"
         + "Before you get started with photos_drive_cli, you need the following:\n"
-        + "\n  1. A place to store your config files (MongoDB or in a config file).\n"
-        + "\n  2. A place to store your photos metadata (MongoDB).\n"
-        + "\n  3. A place to store your photos (Google Photos account).\n"
-        + "\n  4. A place to store your photos map data (MongoDB).\n"
-        + "\n  5. A place to store your photo embeddings (MongoDB).\n"
+        + "\n  1. A place to store your config files (MongoDB / ConfigFile).\n"
+        + "\n  2. A place to store your photos' metadata (MongoDB).\n"
+        + "\n  3. A place to store your photos (Google Photos).\n"
+        + "\n  4. A place to store your photos' embeddings (MongoDB).\n"
     )
     input("Press [enter] to continue")
 

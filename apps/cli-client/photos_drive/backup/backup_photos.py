@@ -22,7 +22,7 @@ from photos_drive.shared.core.albums.repository.base import (
 from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.databases.transactions import (
     TransactionsContext,
-    TransactionsRepository,
+    TransactionsManager,
 )
 from photos_drive.shared.core.media_items.media_item import MediaItem
 from photos_drive.shared.core.media_items.repository.base import (
@@ -80,7 +80,7 @@ class PhotosBackup:
         map_cells_repo: MapCellsRepository,
         vector_store: BaseVectorStore,
         gphotos_client_repo: GPhotosClientsRepository,
-        transactions_repo: TransactionsRepository,
+        transactions_manager: TransactionsManager,
         parallelize_uploads: bool = False,
     ):
         self.__config = config
@@ -100,7 +100,7 @@ class PhotosBackup:
             else GPhotosMediaItemUploaderImpl(gphotos_client_repo)
         )
 
-        self.__transactions_repo = transactions_repo
+        self.__transactions_manager = transactions_manager
 
     def backup(self, diffs: list[ProcessedDiff]) -> BackupResults:
         """Backs up a list of media items based on a list of diffs.
@@ -202,7 +202,7 @@ class PhotosBackup:
         # Step 7: Delete albums with no child albums and no media items
         total_num_albums_deleted = 0
         for album_id in total_album_ids_to_prune:
-            with TransactionsContext(self.__transactions_repo):
+            with TransactionsContext(self.__transactions_manager):
                 logger.debug(f"Pruning {album_id}")
                 total_num_albums_deleted += self.__albums_pruner.prune_album(album_id)
 
@@ -304,7 +304,7 @@ class PhotosBackup:
             for child_album in self.__albums_repo.find_child_albums(cur_album.id):
                 child_album_name_to_album[cast(str, child_album.name)] = child_album
 
-            with TransactionsContext(self.__transactions_repo):
+            with TransactionsContext(self.__transactions_manager):
                 for child_diff_node in cur_diffs_tree_node.child_nodes:
                     if child_diff_node.album_name not in child_album_name_to_album:
                         new_album = self.__albums_repo.create_album(

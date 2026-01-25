@@ -6,7 +6,7 @@ from pymongo import MongoClient
 
 from photos_drive.shared.core.albums.album_id import album_id_to_string
 from photos_drive.shared.core.databases.mongodb import (
-    MongoDBClientsRepository,
+    MongoDBSessionsProvider,
 )
 from photos_drive.shared.core.media_items.media_item import MediaItem
 from photos_drive.shared.core.media_items.media_item_id import (
@@ -26,7 +26,7 @@ class MongoDBMapCellsRepository(MapCellsRepository):
         self,
         client_id: ObjectId,
         mongodb_client: MongoClient,
-        mongodb_transactions_repository: MongoDBClientsRepository,
+        mongodb_sessions_provider: MongoDBSessionsProvider,
     ):
         """
         Creates a MongoDBMapCellsRepository
@@ -34,11 +34,11 @@ class MongoDBMapCellsRepository(MapCellsRepository):
         Args:
             client_id (ObjectId): The ID of the mongo db client that stores the tiles.
             mongodb_client (MongoClient): The MongoDB client.
-            mongodb_transactions_repository (MongoDBClientsRepository):
-                A repo of mongo db clients.
+            mongodb_sessions_provider (MongoDBSessionsProvider):
+                A provider of MongoDB sessions.
         """
         self._client_id = client_id
-        self._mongodb_transactions_repository = mongodb_transactions_repository
+        self._mongodb_sessions_provider = mongodb_sessions_provider
         self._mongodb_client = mongodb_client
 
     def get_client_id(self) -> ObjectId:
@@ -61,7 +61,7 @@ class MongoDBMapCellsRepository(MapCellsRepository):
             for res in range(0, MAX_CELL_RESOLUTION + 1)
         )
 
-        session = self._mongodb_transactions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
 
@@ -80,7 +80,7 @@ class MongoDBMapCellsRepository(MapCellsRepository):
         )
 
     def remove_media_item(self, media_item_id: MediaItemId):
-        session = self._mongodb_transactions_repository.get_session_for_client_id(
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
             self._client_id,
         )
         self._mongodb_client["photos_drive"]["map_cells"].delete_many(

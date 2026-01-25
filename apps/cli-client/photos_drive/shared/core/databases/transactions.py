@@ -5,7 +5,7 @@ from types import TracebackType
 logger = logging.getLogger(__name__)
 
 
-class TransactionsRepository(ABC):
+class TransactionsManager(ABC):
     @abstractmethod
     def start_transactions(self):
         '''
@@ -33,7 +33,7 @@ class TransactionsRepository(ABC):
 
 
 class TransactionsContext:
-    def __init__(self, repo: TransactionsRepository):
+    def __init__(self, repo: TransactionsManager):
         self.__repo = repo
 
     def __enter__(self):

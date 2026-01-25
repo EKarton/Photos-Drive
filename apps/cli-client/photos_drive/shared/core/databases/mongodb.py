@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 import logging
-from typing import Dict
+from typing import Dict, override
 
 from bson.objectid import ObjectId
 from pymongo.client_session import ClientSession
@@ -9,13 +10,36 @@ from pymongo.write_concern import WriteConcern
 
 from photos_drive.shared.core.config.config import Config
 from photos_drive.shared.core.databases.transactions import (
-    TransactionsRepository,
+    TransactionsManager,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class MongoDBClientsRepository(TransactionsRepository):
+class MongoDBSessionsProvider(ABC):
+    '''
+    This class is a provider to fetch MongoDB sessions for a particular MongoDB client.
+    '''
+
+    @abstractmethod
+    def get_session_for_client_id(self, client_id: ObjectId) -> ClientSession | None:
+        """
+        Returns the MongoDB session for a ClientID.
+
+        Args:
+            client_id (ObjectId): The ID of the MongoDB client
+
+        Returns:
+            ClientSession | None: The session if it has already started; else None.
+        """
+        pass
+
+
+class MongoDBClientsRepository(MongoDBSessionsProvider, TransactionsManager):
+    '''
+    This class is a repository for MongoDB clients and its sessions.
+    '''
+
     def __init__(self) -> None:
         self.__id_to_client: Dict[str, MongoClient] = {}
         self.__client_id_to_session: dict[ObjectId, ClientSession] = {}
@@ -89,6 +113,7 @@ class MongoDBClientsRepository(TransactionsRepository):
         """
         return [(ObjectId(id), client) for id, client in self.__id_to_client.items()]
 
+    @override
     def start_transactions(self):
         if self.__transaction_in_progress:
             raise ValueError("Transaction already in progress")
@@ -101,18 +126,11 @@ class MongoDBClientsRepository(TransactionsRepository):
             )
             self.__client_id_to_session[client_id] = session
 
+    @override
     def get_session_for_client_id(self, client_id: ObjectId) -> ClientSession | None:
-        '''
-        Returns the MongoDB session for a ClientID.
-
-        Args:
-            client_id (ObjectId): The ID of the MongoDB client
-
-        Returns:
-            ClientSession | None: The session if it has already started; else None.
-        '''
         return self.__client_id_to_session.get(client_id, None)
 
+    @override
     def commit_and_end_transactions(self):
         if not self.__transaction_in_progress:
             raise ValueError("Transaction not in progress")
@@ -126,6 +144,7 @@ class MongoDBClientsRepository(TransactionsRepository):
         self.__client_id_to_session.clear()
         self.__transaction_in_progress = False
 
+    @override
     def abort_and_end_transactions(self):
         if not self.__transaction_in_progress:
             raise ValueError("Transaction not in progress")
