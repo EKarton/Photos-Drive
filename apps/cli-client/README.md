@@ -23,7 +23,7 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
 
 ## Getting Started to Contribute
 
-1. Ensure Python, [UV](https://docs.astral.sh/uv), and [Libmagic](https://man7.org/linux/man-pages/man3/libmagic.3.html) are installed on your machine
+1. Ensure Python, [UV](https://docs.astral.sh/uv), [Exiftool](https://exiftool.org), and [Libmagic](https://man7.org/linux/man-pages/man3/libmagic.3.html) are installed on your machine
 
 1. Install dependencies by running:
 
