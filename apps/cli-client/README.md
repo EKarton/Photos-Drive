@@ -23,36 +23,36 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
 
 ## Getting Started to Contribute
 
-1. Ensure Python3, Pip, and Poetry are installed on your machine
+1. Ensure Python, [UV](https://docs.astral.sh/uv), and [Libmagic](https://man7.org/linux/man-pages/man3/libmagic.3.html) are installed on your machine
 
 1. Install dependencies by running:
 
    ```bash
-   poetry install
+   uv sync
    ```
 
 1. To lint your code, run:
 
    ```bash
-   poetry run mypy . && poetry run flake8 . && poetry run isort . && poetry run black .
+   uv run mypy ./src && uv run flake8 ./src && uv run isort ./src && uv run black ./src
    ```
 
 1. To run all tests and code coverage, run:
 
    ```bash
-   poetry run coverage run  --source=photos_drive -m pytest tests/ && poetry run coverage report -m
+   uv run coverage run  --source=photos_drive -m pytest tests/ && uv run coverage report -m
    ```
 
 1. To run tests and code coverage for a particular test file, run:
 
    ```bash
-   poetry run coverage run --source=photos_drive -m pytest <insert-file-path> && poetry run coverage report -m
+   uv run coverage run --source=photos_drive -m pytest <insert-file-path> && uv run coverage report -m
    ```
 
    For example,
 
    ```bash
-   poetry run coverage run --source=photos_drive -m pytest tests/backup/test_backup_photos.py && poetry run coverage report -m
+   uv run coverage run --source=photos_drive -m pytest tests/backup/test_backup_photos.py && uv run coverage report -m
    ```
 
 1. To publish a new version of the app:
@@ -60,13 +60,13 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
    1. First, bump up the package version by running:
 
       ```bash
-      poetry version [patch|minor|major]
+      uv version --bump [patch|minor|major]
       ```
 
       For instance, if the app is on 0.1.0 and you want to increment it to version 0.1.1, run:
 
       ```bash
-      poetry version patch
+      uv version --bump patch
       ```
 
    1. Then, create a pull request with the new version number.

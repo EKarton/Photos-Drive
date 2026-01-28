@@ -1,74 +1,83 @@
-[tool.poetry]
+[project]
 name = "photos_drive"
-version = "9.1.2"
+version = "9.1.3"
 description = ""
-authors = ["Emilio Kartono <e.kartonoe@gmail.com>"]
+authors = [{ name = "Emilio Kartono", email = "e.kartonoe@gmail.com" }]
+packages = [{include = "photos_drive"}]
+requires-python = ">=3.10,<3.13"
 readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "exifread>=3.0.0,<4",
+    "typer>=0.15.1,<0.16",
+    "backoff>=2.2.1,<3",
+    "types-requests>=2.32.0.20241016,<3",
+    "google-api-python-client>=2.156.0,<3",
+    "google-auth-oauthlib>=1.2.1,<2",
+    "python-magic>=0.4.27,<0.5",
+    "tqdm>=4.67.1,<5",
+    "event-bus>=1.0.2,<2",
+    "dacite>=1.8.1,<2",
+    "types-exifread>=3.0.0.20240806,<4",
+    "prettytable>=3.12.0,<4",
+    "termcolor>=2.5.0,<3",
+    "xxhash>=3.5.0,<4",
+    "pyexiftool>=0.5.6,<0.6",
+    "pillow>=11.2.1,<12",
+    "pillow-heif>=0.22.0,<0.23",
+    "opencv-python-headless>=4.11.0.86,<5",
+    "h3>=4.3.0,<5",
+    "langchain>=0.3.26,<0.4",
+    "faiss-cpu>=1.11.0.post1,<2",
+    "langchain-google-vertexai>=2.0.27,<3",
+    "langchain-community>=0.3.27,<0.4",
+    "langchain-experimental>=0.3.4,<0.4",
+    "torch<=2.2.2",
+    "numpy<2",
+    "open-clip-torch>=2.32.0,<3",
+    "langchain-google-genai>=2.1.8,<3",
+    "transformers>=4.53.2,<5",
+    "pydantic>=2.11.7,<3",
+    "langgraph>=0.5.4,<0.6",
+    "langmem>=0.0.28,<0.0.29",
+    "rich>=14.0.0,<15",
+    "pymongo<4.11",
+    "typing-extensions>=4.14.1,<5",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-exifread = "^3.0.0"
-typer = "^0.15.1"
-backoff = "^2.2.1"
-types-requests = "^2.32.0.20241016"
-google-api-python-client = "^2.156.0"
-google-auth-oauthlib = "^1.2.1"
-python-magic = "^0.4.27"
-tqdm = "^4.67.1"
-event-bus = "^1.0.2"
-dacite = "^1.8.1"
-types-exifread = "^3.0.0.20240806"
-prettytable = "^3.12.0"
-termcolor = "^2.5.0"
-xxhash = "^3.5.0"
-pyexiftool = "^0.5.6"
-pillow = "^11.2.1"
-pillow-heif = "^0.22.0"
-opencv-python-headless = "^4.11.0.86"
-h3 = "^4.3.0"
-langchain = "^0.3.26"
-faiss-cpu = "^1.11.0.post1"
-langchain-google-vertexai = "^2.0.27"
-langchain-community = "^0.3.27"
-langchain-experimental = "^0.3.4"
-torch = "<=2.2.2"
-numpy = "<2"
-open-clip-torch = "^2.32.0"
-langchain-google-genai = "^2.1.8"
-transformers = "^4.53.2"
-pydantic = "^2.11.7"
-langgraph = "^0.5.4"
-langmem = "^0.0.28"
-rich = "^14.0.0"
-pymongo = "<4.11"
-typing-extensions = "^4.14.1"
+[project.scripts]
+photos_drive_cli = "photos_drive.cli.app:main"
 
-[tool.poetry.group.dev.dependencies]
-black = "^24.10.0"
-mypy = "^1.13.0"
-pytest = "^8.3.4"
-flake8 = "^7.1.1"
-flake8-bugbear = "^24.12.12"
-coverage = "^7.6.9"
-pytest-mock = "^3.14.0"
-requests-mock = "^1.12.1"
-freezegun = "^1.5.1"
-mongomock = "^4.3.0"
-pyfakefs = "^5.7.4"
-unittest-parametrize = "^1.6.0"
-isort = "^6.0.1"
+[dependency-groups]
+dev = [
+    "black>=24.10.0,<25",
+    "mypy>=1.13.0,<2",
+    "pytest>=8.3.4,<9",
+    "flake8>=7.1.1,<8",
+    "flake8-bugbear>=24.12.12,<25",
+    "coverage>=7.6.9,<8",
+    "pytest-mock>=3.14.0,<4",
+    "requests-mock>=1.12.1,<2",
+    "freezegun>=1.5.1,<2",
+    "mongomock>=4.3.0,<5",
+    "pyfakefs>=5.7.4,<6",
+    "unittest-parametrize>=1.6.0,<2",
+    "isort>=6.0.1,<7",
+]
 
-[[tool.poetry.source]]
+[[tool.uv.index]]
 name = "torch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
-priority = "explicit"
+explicit = true
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-photos_drive_cli = "photos_drive.cli.app:main"
+requires = ["uv_build>=0.9.27,<0.10.0"]
+build-backend = "uv_build"
 
 [[tool.mypy.overrides]]
 module = "google_auth_oauthlib.*"
