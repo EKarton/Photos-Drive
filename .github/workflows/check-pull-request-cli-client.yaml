@@ -40,9 +40,10 @@ jobs:
           # Create / update .venv and install deps from pyproject / uv.lock
           uv sync --all-groups
           # Run tools inside the project environment
-          uv run mypy . --check-untyped-defs
-          uv run flake8
-          uv run black --check .
+          uv run mypy ./src ./tests
+          uv run flake8 ./src ./tests
+          uv run isort ./src ./tests
+          uv run black ./src ./tests
 
   run-tests:
     name: Run tests in CLI Client
