@@ -1,6 +1,5 @@
 ##################################################################
 # A Github action used to publish cli client to PyPI
-# More info at https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
 ##################################################################
 
 name: Publish CLI Client to PyPI
@@ -16,28 +15,28 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # updated to latest
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5  # updated to latest
         with:
           python-version: "3.13"
 
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7  # official uv action
         with:
-          poetry-version: "2.0.0"
+          version: "latest"
 
       - name: Get local version from pyproject.toml
         id: get-version
+        working-directory: ./apps/cli-client
         run: |
-          cd ./apps/cli-client
-          echo "version=$(poetry version -s)" >> $GITHUB_OUTPUT
+          echo "version=$(uv project metadata | jq -r '.version')" >> $GITHUB_OUTPUT
 
       - name: Check if version already exists on PyPI
         id: check-pypi
         run: |
-          PACKAGE_NAME=$(poetry version | awk '{print $1}')
+          PACKAGE_NAME=$(cd ./apps/cli-client && uv project metadata | jq -r '.name')
           VERSION=${{ steps.get-version.outputs.version }}
           RESPONSE=$(curl -s https://pypi.org/pypi/$PACKAGE_NAME/json)
           if echo "$RESPONSE" | jq -e ".releases[\"$VERSION\"]" >/dev/null; then
@@ -46,13 +45,17 @@ jobs:
           else
             echo "publish=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Sync dependencies and build
+        if: steps.check-pypi.outputs.publish == 'true'
         working-directory: ./apps/cli-client
+        run: |
+          uv sync --frozen  # syncs from uv.lock (assumes migrated from poetry.lock)
 
       - name: Publish to PyPI
         if: steps.check-pypi.outputs.publish == 'true'
         env:
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        working-directory: ./apps/cli-client
         run: |
-          cd ./apps/cli-client
-          poetry config pypi-token.pypi $PYPI_TOKEN
-          poetry publish --build
+          uv publish --token-env UV_PUBLISH_TOKEN

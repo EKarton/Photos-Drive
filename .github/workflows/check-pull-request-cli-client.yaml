@@ -29,16 +29,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install dependencies and run linting
+        working-directory: ./apps/cli-client
         run: |
-          cd ./apps/cli-client
-          poetry install --no-interaction
-          poetry run mypy . --check-untyped-defs
-          poetry run flake8
-          poetry run black --check .
+          # Create / update .venv and install deps from pyproject / uv.lock
+          uv sync --all-groups
+          # Run tools inside the project environment
+          uv run mypy . --check-untyped-defs
+          uv run flake8
+          uv run black --check .
 
   run-tests:
     name: Run tests in CLI Client
@@ -52,14 +56,17 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Use Exiftool
         uses: woss/exiftool-action@v12.87
 
       - name: Install dependencies and run tests
+        working-directory: ./apps/cli-client
         run: |
-          cd ./apps/cli-client
-          poetry install --no-interaction
-          poetry run coverage run --source=photos_drive -m pytest && poetry run coverage report -m
+          uv sync --all-groups
+          uv run coverage run --source=photos_drive -m pytest
+          uv run coverage report -m
