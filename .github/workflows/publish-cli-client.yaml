@@ -56,7 +56,7 @@ jobs:
       - name: Publish to PyPI
         if: steps.check-pypi.outputs.publish == 'true'
         env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         working-directory: ./apps/cli-client
         run: |
-          uv publish --token UV_PUBLISH_TOKEN
+          uv publish --token $PYPI_TOKEN
