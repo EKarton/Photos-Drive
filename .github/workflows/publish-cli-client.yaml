@@ -51,6 +51,7 @@ jobs:
         working-directory: ./apps/cli-client
         run: |
           uv sync --frozen  # syncs from uv.lock (assumes migrated from poetry.lock)
+          uv build
 
       - name: Publish to PyPI
         if: steps.check-pypi.outputs.publish == 'true'
