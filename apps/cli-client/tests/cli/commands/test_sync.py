@@ -110,6 +110,12 @@ class TestSyncCli(unittest.TestCase):
             )
 
         # 5. Apply patches
+        self.exif_mock = MagicMock()
+        self.exif_mock.__enter__.return_value = self.exif_mock
+        self.exif_mock.get_tags.side_effect = lambda files, *args, **kwargs: [
+            {"SourceFile": f} for f in files
+        ]
+
         self.patchers = [
             patch.object(
                 MongoDBClientsRepository,
@@ -141,7 +147,7 @@ class TestSyncCli(unittest.TestCase):
             ),
             patch(
                 "photos_drive.backup.processed_diffs.ExifToolHelper",
-                return_value=MagicMock(),
+                return_value=self.exif_mock,
             ),
         ]
         for patcher in self.patchers:

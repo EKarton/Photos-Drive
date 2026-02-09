@@ -1,9 +1,9 @@
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, replace
 from datetime import datetime
 import logging
 import os
+from pathlib import Path
 from typing import Optional, Tuple, cast
 
 from PIL import Image, ImageFile
@@ -274,7 +274,6 @@ class DiffsProcessor:
 
         with ExifToolHelper() as exiftool_client:
             file_paths = [d[0].file_path for d in missing_metadata_and_idx]
-            print(file_paths)
             raw_metadatas = exiftool_client.get_tags(
                 file_paths,
                 [

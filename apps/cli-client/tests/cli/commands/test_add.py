@@ -120,6 +120,12 @@ class TestAddCli(unittest.TestCase):
             )
 
         # 6. Apply patches
+        self.exif_mock = MagicMock()
+        self.exif_mock.__enter__.return_value = self.exif_mock
+        self.exif_mock.get_tags.side_effect = lambda files, *args, **kwargs: [
+            {"SourceFile": f} for f in files
+        ]
+
         self.patchers = [
             patch.object(
                 MongoDBClientsRepository,
@@ -153,7 +159,7 @@ class TestAddCli(unittest.TestCase):
             ),
             patch(
                 "photos_drive.backup.processed_diffs.ExifToolHelper",
-                return_value=MagicMock(),
+                return_value=self.exif_mock,
             ),
         ]
         for patcher in self.patchers:
@@ -177,6 +183,13 @@ class TestAddCli(unittest.TestCase):
         )
 
         # Assert
+        # Assert
+        if result.exit_code != 0:
+            print(f"Command output: {result.stdout}")
+            print(f"Exception: {result.exception}")
+            import traceback
+
+            traceback.print_tb(result.exc_info[2])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Items added: 1", result.stdout)
 
