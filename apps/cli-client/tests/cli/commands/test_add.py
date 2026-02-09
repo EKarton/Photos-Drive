@@ -83,43 +83,50 @@ class TestAddCli(unittest.TestCase):
             f.write(b"fake image data 2")
 
         # 5. Build fake config file
-        self.config_file = tempfile.NamedTemporaryFile(delete=False, suffix=".ini")
-        self.config_file_path = self.config_file.name
-        self.config_file.close()
-        with open(self.config_file_path, "w") as f:
+        self.config_dir = tempfile.TemporaryDirectory()
+        self.config_file_path = os.path.join(self.config_dir.name, "config.ini")
+        with open(self.config_file_path, "wb") as f:
             f.write(
-                f"[{self.mongodb_client_id}]\n"
-                + "type = mongodb_config\n"
-                + "name = TestMongoDB\n"
-                + "read_write_connection_string = mongodb://localhost:27017\n"
-                + "read_only_connection_string = mongodb://localhost:27016\n"
-                + "\n"
-                + f"[{self.gphotos_client_id}]\n"
-                + "type = gphotos_config\n"
-                + "name = TestGPhotos\n"
-                + "read_write_token = test_token\n"
-                + "read_write_refresh_token = test_refresh_token\n"
-                + "read_write_client_id = test_client_id\n"
-                + "read_write_client_secret = test_client_secret\n"
-                + "read_write_token_uri = https://oauth2.googleapis.com/token\n"
-                + "read_only_token = test_token_2\n"
-                + "read_only_refresh_token = test_refresh_token_2\n"
-                + "read_only_client_id = test_client_id_2\n"
-                + "read_only_client_secret = test_client_secret_2\n"
-                + "read_only_token_uri = https://oauth2.googleapis.com/token\n"
-                + "\n"
-                + f"[{ObjectId()}]\n"
-                + "type = root_album\n"
-                + f"client_id = {self.root_album.id.client_id}\n"
-                + f"object_id = {self.root_album.id.object_id}\n"
-                + "\n"
-                + f"[{ObjectId()}]\n"
-                + "type = vector_store_config\n"
-                + "name = TestVectorStore\n"
-                + "path = memory\n"
+                (
+                    f"[{self.mongodb_client_id}]\n"
+                    + "type = mongodb_config\n"
+                    + "name = TestMongoDB\n"
+                    + "read_write_connection_string = mongodb://localhost:27017\n"
+                    + "read_only_connection_string = mongodb://localhost:27016\n"
+                    + "\n"
+                    + f"[{self.gphotos_client_id}]\n"
+                    + "type = gphotos_config\n"
+                    + "name = TestGPhotos\n"
+                    + "read_write_token = test_token\n"
+                    + "read_write_refresh_token = test_refresh_token\n"
+                    + "read_write_client_id = test_client_id\n"
+                    + "read_write_client_secret = test_client_secret\n"
+                    + "read_write_token_uri = https://oauth2.googleapis.com/token\n"
+                    + "read_only_token = test_token_2\n"
+                    + "read_only_refresh_token = test_refresh_token_2\n"
+                    + "read_only_client_id = test_client_id_2\n"
+                    + "read_only_client_secret = test_client_secret_2\n"
+                    + "read_only_token_uri = https://oauth2.googleapis.com/token\n"
+                    + "\n"
+                    + f"[{ObjectId()}]\n"
+                    + "type = root_album\n"
+                    + f"client_id = {self.root_album.id.client_id}\n"
+                    + f"object_id = {self.root_album.id.object_id}\n"
+                    + "\n"
+                    + f"[{ObjectId()}]\n"
+                    + "type = vector_store_config\n"
+                    + "name = TestVectorStore\n"
+                    + "path = memory\n"
+                ).encode("utf-8")
             )
 
         # 6. Apply patches
+        self.exif_mock = MagicMock()
+        self.exif_mock.__enter__.return_value = self.exif_mock
+        self.exif_mock.get_tags.side_effect = lambda files, *args, **kwargs: [
+            {"SourceFile": f} for f in files
+        ]
+
         self.patchers = [
             patch.object(
                 MongoDBClientsRepository,
@@ -153,7 +160,7 @@ class TestAddCli(unittest.TestCase):
             ),
             patch(
                 "photos_drive.backup.processed_diffs.ExifToolHelper",
-                return_value=MagicMock(),
+                return_value=self.exif_mock,
             ),
         ]
         for patcher in self.patchers:
