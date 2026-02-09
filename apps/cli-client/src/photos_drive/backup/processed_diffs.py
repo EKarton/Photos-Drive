@@ -1,3 +1,4 @@
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, replace
 from datetime import datetime
@@ -254,7 +255,7 @@ class DiffsProcessor:
         return cast(list[ProcessedDiff], processed_diffs)
 
     def __get_exif_metadatas(self, diffs: list[Diff]) -> list[ExtractedExifMetadata]:
-        metadatas = [ExtractedExifMetadata(None, DEFAULT_DATE_TIME)] * len(diffs)
+        metadatas = [ExtractedExifMetadata(None, DEFAULT_DATE_TIME) for _ in diffs]
 
         missing_metadata_and_idx: list[tuple[Diff, int]] = []
         for i, diff in enumerate(diffs):
@@ -273,6 +274,7 @@ class DiffsProcessor:
 
         with ExifToolHelper() as exiftool_client:
             file_paths = [d[0].file_path for d in missing_metadata_and_idx]
+            print(file_paths)
             raw_metadatas = exiftool_client.get_tags(
                 file_paths,
                 [
@@ -288,8 +290,17 @@ class DiffsProcessor:
                 ],
             )
 
-            for i, raw_metadata in enumerate(raw_metadatas):
-                location = diffs[i].location
+            for (diff, i), raw_metadata in zip(
+                missing_metadata_and_idx, raw_metadatas, strict=True
+            ):
+                src = raw_metadata.get("SourceFile")
+                if src is None:
+                    raise ValueError(f"Missing SourceFile for {diff.file_path}")
+
+                # Compare by basename to avoid ./ vs absolute/relative differences
+                assert Path(src).name == Path(diff.file_path).name
+
+                location = diff.location
                 if location is None:
                     latitude = raw_metadata.get("Composite:GPSLatitude")
                     longitude = raw_metadata.get("Composite:GPSLongitude")
@@ -298,7 +309,7 @@ class DiffsProcessor:
                             latitude=cast(int, latitude), longitude=cast(int, longitude)
                         )
 
-                date_taken = diffs[i].date_taken
+                date_taken = diff.date_taken
                 if date_taken is None:
                     date_str = (
                         raw_metadata.get("EXIF:DateTimeOriginal")
@@ -316,14 +327,12 @@ class DiffsProcessor:
                             )
                         except Exception as e:
                             raise ValueError(
-                                f"Invalid date {date_str} at {diffs[i].file_path}"
+                                f"Invalid date {date_str} at {diff.file_path}"
                             ) from e
                     else:
-                        date_taken = datetime(1970, 1, 1)
+                        date_taken = DEFAULT_DATE_TIME
 
-                metadatas[missing_metadata_and_idx[i][1]] = ExtractedExifMetadata(
-                    location, date_taken
-                )
+                metadatas[i] = ExtractedExifMetadata(location, date_taken)
 
         return metadatas
 
