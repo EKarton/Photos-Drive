@@ -83,9 +83,8 @@ class TestAddCli(unittest.TestCase):
             f.write(b"fake image data 2")
 
         # 5. Build fake config file
-        self.config_file = tempfile.NamedTemporaryFile(delete=False, suffix=".ini")
-        self.config_file_path = self.config_file.name
-        self.config_file.close()
+        self.config_dir = tempfile.TemporaryDirectory()
+        self.config_file_path = os.path.join(self.config_dir.name, "config.ini")
         with open(self.config_file_path, "w") as f:
             f.write(
                 f"[{self.mongodb_client_id}]\n"
@@ -183,13 +182,6 @@ class TestAddCli(unittest.TestCase):
         )
 
         # Assert
-        # Assert
-        if result.exit_code != 0:
-            print(f"Command output: {result.stdout}")
-            print(f"Exception: {result.exception}")
-            import traceback
-
-            traceback.print_tb(result.exc_info[2])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Items added: 1", result.stdout)
 
