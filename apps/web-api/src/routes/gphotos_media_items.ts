@@ -6,7 +6,7 @@ import { verifyAuthorization } from '../middlewares/authorization';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
-} from '../services/blob_store/gphotos/GPhotosClientsRepository';
+} from '../services/core/storage/gphotos/GPhotosClientsRepository';
 
 export default async function (gPhotoClientRepo: GPhotosClientsRepository) {
   const router: Router = Router();
