@@ -1,5 +1,5 @@
-import logger from '../../../utils/logger';
-import { ConfigStore } from '../../config_store/ConfigStore';
+import logger from '../../../../utils/logger';
+import { ConfigStore } from '../../config/ConfigStore';
 import { GPhotosClient } from './GPhotosClient';
 
 /** Stores all of the GPhotoClients in the repository. */

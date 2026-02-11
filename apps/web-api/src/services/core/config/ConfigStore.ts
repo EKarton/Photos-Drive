@@ -1,5 +1,5 @@
 import { AlbumId } from '../albums/Albums';
-import { GPhotosCredentials } from '../blob_store/gphotos/GPhotosClient';
+import { GPhotosCredentials } from '../storage/gphotos/GPhotosClient';
 
 /** Represents a Google Photos config. */
 export interface GPhotosConfig {

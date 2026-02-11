@@ -13,8 +13,8 @@ import {
 import {
   HeatmapGenerator,
   Tile
-} from '../../../src/services/maps_store/HeatmapGenerator';
-import { MapCellsRepositoryImpl } from '../../../src/services/maps_store/mongodb/MapCellsRepositoryImpl';
+} from '../../../../src/services/features/maps/HeatmapGenerator';
+import { MapCellsRepositoryImpl } from '../../../../src/services/features/maps/MapCellsRepositoryImpl';
 
 const MEDIA_ITEM_ID_1: MediaItemId = {
   clientId: 'client1',

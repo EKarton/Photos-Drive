@@ -4,7 +4,7 @@
 import * as fs from 'fs';
 import * as ini from 'ini';
 import { AlbumId } from '../albums/Albums';
-import { GPhotosCredentials } from '../blob_store/gphotos/GPhotosClient';
+import { GPhotosCredentials } from '../storage/gphotos/GPhotosClient';
 import {
   ConfigStore,
   GPhotosConfig,

@@ -29,7 +29,7 @@ import { configToVectorStore } from './services/features/llm/vector_stores/confi
 import { DistributedVectorStore } from './services/features/llm/vector_stores/DistributedVectorStore';
 import { HeatmapGenerator } from './services/features/maps/HeatmapGenerator';
 import { MapCellsRepository } from './services/features/maps/MapCellsRepository';
-import { MapCellsRepositoryImpl } from './services/features/maps/mongodb/MapCellsRepositoryImpl';
+import { MapCellsRepositoryImpl } from './services/features/maps/MapCellsRepositoryImpl';
 import logger from './utils/logger';
 
 export class App {

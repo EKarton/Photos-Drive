@@ -1,4 +1,4 @@
-import { convertStringToAlbumId } from '../../../src/services/core/albums/Albums';
+import { convertStringToAlbumId } from '../../../../src/services/core/albums/Albums';
 
 describe('convertStringToAlbumId', () => {
   it('should parse a valid string into an AlbumId object', () => {

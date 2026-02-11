@@ -1,12 +1,12 @@
 import { Filter, Document as MongoDbDocument } from 'mongodb';
-import { AlbumId, albumIdToString } from '../../metadata_store/Albums';
-import { convertStringToMediaItemId } from '../../metadata_store/MediaItems';
-import { MongoDbClientsStore } from '../../metadata_store/mongodb/MongoDbClientsStore';
+import { AlbumId, albumIdToString } from '../../core/albums/Albums';
+import { MongoDbClientsStore } from '../../core/databases/MongoDbClientsStore';
+import { convertStringToMediaItemId } from '../../core/media_items/MediaItems';
 import {
   CellId,
   HeatmapPoints,
   MapCellsRepository
-} from '../MapCellsRepository';
+} from './MapCellsRepository';
 
 /** The max h3 zoom level */
 export const MAX_ZOOM_LEVEL = 15;

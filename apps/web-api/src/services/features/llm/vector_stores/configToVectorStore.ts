@@ -2,7 +2,7 @@ import { MongoClient } from 'mongodb';
 import {
   MongoDbVectorStoreConfig,
   VectorStoreConfig
-} from '../config/ConfigStore';
+} from '../../../core/config/ConfigStore';
 import { BaseVectorStore } from './BaseVectorStore';
 import { MongoDbVectorStore } from './MongoDbVectorStore';
 
