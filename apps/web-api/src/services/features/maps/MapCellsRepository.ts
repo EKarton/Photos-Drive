@@ -1,5 +1,5 @@
-import { AlbumId } from '../metadata_store/Albums';
-import { MediaItemId } from '../metadata_store/MediaItems';
+import { AlbumId } from '../../core/albums/Albums';
+import { MediaItemId } from '../../core/media_items/MediaItems';
 
 export type CellId = string;
 

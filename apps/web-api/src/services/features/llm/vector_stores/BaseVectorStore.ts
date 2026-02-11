@@ -1,4 +1,4 @@
-import { MediaItemId } from '../metadata_store/MediaItems';
+import { MediaItemId } from '../../../core/media_items/MediaItems';
 
 export class MediaItemEmbeddingId {
   readonly vectorStoreId: string;

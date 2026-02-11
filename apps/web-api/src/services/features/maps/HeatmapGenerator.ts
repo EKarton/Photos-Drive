@@ -1,7 +1,7 @@
 import * as tilebelt from '@mapbox/tilebelt';
 import { cellToLatLng, polygonToCells } from 'h3-js';
-import { AlbumId } from '../metadata_store/Albums';
-import { MediaItemId } from '../metadata_store/MediaItems';
+import { AlbumId } from '../../core/albums/Albums';
+import { MediaItemId } from '../../core/media_items/MediaItems';
 import { CellId, MapCellsRepository } from './MapCellsRepository';
 
 /** Represents an entry to the heat map.  */
