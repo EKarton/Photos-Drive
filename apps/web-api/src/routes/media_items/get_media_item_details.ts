@@ -1,5 +1,6 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
@@ -18,6 +19,10 @@ export default async function (mediaItemsRepo: MediaItemsStore) {
     '/api/v1/media-items/:id',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100
+    }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const rawMediaItemId = req.params.id;
