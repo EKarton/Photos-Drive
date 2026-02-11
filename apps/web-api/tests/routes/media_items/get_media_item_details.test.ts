@@ -2,15 +2,15 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import getMediaItemDetails from '../../../src/routes/media_items/get_media_item_details';
-import {
-  MediaItem,
-  MediaItemId
-} from '../../../src/services/metadata_store/MediaItems';
+import { MongoDbClientNotFoundError } from '../../../src/services/core/databases/MongoDbClientsStore';
 import {
   MediaItemNotFoundError,
   MediaItemsStore
-} from '../../../src/services/metadata_store/MediaItemsStore';
-import { MongoDbClientNotFoundError } from '../../../src/services/metadata_store/mongodb/MongoDbClientsStore';
+} from '../../../src/services/core/media_items/BaseMediaItemsStore';
+import {
+  MediaItem,
+  MediaItemId
+} from '../../../src/services/core/media_items/MediaItems';
 import { fakeAuthEnv, generateTestToken } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 

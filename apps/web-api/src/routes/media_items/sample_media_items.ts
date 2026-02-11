@@ -1,13 +1,14 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
-import { convertStringToAlbumId } from '../../services/metadata_store/Albums';
+import { convertStringToAlbumId } from '../../services/core/albums/Albums';
 import {
   MediaItemsStore,
   SampleMediaItemsRequest
-} from '../../services/metadata_store/MediaItemsStore';
+} from '../../services/core/media_items/BaseMediaItemsStore';
 import { serializeMediaItem } from './utils';
 
 export default async function (mediaItemsRepo: MediaItemsStore) {
@@ -17,6 +18,10 @@ export default async function (mediaItemsRepo: MediaItemsStore) {
     '/api/v1/media-items/sample',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100
+    }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const albumId = req.query['albumId'] as string;

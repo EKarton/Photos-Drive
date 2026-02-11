@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { GPhotosClientsRepository } from '../../services/blob_store/gphotos/GPhotosClientsRepository';
-import { MediaItemsStore } from '../../services/metadata_store/MediaItemsStore';
-import { BaseVectorStore } from '../../services/vector_stores/BaseVectorStore';
+import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
+import { GPhotosClientsRepository } from '../../services/core/storage/gphotos/GPhotosClientsRepository';
+import { BaseVectorStore } from '../../services/features/llm/vector_stores/BaseVectorStore';
 import bulkGetMediaItemDetails from './bulk_get_media_item_details';
 import getMediaItemDetails from './get_media_item_details';
 import getMediaItemImage from './get_media_item_image';

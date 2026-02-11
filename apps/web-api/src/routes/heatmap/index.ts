@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { HeatmapGenerator } from '../../services/maps_store/HeatmapGenerator';
-import { AlbumId } from '../../services/metadata_store/Albums';
+import { AlbumId } from '../../services/core/albums/Albums';
+import { HeatmapGenerator } from '../../services/features/maps/HeatmapGenerator';
 import getHeatmapPoints from './get_heatmap_points';
 
 export default async function (

@@ -2,12 +2,12 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import vectorSearchMediaItemsRouter from '../../../src/routes/media_items/vector_search_media_items';
-import { MediaItem } from '../../../src/services/metadata_store/MediaItems';
-import { MediaItemsStore } from '../../../src/services/metadata_store/MediaItemsStore';
+import { MediaItemsStore } from '../../../src/services/core/media_items/BaseMediaItemsStore';
+import { MediaItem } from '../../../src/services/core/media_items/MediaItems';
 import {
   BaseVectorStore,
   MediaItemEmbeddingId
-} from '../../../src/services/vector_stores/BaseVectorStore';
+} from '../../../src/services/features/llm/vector_stores/BaseVectorStore';
 import { fakeAuthEnv, generateTestToken } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 

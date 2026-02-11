@@ -3,13 +3,13 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import getMediaItemImageRouter from '../../../src/routes/media_items/get_media_item_image';
-import { GPhotosClient } from '../../../src/services/blob_store/gphotos/GPhotosClient';
+import { MediaItemsStore } from '../../../src/services/core/media_items/BaseMediaItemsStore';
+import { MediaItem } from '../../../src/services/core/media_items/MediaItems';
+import { GPhotosClient } from '../../../src/services/core/storage/gphotos/GPhotosClient';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
-} from '../../../src/services/blob_store/gphotos/GPhotosClientsRepository';
-import { MediaItem } from '../../../src/services/metadata_store/MediaItems';
-import { MediaItemsStore } from '../../../src/services/metadata_store/MediaItemsStore';
+} from '../../../src/services/core/storage/gphotos/GPhotosClientsRepository';
 import { fakeAuthEnv, generateTestToken } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 

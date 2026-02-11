@@ -2,8 +2,8 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import bulkGetMediaItemDetails from '../../../src/routes/media_items/bulk_get_media_item_details';
-import { MediaItem } from '../../../src/services/metadata_store/MediaItems';
-import { MediaItemsStore } from '../../../src/services/metadata_store/MediaItemsStore';
+import { MediaItemsStore } from '../../../src/services/core/media_items/BaseMediaItemsStore';
+import { MediaItem } from '../../../src/services/core/media_items/MediaItems';
 import { fakeAuthEnv, generateTestToken } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 

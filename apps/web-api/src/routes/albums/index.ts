@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { AlbumId } from '../../services/metadata_store/Albums';
-import { AlbumsStore } from '../../services/metadata_store/AlbumsStore';
-import { MediaItemsStore } from '../../services/metadata_store/MediaItemsStore';
+import { AlbumId } from '../../services/core/albums/Albums';
+import { AlbumsStore } from '../../services/core/albums/BaseAlbumsStore';
+import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import getAlbumDetails from './get_album_details';
 import listAlbums from './list_albums';
 

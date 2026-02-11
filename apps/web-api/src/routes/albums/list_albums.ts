@@ -6,14 +6,14 @@ import { verifyAuthorization } from '../../middlewares/authorization';
 import {
   AlbumId,
   convertStringToAlbumId
-} from '../../services/metadata_store/Albums';
+} from '../../services/core/albums/Albums';
 import {
   AlbumsStore,
   ListAlbumsRequest,
   SortByDirection,
   SortByField
-} from '../../services/metadata_store/AlbumsStore';
-import { MediaItemsStore } from '../../services/metadata_store/MediaItemsStore';
+} from '../../services/core/albums/BaseAlbumsStore';
+import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import parseEnumOrElse from '../../utils/parseEnumOrElse';
 import { serializeAlbum } from './utils';
 

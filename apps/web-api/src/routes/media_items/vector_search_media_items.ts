@@ -1,15 +1,16 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
+import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import {
   convertStringToMediaItemId,
   mediaIdToString,
   MediaItemId
-} from '../../services/metadata_store/MediaItems';
-import { MediaItemsStore } from '../../services/metadata_store/MediaItemsStore';
-import { BaseVectorStore } from '../../services/vector_stores/BaseVectorStore';
+} from '../../services/core/media_items/MediaItems';
+import { BaseVectorStore } from '../../services/features/llm/vector_stores/BaseVectorStore';
 import logger from '../../utils/logger';
 import { serializeMediaItem } from './utils';
 
@@ -23,6 +24,10 @@ export default async function (
     '/api/v1/media-items/vector-search',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100
+    }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const {

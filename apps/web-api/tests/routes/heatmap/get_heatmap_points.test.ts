@@ -2,11 +2,11 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import getHeatmapPoints from '../../../src/routes/heatmap/get_heatmap_points';
+import { AlbumId } from '../../../src/services/core/albums/Albums';
 import {
   HeatmapGenerator,
   HeatmapPoint
-} from '../../../src/services/maps_store/HeatmapGenerator';
-import { AlbumId } from '../../../src/services/metadata_store/Albums';
+} from '../../../src/services/features/maps/HeatmapGenerator';
 import { fakeAuthEnv, generateTestToken } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 

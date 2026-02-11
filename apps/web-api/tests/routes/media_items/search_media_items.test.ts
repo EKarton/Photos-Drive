@@ -2,12 +2,12 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import searchMediaItemsRouter from '../../../src/routes/media_items/search_media_items';
-import { MediaItem } from '../../../src/services/metadata_store/MediaItems';
 import {
   MediaItemsStore,
   SortByDirection,
   SortByField
-} from '../../../src/services/metadata_store/MediaItemsStore';
+} from '../../../src/services/core/media_items/BaseMediaItemsStore';
+import { MediaItem } from '../../../src/services/core/media_items/MediaItems';
 import { fakeAuthEnv, generateTestToken } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 

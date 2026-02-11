@@ -6,13 +6,13 @@ import { verifyAuthorization } from '../../middlewares/authorization';
 import {
   AlbumId,
   convertStringToAlbumId
-} from '../../services/metadata_store/Albums';
+} from '../../services/core/albums/Albums';
 import {
   AlbumNotFoundError,
   AlbumsStore
-} from '../../services/metadata_store/AlbumsStore';
-import { MediaItemsStore } from '../../services/metadata_store/MediaItemsStore';
-import { MongoDbClientNotFoundError } from '../../services/metadata_store/mongodb/MongoDbClientsStore';
+} from '../../services/core/albums/BaseAlbumsStore';
+import { MongoDbClientNotFoundError } from '../../services/core/databases/MongoDbClientsStore';
+import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import { serializeAlbum } from './utils';
 
 export default async function (

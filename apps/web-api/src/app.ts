@@ -11,25 +11,25 @@ import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
 import mapsRouter from './routes/heatmap';
 import mediaItemsRouter from './routes/media_items';
-import { GPhotosClientsRepository } from './services/blob_store/gphotos/GPhotosClientsRepository';
-import { ConfigStore } from './services/config_store/ConfigStore';
-import { ConfigStoreFromFile } from './services/config_store/ConfigStoreFromFile';
-import { ConfigStoreFromMongoDb } from './services/config_store/ConfigStoreFromMongoDb';
-import { HeatmapGenerator } from './services/maps_store/HeatmapGenerator';
-import { MapCellsRepository } from './services/maps_store/MapCellsRepository';
-import { MapCellsRepositoryImpl } from './services/maps_store/mongodb/MapCellsRepositoryImpl';
-import { AlbumsStore } from './services/metadata_store/AlbumsStore';
-import { MediaItemsStore } from './services/metadata_store/MediaItemsStore';
-import { DistributedAlbumsStore } from './services/metadata_store/mongodb/DistributedAlbumsStore';
-import { DistributedMediaItemsStore } from './services/metadata_store/mongodb/DistributedMediaItemsStore';
-import { MongoDbAlbumsStore } from './services/metadata_store/mongodb/MongoDbAlbumsStore';
+import { AlbumsStore } from './services/core/albums/BaseAlbumsStore';
+import { DistributedAlbumsStore } from './services/core/albums/DistributedAlbumsStore';
+import { MongoDbAlbumsStore } from './services/core/albums/MongoDbAlbumsStore';
+import { ConfigStore } from './services/core/config/ConfigStore';
+import { ConfigStoreFromFile } from './services/core/config/ConfigStoreFromFile';
+import { ConfigStoreFromMongoDb } from './services/core/config/ConfigStoreFromMongoDb';
 import {
   MongoDbClientsStore,
   MongoDbClientsStoreImpl
-} from './services/metadata_store/mongodb/MongoDbClientsStore';
-import { MongoDbMediaItemsStore } from './services/metadata_store/mongodb/MongoDbMediaItemsStore';
-import { configToVectorStore } from './services/vector_stores/configToVectorStore';
-import { DistributedVectorStore } from './services/vector_stores/DistributedVectorStore';
+} from './services/core/databases/MongoDbClientsStore';
+import { MediaItemsStore } from './services/core/media_items/BaseMediaItemsStore';
+import { DistributedMediaItemsStore } from './services/core/media_items/DistributedMediaItemsStore';
+import { MongoDbMediaItemsStore } from './services/core/media_items/MongoDbMediaItemsStore';
+import { GPhotosClientsRepository } from './services/core/storage/gphotos/GPhotosClientsRepository';
+import { configToVectorStore } from './services/features/llm/vector_stores/configToVectorStore';
+import { DistributedVectorStore } from './services/features/llm/vector_stores/DistributedVectorStore';
+import { HeatmapGenerator } from './services/features/maps/HeatmapGenerator';
+import { MapCellsRepository } from './services/features/maps/MapCellsRepository';
+import { MapCellsRepositoryImpl } from './services/features/maps/mongodb/MapCellsRepositoryImpl';
 import logger from './utils/logger';
 
 export class App {

@@ -2,13 +2,13 @@ import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
 import getAlbumDetailsRouter from '../../../src/routes/albums/get_album_details';
-import { Album, AlbumId } from '../../../src/services/metadata_store/Albums';
+import { Album, AlbumId } from '../../../src/services/core/albums/Albums';
 import {
   AlbumNotFoundError,
   AlbumsStore
-} from '../../../src/services/metadata_store/AlbumsStore';
-import { MediaItemsStore } from '../../../src/services/metadata_store/MediaItemsStore';
-import { MongoDbClientNotFoundError } from '../../../src/services/metadata_store/mongodb/MongoDbClientsStore';
+} from '../../../src/services/core/albums/BaseAlbumsStore';
+import { MongoDbClientNotFoundError } from '../../../src/services/core/databases/MongoDbClientsStore';
+import { MediaItemsStore } from '../../../src/services/core/media_items/BaseMediaItemsStore';
 import { fakeAuthEnv, generateTestToken } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 

@@ -1,4 +1,4 @@
-import { Album, albumIdToString } from '../../services/metadata_store/Albums';
+import { Album, albumIdToString } from '../../services/core/albums/Albums';
 
 /** Serializes an album to a JSON object */
 export function serializeAlbum(

@@ -1,6 +1,7 @@
 import { wrap } from 'async-middleware';
 import axios from 'axios';
 import { json, Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { importPKCS8, SignJWT } from 'jose';
 import { getAppConfig } from '../../app_config';
 import logger from '../../utils/logger';
@@ -21,6 +22,12 @@ export default async function () {
 
   router.post(
     '/auth/v1/google/token',
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 5,
+      standardHeaders: true,
+      legacyHeaders: false
+    }),
     json(),
     wrap(async (req: Request, res: Response) => {
       const code = req.body.code;

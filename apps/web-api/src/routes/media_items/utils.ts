@@ -1,8 +1,8 @@
-import { albumIdToString } from '../../services/metadata_store/Albums';
+import { albumIdToString } from '../../services/core/albums/Albums';
 import {
   mediaIdToString,
   MediaItem
-} from '../../services/metadata_store/MediaItems';
+} from '../../services/core/media_items/MediaItems';
 
 /** Serializes a media item to a JSON object */
 export function serializeMediaItem(mediaItem: MediaItem): object {

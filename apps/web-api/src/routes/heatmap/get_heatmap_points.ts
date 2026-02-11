@@ -1,17 +1,18 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
 import {
-  HeatmapGenerator,
-  Tile
-} from '../../services/maps_store/HeatmapGenerator';
-import {
   AlbumId,
   convertStringToAlbumId
-} from '../../services/metadata_store/Albums';
-import { mediaIdToString } from '../../services/metadata_store/MediaItems';
+} from '../../services/core/albums/Albums';
+import { mediaIdToString } from '../../services/core/media_items/MediaItems';
+import {
+  HeatmapGenerator,
+  Tile
+} from '../../services/features/maps/HeatmapGenerator';
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -23,6 +24,10 @@ export default async function (
     '/api/v1/maps/heatmap',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100
+    }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const inputAlbumId = req.query['albumId'] as string;
