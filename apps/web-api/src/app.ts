@@ -115,7 +115,11 @@ export class App {
       await albumsRouter(rootAlbumId, this.albumsStore, this.mediaItemsStore)
     );
     this.app.use(
-      await mediaItemsRouter(this.mediaItemsStore, this.vectorStore)
+      await mediaItemsRouter(
+        this.mediaItemsStore,
+        this.gPhotosClientsRepository,
+        this.vectorStore
+      )
     );
     this.app.use(await gPhotosMediaItemsRouter(this.gPhotosClientsRepository));
     this.app.use(await mapsRouter(rootAlbumId, this.heatmapGenerator));

@@ -1,6 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import healthRouter from '../../src/routes/health';
+import healthRouter from '../../../src/routes/health';
 
 describe('GET api/v1/health', () => {
   it('should return OK', async () => {

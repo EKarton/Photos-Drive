@@ -1,24 +1,21 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
-import { addRequestAbortController } from '../middlewares/abort-controller';
-import { verifyAuthentication } from '../middlewares/authentication';
-import { verifyAuthorization } from '../middlewares/authorization';
+import { addRequestAbortController } from '../../middlewares/abort-controller';
+import { verifyAuthentication } from '../../middlewares/authentication';
+import { verifyAuthorization } from '../../middlewares/authorization';
 import {
-  Album,
   AlbumId,
-  albumIdToString,
   convertStringToAlbumId
-} from '../services/metadata_store/Albums';
+} from '../../services/metadata_store/Albums';
 import {
-  AlbumNotFoundError,
   AlbumsStore,
   ListAlbumsRequest,
   SortByDirection,
   SortByField
-} from '../services/metadata_store/AlbumsStore';
-import { MediaItemsStore } from '../services/metadata_store/MediaItemsStore';
-import { MongoDbClientNotFoundError } from '../services/metadata_store/mongodb/MongoDbClientsStore';
-import parseEnumOrElse from '../utils/parseEnumOrElse';
+} from '../../services/metadata_store/AlbumsStore';
+import { MediaItemsStore } from '../../services/metadata_store/MediaItemsStore';
+import parseEnumOrElse from '../../utils/parseEnumOrElse';
+import { serializeAlbum } from './utils';
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -26,50 +23,6 @@ export default async function (
   mediaItemsRepo: MediaItemsStore
 ) {
   const router: Router = Router();
-
-  router.get(
-    '/api/v1/albums/:albumId',
-    await verifyAuthentication(),
-    await verifyAuthorization(),
-    addRequestAbortController(),
-    wrap(async (req: Request, res: Response) => {
-      try {
-        const inputAlbumId = req.params.albumId;
-
-        let albumId: AlbumId;
-        if (inputAlbumId === 'root') {
-          albumId = rootAlbumId;
-        } else {
-          albumId = convertStringToAlbumId(inputAlbumId);
-        }
-
-        const [album, numChildAlbums, numMediaItems] = await Promise.all([
-          albumsRepo.getAlbumById(albumId, {
-            abortController: req.abortController
-          }),
-          albumsRepo.getNumAlbumsInAlbum(albumId, {
-            abortController: req.abortController
-          }),
-          mediaItemsRepo.getNumMediaItemsInAlbum(albumId, {
-            abortController: req.abortController
-          })
-        ]);
-
-        return res
-          .status(200)
-          .json(serializeAlbum(album, numChildAlbums, numMediaItems));
-      } catch (error) {
-        if (error instanceof MongoDbClientNotFoundError) {
-          return res.status(404).json({ error: 'Album not found' });
-        }
-        if (error instanceof AlbumNotFoundError) {
-          return res.status(404).json({ error: 'Album not found' });
-        }
-
-        throw error;
-      }
-    })
-  );
 
   router.get(
     '/api/v1/albums',
@@ -134,20 +87,4 @@ export default async function (
   );
 
   return router;
-}
-
-function serializeAlbum(
-  album: Album,
-  numChildAlbums: number,
-  numMediaItems: number
-): object {
-  return {
-    id: `${album.id.clientId}:${album.id.objectId}`,
-    albumName: album.name,
-    parentAlbumId: album.parent_album_id
-      ? albumIdToString(album.parent_album_id)
-      : null,
-    numChildAlbums,
-    numMediaItems
-  };
 }

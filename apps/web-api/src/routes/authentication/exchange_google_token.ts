@@ -2,11 +2,8 @@ import { wrap } from 'async-middleware';
 import axios from 'axios';
 import { json, Request, Response, Router } from 'express';
 import { importPKCS8, SignJWT } from 'jose';
-import { getAppConfig } from '../app_config';
-import logger from '../utils/logger';
-
-export const GOOGLE_LOGIN_PAGE_URL =
-  'https://accounts.google.com/o/oauth2/v2/auth';
+import { getAppConfig } from '../../app_config';
+import logger from '../../utils/logger';
 
 export const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
@@ -21,22 +18,6 @@ export default async function () {
     Number(process.env.JWT_EXPIRY_IN_MILLISECONDS) || 3600000;
 
   const router: Router = Router();
-  router.get('/auth/v1/google', (req: Request, res: Response) => {
-    const url = new URL(GOOGLE_LOGIN_PAGE_URL);
-    const params = new URLSearchParams({
-      client_id: config.googleLoginClientId,
-      redirect_uri: config.googleLoginCallbackUri,
-      response_type: 'code',
-      scope: 'profile'
-    });
-
-    if (req.query['select_account'] === 'true') {
-      params.append('prompt', 'select_account');
-    }
-
-    url.search = params.toString();
-    res.redirect(url.toString());
-  });
 
   router.post(
     '/auth/v1/google/token',

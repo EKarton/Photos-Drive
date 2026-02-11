@@ -1,14 +1,14 @@
 import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
-import heatmapRouter from '../../src/routes/heatmap';
+import getHeatmapPoints from '../../../src/routes/heatmap/get_heatmap_points';
 import {
   HeatmapGenerator,
   HeatmapPoint
-} from '../../src/services/maps_store/HeatmapGenerator';
-import { AlbumId } from '../../src/services/metadata_store/Albums';
-import { fakeAuthEnv, generateTestToken } from './utils/auth';
-import { setupTestEnv } from './utils/env';
+} from '../../../src/services/maps_store/HeatmapGenerator';
+import { AlbumId } from '../../../src/services/metadata_store/Albums';
+import { fakeAuthEnv, generateTestToken } from '../utils/auth';
+import { setupTestEnv } from '../utils/env';
 
 const MOCK_ROOT_ALBUM_ID: AlbumId = {
   clientId: 'albumClient1',
@@ -42,9 +42,8 @@ describe('Heatmap Router', () => {
         } as HeatmapPoint
       ]
     });
-
     const app = express();
-    app.use(await heatmapRouter(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
+    app.use(await getHeatmapPoints(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
 
     const res = await request(app)
       .get('/api/v1/maps/heatmap?x=1&y=2&z=3&albumId=albumClient1:albumObject1')
@@ -66,9 +65,8 @@ describe('Heatmap Router', () => {
   it('returns 200 when albumId is "root"', async () => {
     const mockHeatmapGenerator = mock<HeatmapGenerator>();
     mockHeatmapGenerator.getHeatmapForTile.mockResolvedValue({ points: [] });
-
     const app = express();
-    app.use(await heatmapRouter(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
+    app.use(await getHeatmapPoints(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
 
     const res = await request(app)
       .get('/api/v1/maps/heatmap?x=1&y=2&z=3&albumId=root')
@@ -81,7 +79,7 @@ describe('Heatmap Router', () => {
   it('returns 400 if tile parameters are missing or invalid', async () => {
     const mockHeatmapGenerator = mock<HeatmapGenerator>();
     const app = express();
-    app.use(await heatmapRouter(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
+    app.use(await getHeatmapPoints(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
 
     const res = await request(app)
       .get('/api/v1/maps/heatmap?x=notANumber&y=2&z=3')
@@ -96,9 +94,8 @@ describe('Heatmap Router', () => {
   it('returns 200 with empty points array if no heatmap data', async () => {
     const mockHeatmapGenerator = mock<HeatmapGenerator>();
     mockHeatmapGenerator.getHeatmapForTile.mockResolvedValue({ points: [] });
-
     const app = express();
-    app.use(await heatmapRouter(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
+    app.use(await getHeatmapPoints(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
 
     const res = await request(app)
       .get('/api/v1/maps/heatmap?x=1&y=2&z=3')
@@ -113,9 +110,8 @@ describe('Heatmap Router', () => {
     mockHeatmapGenerator.getHeatmapForTile.mockRejectedValue(
       new Error('Unexpected failure')
     );
-
     const app = express();
-    app.use(await heatmapRouter(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
+    app.use(await getHeatmapPoints(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
 
     const res = await request(app)
       .get('/api/v1/maps/heatmap?x=1&y=2&z=3')

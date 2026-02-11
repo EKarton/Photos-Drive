@@ -1,22 +1,23 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
-import { verifyAuthentication } from '../middlewares/authentication';
-import { verifyAuthorization } from '../middlewares/authorization';
+import { verifyAuthentication } from '../../middlewares/authentication';
+import { verifyAuthorization } from '../../middlewares/authorization';
 import {
   HeatmapGenerator,
   Tile
-} from '../services/maps_store/HeatmapGenerator';
+} from '../../services/maps_store/HeatmapGenerator';
 import {
   AlbumId,
   convertStringToAlbumId
-} from '../services/metadata_store/Albums';
-import { mediaIdToString } from '../services/metadata_store/MediaItems';
+} from '../../services/metadata_store/Albums';
+import { mediaIdToString } from '../../services/metadata_store/MediaItems';
 
 export default async function (
   rootAlbumId: AlbumId,
   heatmapGenerator: HeatmapGenerator
 ) {
   const router: Router = Router();
+
   router.get(
     '/api/v1/maps/heatmap',
     await verifyAuthentication(),
