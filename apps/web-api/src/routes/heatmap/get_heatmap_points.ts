@@ -1,5 +1,6 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
 import {
@@ -22,6 +23,7 @@ export default async function (
     '/api/v1/maps/heatmap',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const inputAlbumId = req.query['albumId'] as string;
       const tile: Tile = {
@@ -43,11 +45,8 @@ export default async function (
         });
       }
 
-      const abortController = new AbortController();
-      req.on('close', () => abortController.abort());
-
       const heatmap = await heatmapGenerator.getHeatmapForTile(tile, albumId, {
-        abortController
+        abortController: req.abortController
       });
 
       return res.status(200).json({
