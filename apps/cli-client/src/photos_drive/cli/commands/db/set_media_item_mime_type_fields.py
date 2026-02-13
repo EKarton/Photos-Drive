@@ -1,14 +1,13 @@
-import magic
 from collections import deque
 from datetime import datetime
 import logging
 from typing import cast
 
-from exiftool import ExifToolHelper
 from tqdm import tqdm
 import typer
 from typing_extensions import Annotated
 
+from photos_drive.shared.utils.mime_type.utils import get_mime_type
 from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
@@ -122,7 +121,7 @@ def set_media_item_mime_type_fields(
                     continue
 
                 try:
-                    mime_type = get_mime_type(file_path)
+                    mime_type = get_mime_type(file_path) or "application/octet-stream"
                 except Exception as e:
                     print(f"get_mime_type() error for {file_path}:")
                     print(e)
@@ -141,7 +140,3 @@ def set_media_item_mime_type_fields(
         media_items_repo.update_many_media_items(update_media_item_requests)
     else:
         print("Operation cancelled")
-
-
-def get_mime_type(file_path: str) -> str:
-    return magic.from_file(file_path, mime=True) or "application/octet-stream"

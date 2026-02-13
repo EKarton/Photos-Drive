@@ -308,6 +308,19 @@ class TestAlbumsRepositoryImpl(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unable to update all albums: 0 vs 1"):
             self.repo.update_many_albums(requests)
 
+    def test_update_many_albums_on_wrong_client_id(self):
+        requests = [
+            UpdateAlbumRequest(
+                AlbumId(ObjectId(), ObjectId()),
+                new_name="1910",
+            ),
+        ]
+
+        with self.assertRaisesRegex(
+            ValueError, "Album .* belongs to a different client"
+        ):
+            self.repo.update_many_albums(requests)
+
     def test_find_child_albums(self):
         parent_album_id = AlbumId(MONGO_CLIENT_ID, ObjectId("5f50c31e8a7d4b1c9c9b0b1a"))
         child_album_id_1 = AlbumId(

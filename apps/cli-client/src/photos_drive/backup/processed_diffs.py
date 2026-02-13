@@ -1,3 +1,4 @@
+from photos_drive.shared.utils.mime_type.utils import get_mime_type
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, replace
 from datetime import datetime
@@ -232,7 +233,7 @@ class DiffsProcessor:
             return diff.mime_type
 
         try:
-            mime_type = magic.from_file(diff.file_path, mime=True)
+            mime_type = get_mime_type(diff.file_path)
             return mime_type or "application/octet-stream"
         except Exception as e:
             logger.error(f"Error reading file type: {e}")
