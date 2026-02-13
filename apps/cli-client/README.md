@@ -34,7 +34,7 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
 1. To lint your code, run:
 
    ```bash
-   uv run mypy ./src && uv run flake8 ./src && uv run isort ./src && uv run black ./src
+   uv run mypy ./src ./tests && uv run flake8 ./src ./tests && uv run isort ./src ./tests && uv run black ./src ./tests
    ```
 
 1. To run all tests and code coverage, run:
