@@ -116,7 +116,7 @@ def set_media_item_mime_type_fields(
                     )
                 pbar.update(1)
 
-                if not rewrite and media_item.mime_type != "application/octet-stream":
+                if not rewrite and media_item.mime_type != "none":
                     continue
 
                 try:
