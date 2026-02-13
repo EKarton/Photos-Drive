@@ -214,6 +214,7 @@ class TestSyncCli(unittest.TestCase):
                     height=600,
                     date_taken=datetime(2025, 1, 1),
                     embedding_id=None,
+                    mime_type='image/jpeg',
                 )
             )
 

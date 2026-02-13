@@ -179,6 +179,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
             "width": request.width,
             "height": request.height,
             "date_taken": request.date_taken,
+            "mime_type": request.mime_type,
         }
 
         if request.location:
@@ -208,6 +209,7 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
             height=request.height,
             date_taken=request.date_taken,
             embedding_id=request.embedding_id,
+            mime_type=request.mime_type,
         )
 
     def update_many_media_items(self, requests: list[UpdateMediaItemRequest]):
@@ -245,6 +247,8 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
                 set_query['$set']['height'] = request.new_height
             if request.new_date_taken is not None:
                 set_query['$set']['date_taken'] = request.new_date_taken
+            if request.new_mime_type is not None:
+                set_query['$set']['mime_type'] = request.new_mime_type
 
             if request.clear_location:
                 set_query["$set"]['location'] = None
@@ -355,4 +359,5 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
             height=height,
             date_taken=date_taken,
             embedding_id=embedding_id,
+            mime_type=raw_item["mime_type"],
         )

@@ -39,6 +39,7 @@ MEDIA_ITEM = MediaItem(
     height=3000,
     date_taken=datetime(2026, 1, 1, 14, 30, 0),
     embedding_id=None,
+    mime_type="image/jpeg",
 )
 
 
@@ -79,6 +80,7 @@ class TestMongoDBMapCellsRepository(unittest.TestCase):
             height=3000,
             date_taken=datetime(2026, 1, 1, 14, 30, 0),
             embedding_id=None,
+            mime_type="image/jpeg",
         )
 
         with self.assertRaises(ValueError) as context:

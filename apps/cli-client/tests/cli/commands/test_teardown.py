@@ -166,6 +166,7 @@ class TestTeardownCli(unittest.TestCase):
                 height=100,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 

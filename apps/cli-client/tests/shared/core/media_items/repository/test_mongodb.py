@@ -84,6 +84,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
 
@@ -100,6 +101,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.height, 200)
         self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
         self.assertEqual(media_item.embedding_id, MOCK_EMBEDDING_ID_1)
+        self.assertEqual(media_item.mime_type, "image/jpeg")
 
     def test_get_media_item_by_id_not_found(self):
         media_item_id = MediaItemId(self.mongodb_client_id, ObjectId())
@@ -131,6 +133,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
 
@@ -149,6 +152,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].height, 200)
         self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
         self.assertEqual(media_items[0].embedding_id, MOCK_EMBEDDING_ID_1)
+        self.assertEqual(media_items[0].mime_type, "image/jpeg")
 
     def test_get_all_media_items_with_no_date_taken_and_no_embedding_id_and_no_location(
         self,
@@ -165,6 +169,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
                 "width": 100,
                 "height": 200,
+                "mime_type": "image/jpeg",
             }
         )
 
@@ -182,6 +187,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].height, 200)
         self.assertEqual(media_items[0].date_taken, datetime(1970, 1, 1))
         self.assertIsNone(media_items[0].embedding_id)
+        self.assertEqual(media_items[0].mime_type, "image/jpeg")
 
     def test_find_media_items(self):
         # Insert mock media items from different albums into the mock database
@@ -197,6 +203,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -211,6 +218,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -225,6 +233,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
 
@@ -240,6 +249,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_items[0].height, 200)
         self.assertEqual(media_items[0].date_taken, MOCK_DATE_TAKEN)
         self.assertEqual(media_items[0].embedding_id, MOCK_EMBEDDING_ID_1)
+        self.assertEqual(media_items[0].mime_type, 'image/jpeg')
 
     def test_find_media_items_excluded_by_client_id(self):
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -248,6 +258,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "gphotos_client_id": str(self.mongodb_client_id),
                 "album_id": album_id_to_string(MOCK_ALBUM_ID),
                 "file_hash": Binary(os.urandom(16)),
+                "mime_type": "image/jpeg",
             }
         )
 
@@ -271,6 +282,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -285,6 +297,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
         self.mongodb_client["photos_drive"]["media_items"].insert_one(
@@ -299,6 +312,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
                 "embedding_id": embedding_id_to_string(MOCK_EMBEDDING_ID_1),
+                "mime_type": "image/jpeg",
             }
         )
 
@@ -318,6 +332,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             embedding_id=MOCK_EMBEDDING_ID_1,
+            mime_type="image/jpeg",
         )
 
         # Test creation of media item
@@ -337,6 +352,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.height, 200)
         self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
         self.assertEqual(media_item.embedding_id, MOCK_EMBEDDING_ID_1)
+        self.assertEqual(media_item.mime_type, "image/jpeg")
 
     def test_create_media_item_with_no_embedding_id_no_location(self):
         fake_file_hash = os.urandom(16)
@@ -351,6 +367,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
             height=200,
             date_taken=MOCK_DATE_TAKEN,
             embedding_id=None,
+            mime_type="image/png",
         )
 
         # Test creation of media item
@@ -369,6 +386,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(media_item.height, 200)
         self.assertEqual(media_item.date_taken, MOCK_DATE_TAKEN)
         self.assertIsNone(media_item.embedding_id)
+        self.assertEqual(media_item.mime_type, "image/png")
 
     def test_update_many_media_items(self):
         media_item_1 = self.repo.create_media_item(
@@ -383,6 +401,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=MOCK_EMBEDDING_ID_1,
+                mime_type="image/jpeg",
             )
         )
         media_item_2 = self.repo.create_media_item(
@@ -397,6 +416,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=MOCK_EMBEDDING_ID_1,
+                mime_type="image/jpeg",
             )
         )
 
@@ -418,6 +438,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_date_taken=MOCK_DATE_TAKEN_2,
                     clear_embedding_id=False,
                     new_embedding_id=MOCK_EMBEDDING_ID_2,
+                    new_mime_type="image/png",
                 ),
                 UpdateMediaItemRequest(
                     media_item_id=media_item_2.id,
@@ -433,6 +454,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     new_date_taken=MOCK_DATE_TAKEN_2,
                     clear_embedding_id=False,
                     new_embedding_id=MOCK_EMBEDDING_ID_2,
+                    new_mime_type="image/png",
                 ),
             ]
         )
@@ -451,6 +473,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(new_media_item_1.height, 400)
         self.assertEqual(new_media_item_1.date_taken, MOCK_DATE_TAKEN_2)
         self.assertEqual(new_media_item_1.embedding_id, MOCK_EMBEDDING_ID_2)
+        self.assertEqual(new_media_item_1.mime_type, "image/png")
 
         new_media_item_2 = self.repo.get_media_item_by_id(media_item_2.id)
         self.assertEqual(new_media_item_2.id, media_item_2.id)
@@ -466,6 +489,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
         self.assertEqual(new_media_item_2.height, 400)
         self.assertEqual(new_media_item_2.date_taken, MOCK_DATE_TAKEN_2)
         self.assertEqual(new_media_item_2.embedding_id, MOCK_EMBEDDING_ID_2)
+        self.assertEqual(new_media_item_2.mime_type, "image/png")
 
     def test_update_many_media_items_clear_location(self):
         media_item_1 = self.repo.create_media_item(
@@ -480,6 +504,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type="image/jpeg",
             )
         )
 
@@ -503,6 +528,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=MOCK_EMBEDDING_ID_1,
+                mime_type="image/jpeg",
             )
         )
 
@@ -530,6 +556,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type="image/jpeg",
             )
         )
 
@@ -561,6 +588,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "mime_type": "image/jpeg",
             }
         )
 
@@ -600,6 +628,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                     "width": 100,
                     "height": 200,
                     "date_taken": MOCK_DATE_TAKEN,
+                    "mime_type": "image/jpeg",
                 }
             )
 
@@ -636,6 +665,7 @@ class TestMediaItemsRepositoryImpl(unittest.TestCase):
                 "width": 100,
                 "height": 200,
                 "date_taken": MOCK_DATE_TAKEN,
+                "mime_type": "image/jpeg",
             }
         )
 

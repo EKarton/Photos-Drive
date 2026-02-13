@@ -103,6 +103,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -192,6 +193,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -216,6 +218,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -322,6 +325,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
         cat_upload_token = gphotos_client.media_items().upload_photo(
@@ -346,6 +350,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -510,6 +515,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -603,6 +609,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -619,6 +626,7 @@ class SystemCleanerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 

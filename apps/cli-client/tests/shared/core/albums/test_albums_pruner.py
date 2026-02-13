@@ -116,6 +116,7 @@ class AlbumsPrunerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 
@@ -195,6 +196,7 @@ class AlbumsPrunerTests(unittest.TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
