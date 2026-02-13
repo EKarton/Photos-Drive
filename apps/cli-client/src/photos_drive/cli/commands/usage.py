@@ -54,7 +54,7 @@ def usage(
     setup_logging(verbose)
 
     logger.debug(
-        "Called teardown handler with args:\n"
+        "Called usage handler with args:\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"
         + f" verbose={verbose}"
