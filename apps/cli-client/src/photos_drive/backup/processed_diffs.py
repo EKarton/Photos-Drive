@@ -9,7 +9,6 @@ from typing import Optional, Tuple, cast
 
 from PIL import Image, ImageFile
 from exiftool import ExifToolHelper
-import magic
 import numpy as np
 from tqdm import tqdm
 
