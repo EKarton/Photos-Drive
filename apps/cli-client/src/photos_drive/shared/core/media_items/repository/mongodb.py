@@ -359,5 +359,5 @@ class MongoDBMediaItemsRepository(MediaItemsRepository):
             height=height,
             date_taken=date_taken,
             embedding_id=embedding_id,
-            mime_type=raw_item["mime_type"],
+            mime_type=raw_item.get("mime_type", "none"),
         )
