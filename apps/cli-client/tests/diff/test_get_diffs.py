@@ -89,6 +89,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 
@@ -162,6 +163,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
         media_items_repo.create_media_item(
@@ -179,6 +181,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 
@@ -250,6 +253,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 
@@ -313,6 +317,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 
@@ -377,6 +382,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
         boat_upload_token = gphotos_client.media_items().upload_photo(
@@ -397,6 +403,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 
@@ -471,6 +478,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
         dog_upload_token = gphotos_client.media_items().upload_photo(
@@ -491,6 +499,7 @@ class FolderSyncDiffTests(TestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/jpeg',
             )
         )
 

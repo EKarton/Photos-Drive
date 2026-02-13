@@ -181,6 +181,7 @@ class TestDeleteCli(unittest.TestCase):
                     height=600,
                     date_taken=datetime(2025, 1, 1),
                     embedding_id=None,
+                    mime_type='image/jpeg',
                 )
             )
 
@@ -245,6 +246,7 @@ class TestDeleteCli(unittest.TestCase):
                     height=600,
                     date_taken=datetime(2025, 1, 1),
                     embedding_id=None,
+                    mime_type='image/jpeg',
                 )
             )
             # Subdir file (album "Summer")
@@ -261,6 +263,7 @@ class TestDeleteCli(unittest.TestCase):
                     height=600,
                     date_taken=datetime(2025, 1, 1),
                     embedding_id=None,
+                    mime_type='image/png',
                 )
             )
 
@@ -305,6 +308,7 @@ class TestDeleteCli(unittest.TestCase):
                     height=600,
                     date_taken=datetime(2025, 1, 1),
                     embedding_id=None,
+                    mime_type='image/jpeg',
                 )
             )
 

@@ -33,6 +33,7 @@ class MediaItem:
         date_taken (datetime): The date and time for when the image / video was taken.
         embedding_id (Optional[MediaItemEmbeddingId]): The ID referring to its embedding
             in the vector store.
+        mime_type (str): The mime type of the media item.
     """
 
     id: MediaItemId
@@ -46,3 +47,4 @@ class MediaItem:
     height: int
     date_taken: datetime
     embedding_id: Optional[MediaItemEmbeddingId]
+    mime_type: str

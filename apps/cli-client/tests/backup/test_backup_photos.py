@@ -386,6 +386,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -551,6 +552,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
         map_cells_repo.add_media_item(dog_media_item)
@@ -568,6 +570,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
         map_cells_repo.add_media_item(cat_media_item)
@@ -705,6 +708,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -837,6 +841,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
         media_items_repo.create_media_item(
@@ -853,6 +858,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 
@@ -991,6 +997,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
         media_items_repo.create_media_item(
@@ -1007,6 +1014,7 @@ class TestPhotosBackup(ParametrizedTestCase):
                 height=200,
                 date_taken=MOCK_DATE_TAKEN,
                 embedding_id=None,
+                mime_type='image/png',
             )
         )
 

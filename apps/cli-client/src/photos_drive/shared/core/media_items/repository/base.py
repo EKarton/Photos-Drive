@@ -34,6 +34,7 @@ class CreateMediaItemRequest:
         date_taken (datetime): The date and time of when the media item was taken.
         embedding_id (Optional[MediaItemEmbeddingId]): An ID referring to its embedding,
             if present.
+        mime_type (str): The mime type of the media item.
     """
 
     file_name: str
@@ -46,6 +47,7 @@ class CreateMediaItemRequest:
     height: int
     date_taken: datetime
     embedding_id: Optional[MediaItemEmbeddingId]
+    mime_type: str
 
 
 @dataclass(frozen=True)
@@ -73,6 +75,7 @@ class UpdateMediaItemRequest:
             image / video was taken.
         clear_embedding_id (bool): Whether to clear the embedding ID.
         new_embedding_id (Optional[MediaItemEmbeddingId]): The new embedding ID.
+        new_mime_type (Optional[str]): The new mime type.
     '''
 
     media_item_id: MediaItemId
@@ -88,6 +91,7 @@ class UpdateMediaItemRequest:
     new_date_taken: Optional[datetime] = None
     clear_embedding_id: Optional[bool] = False
     new_embedding_id: Optional[MediaItemEmbeddingId] = None
+    new_mime_type: Optional[str] = None
 
 
 @dataclass(frozen=True)

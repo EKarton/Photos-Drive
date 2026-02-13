@@ -16,6 +16,9 @@ from photos_drive.cli.commands.db.restore import restore
 from photos_drive.cli.commands.db.set_media_item_date_taken_fields import (
     set_media_item_date_taken_fields,
 )
+from photos_drive.cli.commands.db.set_media_item_mime_type_fields import (
+    set_media_item_mime_type_fields,
+)
 from photos_drive.cli.commands.db.set_media_item_width_height_fields import (
     set_media_item_width_height_fields,
 )
@@ -26,6 +29,7 @@ app.command()(restore)
 app.command()(delete_media_item_ids_from_albums_db)
 app.command()(set_media_item_width_height_fields)
 app.command()(set_media_item_date_taken_fields)
+app.command()(set_media_item_mime_type_fields)
 app.command()(delete_child_album_ids_from_albums_db)
 app.command()(delete_media_items_without_album_id)
 app.command()(initialize_map_cells_db)

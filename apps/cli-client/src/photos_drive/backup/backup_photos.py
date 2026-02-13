@@ -175,6 +175,7 @@ class PhotosBackup:
                     height=add_diff.height,
                     date_taken=add_diff.date_taken,
                     embedding_id=None,
+                    mime_type=add_diff.mime_type,
                 )
                 media_item = self.__media_items_repo.create_media_item(
                     create_media_item_request

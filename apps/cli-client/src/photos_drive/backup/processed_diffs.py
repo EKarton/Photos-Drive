@@ -8,7 +8,6 @@ from typing import Optional, Tuple, cast
 
 from PIL import Image, ImageFile
 from exiftool import ExifToolHelper
-import magic
 import numpy as np
 from tqdm import tqdm
 
@@ -23,7 +22,7 @@ from photos_drive.shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
-from photos_drive.shared.utils.mime_type.utils import is_image
+from photos_drive.shared.utils.mime_type.utils import get_mime_type, is_image
 
 logger = logging.getLogger(__name__)
 
@@ -232,7 +231,7 @@ class DiffsProcessor:
             return diff.mime_type
 
         try:
-            mime_type = magic.from_file(diff.file_path, mime=True)
+            mime_type = get_mime_type(diff.file_path)
             return mime_type or "application/octet-stream"
         except Exception as e:
             logger.error(f"Error reading file type: {e}")

@@ -17,11 +17,11 @@ export default async function (
   const router: Router = Router();
 
   router.use(await bulkGetMediaItemDetails(mediaItemsRepo));
-  router.use(await getMediaItemDetails(mediaItemsRepo));
-  router.use(await getMediaItemImage(mediaItemsRepo, gPhotoClientRepo));
   router.use(await sampleMediaItems(mediaItemsRepo));
   router.use(await searchMediaItems(mediaItemsRepo));
   router.use(await vectorSearchMediaItems(mediaItemsRepo, vectorStore));
+  router.use(await getMediaItemDetails(mediaItemsRepo));
+  router.use(await getMediaItemImage(mediaItemsRepo, gPhotoClientRepo));
 
   return router;
 }

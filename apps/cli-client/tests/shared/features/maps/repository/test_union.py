@@ -41,6 +41,7 @@ class TestUnionMapCellsRepository(unittest.TestCase):
             height=100,
             date_taken=datetime.now(),
             embedding_id=None,
+            mime_type="image/jpeg",
         )
 
         self.union_repo.add_media_item(media_item)
