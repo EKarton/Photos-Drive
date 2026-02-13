@@ -1,4 +1,3 @@
-from photos_drive.shared.utils.mime_type.utils import get_mime_type
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, replace
 from datetime import datetime
@@ -23,7 +22,7 @@ from photos_drive.shared.utils.dimensions.pillow_image_dimensions import (
     get_width_height_of_image,
 )
 from photos_drive.shared.utils.hashes.xxhash import compute_file_hash
-from photos_drive.shared.utils.mime_type.utils import is_image
+from photos_drive.shared.utils.mime_type.utils import get_mime_type, is_image
 
 logger = logging.getLogger(__name__)
 

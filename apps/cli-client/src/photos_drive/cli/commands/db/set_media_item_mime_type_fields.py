@@ -6,7 +6,6 @@ from tqdm import tqdm
 import typer
 from typing_extensions import Annotated
 
-from photos_drive.shared.utils.mime_type.utils import get_mime_type
 from photos_drive.cli.shared.config import build_config_from_options
 from photos_drive.cli.shared.inputs import (
     prompt_user_for_yes_no_answer,
@@ -29,6 +28,7 @@ from photos_drive.shared.core.media_items.repository.base import (
 from photos_drive.shared.core.media_items.repository.union import (
     create_union_media_items_repository_from_db_clients,
 )
+from photos_drive.shared.utils.mime_type.utils import get_mime_type
 
 logger = logging.getLogger(__name__)
 
