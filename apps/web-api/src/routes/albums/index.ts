@@ -12,8 +12,8 @@ export default async function (
 ) {
   const router: Router = Router();
 
-  router.use(await getAlbumDetails(rootAlbumId, albumsRepo, mediaItemsRepo));
   router.use(await listAlbums(rootAlbumId, albumsRepo, mediaItemsRepo));
+  router.use(await getAlbumDetails(rootAlbumId, albumsRepo, mediaItemsRepo));
 
   return router;
 }
