@@ -98,6 +98,9 @@ export class App {
 
     const rootAlbumId = await this.config.getRootAlbumId();
 
+    if (this.appConfig.trustProxyHops > 0) {
+      this.app.set('trust proxy', this.appConfig.trustProxyHops);
+    }
     this.app.use(helmet());
     this.app.use(compression());
     this.app.use(express.json());

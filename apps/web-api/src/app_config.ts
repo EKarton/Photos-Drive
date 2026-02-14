@@ -23,6 +23,9 @@ export type AppConfig = {
   /** The server port. */
   serverPort: number;
 
+  /** The number of trust proxies. */
+  trustProxyHops: number;
+
   /** The file path to the vault. */
   vaultFilePath: string;
 
@@ -49,6 +52,7 @@ export function getAppConfig(): AppConfig {
     accessTokenJwtPrivateKey: process.env.ACCESS_TOKEN_JWT_PRIVATE_KEY || '',
     accessTokenAllowedSubject: process.env.ACCESS_TOKEN_ALLOWED_SUBJECT || '',
     serverPort: parseInt(process.env.PORT || '3000'),
+    trustProxyHops: parseInt(process.env.TRUST_PROXY_HOPS || '1'),
     vaultFilePath: process.env.VAULT_FILE_PATH || '',
     vaultMongoDb: process.env.VAULT_MONGODB || '',
     corsFrontendEndpoint: process.env.CORS_FRONTEND_ENDPOINT || '',
