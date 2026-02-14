@@ -31,7 +31,8 @@ export default async function () {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none' as const,
-        maxAge: 15 * 60 * 1000 // 15 minutes
+        maxAge: 15 * 60 * 1000, // 15 minutes
+        partitioned: true
       };
 
       res.cookie('oauth_state', state, cookieOptions);
