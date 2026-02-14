@@ -32,7 +32,15 @@ export default async function () {
     }),
     json(),
     wrap(async (req: Request, res: Response) => {
-      const code = req.body.code;
+      const { code, state } = req.body;
+      const cookieState = req.cookies['oauth_state'];
+      const codeVerifier = req.cookies['oauth_code_verifier'];
+
+      if (!state || state !== cookieState) {
+        logger.error('CSRF protection: state mismatch or missing');
+        res.status(403).json({ error: 'Invalid state' });
+        return;
+      }
 
       try {
         const tokenResponse = await axios.post(GOOGLE_TOKEN_URL, {
@@ -40,8 +48,13 @@ export default async function () {
           client_id: config.googleLoginClientId,
           client_secret: config.googleLoginClientSecret,
           redirect_uri: config.googleLoginCallbackUri,
-          grant_type: 'authorization_code'
+          grant_type: 'authorization_code',
+          code_verifier: codeVerifier
         });
+
+        // Clear OAuth cookies
+        res.clearCookie('oauth_state');
+        res.clearCookie('oauth_code_verifier');
 
         const accessToken = tokenResponse.data.access_token;
         const userInfo = await axios.get(GOOGLE_USER_INFO_URL, {
