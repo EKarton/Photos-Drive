@@ -10,8 +10,8 @@ import {
   MediaItemsStore,
   SampleMediaItemsRequest
 } from '../../services/core/media_items/BaseMediaItemsStore';
-import { serializeMediaItem } from './utils';
 import { rateLimitKey } from '../../utils/rateLimitKey';
+import { serializeMediaItem } from './utils';
 
 const sampleMediaItemsQuerySchema = z.object({
   albumId: z.string().optional(),
@@ -59,13 +59,13 @@ export default async function (mediaItemsRepo: MediaItemsStore) {
         latestDateTaken: latest ? new Date(latest) : undefined,
         withinLocation:
           latitude !== undefined &&
-            longitude !== undefined &&
-            range !== undefined
+          longitude !== undefined &&
+          range !== undefined
             ? {
-              latitude,
-              longitude,
-              range
-            }
+                latitude,
+                longitude,
+                range
+              }
             : undefined,
         pageSize
       };

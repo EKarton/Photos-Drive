@@ -1,5 +1,6 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import z from 'zod';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
@@ -16,9 +17,8 @@ import {
 } from '../../services/core/albums/BaseAlbumsStore';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import parseEnumOrElse from '../../utils/parseEnumOrElse';
-import { serializeAlbum } from './utils';
-import rateLimit from 'express-rate-limit';
 import { rateLimitKey } from '../../utils/rateLimitKey';
+import { serializeAlbum } from './utils';
 
 const listAlbumsQuerySchema = z.object({
   pageSize: z.coerce.number().min(0).max(50).default(25),

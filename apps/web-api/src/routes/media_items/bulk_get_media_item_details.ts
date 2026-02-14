@@ -7,8 +7,8 @@ import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import { convertStringToMediaItemId } from '../../services/core/media_items/MediaItems';
-import { serializeMediaItem } from './utils';
 import { rateLimitKey } from '../../utils/rateLimitKey';
+import { serializeMediaItem } from './utils';
 
 const bulkGetMediaItemDetailsBodySchema = z.object({
   mediaItemIds: z.array(z.string()).max(50)

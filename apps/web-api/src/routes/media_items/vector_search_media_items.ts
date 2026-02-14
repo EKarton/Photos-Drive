@@ -13,8 +13,8 @@ import {
 } from '../../services/core/media_items/MediaItems';
 import { BaseVectorStore } from '../../services/features/llm/vector_stores/BaseVectorStore';
 import logger from '../../utils/logger';
-import { serializeMediaItem } from './utils';
 import { rateLimitKey } from '../../utils/rateLimitKey';
+import { serializeMediaItem } from './utils';
 
 const vectorSearchMediaItemsBodySchema = z.object({
   queryEmbedding: z.array(z.number()),

@@ -1,5 +1,6 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import z from 'zod';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
@@ -14,9 +15,8 @@ import {
 } from '../../services/core/albums/BaseAlbumsStore';
 import { MongoDbClientNotFoundError } from '../../services/core/databases/MongoDbClientsStore';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
-import { serializeAlbum } from './utils';
-import rateLimit from 'express-rate-limit';
 import { rateLimitKey } from '../../utils/rateLimitKey';
+import { serializeAlbum } from './utils';
 
 const getAlbumDetailsParamsSchema = z.object({
   albumId: z.union([z.literal('root'), z.string().includes(':')])

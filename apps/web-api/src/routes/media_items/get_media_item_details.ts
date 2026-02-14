@@ -11,8 +11,8 @@ import {
   MediaItemsStore
 } from '../../services/core/media_items/BaseMediaItemsStore';
 import { MediaItemId } from '../../services/core/media_items/MediaItems';
-import { serializeMediaItem } from './utils';
 import { rateLimitKey } from '../../utils/rateLimitKey';
+import { serializeMediaItem } from './utils';
 
 const getMediaItemDetailsParamsSchema = z.object({
   id: z.string().includes(':')
