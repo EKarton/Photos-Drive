@@ -6,10 +6,12 @@ describe('Auth Actions', () => {
   describe('loadAuth', () => {
     it('should create an action to load auth details', () => {
       const code = 'test-auth-code';
-      const action = loadAuth({ code });
+      const state = 'test-state';
+      const action = loadAuth({ code, state });
 
       expect(action.type).toBe('[Auth] Load auth details from auth code');
       expect(action.code).toBe(code);
+      expect(action.state).toBe(state);
     });
   });
 
