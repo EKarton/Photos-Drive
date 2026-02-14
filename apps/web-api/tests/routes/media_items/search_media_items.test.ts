@@ -55,7 +55,7 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
 ];
 
 describe('GET api/v1/media-items/search', () => {
-  let cleanupTestEnvFn = () => {};
+  let cleanupTestEnvFn = () => { };
   let token = '';
 
   beforeEach(async () => {
@@ -140,7 +140,7 @@ describe('GET api/v1/media-items/search', () => {
 
     const res = await request(app)
       .get(
-        '/api/v1/media-items/search?albumId=albumClient1:albumObject1&pageSize=10&pageToken=abc&sortBy=id&sortDir=asc&earliest=2025-01-01&latest=2025-04-01&latitude=-48&longitude=95&range=300'
+        '/api/v1/media-items/search?albumId=albumClient1:albumObject1&pageSize=10&pageToken=abc&sortBy=id&sortDir=asc&earliest=2025-01-01T00:00:00Z&latest=2025-04-01T00:00:00Z&latitude=-48&longitude=95&range=300'
       )
       .set('Authorization', `Bearer ${token}`);
 
@@ -155,8 +155,8 @@ describe('GET api/v1/media-items/search', () => {
           clientId: 'albumClient1',
           objectId: 'albumObject1'
         },
-        earliestDateTaken: new Date('2025-01-01'),
-        latestDateTaken: new Date('2025-04-01'),
+        earliestDateTaken: new Date('2025-01-01T00:00:00Z'),
+        latestDateTaken: new Date('2025-04-01T00:00:00Z'),
         withinLocation: {
           latitude: -48,
           longitude: 95,
@@ -171,6 +171,24 @@ describe('GET api/v1/media-items/search', () => {
       },
       { abortController: expect.any(AbortController) }
     );
+  });
+
+  it('should return 400 when request is not valid', async () => {
+    const repo = mock<MediaItemsStore>();
+    repo.listMediaItems.mockResolvedValue({
+      mediaItems: [],
+      nextPageToken: 'next-token'
+    });
+
+    const app = express();
+    app.use(await searchMediaItemsRouter(repo));
+
+    const res = await request(app)
+      .get('/api/v1/media-items/search?pageSize=1000')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid request' });
   });
 
   it('should return 500 when an unexpected error is thrown', async () => {

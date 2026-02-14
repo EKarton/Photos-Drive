@@ -27,7 +27,7 @@ const MOCK_ALBUM: Album = {
 };
 
 describe('GET /api/v1/albums', () => {
-  let cleanupTestEnvFn = () => {};
+  let cleanupTestEnvFn = () => { };
   let token = '';
 
   beforeEach(async () => {
@@ -210,5 +210,25 @@ describe('GET /api/v1/albums', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toBe(500);
+  });
+
+  it('should return 400 when query parameters are invalid', async () => {
+    const mockAlbumsRepository = mock<AlbumsStore>();
+    const mockMediaItemsRepository = mock<MediaItemsStore>();
+    const app = express();
+    app.use(
+      await listAlbumsRouter(
+        MOCK_ROOT_ALBUM_ID,
+        mockAlbumsRepository,
+        mockMediaItemsRepository
+      )
+    );
+
+    const res = await request(app)
+      .get('/api/v1/albums?pageSize=1000')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid query parameters' });
   });
 });

@@ -57,7 +57,7 @@ const gPhotosMediaItem = {
 };
 
 describe('GET /api/v1/media-items/:id/image', () => {
-  let cleanupTestEnvFn = () => {};
+  let cleanupTestEnvFn = () => { };
   let token = '';
 
   beforeEach(async () => {
@@ -110,6 +110,38 @@ describe('GET /api/v1/media-items/:id/image', () => {
     expect(res.headers.location).toEqual(
       'https://example.com/mediaItem1=w100-h200'
     );
+  });
+
+  it('should return 400 when media item id is not valid', async () => {
+    const repo = mock<MediaItemsStore>();
+    const gPhotosClientsRepository = mock<GPhotosClientsRepository>();
+    const app = express();
+    app.use(await getMediaItemImageRouter(repo, gPhotosClientsRepository));
+
+    const res = await request(app)
+      .get(
+        '/api/v1/media-items/mediaItemClientId1/image?width=100&height=200'
+      )
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toEqual({ error: 'Invalid request' });
+  });
+
+  it('should return 400 when width is not valid', async () => {
+    const repo = mock<MediaItemsStore>();
+    const gPhotosClientsRepository = mock<GPhotosClientsRepository>();
+    const app = express();
+    app.use(await getMediaItemImageRouter(repo, gPhotosClientsRepository));
+
+    const res = await request(app)
+      .get(
+        '/api/v1/media-items/mediaItemClientId1:mediaItem1/image?width=a&height=b'
+      )
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toEqual({ error: 'Invalid request' });
   });
 
   it('should return 404 when client does not have base URL', async () => {

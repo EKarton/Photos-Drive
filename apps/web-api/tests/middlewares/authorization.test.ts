@@ -2,6 +2,8 @@ import express, { NextFunction, Request, Response } from 'express';
 import request from 'supertest';
 import { verifyAuthorization } from '../../src/middlewares/authorization';
 
+import { fakeAuthEnv } from '../routes/utils/auth';
+
 describe('verifyAuthorization()', () => {
   const originalEnv = process.env;
 
@@ -9,6 +11,7 @@ describe('verifyAuthorization()', () => {
     jest.resetModules();
     process.env = {
       ...originalEnv,
+      ...fakeAuthEnv,
       ACCESS_TOKEN_ALLOWED_SUBJECT: '1234'
     };
   });

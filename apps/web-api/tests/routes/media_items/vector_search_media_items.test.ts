@@ -55,7 +55,7 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
 ];
 
 describe('POST /api/v1/media-items/vector-search', () => {
-  let cleanupTestEnvFn = () => {};
+  let cleanupTestEnvFn = () => { };
   let token = '';
 
   beforeEach(async () => {
@@ -103,7 +103,7 @@ describe('POST /api/v1/media-items/vector-search', () => {
     const res = await request(app)
       .post('/api/v1/media-items/vector-search')
       .set('Authorization', `Bearer ${token}`)
-      .send({ queryEmbedding: new Float32Array([0.1, 0.2, 0.3]) });
+      .send({ queryEmbedding: [0.1, 0.2, 0.3] });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -145,9 +145,7 @@ describe('POST /api/v1/media-items/vector-search', () => {
       .send({});
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      error: 'Missing or invalid "queryEmbedding" field'
-    });
+    expect(res.body).toEqual({ error: 'Invalid request' });
   });
 
   it('should return 400 for invalid earliestDateTaken format', async () => {
@@ -161,12 +159,12 @@ describe('POST /api/v1/media-items/vector-search', () => {
       .post('/api/v1/media-items/vector-search')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        queryEmbedding: new Float32Array([1, 2, 3]),
+        queryEmbedding: [1, 2, 3],
         earliestDateTaken: 'invalid-date'
       });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid earliestDateTaken format' });
+    expect(res.body).toEqual({ error: 'Invalid request' });
   });
 
   it('should return 400 for invalid latestDateTaken format', async () => {
@@ -180,12 +178,12 @@ describe('POST /api/v1/media-items/vector-search', () => {
       .post('/api/v1/media-items/vector-search')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        queryEmbedding: new Float32Array([1, 2, 3]),
+        queryEmbedding: [1, 2, 3],
         latestDateTaken: 'invalid-date'
       });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid latestDateTaken format' });
+    expect(res.body).toEqual({ error: 'Invalid request' });
   });
 
   it('should pass filters and topK to vectorStore', async () => {
@@ -203,7 +201,7 @@ describe('POST /api/v1/media-items/vector-search', () => {
       .post('/api/v1/media-items/vector-search')
       .set('Authorization', `Bearer ${token}`)
       .send({
-        queryEmbedding: new Float32Array([1, 2, 3]),
+        queryEmbedding: [1, 2, 3],
         earliestDateTaken: earliest,
         latestDateTaken: latest,
         withinMediaItemIds: ['albumClient1:mediaItem1'],
@@ -236,7 +234,7 @@ describe('POST /api/v1/media-items/vector-search', () => {
     const res = await request(app)
       .post('/api/v1/media-items/vector-search')
       .set('Authorization', `Bearer ${token}`)
-      .send({ queryEmbedding: new Float32Array([1, 2, 3]) });
+      .send({ queryEmbedding: [1, 2, 3] });
 
     expect(res.statusCode).toBe(500);
   });

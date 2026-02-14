@@ -14,6 +14,11 @@ import {
 import { MongoDbClientNotFoundError } from '../../services/core/databases/MongoDbClientsStore';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import { serializeAlbum } from './utils';
+import z from 'zod';
+
+const getAlbumDetailsParamsSchema = z.object({
+  albumId: z.union([z.literal('root'), z.string().includes(':')])
+});
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -29,7 +34,13 @@ export default async function (
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       try {
-        const inputAlbumId = req.params.albumId;
+        const params = getAlbumDetailsParamsSchema.safeParse(req.params);
+
+        if (!params.success) {
+          return res.status(400).json({ error: 'Invalid request' });
+        }
+
+        const inputAlbumId = params.data.albumId;
 
         let albumId: AlbumId;
         if (inputAlbumId === 'root') {

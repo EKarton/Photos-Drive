@@ -2,6 +2,7 @@ import { wrap } from 'async-middleware';
 import axios from 'axios';
 import { Request, Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
@@ -11,6 +12,15 @@ import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
 } from '../../services/core/storage/gphotos/GPhotosClientsRepository';
+
+const getMediaItemImageParamsSchema = z.object({
+  id: z.string().includes(':')
+});
+
+const getMediaItemImageQuerySchema = z.object({
+  width: z.coerce.number().optional(),
+  height: z.coerce.number().optional()
+});
 
 export default async function (
   mediaItemsRepo: MediaItemsStore,
@@ -28,16 +38,22 @@ export default async function (
     }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
-      const rawMediaItemId = req.params.id;
+      const params = getMediaItemImageParamsSchema.safeParse(req.params);
+      const query = getMediaItemImageQuerySchema.safeParse(req.query);
+
+      if (!params.success || !query.success) {
+        return res
+          .status(400)
+          .json({ error: 'Invalid request' });
+      }
+
+      const rawMediaItemId = params.data.id;
       const rawMediaItemIdParts = rawMediaItemId.split(':');
       const mediaItemId: MediaItemId = {
         clientId: rawMediaItemIdParts[0],
         objectId: rawMediaItemIdParts[1]
       };
-      const { width, height } = req.query as {
-        width?: string;
-        height?: string;
-      };
+      const { width, height } = query.data;
 
       try {
         const mediaItem = await mediaItemsRepo.getMediaItemById(mediaItemId, {

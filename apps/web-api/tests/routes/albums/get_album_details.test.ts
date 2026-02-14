@@ -33,7 +33,7 @@ const MOCK_ALBUM: Album = {
 };
 
 describe('GET api/v1/albums/:albumId', () => {
-  let cleanupTestEnvFn = () => {};
+  let cleanupTestEnvFn = () => { };
   let token = '';
 
   beforeEach(async () => {
@@ -134,6 +134,26 @@ describe('GET api/v1/albums/:albumId', () => {
       numChildAlbums: 1,
       numMediaItems: 2
     });
+  });
+
+  it(`should return 400, given invalid albumId`, async () => {
+    const mockAlbumsRepository = mock<AlbumsStore>();
+    const mockMediaItemsRepository = mock<MediaItemsStore>();
+    const app = express();
+    app.use(
+      await getAlbumDetailsRouter(
+        MOCK_ROOT_ALBUM_ID,
+        mockAlbumsRepository,
+        mockMediaItemsRepository
+      )
+    );
+
+    const res = await request(app)
+      .get('/api/v1/albums/invalid')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toEqual({ error: 'Invalid request' });
   });
 
   it(`should return error code, given MongoDbClientNotFoundError thrown from AlbumsRepository`, async () => {

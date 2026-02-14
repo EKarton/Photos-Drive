@@ -14,8 +14,17 @@ import {
   SortByField
 } from '../../services/core/albums/BaseAlbumsStore';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
+import z from 'zod';
 import parseEnumOrElse from '../../utils/parseEnumOrElse';
 import { serializeAlbum } from './utils';
+
+const listAlbumsQuerySchema = z.object({
+  pageSize: z.coerce.number().min(0).max(50).default(25),
+  pageToken: z.string().optional(),
+  sortBy: z.enum(SortByField).optional(),
+  sortDir: z.enum(SortByDirection).optional(),
+  parentAlbumId: z.union([z.literal('root'), z.string().includes(':')]).optional()
+});
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -30,11 +39,19 @@ export default async function (
     await verifyAuthorization(),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
-      const pageSize = Number(req.query['pageSize']);
-      const pageToken = req.query['pageToken'] as string;
-      const sortBy = req.query['sortBy'];
-      const sortDir = req.query['sortDir'];
-      const rawParentAlbumId = req.query['parentAlbumId'] as string;
+      const query = listAlbumsQuerySchema.safeParse(req.query);
+
+      if (!query.success) {
+        return res.status(400).json({ error: 'Invalid query parameters' });
+      }
+
+      const {
+        pageSize,
+        pageToken,
+        sortBy,
+        sortDir,
+        parentAlbumId: rawParentAlbumId
+      } = query.data;
 
       let parentAlbumId: AlbumId | undefined = undefined;
       if (rawParentAlbumId) {
@@ -47,7 +64,7 @@ export default async function (
 
       const listAlbumsRequest: ListAlbumsRequest = {
         parentAlbumId,
-        pageSize: !isNaN(pageSize) ? Math.min(50, Math.max(0, pageSize)) : 25,
+        pageSize,
         pageToken: pageToken ? decodeURIComponent(pageToken) : undefined,
         sortBy: {
           field: parseEnumOrElse(SortByField, sortBy, SortByField.ID),
