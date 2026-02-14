@@ -57,7 +57,7 @@ const gPhotosMediaItem = {
 };
 
 describe('GET /api/v1/media-items/:id/image', () => {
-  let cleanupTestEnvFn = () => { };
+  let cleanupTestEnvFn = () => {};
   let token = '';
 
   beforeEach(async () => {
@@ -119,9 +119,7 @@ describe('GET /api/v1/media-items/:id/image', () => {
     app.use(await getMediaItemImageRouter(repo, gPhotosClientsRepository));
 
     const res = await request(app)
-      .get(
-        '/api/v1/media-items/mediaItemClientId1/image?width=100&height=200'
-      )
+      .get('/api/v1/media-items/mediaItemClientId1/image?width=100&height=200')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toEqual(400);

@@ -55,7 +55,7 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
 ];
 
 describe('POST /api/v1/media-items/vector-search', () => {
-  let cleanupTestEnvFn = () => { };
+  let cleanupTestEnvFn = () => {};
   let token = '';
 
   beforeEach(async () => {

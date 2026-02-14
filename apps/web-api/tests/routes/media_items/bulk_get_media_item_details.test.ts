@@ -51,7 +51,7 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
 ];
 
 describe('POST /api/v1/media-items/bulk-get', () => {
-  let cleanupTestEnvFn = () => { };
+  let cleanupTestEnvFn = () => {};
   let token = '';
 
   beforeEach(async () => {

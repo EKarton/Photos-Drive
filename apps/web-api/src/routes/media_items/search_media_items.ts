@@ -14,6 +14,7 @@ import {
 } from '../../services/core/media_items/BaseMediaItemsStore';
 import parseEnumOrElse from '../../utils/parseEnumOrElse';
 import { serializeMediaItem } from './utils';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 
 const searchMediaItemsQuerySchema = z.object({
   albumId: z.string().optional(),
@@ -37,7 +38,8 @@ export default async function (mediaItemsRepo: MediaItemsStore) {
     await verifyAuthorization(),
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100
+      max: 100,
+      keyGenerator: rateLimitKey
     }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {

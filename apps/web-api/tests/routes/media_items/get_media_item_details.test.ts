@@ -36,7 +36,7 @@ const mockMediaItem: MediaItem = {
 };
 
 describe('GET /api/v1/media-items/:id', () => {
-  let cleanupTestEnvFn = () => { };
+  let cleanupTestEnvFn = () => {};
   let token = '';
 
   beforeEach(async () => {

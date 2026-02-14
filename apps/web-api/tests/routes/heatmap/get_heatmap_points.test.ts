@@ -87,8 +87,21 @@ describe('Heatmap Router', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      error: 'Bad request for tile id x=NaN, y=2, z=3'
+      error: 'Invalid request'
     });
+  });
+
+  it('returns 400 if albumId is invalid', async () => {
+    const mockHeatmapGenerator = mock<HeatmapGenerator>();
+    const app = express();
+    app.use(await getHeatmapPoints(MOCK_ROOT_ALBUM_ID, mockHeatmapGenerator));
+
+    const res = await request(app)
+      .get('/api/v1/maps/heatmap?x=1&y=2&z=3&albumId=invalid')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid request' });
   });
 
   it('returns 200 with empty points array if no heatmap data', async () => {

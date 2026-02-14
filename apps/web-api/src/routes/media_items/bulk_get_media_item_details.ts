@@ -8,6 +8,7 @@ import { verifyAuthorization } from '../../middlewares/authorization';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
 import { convertStringToMediaItemId } from '../../services/core/media_items/MediaItems';
 import { serializeMediaItem } from './utils';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 
 const bulkGetMediaItemDetailsBodySchema = z.object({
   mediaItemIds: z.array(z.string()).max(50)
@@ -22,7 +23,8 @@ export default async function (mediaItemsRepo: MediaItemsStore) {
     await verifyAuthorization(),
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100
+      max: 100,
+      keyGenerator: rateLimitKey
     }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {

@@ -14,6 +14,7 @@ import {
 import { BaseVectorStore } from '../../services/features/llm/vector_stores/BaseVectorStore';
 import logger from '../../utils/logger';
 import { serializeMediaItem } from './utils';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 
 const vectorSearchMediaItemsBodySchema = z.object({
   queryEmbedding: z.array(z.number()),
@@ -35,16 +36,15 @@ export default async function (
     await verifyAuthorization(),
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100
+      max: 100,
+      keyGenerator: rateLimitKey
     }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const body = vectorSearchMediaItemsBodySchema.safeParse(req.body);
 
       if (!body.success) {
-        return res
-          .status(400)
-          .json({ error: 'Invalid request' });
+        return res.status(400).json({ error: 'Invalid request' });
       }
 
       const {

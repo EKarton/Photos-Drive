@@ -1,5 +1,6 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import z from 'zod';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
@@ -14,16 +15,19 @@ import {
   SortByField
 } from '../../services/core/albums/BaseAlbumsStore';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
-import z from 'zod';
 import parseEnumOrElse from '../../utils/parseEnumOrElse';
 import { serializeAlbum } from './utils';
+import rateLimit from 'express-rate-limit';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 
 const listAlbumsQuerySchema = z.object({
   pageSize: z.coerce.number().min(0).max(50).default(25),
   pageToken: z.string().optional(),
   sortBy: z.enum(SortByField).optional(),
   sortDir: z.enum(SortByDirection).optional(),
-  parentAlbumId: z.union([z.literal('root'), z.string().includes(':')]).optional()
+  parentAlbumId: z
+    .union([z.literal('root'), z.string().includes(':')])
+    .optional()
 });
 
 export default async function (
@@ -37,6 +41,11 @@ export default async function (
     '/api/v1/albums',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100,
+      keyGenerator: rateLimitKey
+    }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       const query = listAlbumsQuerySchema.safeParse(req.query);

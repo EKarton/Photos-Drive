@@ -41,23 +41,25 @@ export type AppConfig = {
   mapboxApiToken: string;
 };
 
-const appConfigSchema = z.object({
-  GOOGLE_CLIENT_ID: z.string().min(1),
-  GOOGLE_CLIENT_SECRET: z.string().min(1),
-  GOOGLE_CALLBACK_URI: z.string().min(1),
-  ACCESS_TOKEN_JWT_PUBLIC_KEY: z.string().min(1),
-  ACCESS_TOKEN_JWT_PRIVATE_KEY: z.string().min(1),
-  ACCESS_TOKEN_ALLOWED_SUBJECT: z.string().default('*'),
-  PORT: z.coerce.number().default(3000),
-  TRUST_PROXY_HOPS: z.coerce.number().default(1),
-  VAULT_FILE_PATH: z.string().default(''),
-  VAULT_MONGODB: z.string().default(''),
-  CORS_FRONTEND_ENDPOINT: z.string().default('*'),
-  MAPBOX_API_TOKEN: z.string().default('')
-}).refine(data => data.VAULT_FILE_PATH || data.VAULT_MONGODB, {
-  message: "Either VAULT_FILE_PATH or VAULT_MONGODB must be set",
-  path: ["VAULT_FILE_PATH", "VAULT_MONGODB"]
-});
+const appConfigSchema = z
+  .object({
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
+    GOOGLE_CALLBACK_URI: z.string().min(1),
+    ACCESS_TOKEN_JWT_PUBLIC_KEY: z.string().min(1),
+    ACCESS_TOKEN_JWT_PRIVATE_KEY: z.string().min(1),
+    ACCESS_TOKEN_ALLOWED_SUBJECT: z.string().default('*'),
+    PORT: z.coerce.number().default(3000),
+    TRUST_PROXY_HOPS: z.coerce.number().default(1),
+    VAULT_FILE_PATH: z.string().default(''),
+    VAULT_MONGODB: z.string().default(''),
+    CORS_FRONTEND_ENDPOINT: z.string().default('*'),
+    MAPBOX_API_TOKEN: z.string().default('')
+  })
+  .refine((data) => data.VAULT_FILE_PATH || data.VAULT_MONGODB, {
+    message: 'Either VAULT_FILE_PATH or VAULT_MONGODB must be set',
+    path: ['VAULT_FILE_PATH', 'VAULT_MONGODB']
+  });
 
 /**
  * Returns a set of config variables from environment variables.

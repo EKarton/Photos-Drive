@@ -12,6 +12,7 @@ import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
 } from '../../services/core/storage/gphotos/GPhotosClientsRepository';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 
 const getMediaItemImageParamsSchema = z.object({
   id: z.string().includes(':')
@@ -34,7 +35,8 @@ export default async function (
     await verifyAuthorization(),
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100
+      max: 100,
+      keyGenerator: rateLimitKey
     }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
@@ -42,9 +44,7 @@ export default async function (
       const query = getMediaItemImageQuerySchema.safeParse(req.query);
 
       if (!params.success || !query.success) {
-        return res
-          .status(400)
-          .json({ error: 'Invalid request' });
+        return res.status(400).json({ error: 'Invalid request' });
       }
 
       const rawMediaItemId = params.data.id;

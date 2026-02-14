@@ -27,7 +27,7 @@ const MOCK_ALBUM: Album = {
 };
 
 describe('GET /api/v1/albums', () => {
-  let cleanupTestEnvFn = () => { };
+  let cleanupTestEnvFn = () => {};
   let token = '';
 
   beforeEach(async () => {

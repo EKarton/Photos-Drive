@@ -51,7 +51,7 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
 ];
 
 describe('GET api/v1/media-items/sample', () => {
-  let cleanupTestEnvFn = () => { };
+  let cleanupTestEnvFn = () => {};
   let token = '';
 
   beforeEach(async () => {

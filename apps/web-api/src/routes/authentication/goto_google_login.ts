@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { getAppConfig } from '../../app_config';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 
 export const GOOGLE_LOGIN_PAGE_URL =
   'https://accounts.google.com/o/oauth2/v2/auth';
@@ -15,7 +16,8 @@ export default async function () {
       windowMs: 15 * 60 * 1000,
       max: 5,
       standardHeaders: true,
-      legacyHeaders: false
+      legacyHeaders: false,
+      keyGenerator: rateLimitKey
     }),
     (req: Request, res: Response) => {
       const url = new URL(GOOGLE_LOGIN_PAGE_URL);
