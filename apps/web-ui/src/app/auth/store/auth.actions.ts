@@ -6,7 +6,7 @@ import { TokenResponse } from '../services/webapi.service';
 /** An action that authenticates user via Google OAuth2 code. */
 export const loadAuth = createAction(
   '[Auth] Load auth details from auth code',
-  props<{ code: string }>(),
+  props<{ code: string; state: string }>(),
 );
 
 /** An action that saves the results of authenticating with Web Api. */

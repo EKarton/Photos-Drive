@@ -19,14 +19,17 @@ export class CallbackPageComponent implements OnInit, OnDestroy {
 
   private readonly subscription = new Subscription();
 
-  readonly code$ = this.route.queryParamMap.pipe(
-    map((params) => params.get('code')!),
+  readonly params$ = this.route.queryParamMap.pipe(
+    map((params) => ({
+      code: params.get('code')!,
+      state: params.get('state')!,
+    })),
   );
 
   ngOnInit(): void {
     this.subscription.add(
-      this.code$.subscribe((code) => {
-        this.store.dispatch(authActions.loadAuth({ code }));
+      this.params$.subscribe(({ code, state }) => {
+        this.store.dispatch(authActions.loadAuth({ code, state }));
       }),
     );
 
