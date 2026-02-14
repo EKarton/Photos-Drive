@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { importPKCS8, SignJWT } from 'jose';
 import { getAppConfig } from '../../app_config';
 import logger from '../../utils/logger';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 
 export const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
@@ -26,7 +27,8 @@ export default async function () {
       windowMs: 15 * 60 * 1000,
       max: 5,
       standardHeaders: true,
-      legacyHeaders: false
+      legacyHeaders: false,
+      keyGenerator: rateLimitKey
     }),
     json(),
     wrap(async (req: Request, res: Response) => {

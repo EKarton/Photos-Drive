@@ -1,6 +1,7 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
+import z from 'zod';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
@@ -13,6 +14,14 @@ import {
   HeatmapGenerator,
   Tile
 } from '../../services/features/maps/HeatmapGenerator';
+import { rateLimitKey } from '../../utils/rateLimitKey';
+
+const getHeatmapPointsQuerySchema = z.object({
+  x: z.coerce.number(),
+  y: z.coerce.number(),
+  z: z.coerce.number(),
+  albumId: z.union([z.literal('root'), z.string().includes(':')]).optional()
+});
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -26,28 +35,25 @@ export default async function (
     await verifyAuthorization(),
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100
+      max: 100,
+      keyGenerator: rateLimitKey
     }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
-      const inputAlbumId = req.query['albumId'] as string;
-      const tile: Tile = {
-        x: Number(req.query['x']),
-        y: Number(req.query['y']),
-        z: Number(req.query['z'])
-      };
+      const query = getHeatmapPointsQuerySchema.safeParse(req.query);
+
+      if (!query.success) {
+        return res.status(400).json({ error: 'Invalid request' });
+      }
+
+      const { x, y, z, albumId: inputAlbumId } = query.data;
+      const tile: Tile = { x, y, z };
 
       let albumId: AlbumId | undefined = undefined;
       if (inputAlbumId === 'root') {
         albumId = rootAlbumId;
       } else if (inputAlbumId) {
         albumId = convertStringToAlbumId(inputAlbumId);
-      }
-
-      if (isNaN(tile.x) || isNaN(tile.y) || isNaN(tile.z)) {
-        return res.status(400).json({
-          error: `Bad request for tile id x=${tile.x}, y=${tile.y}, z=${tile.z}`
-        });
       }
 
       const heatmap = await heatmapGenerator.getHeatmapForTile(tile, albumId, {

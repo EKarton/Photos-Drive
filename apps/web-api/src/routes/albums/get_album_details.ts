@@ -1,5 +1,7 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import z from 'zod';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
@@ -13,7 +15,12 @@ import {
 } from '../../services/core/albums/BaseAlbumsStore';
 import { MongoDbClientNotFoundError } from '../../services/core/databases/MongoDbClientsStore';
 import { MediaItemsStore } from '../../services/core/media_items/BaseMediaItemsStore';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 import { serializeAlbum } from './utils';
+
+const getAlbumDetailsParamsSchema = z.object({
+  albumId: z.union([z.literal('root'), z.string().includes(':')])
+});
 
 export default async function (
   rootAlbumId: AlbumId,
@@ -26,10 +33,21 @@ export default async function (
     '/api/v1/albums/:albumId',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100,
+      keyGenerator: rateLimitKey
+    }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
       try {
-        const inputAlbumId = req.params.albumId;
+        const params = getAlbumDetailsParamsSchema.safeParse(req.params);
+
+        if (!params.success) {
+          return res.status(400).json({ error: 'Invalid request' });
+        }
+
+        const inputAlbumId = params.data.albumId;
 
         let albumId: AlbumId;
         if (inputAlbumId === 'root') {

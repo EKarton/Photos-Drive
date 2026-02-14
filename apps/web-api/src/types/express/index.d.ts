@@ -8,6 +8,7 @@ declare global {
     export interface Request {
       decodedAccessToken: DecodedAccessToken;
       abortController?: AbortController;
+      ip: string;
     }
   }
 }

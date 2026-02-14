@@ -107,7 +107,7 @@ describe('POST /api/v1/media-items/bulk-get', () => {
     });
   });
 
-  it('should return 413 if there are too many media items to request for', async () => {
+  it('should return 400 if there are too many media items to request for', async () => {
     const repo = mock<MediaItemsStore>();
     const app = express();
     app.use(express.json());
@@ -122,11 +122,11 @@ describe('POST /api/v1/media-items/bulk-get', () => {
         mediaItemIds: tooManyIds
       });
 
-    expect(res.statusCode).toBe(413);
+    expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      error: 'Too many media item IDs to fetch (needs to be under 50)'
+      error:
+        'Invalid request body, mediaItemIds must be string array with at most 50 items'
     });
-    // Ensure repo method was never called
     expect(repo.bulkGetMediaItemByIds).not.toHaveBeenCalled();
   });
 

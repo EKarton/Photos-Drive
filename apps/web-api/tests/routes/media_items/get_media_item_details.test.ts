@@ -77,6 +77,19 @@ describe('GET /api/v1/media-items/:id', () => {
     });
   });
 
+  it('should return 400 response given invalid media item id', async () => {
+    const repo = mock<MediaItemsStore>();
+    const app = express();
+    app.use(await getMediaItemDetails(repo));
+
+    const res = await request(app)
+      .get('/api/v1/media-items/mediaItemClientId1')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toEqual({ error: 'Invalid media item ID format' });
+  });
+
   it('should return 404 response given MediaItemsRepository returns MongoDbClientNotFoundError', async () => {
     const repo = mock<MediaItemsStore>();
     repo.getMediaItemById.mockRejectedValue(

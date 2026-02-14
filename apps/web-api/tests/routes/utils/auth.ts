@@ -9,7 +9,11 @@ export const fakePrivateKey =
 /** The fake required environment variables needed to generate an auth. */
 export const fakeAuthEnv = {
   ACCESS_TOKEN_JWT_PUBLIC_KEY: fakePublicKey,
-  ACCESS_TOKEN_JWT_PRIVATE_KEY: fakePrivateKey
+  ACCESS_TOKEN_JWT_PRIVATE_KEY: fakePrivateKey,
+  GOOGLE_CLIENT_ID: 'fake-client-id',
+  GOOGLE_CLIENT_SECRET: 'fake-client-secret',
+  GOOGLE_CALLBACK_URI: 'http://localhost:3000/auth/google/callback',
+  VAULT_FILE_PATH: '/tmp/vault.json'
 };
 
 /**

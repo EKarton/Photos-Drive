@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 /**
  * A set of config variables
  */
@@ -39,23 +41,45 @@ export type AppConfig = {
   mapboxApiToken: string;
 };
 
+const appConfigSchema = z
+  .object({
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
+    GOOGLE_CALLBACK_URI: z.string().min(1),
+    ACCESS_TOKEN_JWT_PUBLIC_KEY: z.string().min(1),
+    ACCESS_TOKEN_JWT_PRIVATE_KEY: z.string().min(1),
+    ACCESS_TOKEN_ALLOWED_SUBJECT: z.string().default('*'),
+    PORT: z.coerce.number().default(3000),
+    TRUST_PROXY_HOPS: z.coerce.number().default(1),
+    VAULT_FILE_PATH: z.string().default(''),
+    VAULT_MONGODB: z.string().default(''),
+    CORS_FRONTEND_ENDPOINT: z.string().default('*'),
+    MAPBOX_API_TOKEN: z.string().default('')
+  })
+  .refine((data) => data.VAULT_FILE_PATH || data.VAULT_MONGODB, {
+    message: 'Either VAULT_FILE_PATH or VAULT_MONGODB must be set',
+    path: ['VAULT_FILE_PATH', 'VAULT_MONGODB']
+  });
+
 /**
  * Returns a set of config variables from environment variables.
  * @returns a set of config variables
  */
 export function getAppConfig(): AppConfig {
+  const env = appConfigSchema.parse(process.env);
+
   return {
-    googleLoginClientId: process.env.GOOGLE_CLIENT_ID || '',
-    googleLoginClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-    googleLoginCallbackUri: process.env.GOOGLE_CALLBACK_URI || '',
-    accessTokenJwtPublicKey: process.env.ACCESS_TOKEN_JWT_PUBLIC_KEY || '',
-    accessTokenJwtPrivateKey: process.env.ACCESS_TOKEN_JWT_PRIVATE_KEY || '',
-    accessTokenAllowedSubject: process.env.ACCESS_TOKEN_ALLOWED_SUBJECT || '',
-    serverPort: parseInt(process.env.PORT || '3000'),
-    trustProxyHops: parseInt(process.env.TRUST_PROXY_HOPS || '1'),
-    vaultFilePath: process.env.VAULT_FILE_PATH || '',
-    vaultMongoDb: process.env.VAULT_MONGODB || '',
-    corsFrontendEndpoint: process.env.CORS_FRONTEND_ENDPOINT || '',
-    mapboxApiToken: process.env.MAPBOX_API_TOKEN || ''
+    googleLoginClientId: env.GOOGLE_CLIENT_ID,
+    googleLoginClientSecret: env.GOOGLE_CLIENT_SECRET,
+    googleLoginCallbackUri: env.GOOGLE_CALLBACK_URI,
+    accessTokenJwtPublicKey: env.ACCESS_TOKEN_JWT_PUBLIC_KEY,
+    accessTokenJwtPrivateKey: env.ACCESS_TOKEN_JWT_PRIVATE_KEY,
+    accessTokenAllowedSubject: env.ACCESS_TOKEN_ALLOWED_SUBJECT,
+    serverPort: env.PORT,
+    trustProxyHops: env.TRUST_PROXY_HOPS,
+    vaultFilePath: env.VAULT_FILE_PATH,
+    vaultMongoDb: env.VAULT_MONGODB,
+    corsFrontendEndpoint: env.CORS_FRONTEND_ENDPOINT,
+    mapboxApiToken: env.MAPBOX_API_TOKEN
   };
 }

@@ -1,6 +1,7 @@
 import { wrap } from 'async-middleware';
 import { Request, Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
 import { addRequestAbortController } from '../../middlewares/abort-controller';
 import { verifyAuthentication } from '../../middlewares/authentication';
 import { verifyAuthorization } from '../../middlewares/authorization';
@@ -12,7 +13,16 @@ import {
 } from '../../services/core/media_items/MediaItems';
 import { BaseVectorStore } from '../../services/features/llm/vector_stores/BaseVectorStore';
 import logger from '../../utils/logger';
+import { rateLimitKey } from '../../utils/rateLimitKey';
 import { serializeMediaItem } from './utils';
+
+const vectorSearchMediaItemsBodySchema = z.object({
+  queryEmbedding: z.array(z.number()),
+  earliestDateTaken: z.iso.datetime().optional(),
+  latestDateTaken: z.iso.datetime().optional(),
+  withinMediaItemIds: z.array(z.string()).optional(),
+  topK: z.number().optional()
+});
 
 export default async function (
   mediaItemsRepo: MediaItemsStore,
@@ -26,53 +36,38 @@ export default async function (
     await verifyAuthorization(),
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100
+      max: 100,
+      keyGenerator: rateLimitKey
     }),
     addRequestAbortController(),
     wrap(async (req: Request, res: Response) => {
+      const body = vectorSearchMediaItemsBodySchema.safeParse(req.body);
+
+      if (!body.success) {
+        return res.status(400).json({ error: 'Invalid request' });
+      }
+
       const {
         queryEmbedding,
         earliestDateTaken,
         latestDateTaken,
         withinMediaItemIds,
         topK
-      }: {
-        queryEmbedding?: number[];
-        earliestDateTaken?: string;
-        latestDateTaken?: string;
-        withinMediaItemIds?: string[];
-        topK?: number;
-      } = req.body;
-
-      if (!queryEmbedding) {
-        return res
-          .status(400)
-          .json({ error: 'Missing or invalid "queryEmbedding" field' });
-      }
+      } = body.data;
 
       // Convert dates to Date objects if provided
       let earliestDateObj: Date | undefined;
       if (earliestDateTaken) {
         earliestDateObj = new Date(earliestDateTaken);
-        if (isNaN(earliestDateObj.getTime())) {
-          return res
-            .status(400)
-            .json({ error: 'Invalid earliestDateTaken format' });
-        }
       }
 
       let latestDateObj: Date | undefined;
       if (latestDateTaken) {
         latestDateObj = new Date(latestDateTaken);
-        if (isNaN(latestDateObj.getTime())) {
-          return res
-            .status(400)
-            .json({ error: 'Invalid latestDateTaken format' });
-        }
       }
 
       let mediaItemIdObjects: MediaItemId[] = [];
-      if (withinMediaItemIds && Array.isArray(withinMediaItemIds)) {
+      if (withinMediaItemIds) {
         mediaItemIdObjects = withinMediaItemIds.map((idStr) =>
           convertStringToMediaItemId(idStr)
         );
