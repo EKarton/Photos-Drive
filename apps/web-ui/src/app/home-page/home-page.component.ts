@@ -13,10 +13,6 @@ import { WebApiService } from '../auth/services/webapi.service';
 import { hasSucceed } from '../shared/results/results';
 import { ThemeToggleButtonComponent } from '../themes/components/theme-toggle-button/theme-toggle-button.component';
 
-interface GetGoogleLoginUrlResponse {
-  url: string;
-}
-
 @Component({
   selector: 'app-home-page',
   imports: [CommonModule, ThemeToggleButtonComponent],
