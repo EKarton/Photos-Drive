@@ -3,6 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { Result } from '../../shared/results/results';
+import { toResult } from '../../shared/results/rxjs/toResult';
 
 export interface TokenResponse {
   accessToken: string;
@@ -10,9 +12,18 @@ export interface TokenResponse {
   mapboxApiToken: string;
 }
 
+export interface GetGoogleLoginUrlResponse {
+  url: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WebApiService {
   private readonly httpClient = inject(HttpClient);
+
+  getGoogleLoginUrl(): Observable<Result<GetGoogleLoginUrlResponse>> {
+    const url = `${environment.webApiEndpoint}/auth/v1/google/login?select_account=true`;
+    return this.httpClient.get<GetGoogleLoginUrlResponse>(url).pipe(toResult());
+  }
 
   fetchAccessToken(code: string, state: string): Observable<TokenResponse> {
     const url = `${environment.webApiEndpoint}/auth/v1/google/token`;

@@ -6,7 +6,12 @@ import {
 import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../../environments/environment';
-import { TokenResponse, WebApiService } from '../webapi.service';
+import { toSuccess } from '../../../shared/results/results';
+import {
+  GetGoogleLoginUrlResponse,
+  TokenResponse,
+  WebApiService,
+} from '../webapi.service';
 
 describe('WebApiService', () => {
   let service: WebApiService;
@@ -30,52 +35,70 @@ describe('WebApiService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  describe('getGoogleLoginUrl', () => {
+    it('should get google login url', () => {
+      const mockResponse: GetGoogleLoginUrlResponse = {
+        url: 'mockGoogleLoginUrl',
+      };
+
+      service.getGoogleLoginUrl().subscribe((response) => {
+        expect(response).toEqual(toSuccess(mockResponse));
+      });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/auth/v1/google/login?select_account=true`,
+      );
+
+      expect(req.request.method).toBe('GET');
+
+      req.flush(mockResponse);
+    });
   });
 
-  it('should fetch access token', () => {
-    const mockCode = 'test-auth-code';
-    const mockState = 'test-state';
-    const mockResponse: TokenResponse = {
-      accessToken: 'mockAccessToken',
-      userProfileUrl: 'mockUserProfileUrl',
-      mapboxApiToken: 'mockMapboxApiToken',
-    };
+  describe('fetchAccessToken', () => {
+    it('should fetch access token', () => {
+      const mockCode = 'test-auth-code';
+      const mockState = 'test-state';
+      const mockResponse: TokenResponse = {
+        accessToken: 'mockAccessToken',
+        userProfileUrl: 'mockUserProfileUrl',
+        mapboxApiToken: 'mockMapboxApiToken',
+      };
 
-    service.fetchAccessToken(mockCode, mockState).subscribe((response) => {
-      expect(response).toEqual(mockResponse);
+      service.fetchAccessToken(mockCode, mockState).subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/auth/v1/google/token`,
+      );
+
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ code: mockCode, state: mockState });
+
+      req.flush(mockResponse);
     });
 
-    const req = httpMock.expectOne(
-      `${environment.webApiEndpoint}/auth/v1/google/token`,
-    );
+    it('should handle error response', () => {
+      const mockCode = 'test-auth-code';
+      const mockState = 'test-state';
 
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ code: mockCode, state: mockState });
+      service.fetchAccessToken(mockCode, mockState).subscribe({
+        next: () => fail('expected an error, not token'),
+        error: (error) => {
+          expect(error.status).toBe(500);
+          expect(error.error).toContain('Server error');
+        },
+      });
 
-    req.flush(mockResponse);
-  });
+      const req = httpMock.expectOne(
+        `${environment.webApiEndpoint}/auth/v1/google/token`,
+      );
 
-  it('should handle error response', () => {
-    const mockCode = 'test-auth-code';
-    const mockState = 'test-state';
-
-    service.fetchAccessToken(mockCode, mockState).subscribe({
-      next: () => fail('expected an error, not token'),
-      error: (error) => {
-        expect(error.status).toBe(500);
-        expect(error.error).toContain('Server error');
-      },
-    });
-
-    const req = httpMock.expectOne(
-      `${environment.webApiEndpoint}/auth/v1/google/token`,
-    );
-
-    req.flush('Server error', {
-      status: 500,
-      statusText: 'Internal Server Error',
+      req.flush('Server error', {
+        status: 500,
+        statusText: 'Internal Server Error',
+      });
     });
   });
 });

@@ -1,8 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, inject, signal } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 
-import { environment } from '../../environments/environment';
 import { WINDOW } from '../app.tokens';
+import { WebApiService } from '../auth/services/webapi.service';
+import { hasSucceed } from '../shared/results/results';
 import { ThemeToggleButtonComponent } from '../themes/components/theme-toggle-button/theme-toggle-button.component';
 
 @Component({
@@ -10,8 +18,10 @@ import { ThemeToggleButtonComponent } from '../themes/components/theme-toggle-bu
   imports: [CommonModule, ThemeToggleButtonComponent],
   templateUrl: './home-page.component.html',
 })
-export class HomePageComponent {
+export class HomePageComponent implements OnDestroy {
+  private readonly webApiService = inject(WebApiService);
   private readonly window: Window = inject(WINDOW);
+  private readonly subscriptions = new Subscription();
 
   readonly isScrolled = signal(false);
 
@@ -21,6 +31,16 @@ export class HomePageComponent {
   }
 
   handleLoginClick() {
-    this.window.location.href = `${environment.loginUrl}?select_account=true`;
+    this.subscriptions.add(
+      this.webApiService.getGoogleLoginUrl().subscribe((res) => {
+        if (hasSucceed(res)) {
+          this.window.location.href = res.data!.url;
+        }
+      }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }
