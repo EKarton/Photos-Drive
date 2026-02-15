@@ -1,4 +1,3 @@
-import { createHash, randomBytes } from 'crypto';
 import { Request, Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { getAppConfig } from '../../app_config';
@@ -21,31 +20,12 @@ export default async function () {
       keyGenerator: rateLimitKey
     }),
     (req: Request, res: Response) => {
-      const state = randomBytes(32).toString('hex');
-      const codeVerifier = randomBytes(32).toString('hex');
-      const codeChallenge = createHash('sha256')
-        .update(codeVerifier)
-        .digest('base64url');
-
-      const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
-        maxAge: 15 * 60 * 1000 // 15 minutes
-      };
-
-      res.cookie('oauth_state', state, cookieOptions);
-      res.cookie('oauth_code_verifier', codeVerifier, cookieOptions);
-
       const url = new URL(GOOGLE_LOGIN_PAGE_URL);
       const params = new URLSearchParams({
         client_id: config.googleLoginClientId,
         redirect_uri: config.googleLoginCallbackUri,
         response_type: 'code',
-        scope: 'profile',
-        state: state,
-        code_challenge: codeChallenge,
-        code_challenge_method: 'S256'
+        scope: 'profile'
       });
 
       if (req.query['select_account'] === 'true') {

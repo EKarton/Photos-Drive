@@ -36,14 +36,13 @@ describe('WebApiService', () => {
 
   it('should fetch access token', () => {
     const mockCode = 'test-auth-code';
-    const mockState = 'test-state';
     const mockResponse: TokenResponse = {
       accessToken: 'mockAccessToken',
       userProfileUrl: 'mockUserProfileUrl',
       mapboxApiToken: 'mockMapboxApiToken',
     };
 
-    service.fetchAccessToken(mockCode, mockState).subscribe((response) => {
+    service.fetchAccessToken(mockCode).subscribe((response) => {
       expect(response).toEqual(mockResponse);
     });
 
@@ -52,16 +51,15 @@ describe('WebApiService', () => {
     );
 
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ code: mockCode, state: mockState });
+    expect(req.request.body).toEqual({ code: mockCode });
 
     req.flush(mockResponse);
   });
 
   it('should handle error response', () => {
     const mockCode = 'test-auth-code';
-    const mockState = 'test-state';
 
-    service.fetchAccessToken(mockCode, mockState).subscribe({
+    service.fetchAccessToken(mockCode).subscribe({
       next: () => fail('expected an error, not token'),
       error: (error) => {
         expect(error.status).toBe(500);

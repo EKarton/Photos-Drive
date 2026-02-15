@@ -14,12 +14,10 @@ export interface TokenResponse {
 export class WebApiService {
   private readonly httpClient = inject(HttpClient);
 
-  fetchAccessToken(code: string, state: string): Observable<TokenResponse> {
+  fetchAccessToken(code: string): Observable<TokenResponse> {
     const url = `${environment.webApiEndpoint}/auth/v1/google/token`;
-    return this.httpClient.post<TokenResponse>(
-      url,
-      { code, state },
-      { withCredentials: true },
-    );
+    return this.httpClient.post<TokenResponse>(url, {
+      code,
+    });
   }
 }
