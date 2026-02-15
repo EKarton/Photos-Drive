@@ -54,10 +54,7 @@ export default async function () {
       }
 
       url.search = params.toString();
-
-      res.json({
-        url: url.toString()
-      });
+      res.redirect(url.toString());
     }
   );
 

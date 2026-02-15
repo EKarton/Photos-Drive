@@ -35,8 +35,9 @@ describe('GET auth/v1/google', () => {
 
     const res = await request(app).get('/auth/v1/google');
 
-    expect(res.statusCode).toEqual(200);
-    const url = new URL(res.body.url);
+    expect(res.statusCode).toEqual(302);
+    const location = res.headers['location'];
+    const url = new URL(location);
 
     expect(url.origin).toEqual('https://accounts.google.com');
     expect(url.pathname).toEqual('/o/oauth2/v2/auth');
@@ -66,8 +67,8 @@ describe('GET auth/v1/google', () => {
 
     const res = await request(app).get('/auth/v1/google?select_account=true');
 
-    expect(res.statusCode).toEqual(200);
-    const url = new URL(res.body.url);
+    expect(res.statusCode).toEqual(302);
+    const url = new URL(res.headers['location']);
     expect(url.searchParams.get('prompt')).toEqual('select_account');
   });
 });
