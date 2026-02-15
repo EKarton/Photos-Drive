@@ -5,13 +5,13 @@ import authRouter from '../../../src/routes/authentication';
 import { fakeAuthEnv } from '../utils/auth';
 import { setupTestEnv } from '../utils/env';
 
-describe('GET auth/v1/google', () => {
+describe('GET auth/v1/google/login', () => {
   const fakeGoogleClientId = '123';
   const fakeGoogleClientSecret = '456';
   const fakeGoogleCallbackUri = 'http://localhost:3000/photos';
   const fakeMapboxApiToken = 'fakeMapboxApiToken1';
 
-  let cleanupTestEnvFn = () => {};
+  let cleanupTestEnvFn = () => { };
 
   beforeEach(() => {
     jest.resetModules();
@@ -33,7 +33,7 @@ describe('GET auth/v1/google', () => {
     app.use(cookieParser());
     app.use(await authRouter());
 
-    const res = await request(app).get('/auth/v1/google');
+    const res = await request(app).get('/auth/v1/google/login');
 
     expect(res.statusCode).toEqual(200);
     const url = new URL(res.body.url);
@@ -64,7 +64,7 @@ describe('GET auth/v1/google', () => {
     app.use(cookieParser());
     app.use(await authRouter());
 
-    const res = await request(app).get('/auth/v1/google?select_account=true');
+    const res = await request(app).get('/auth/v1/google/login?select_account=true');
 
     expect(res.statusCode).toEqual(200);
     const url = new URL(res.body.url);
