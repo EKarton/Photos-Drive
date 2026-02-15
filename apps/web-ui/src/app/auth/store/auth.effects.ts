@@ -11,11 +11,11 @@ export class AuthEffects {
   private readonly actions$ = inject(Actions);
   private readonly webApiService = inject(WebApiService);
 
-  loadAuth$ = createEffect(() => {
+  loadAlbumDetails$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(authActions.loadAuth),
-      mergeMap(({ code, state }) => {
-        return this.webApiService.fetchAccessToken(code, state).pipe(
+      mergeMap(({ code }) => {
+        return this.webApiService.fetchAccessToken(code).pipe(
           toResult<TokenResponse>(),
           map((result) => authActions.loadAuthResult({ result })),
         );

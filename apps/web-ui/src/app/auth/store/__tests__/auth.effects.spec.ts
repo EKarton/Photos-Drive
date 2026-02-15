@@ -33,7 +33,6 @@ describe('AuthEffects', () => {
 
   it('should dispatch loadAuthResult action on successful token fetch', (done) => {
     const code = 'test-auth-code';
-    const state = 'test-state';
     const tokenResponse: TokenResponse = {
       accessToken: 'mockAccessToken',
       userProfileUrl: 'http://profile.com/1',
@@ -41,10 +40,10 @@ describe('AuthEffects', () => {
     };
     const result: Result<TokenResponse> = toSuccess(tokenResponse);
 
-    actions$ = of(authActions.loadAuth({ code, state }));
+    actions$ = of(authActions.loadAuth({ code }));
     webApiService.fetchAccessToken.and.returnValue(of(tokenResponse));
 
-    effects.loadAuth$.subscribe((action) => {
+    effects.loadAlbumDetails$.subscribe((action) => {
       expect(action).toEqual(authActions.loadAuthResult({ result }));
       done();
     });
@@ -53,12 +52,11 @@ describe('AuthEffects', () => {
   it('should handle errors gracefully', (done) => {
     const error = new Error('Some error');
     const code = 'test-auth-code';
-    const state = 'test-state';
 
-    actions$ = of(authActions.loadAuth({ code, state }));
+    actions$ = of(authActions.loadAuth({ code }));
     webApiService.fetchAccessToken.and.returnValue(throwError(() => error));
 
-    effects.loadAuth$.subscribe((action) => {
+    effects.loadAlbumDetails$.subscribe((action) => {
       expect(action).toEqual(
         authActions.loadAuthResult({ result: toFailure(error) }),
       );
