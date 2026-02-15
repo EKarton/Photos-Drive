@@ -1,11 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { WINDOW } from '../../app.tokens';
-import { WebApiService } from '../../auth/services/webapi.service';
-import { toSuccess } from '../../shared/results/results';
 import { themeState } from '../../themes/store';
 import { HomePageComponent } from '../home-page.component';
 
@@ -13,17 +10,9 @@ describe('HomePageComponent', () => {
   let component: HomePageComponent;
   let fixture: ComponentFixture<HomePageComponent>;
   let mockWindow: Window;
-  let mockWebApiService: jasmine.SpyObj<WebApiService>;
 
   beforeEach(async () => {
     mockWindow = { location: { href: '' }, pageYOffset: 0 } as Window;
-    mockWebApiService = jasmine.createSpyObj('WebApiService', [
-      'getGoogleLoginUrl',
-    ]);
-
-    mockWebApiService.getGoogleLoginUrl.and.returnValue(
-      of(toSuccess({ url: `${environment.loginUrl}?select_account=true` })),
-    );
 
     await TestBed.configureTestingModule({
       imports: [HomePageComponent],
@@ -31,10 +20,6 @@ describe('HomePageComponent', () => {
         {
           provide: WINDOW,
           useValue: mockWindow,
-        },
-        {
-          provide: WebApiService,
-          useValue: mockWebApiService,
         },
         provideMockStore({
           initialState: {
