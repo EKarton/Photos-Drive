@@ -30,7 +30,7 @@ export default async function () {
       const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none' as const,
+        sameSite: 'lax' as const,
         maxAge: 15 * 60 * 1000 // 15 minutes
       };
 
