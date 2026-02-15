@@ -12,7 +12,7 @@ export default async function () {
   const router: Router = Router();
 
   router.get(
-    '/auth/v1/google/login',
+    '/auth/v1/google',
     rateLimit({
       windowMs: 15 * 60 * 1000,
       max: 5,
