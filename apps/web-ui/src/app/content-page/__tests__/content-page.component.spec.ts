@@ -68,6 +68,7 @@ const PAGE_1: ListMediaItemsResponse = {
       width: 200,
       height: 300,
       dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+      mimeType: 'image/png',
     },
     {
       id: 'photos2',
@@ -77,6 +78,7 @@ const PAGE_1: ListMediaItemsResponse = {
       width: 200,
       height: 300,
       dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+      mimeType: 'image/png',
     },
   ],
 };

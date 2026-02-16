@@ -42,9 +42,9 @@ export function domainToGpsLocation(loc?: {
 }): GpsLocationModel | undefined {
   return loc
     ? {
-      latitude: loc.latitude,
-      longitude: loc.longitude,
-    }
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+      }
     : undefined;
 }
 
