@@ -47,4 +47,4 @@ describe('MapboxFactory', () => {
   selector: 'app-empty',
   template: '',
 })
-export class EmptyComponent { }
+export class EmptyComponent {}
