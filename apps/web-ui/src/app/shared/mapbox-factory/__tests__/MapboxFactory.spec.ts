@@ -12,6 +12,8 @@ describe('MapboxFactory', () => {
   });
 
   it('should return an instance of mapboxgl.Map when called buildMap()', () => {
+    const mapMock = Object.create(mapboxgl.Map.prototype);
+    spyOn(mapboxgl, 'Map').and.returnValue(mapMock);
     const fixture = TestBed.createComponent(EmptyComponent);
 
     const factory = new MapboxFactory();
@@ -21,7 +23,12 @@ describe('MapboxFactory', () => {
       testMode: true,
     });
 
-    expect(map).toBeInstanceOf(mapboxgl.Map);
+    expect(mapboxgl.Map).toHaveBeenCalledWith({
+      container: fixture.nativeElement,
+      accessToken: '1234',
+      testMode: true,
+    });
+    expect(map).toBe(mapMock);
   });
 
   it('should return an instance of MapboxMarker when called buildMarker()', () => {
@@ -40,4 +47,4 @@ describe('MapboxFactory', () => {
   selector: 'app-empty',
   template: '',
 })
-export class EmptyComponent {}
+export class EmptyComponent { }
