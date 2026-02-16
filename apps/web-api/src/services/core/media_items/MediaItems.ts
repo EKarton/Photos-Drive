@@ -58,6 +58,9 @@ export type MediaItem = {
 
   /** The date and time that the media item was taken. */
   date_taken: Date;
+
+  /** The mime type of the media item. */
+  mime_type: string;
 };
 
 /** Represents a GPS location. */

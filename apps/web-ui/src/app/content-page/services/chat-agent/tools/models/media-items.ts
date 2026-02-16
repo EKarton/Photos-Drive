@@ -32,6 +32,7 @@ export const MediaItemModelSchema = z.object({
     .describe(
       "Timestamp when the image/video was taken. An example of this is '2025-09-14T16:35:00.000Z'",
     ),
+  mime_type: z.string().describe('Mime type of the media item'),
 });
 
 // Converts the internal location object
@@ -59,6 +60,7 @@ export function domainToToolMediaItem(item: MediaItem): MediaItemModel {
       item.dateTaken instanceof Date
         ? item.dateTaken.toISOString()
         : new Date(item.dateTaken).toISOString(),
+    mime_type: item.mimeType,
   };
 }
 

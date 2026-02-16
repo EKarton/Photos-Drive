@@ -26,7 +26,8 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
     },
     width: 1000,
     height: 2000,
-    date_taken: new Date('2025-06-07T17:00:00.000Z')
+    date_taken: new Date('2025-06-07T17:00:00.000Z'),
+    mime_type: 'image/png'
   },
   {
     id: {
@@ -46,7 +47,8 @@ const MOCK_MEDIA_ITEMS: MediaItem[] = [
     },
     width: 100,
     height: 200,
-    date_taken: new Date('2024-06-07T17:00:00.000Z')
+    date_taken: new Date('2024-06-07T17:00:00.000Z'),
+    mime_type: 'image/png'
   }
 ];
 
@@ -91,7 +93,8 @@ describe('POST /api/v1/media-items/bulk-get', () => {
           albumId: 'albumClient1:albumObject1',
           width: 1000,
           height: 2000,
-          dateTaken: '2025-06-07T17:00:00.000Z'
+          dateTaken: '2025-06-07T17:00:00.000Z',
+          mimeType: 'image/png'
         },
         {
           id: 'albumClient1:mediaItem2',
@@ -101,7 +104,8 @@ describe('POST /api/v1/media-items/bulk-get', () => {
           albumId: 'albumClient1:albumObject1',
           width: 100,
           height: 200,
-          dateTaken: '2024-06-07T17:00:00.000Z'
+          dateTaken: '2024-06-07T17:00:00.000Z',
+          mimeType: 'image/png'
         }
       ]
     });

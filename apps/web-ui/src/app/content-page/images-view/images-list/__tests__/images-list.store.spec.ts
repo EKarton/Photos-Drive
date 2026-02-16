@@ -28,6 +28,7 @@ describe('ImagesListStore', () => {
       width: 200,
       height: 300,
       dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+      mimeType: 'image/png',
     },
     {
       id: '2',
@@ -37,6 +38,7 @@ describe('ImagesListStore', () => {
       width: 200,
       height: 300,
       dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+      mimeType: 'image/png',
     },
   ];
   const dummyResponse: ListMediaItemsResponse = {
@@ -133,6 +135,7 @@ describe('ImagesListStore', () => {
           width: 200,
           height: 300,
           dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+          mimeType: 'image/png',
         },
       ],
       nextPageToken: undefined,

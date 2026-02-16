@@ -26,6 +26,7 @@ const MEDIA_ITEM_IMAGE: MediaItem = {
   width: 200,
   height: 300,
   dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+  mimeType: 'image/png',
 };
 
 const GPHOTOS_MEDIA_ITEM_IMAGE: GPhotosMediaItem = {
@@ -50,6 +51,7 @@ const MEDIA_ITEM_VIDEO: MediaItem = {
   width: 200,
   height: 300,
   dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+  mimeType: 'video/mp4',
 };
 
 const GPHOTOS_MEDIA_ITEM_VIDEO: GPhotosMediaItem = {
@@ -70,6 +72,7 @@ const MEDIA_ITEM_AUDIO: MediaItem = {
   width: 200,
   height: 300,
   dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+  mimeType: 'audio/mp3',
 };
 
 const GPHOTOS_MEDIA_ITEM_AUDIO: GPhotosMediaItem = {

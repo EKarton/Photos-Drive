@@ -45,6 +45,7 @@ const MEDIA_ITEM_1: MediaItem = {
     longitude: 80,
   },
   dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+  mimeType: 'image/png',
 };
 
 const MEDIA_ITEM_2: MediaItem = {
@@ -59,11 +60,12 @@ const MEDIA_ITEM_2: MediaItem = {
     longitude: 80.1,
   },
   dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+  mimeType: 'image/png',
 };
 
 const G_MEDIA_ITEM: GPhotosMediaItem = {
   baseUrl: 'http://www.google.com/photos/1',
-  mimeType: 'image/jpeg',
+  mimeType: 'image/png',
   mediaMetadata: {
     creationTime: '',
     width: '4032',

@@ -35,6 +35,7 @@ describe('MediaItem model conversions', () => {
         location: { latitude: 12.34, longitude: 56.78 },
         dateTaken: new Date('2024-01-01T00:00:00.000Z'),
         hashCode: 'abc', // extra fields should be ignored
+        mimeType: 'image/jpeg',
       };
 
       const result = domainToToolMediaItem(mediaItem);
@@ -46,6 +47,7 @@ describe('MediaItem model conversions', () => {
         height: 1080,
         location: { latitude: 12.34, longitude: 56.78 },
         date_taken: '2024-01-01T00:00:00.000Z',
+        mime_type: 'image/jpeg',
       });
 
       expect(() => MediaItemModelSchema.parse(result)).not.toThrow();
@@ -61,6 +63,7 @@ describe('MediaItem model conversions', () => {
         location: undefined,
         dateTaken: new Date('2024-02-01T12:34:56Z'),
         hashCode: 'def',
+        mimeType: 'image/jpeg',
       };
 
       const result = domainToToolMediaItem(mediaItem);
@@ -80,6 +83,7 @@ describe('MediaItem model conversions', () => {
         location: undefined,
         dateTaken: '2024-03-01T08:00:00Z' as unknown as Date,
         hashCode: 'ghi',
+        mimeType: 'image/jpeg',
       };
 
       const result = domainToToolMediaItem(mediaItem);
@@ -107,6 +111,7 @@ describe('MediaItem model conversions', () => {
         height: 200,
         location: { latitude: 1, longitude: 2 },
         date_taken: new Date().toISOString(),
+        mime_type: 'image/jpeg',
       };
       expect(() => MediaItemModelSchema.parse(validItem)).not.toThrow();
     });

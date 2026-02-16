@@ -55,6 +55,7 @@ describe('SearchMediaItemsForTextTool', () => {
         height: 600,
         dateTaken: new Date('2023-01-01T10:00:00Z'),
         hashCode: '123',
+        mimeType: 'image/jpeg',
       },
     ];
 
@@ -94,6 +95,7 @@ describe('SearchMediaItemsForTextTool', () => {
       width: 800,
       height: 600,
       date_taken: '2023-01-01T10:00:00.000Z',
+      mime_type: 'image/jpeg',
     });
   });
 
@@ -125,6 +127,7 @@ describe('SearchMediaItemsForTextTool', () => {
       width: 800,
       height: 600,
       date_taken: '2023-01-01T10:00:00.000Z',
+      mime_type: 'image/jpeg',
     });
   });
 

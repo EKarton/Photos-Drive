@@ -44,6 +44,7 @@ describe('FindPhotosTool', () => {
         height: 1080,
         dateTaken: new Date('2023-01-01T00:00:00Z'),
         hashCode: '1',
+        mimeType: 'image/jpeg',
       },
     ];
 
@@ -80,6 +81,7 @@ describe('FindPhotosTool', () => {
       width: 1920,
       height: 1080,
       date_taken: '2023-01-01T00:00:00.000Z',
+      mime_type: 'image/jpeg',
     });
   });
 

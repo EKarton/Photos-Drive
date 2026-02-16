@@ -298,6 +298,7 @@ export class WebApiService {
       width: rawDoc.width,
       height: rawDoc.height,
       dateTaken: new Date(rawDoc.dateTaken),
+      mimeType: rawDoc.mimeType,
     };
   }
 }
