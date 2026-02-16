@@ -182,6 +182,7 @@ describe('WebApiService', () => {
                 width: 200,
                 height: 300,
                 dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+                mimeType: 'image/jpeg',
               },
             ],
             nextPageToken: 'next123',
@@ -231,7 +232,7 @@ describe('WebApiService', () => {
       const req = httpMock.expectOne((req) => {
         return (
           req.url ===
-            `${environment.webApiEndpoint}/api/v1/media-items/search` &&
+          `${environment.webApiEndpoint}/api/v1/media-items/search` &&
           req.params.get('albumId') === 'album123' &&
           req.params.get('pageSize') === '10' &&
           req.params.get('pageToken') === 'page123' &&
@@ -286,6 +287,7 @@ describe('WebApiService', () => {
                 width: 100,
                 height: 200,
                 dateTaken: new Date('2024-06-01T10:00:00.000Z'),
+                mimeType: 'image/jpeg',
               },
             ],
           }),
@@ -325,7 +327,7 @@ describe('WebApiService', () => {
       const req = httpMock.expectOne((req) => {
         return (
           req.url ===
-            `${environment.webApiEndpoint}/api/v1/media-items/sample` &&
+          `${environment.webApiEndpoint}/api/v1/media-items/sample` &&
           req.params.get('albumId') === 'album123' &&
           req.params.get('earliest') === earliestDate.toISOString() &&
           req.params.get('latest') === latestDate.toISOString() &&
@@ -527,6 +529,7 @@ describe('WebApiService', () => {
                   width: 1920,
                   height: 1080,
                   dateTaken: new Date('2024-05-27T13:17:46.000Z'),
+                  mimeType: 'image/jpeg',
                 },
               ],
             }),
@@ -640,6 +643,7 @@ describe('WebApiService', () => {
                   width: 100,
                   height: 200,
                   dateTaken: new Date('2024-01-01T00:00:00.000Z'),
+                  mimeType: 'image/jpeg',
                 },
                 {
                   id: '2',
@@ -650,6 +654,7 @@ describe('WebApiService', () => {
                   width: 300,
                   height: 400,
                   dateTaken: new Date('2024-02-01T00:00:00.000Z'),
+                  mimeType: 'image/jpeg',
                 },
               ],
             }),

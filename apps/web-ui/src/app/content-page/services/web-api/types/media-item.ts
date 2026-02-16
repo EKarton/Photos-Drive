@@ -7,6 +7,7 @@ export interface RawMediaItem {
   width: number;
   height: number;
   dateTaken: string;
+  mimeType: string;
 }
 
 export type RawMediaItemDetailsApiResponse = RawMediaItem;
@@ -20,6 +21,7 @@ export interface MediaItem {
   width: number;
   height: number;
   dateTaken: Date;
+  mimeType: string;
 }
 
 export type MediaItemDetailsApiResponse = MediaItem;

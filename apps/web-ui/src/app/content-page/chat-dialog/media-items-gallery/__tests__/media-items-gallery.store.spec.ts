@@ -27,6 +27,7 @@ const mediaItem1: MediaItem = {
   width: 100,
   height: 200,
   dateTaken: new Date('2020-01-01'),
+  mimeType: 'image/jpeg',
 };
 
 const mediaItem2: MediaItem = {
@@ -38,6 +39,7 @@ const mediaItem2: MediaItem = {
   width: 300,
   height: 400,
   dateTaken: new Date('2020-02-02'),
+  mimeType: 'image/jpeg',
 };
 
 describe('MediaItemsGalleryStore', () => {

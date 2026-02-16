@@ -36,6 +36,7 @@ describe('MediaItemsGalleryComponent (with real store, mock API)', () => {
     height: 300,
     dateTaken: new Date(),
     location: { latitude: 0, longitude: 0 },
+    mimeType: 'image/jpeg',
   });
 
   beforeEach(async () => {
