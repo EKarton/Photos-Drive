@@ -1,6 +1,5 @@
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { map, Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -11,6 +10,7 @@ import {
   BulkGetMediaItemsByIdsRequest,
   BulkGetMediaItemsByIdsResponse,
 } from './types/bulk-get-media-items-by-ids';
+import { GetMediaItemImageResponse } from './types/get-media-item-image';
 import {
   GetGPhotosMediaItemDetailsRequest,
   GetGPhotosMediaItemDetailsResponse,
@@ -40,7 +40,6 @@ import {
 @Injectable({ providedIn: 'root' })
 export class WebApiService {
   private readonly httpClient = inject(HttpClient);
-  private readonly sanitizer = inject(DomSanitizer);
 
   /** Fetches the details of an album. */
   getAlbum(
@@ -72,19 +71,13 @@ export class WebApiService {
       .pipe(map(this.convertRawMediaItemToMediaItem), toResult());
   }
 
-  /**
-   * Fetches the image / video of a media item.
-   *
-   * @returns A safe URL that can be used in an img tag.
-   *          The caller is responsible for revoking the URL when it's no longer needed.
-   *          See https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-   */
+  /** Fetches the image / video of a media item. */
   getMediaItemImage(
     accessToken: string,
     mediaItemId: string,
     width?: number,
     height?: number,
-  ): Observable<Result<SafeUrl>> {
+  ): Observable<Result<GetMediaItemImageResponse>> {
     const url = `${environment.webApiEndpoint}/api/v1/media-items/${mediaItemId}/image`;
     let params = new HttpParams();
     if (width) {
@@ -95,22 +88,13 @@ export class WebApiService {
     }
 
     return this.httpClient
-      .get<Blob>(url, {
+      .get<GetMediaItemImageResponse>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
         params,
-        observe: 'response',
-        responseType: 'blob' as 'json',
       })
-      .pipe(
-        map((resp: HttpResponse<Blob>) => {
-          const blob = resp.body!;
-          const objectUrl = URL.createObjectURL(blob);
-          return this.sanitizer.bypassSecurityTrustUrl(objectUrl);
-        }),
-        toResult(),
-      );
+      .pipe(toResult());
   }
 
   /** Fetches the details of a gphotos media item. */

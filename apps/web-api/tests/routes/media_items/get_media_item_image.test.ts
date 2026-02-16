@@ -73,7 +73,7 @@ describe('GET /api/v1/media-items/:id/image', () => {
     cleanupTestEnvFn();
   });
 
-  it('should return 302 response when media item is successfully fetched', async () => {
+  it('should return 200 response when media item is successfully fetched', async () => {
     const repo = mock<MediaItemsStore>();
     repo.getMediaItemById.mockResolvedValue(mockMediaItem);
     const client = mock<GPhotosClient>();
@@ -87,11 +87,11 @@ describe('GET /api/v1/media-items/:id/image', () => {
       .get('/api/v1/media-items/mediaItemClientId1:mediaItem1/image')
       .set('Authorization', `Bearer ${token}`);
 
-    expect(res.statusCode).toEqual(302);
-    expect(res.headers.location).toEqual('https://example.com/mediaItem1');
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({ url: 'https://example.com/mediaItem1' });
   });
 
-  it('should return 302 response when media item is successfully fetched with width and height params', async () => {
+  it('should return 200 response when media item is successfully fetched with width and height params', async () => {
     const repo = mock<MediaItemsStore>();
     repo.getMediaItemById.mockResolvedValue(mockMediaItem);
     const client = mock<GPhotosClient>();
@@ -107,10 +107,10 @@ describe('GET /api/v1/media-items/:id/image', () => {
       )
       .set('Authorization', `Bearer ${token}`);
 
-    expect(res.statusCode).toEqual(302);
-    expect(res.headers.location).toEqual(
-      'https://example.com/mediaItem1=w100-h200'
-    );
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      url: 'https://example.com/mediaItem1=w100-h200'
+    });
   });
 
   it('should return 400 when media item id is not valid', async () => {

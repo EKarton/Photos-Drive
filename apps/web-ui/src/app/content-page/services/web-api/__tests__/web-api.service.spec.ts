@@ -114,19 +114,16 @@ describe('WebApiService', () => {
   });
 
   describe('getMediaItemImage()', () => {
-    it('should fetch media item image and return a safe URL', () => {
+    it('should fetch media item image', () => {
       const mediaItemId = 'media123';
-      const mockBlob = new Blob(['image-data'], { type: 'image/jpeg' });
-      const mockObjectUrl = 'blob:http://localhost:4200/unit-test';
-      const spy = spyOn(URL, 'createObjectURL').and.returnValue(mockObjectUrl);
+      const mockResponse = {
+        url: 'blob:http://localhost:4200/unit-test',
+      };
 
       service
         .getMediaItemImage('authToken123', mediaItemId)
         .subscribe((response) => {
-          expect(response.isLoading).toBeFalse();
-          expect(response.error).toBeUndefined();
-          // We can't easily check the safe URL content but we can check if it's defined
-          expect(response.data).toBeDefined();
+          expect(response).toEqual(toSuccess(mockResponse));
         });
 
       const req = httpMock.expectOne((req) =>
@@ -136,19 +133,20 @@ describe('WebApiService', () => {
       expect(req.request.params.get('width')).toBeNull();
       expect(req.request.params.get('height')).toBeNull();
 
-      req.flush(mockBlob);
-      spy.and.callThrough();
+      req.flush(mockResponse);
     });
 
     it('should include width and height params if provided', () => {
       const mediaItemId = 'media123';
-      const mockBlob = new Blob(['image-data'], { type: 'image/jpeg' });
-      const mockObjectUrl = 'blob:http://localhost:4200/unit-test';
-      spyOn(URL, 'createObjectURL').and.returnValue(mockObjectUrl);
+      const mockResponse = {
+        url: 'blob:http://localhost:4200/unit-test',
+      };
 
       service
         .getMediaItemImage('authToken123', mediaItemId, 100, 200)
-        .subscribe();
+        .subscribe((response) => {
+          expect(response).toEqual(toSuccess(mockResponse));
+        });
 
       const req = httpMock.expectOne((req) =>
         req.url.includes(`/api/v1/media-items/${mediaItemId}/image`),
@@ -156,7 +154,7 @@ describe('WebApiService', () => {
       expect(req.request.params.get('width')).toBe('100');
       expect(req.request.params.get('height')).toBe('200');
 
-      req.flush(mockBlob);
+      req.flush(mockResponse);
     });
   });
 
