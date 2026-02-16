@@ -1,22 +1,21 @@
 import { inject, Injectable } from '@angular/core';
+import { SafeUrl } from '@angular/platform-browser';
 import { ComponentStore } from '@ngrx/component-store';
 import { Store } from '@ngrx/store';
 import { switchMap, tap } from 'rxjs/operators';
 
 import { authState } from '../../../../../auth/store';
 import { Result, toPending } from '../../../../../shared/results/results';
-import { switchMapResultToResultRxJs } from '../../../../../shared/results/rxjs/switchMapResultToResultRxJs';
-import { GPhotosMediaItem } from '../../../../services/web-api/types/gphotos-media-item';
 import { WebApiService } from '../../../../services/web-api/web-api.service';
 
 /** State definition for {@code ImageMapMarkerStore}. */
 export interface ImageMapMarkerState {
-  gPhotosMediaItem: Result<GPhotosMediaItem>;
+  url: Result<SafeUrl>;
 }
 
 /** Initial state for {@code ImageMarkerStore}. */
 export const INITIAL_STATE: ImageMapMarkerState = {
-  gPhotosMediaItem: toPending(),
+  url: toPending(),
 };
 
 /** Component store for {@code ImageComponent}. */
@@ -29,11 +28,9 @@ export class ImageMapMarkerStore extends ComponentStore<ImageMapMarkerState> {
     super(INITIAL_STATE);
   }
 
-  readonly gPhotosMediaItem = this.selectSignal(
-    (state) => state.gPhotosMediaItem,
-  );
+  readonly url = this.selectSignal((state) => state.url);
 
-  readonly loadGPhotosMediaItem = this.effect<string>((mediaItemId$) =>
+  readonly loadUrl = this.effect<string>((mediaItemId$) =>
     mediaItemId$.pipe(
       switchMap((mediaItemId) => {
         this.patchState({
@@ -43,18 +40,11 @@ export class ImageMapMarkerStore extends ComponentStore<ImageMapMarkerState> {
         return this.store.select(authState.selectAuthToken).pipe(
           switchMap((accessToken) => {
             return this.webApiService
-              .getMediaItem(accessToken, mediaItemId)
-              .pipe(
-                switchMapResultToResultRxJs((mediaItem) => {
-                  return this.webApiService.getGPhotosMediaItem(accessToken, {
-                    gPhotosMediaItemId: mediaItem.gPhotosMediaItemId,
-                  });
-                }),
-              )
+              .getMediaItemImage(accessToken, mediaItemId)
               .pipe(
                 tap((response) => {
                   this.patchState({
-                    gPhotosMediaItem: response,
+                    url: response,
                   });
                 }),
               );
