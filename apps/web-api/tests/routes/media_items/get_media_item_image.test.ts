@@ -31,7 +31,8 @@ const mockMediaItem: MediaItem = {
   },
   width: 1000,
   height: 2000,
-  date_taken: new Date('2025-06-07T17:00:00.000Z')
+  date_taken: new Date('2025-06-07T17:00:00.000Z'),
+  mime_type: 'image/jpeg'
 };
 
 const gPhotosMediaItem = {

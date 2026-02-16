@@ -280,7 +280,8 @@ export class MongoDbMediaItemsStore implements MediaItemsStore {
       album_id: convertStringToAlbumId(doc['album_id']),
       width: doc['width'] || 0,
       height: doc['height'] || 0,
-      date_taken: doc['date_taken'] || new Date(1970, 1, 1)
+      date_taken: doc['date_taken'] || new Date(1970, 1, 1),
+      mime_type: doc['mime_type'] || 'none'
     };
 
     if (doc['location']) {

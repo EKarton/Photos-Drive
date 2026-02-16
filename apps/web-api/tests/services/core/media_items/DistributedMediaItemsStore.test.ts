@@ -91,7 +91,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`,
           width: 1000,
           height: 2000,
-          date_taken: new Date(2024, 4, 4)
+          date_taken: new Date(2024, 4, 4),
+          mime_type: 'image/jpeg'
         });
 
       const result = await mediaItemsRepo.getMediaItemById(mediaItemId);
@@ -111,7 +112,8 @@ describe('DistributedMediaItemsStore', () => {
         },
         width: 1000,
         height: 2000,
-        date_taken: new Date(2024, 4, 4)
+        date_taken: new Date(2024, 4, 4),
+        mime_type: 'image/jpeg'
       });
     });
 
@@ -127,7 +129,8 @@ describe('DistributedMediaItemsStore', () => {
           location: {
             coordinates: [40.7128, -74.006] // longitude, latitude
           },
-          album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`
+          album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`,
+          mime_type: 'image/jpeg'
         });
 
       const result = await mediaItemsRepo.getMediaItemById(mediaItemId);
@@ -147,7 +150,8 @@ describe('DistributedMediaItemsStore', () => {
         },
         width: 0,
         height: 0,
-        date_taken: new Date(1970, 1, 1)
+        date_taken: new Date(1970, 1, 1),
+        mime_type: 'image/jpeg'
       });
     });
 
@@ -183,7 +187,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: 'a1:a2',
           width: 100,
           height: 200,
-          date_taken: new Date('2024-01-01')
+          date_taken: new Date('2024-01-01'),
+          mime_type: 'image/jpeg'
         });
       id1 = {
         clientId: 'client1',
@@ -201,7 +206,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: 'a3:a4',
           width: 300,
           height: 400,
-          date_taken: new Date('2024-02-02')
+          date_taken: new Date('2024-02-02'),
+          mime_type: 'image/jpeg'
         });
       id2 = {
         clientId: 'client2',
@@ -219,7 +225,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: 'a5:a6',
           width: 500,
           height: 600,
-          date_taken: new Date('2024-03-03')
+          date_taken: new Date('2024-03-03'),
+          mime_type: 'image/jpeg'
         });
       id3 = {
         clientId: 'client1',
@@ -346,7 +353,8 @@ describe('DistributedMediaItemsStore', () => {
             coordinates: [40.0, -70.0]
           },
           width: 1000,
-          height: 2000
+          height: 2000,
+          mime_type: 'image/jpeg'
         });
       await mongoClient2
         .db('photos_drive')
@@ -359,7 +367,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 10,
           height: 20,
-          date_taken: new Date(2024, 4, 2)
+          date_taken: new Date(2024, 4, 2),
+          mime_type: 'image/jpeg'
         });
       await mongoClient1
         .db('photos_drive')
@@ -372,7 +381,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 1000,
           height: 2000,
-          date_taken: new Date(2024, 4, 3)
+          date_taken: new Date(2024, 4, 3),
+          mime_type: 'image/jpeg'
         });
       await mongoClient2
         .db('photos_drive')
@@ -385,7 +395,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 10,
           height: 20,
-          date_taken: new Date(2024, 4, 4)
+          date_taken: new Date(2024, 4, 4),
+          mime_type: 'image/jpeg'
         });
 
       // Photo 5 is in Album 2
@@ -400,7 +411,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId2.clientId}:${albumId2.objectId}`,
           width: 1,
           height: 2,
-          date_taken: new Date(2024, 4, 5)
+          date_taken: new Date(2024, 4, 5),
+          mime_type: 'image/jpeg'
         });
     });
 
@@ -424,7 +436,8 @@ describe('DistributedMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -434,7 +447,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId2,
@@ -444,7 +458,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_5',
             height: 2,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
-            width: 1
+            width: 1,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -454,7 +469,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -464,7 +480,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken:
@@ -492,7 +509,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_client_id: 'gphotos_client_5',
             gphotos_media_item_id: 'media_item_5',
             height: 2,
-            width: 1
+            width: 1,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439014'
@@ -533,7 +551,8 @@ describe('DistributedMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439010'
@@ -561,7 +580,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439012'
@@ -589,7 +609,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken:
@@ -618,7 +639,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken:
@@ -647,7 +669,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken:
@@ -690,7 +713,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -700,7 +724,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -710,7 +735,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -721,7 +747,8 @@ describe('DistributedMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken:
@@ -750,7 +777,8 @@ describe('DistributedMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -760,7 +788,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -770,7 +799,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -780,7 +810,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken:
@@ -808,7 +839,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -818,7 +850,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -828,7 +861,8 @@ describe('DistributedMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client2', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -839,7 +873,8 @@ describe('DistributedMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken:
@@ -865,7 +900,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 100,
           height: 100,
-          date_taken: new Date('2025-01-01')
+          date_taken: new Date('2025-01-01'),
+          mime_type: 'image/jpeg'
         });
       id1 = { clientId: 'client1', objectId: res1.insertedId.toString() };
 
@@ -879,7 +915,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId2.clientId}:${albumId2.objectId}`,
           width: 200,
           height: 200,
-          date_taken: new Date('2025-02-02')
+          date_taken: new Date('2025-02-02'),
+          mime_type: 'image/jpeg'
         });
       id2 = { clientId: 'client1', objectId: res2.insertedId.toString() };
 
@@ -893,7 +930,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 300,
           height: 300,
-          date_taken: new Date('2025-03-03')
+          date_taken: new Date('2025-03-03'),
+          mime_type: 'image/jpeg'
         });
       id3 = { clientId: 'client2', objectId: res3.insertedId.toString() };
 
@@ -907,7 +945,8 @@ describe('DistributedMediaItemsStore', () => {
           album_id: `${albumId2.clientId}:${albumId2.objectId}`,
           width: 400,
           height: 400,
-          date_taken: new Date('2025-04-04')
+          date_taken: new Date('2025-04-04'),
+          mime_type: 'image/jpeg'
         });
       id4 = { clientId: 'client2', objectId: res4.insertedId.toString() };
     });
@@ -1031,7 +1070,8 @@ describe('sortMediaItem', () => {
       album_id: albumId,
       width: 1000,
       height: 2000,
-      date_taken: dateTaken
+      date_taken: dateTaken,
+      mime_type: 'image/jpeg'
     };
   }
 });

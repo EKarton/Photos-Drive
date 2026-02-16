@@ -14,6 +14,7 @@ export function serializeMediaItem(mediaItem: MediaItem): object {
     albumId: albumIdToString(mediaItem.album_id),
     width: mediaItem.width,
     height: mediaItem.height,
-    dateTaken: mediaItem.date_taken.toISOString()
+    dateTaken: mediaItem.date_taken.toISOString(),
+    mimeType: mediaItem.mime_type
   };
 }

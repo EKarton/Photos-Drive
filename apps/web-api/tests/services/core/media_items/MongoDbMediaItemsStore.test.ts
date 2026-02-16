@@ -59,7 +59,8 @@ describe('MongoDbMediaItemsStore', () => {
           album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`,
           width: 1000,
           height: 2000,
-          date_taken: new Date(2024, 4, 4)
+          date_taken: new Date(2024, 4, 4),
+          mime_type: 'image/jpeg'
         });
 
       const result = await mediaItemsRepo.getMediaItemById(mediaItemId);
@@ -79,7 +80,8 @@ describe('MongoDbMediaItemsStore', () => {
         },
         width: 1000,
         height: 2000,
-        date_taken: new Date(2024, 4, 4)
+        date_taken: new Date(2024, 4, 4),
+        mime_type: 'image/jpeg'
       });
     });
 
@@ -95,7 +97,8 @@ describe('MongoDbMediaItemsStore', () => {
           location: {
             coordinates: [40.7128, -74.006] // longitude, latitude
           },
-          album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`
+          album_id: `407f1f77bcf86cd799439001:407f1f77bcf86cd799439002`,
+          mime_type: 'image/jpeg'
         });
 
       const result = await mediaItemsRepo.getMediaItemById(mediaItemId);
@@ -115,7 +118,8 @@ describe('MongoDbMediaItemsStore', () => {
         },
         width: 0,
         height: 0,
-        date_taken: new Date(1970, 1, 1)
+        date_taken: new Date(1970, 1, 1),
+        mime_type: 'image/jpeg'
       });
     });
 
@@ -279,7 +283,8 @@ describe('MongoDbMediaItemsStore', () => {
             coordinates: [40.0, -70.0]
           },
           width: 1000,
-          height: 2000
+          height: 2000,
+          mime_type: 'image/jpeg'
         });
       await mongoClient1
         .db('photos_drive')
@@ -292,7 +297,8 @@ describe('MongoDbMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 10,
           height: 20,
-          date_taken: new Date(2024, 4, 2)
+          date_taken: new Date(2024, 4, 2),
+          mime_type: 'image/jpeg'
         });
       await mongoClient1
         .db('photos_drive')
@@ -305,7 +311,8 @@ describe('MongoDbMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 1000,
           height: 2000,
-          date_taken: new Date(2024, 4, 3)
+          date_taken: new Date(2024, 4, 3),
+          mime_type: 'image/jpeg'
         });
       await mongoClient1
         .db('photos_drive')
@@ -318,7 +325,8 @@ describe('MongoDbMediaItemsStore', () => {
           album_id: `${albumId1.clientId}:${albumId1.objectId}`,
           width: 10,
           height: 20,
-          date_taken: new Date(2024, 4, 4)
+          date_taken: new Date(2024, 4, 4),
+          mime_type: 'image/jpeg'
         });
 
       // Photo 5 is in Album 2
@@ -333,7 +341,8 @@ describe('MongoDbMediaItemsStore', () => {
           album_id: `${albumId2.clientId}:${albumId2.objectId}`,
           width: 1,
           height: 2,
-          date_taken: new Date(2024, 4, 5)
+          date_taken: new Date(2024, 4, 5),
+          mime_type: 'image/jpeg'
         });
 
       // Enable geospatial queries
@@ -363,7 +372,8 @@ describe('MongoDbMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -373,7 +383,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -383,7 +394,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -393,7 +405,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId2,
@@ -403,7 +416,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_5',
             height: 2,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439014' },
-            width: 1
+            width: 1,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439014'
@@ -430,7 +444,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_client_id: 'gphotos_client_5',
             gphotos_media_item_id: 'media_item_5',
             height: 2,
-            width: 1
+            width: 1,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439014'
@@ -471,7 +486,8 @@ describe('MongoDbMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439010'
@@ -499,7 +515,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439011'
@@ -550,7 +567,8 @@ describe('MongoDbMediaItemsStore', () => {
               clientId: 'client1',
               objectId: '507f1f77bcf86cd799439011'
             },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439011'
@@ -608,7 +626,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -618,7 +637,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -628,7 +648,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -639,7 +660,8 @@ describe('MongoDbMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439010'
@@ -667,7 +689,8 @@ describe('MongoDbMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -677,7 +700,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -687,7 +711,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -697,7 +722,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439013'
@@ -724,7 +750,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_4',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439013' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -734,7 +761,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_3',
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439012' },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -744,7 +772,8 @@ describe('MongoDbMediaItemsStore', () => {
             gphotos_media_item_id: 'media_item_2',
             height: 20,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439011' },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           },
           {
             album_id: albumId1,
@@ -755,7 +784,8 @@ describe('MongoDbMediaItemsStore', () => {
             height: 2000,
             id: { clientId: 'client1', objectId: '507f1f77bcf86cd799439010' },
             location: { latitude: -70, longitude: 40 },
-            width: 1000
+            width: 1000,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439010'
@@ -809,7 +839,8 @@ describe('MongoDbMediaItemsStore', () => {
               clientId: 'client1',
               objectId: '507f1f77bcf86cd799439011'
             },
-            width: 10
+            width: 10,
+            mime_type: 'image/jpeg'
           }
         ],
         nextPageToken: 'client1:507f1f77bcf86cd799439011'
@@ -835,7 +866,8 @@ describe('MongoDbMediaItemsStore', () => {
       },
       width: 1000,
       height: 2000,
-      date_taken: new Date(2024, 4, 1)
+      date_taken: new Date(2024, 4, 1),
+      mime_type: 'image/jpeg'
     };
 
     const doc2 = {
@@ -846,7 +878,8 @@ describe('MongoDbMediaItemsStore', () => {
       album_id: `${albumId1.clientId}:${albumId1.objectId}`,
       width: 10,
       height: 20,
-      date_taken: new Date(2024, 4, 2)
+      date_taken: new Date(2024, 4, 2),
+      mime_type: 'image/jpeg'
     };
 
     let aggregateFn: jest.SpyInstance;
