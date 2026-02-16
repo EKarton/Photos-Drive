@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   input,
+  OnDestroy,
   output,
   signal,
 } from '@angular/core';
@@ -22,7 +23,7 @@ import { ImageMapMarkerStore } from './image-map-marker.store';
   templateUrl: './image-map-marker.component.html',
   providers: [ImageMapMarkerStore],
 })
-export class ImageMapMarkerComponent {
+export class ImageMapMarkerComponent implements OnDestroy {
   readonly mediaItemId = input.required<string>();
   readonly badgeCount = input<number>(1);
 
@@ -39,21 +40,25 @@ export class ImageMapMarkerComponent {
   );
 
   readonly imageUrl = computed(() => {
-    return mapResult(
-      this.imageMarkerStore.gPhotosMediaItem(),
-      (gPhotosMediaItem) => gPhotosMediaItem.baseUrl,
-    );
+    return mapResult(this.imageMarkerStore.url(), (url) => url);
   });
 
   constructor() {
     effect(() => {
       if (this.isInViewport()) {
-        this.imageMarkerStore.loadGPhotosMediaItem(this.mediaItemId());
+        this.imageMarkerStore.loadUrl(this.mediaItemId());
       }
     });
   }
 
   setIsInViewport(visible: boolean) {
     this.isInViewport.set(visible);
+  }
+
+  ngOnDestroy() {
+    const data = this.imageUrl().data;
+    if (data) {
+      URL.revokeObjectURL(data.toString());
+    }
   }
 }
