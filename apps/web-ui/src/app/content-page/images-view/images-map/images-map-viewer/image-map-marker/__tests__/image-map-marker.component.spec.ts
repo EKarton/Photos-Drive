@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { SafeUrl } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
@@ -10,6 +9,7 @@ import {
   toPending,
   toSuccess,
 } from '../../../../../../shared/results/results';
+import { GetMediaItemImageResponse } from '../../../../../services/web-api/types/get-media-item-image';
 import { WebApiService } from '../../../../../services/web-api/web-api.service';
 import { ImageMapMarkerComponent } from '../image-map-marker.component';
 
@@ -48,7 +48,7 @@ describe('ImageMapMarkerComponent', () => {
 
   it('should render skeleton when media item is not loaded yet', () => {
     mockWebApiService.getMediaItemImage.and.returnValue(
-      of(toPending<SafeUrl>()),
+      of(toPending<GetMediaItemImageResponse>()),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
@@ -63,7 +63,7 @@ describe('ImageMapMarkerComponent', () => {
 
   it('should render error when fetching media item failed', () => {
     mockWebApiService.getMediaItemImage.and.returnValue(
-      of(toFailure<SafeUrl>(new Error('Random error'))),
+      of(toFailure<GetMediaItemImageResponse>(new Error('Random error'))),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
@@ -80,7 +80,7 @@ describe('ImageMapMarkerComponent', () => {
 
   it('should fetch gphotos media item and render image when it is in viewport', () => {
     mockWebApiService.getMediaItemImage.and.returnValue(
-      of(toSuccess(MEDIA_ITEM_IMAGE_URL)),
+      of(toSuccess({ url: MEDIA_ITEM_IMAGE_URL })),
     );
 
     const fixture = TestBed.createComponent(ImageMapMarkerComponent);
@@ -118,7 +118,7 @@ describe('ImageMapMarkerComponent', () => {
   ].forEach(({ event }) => {
     it(`should emit event when user emits event ${event} on image`, () => {
       mockWebApiService.getMediaItemImage.and.returnValue(
-        of(toSuccess(MEDIA_ITEM_IMAGE_URL)),
+        of(toSuccess({ url: MEDIA_ITEM_IMAGE_URL })),
       );
       const fixture = TestBed.createComponent(ImageMapMarkerComponent);
       fixture.componentRef.setInput('mediaItemId', MEDIA_ITEM_ID);
