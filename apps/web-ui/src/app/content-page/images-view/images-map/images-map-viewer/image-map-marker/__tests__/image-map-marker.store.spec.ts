@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { SafeUrl } from '@angular/platform-browser';
 import { provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 
@@ -8,7 +9,6 @@ import {
   toPending,
   toSuccess,
 } from '../../../../../../shared/results/results';
-import { GetMediaItemImageResponse } from '../../../../../services/web-api/types/get-media-item-image';
 import { WebApiService } from '../../../../../services/web-api/web-api.service';
 import { ImageMapMarkerStore, INITIAL_STATE } from '../image-map-marker.store';
 
@@ -16,7 +16,7 @@ const MEDIA_ITEM_ID = 'client1:photos1';
 
 const MEDIA_ITEM_IMAGE_URL = 'http://www.google.com/photos/1';
 
-describe('ImageMapMarkerStore', () => {
+describe('ImageStore', () => {
   let store: ImageMapMarkerStore;
   let webApiService: jasmine.SpyObj<WebApiService>;
 
@@ -49,16 +49,14 @@ describe('ImageMapMarkerStore', () => {
   });
 
   it('should initialize with pending state', () => {
-    webApiService.getMediaItemImage.and.returnValue(
-      of(toPending<GetMediaItemImageResponse>()),
-    );
+    webApiService.getMediaItemImage.and.returnValue(of(toPending<SafeUrl>()));
 
     expect(store.url()).toEqual(INITIAL_STATE.url);
   });
 
   it('should load and update state on success', () => {
     webApiService.getMediaItemImage.and.returnValue(
-      of(toSuccess({ url: MEDIA_ITEM_IMAGE_URL })),
+      of(toSuccess(MEDIA_ITEM_IMAGE_URL)),
     );
 
     store.loadUrl(MEDIA_ITEM_ID);
@@ -73,7 +71,7 @@ describe('ImageMapMarkerStore', () => {
   it('should update state to failure on API error', () => {
     const error = new Error('API failed');
     webApiService.getMediaItemImage.and.returnValue(
-      of(toFailure<GetMediaItemImageResponse>(error)),
+      of(toFailure<SafeUrl>(error)),
     );
 
     store.loadUrl(MEDIA_ITEM_ID);

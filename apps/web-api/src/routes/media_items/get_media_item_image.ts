@@ -73,14 +73,12 @@ export default async function (
         }
 
         if (width && height) {
-          return res.json({
-            url: `${gPhotosMediaItem.baseUrl}=w${width}-h${height}`
-          });
+          return res.redirect(
+            `${gPhotosMediaItem.baseUrl}=w${width}-h${height}`
+          );
         }
 
-        return res.json({
-          url: gPhotosMediaItem.baseUrl
-        });
+        return res.redirect(gPhotosMediaItem.baseUrl);
       } catch (error) {
         if (error instanceof NoGPhotosClientFoundError) {
           return res.status(404).json({

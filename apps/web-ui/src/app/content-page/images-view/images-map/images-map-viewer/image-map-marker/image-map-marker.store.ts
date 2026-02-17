@@ -1,16 +1,16 @@
 import { inject, Injectable } from '@angular/core';
+import { SafeUrl } from '@angular/platform-browser';
 import { ComponentStore } from '@ngrx/component-store';
 import { Store } from '@ngrx/store';
 import { switchMap, tap } from 'rxjs/operators';
 
 import { authState } from '../../../../../auth/store';
 import { Result, toPending } from '../../../../../shared/results/results';
-import { mapResultRxJs } from '../../../../../shared/results/rxjs/mapResultRxJs';
 import { WebApiService } from '../../../../services/web-api/web-api.service';
 
 /** State definition for {@code ImageMapMarkerStore}. */
 export interface ImageMapMarkerState {
-  url: Result<string>;
+  url: Result<SafeUrl>;
 }
 
 /** Initial state for {@code ImageMarkerStore}. */
@@ -42,10 +42,9 @@ export class ImageMapMarkerStore extends ComponentStore<ImageMapMarkerState> {
             return this.webApiService
               .getMediaItemImage(accessToken, mediaItemId)
               .pipe(
-                mapResultRxJs((response) => response.url),
-                tap((url) => {
+                tap((response) => {
                   this.patchState({
-                    url,
+                    url: response,
                   });
                 }),
               );
