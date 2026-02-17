@@ -1,18 +1,18 @@
 import { wrap } from 'async-middleware';
 import axios from 'axios';
 import { Router } from 'express';
-import { verifyAuthentication } from '../middlewares/authentication';
-import { verifyAuthorization } from '../middlewares/authorization';
+import { verifyAuthentication } from '../../../middlewares/authentication';
+import { verifyAuthorization } from '../../../middlewares/authorization';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
-} from '../services/core/storage/gphotos/GPhotosClientsRepository';
+} from '../../../services/core/storage/gphotos/GPhotosClientsRepository';
 
 export default async function (gPhotoClientRepo: GPhotosClientsRepository) {
   const router: Router = Router();
 
   router.get(
-    '/api/v1/gphotos/media-items/:gMediaItemId',
+    '/api/v1/storage/gphotos/media-items/:gMediaItemId',
     await verifyAuthentication(),
     await verifyAuthorization(),
     wrap(async (req, res) => {

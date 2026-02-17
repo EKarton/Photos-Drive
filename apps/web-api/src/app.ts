@@ -7,10 +7,10 @@ import expressLogger from 'pino-http';
 import { AppConfig, getAppConfig } from './app_config';
 import albumsRouter from './routes/albums';
 import authRouter from './routes/authentication';
-import gPhotosMediaItemsRouter from './routes/gphotos_media_items';
 import healthRouter from './routes/health';
 import mapsRouter from './routes/heatmap';
 import mediaItemsRouter from './routes/media_items';
+import storageRouter from './routes/storage';
 import { AlbumsStore } from './services/core/albums/BaseAlbumsStore';
 import { DistributedAlbumsStore } from './services/core/albums/DistributedAlbumsStore';
 import { MongoDbAlbumsStore } from './services/core/albums/MongoDbAlbumsStore';
@@ -124,7 +124,7 @@ export class App {
         this.vectorStore
       )
     );
-    this.app.use(await gPhotosMediaItemsRouter(this.gPhotosClientsRepository));
+    this.app.use(await storageRouter(this.gPhotosClientsRepository));
     this.app.use(await mapsRouter(rootAlbumId, this.heatmapGenerator));
 
     this.app.use(
