@@ -25,7 +25,7 @@ export default async function () {
     '/auth/v1/google/token',
     rateLimit({
       windowMs: 15 * 60 * 1000,
-      max: 50,
+      max: 5,
       standardHeaders: true,
       legacyHeaders: false,
       keyGenerator: rateLimitKey
