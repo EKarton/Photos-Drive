@@ -141,7 +141,7 @@ describe('WebApiService', () => {
         });
 
       const req = httpMock.expectOne(
-        `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${gPhotosMediaItemId}`,
+        `${environment.webApiEndpoint}/api/v1/storage/gphotos/media-items/${gPhotosMediaItemId}`,
       );
       expect(req.request.method).toBe('GET');
       expect(req.request.headers.get('Authorization')).toEqual(

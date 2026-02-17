@@ -2,16 +2,16 @@ import { AxiosError } from 'axios';
 import express from 'express';
 import { mock } from 'jest-mock-extended';
 import request from 'supertest';
-import gPhotosMediaItemsRouter from '../../src/routes/gphotos_media_items';
-import { GPhotosClient } from '../../src/services/core/storage/gphotos/GPhotosClient';
+import gPhotosMediaItemsRouter from '../../../../src/routes/storage/gphotos/get_gphotos_media_item_details';
+import { GPhotosClient } from '../../../../src/services/core/storage/gphotos/GPhotosClient';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
-} from '../../src/services/core/storage/gphotos/GPhotosClientsRepository';
-import { fakeAuthEnv, generateTestToken } from './utils/auth';
-import { setupTestEnv } from './utils/env';
+} from '../../../../src/services/core/storage/gphotos/GPhotosClientsRepository';
+import { fakeAuthEnv, generateTestToken } from '../../utils/auth';
+import { setupTestEnv } from '../../utils/env';
 
-describe('GPhotos Media Items Router', () => {
+describe('GPhotos Media Item Details Router', () => {
   let cleanupTestEnvFn = () => {};
   let token = '';
 
@@ -27,7 +27,7 @@ describe('GPhotos Media Items Router', () => {
     cleanupTestEnvFn();
   });
 
-  describe('GET /api/v1/gphotos/media-items/:gMediaItemId', () => {
+  describe('GET /api/v1/storage/gphotos/media-items/:gMediaItemId', () => {
     it('should return 200 response when media item is successfully fetched', async () => {
       const mediaItem = {
         id: 'mediaItem1',
@@ -61,7 +61,7 @@ describe('GPhotos Media Items Router', () => {
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/media-items/123:abc')
+        .get('/api/v1/storage/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(200);
@@ -94,7 +94,7 @@ describe('GPhotos Media Items Router', () => {
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/media-items/123:abc')
+        .get('/api/v1/storage/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(404);
@@ -114,7 +114,7 @@ describe('GPhotos Media Items Router', () => {
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/media-items/123:abc')
+        .get('/api/v1/storage/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(500);
@@ -133,7 +133,7 @@ describe('GPhotos Media Items Router', () => {
       app.use(await gPhotosMediaItemsRouter(repo));
 
       const res = await request(app)
-        .get('/api/v1/gphotos/media-items/123:abc')
+        .get('/api/v1/storage/gphotos/media-items/123:abc')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toEqual(500);

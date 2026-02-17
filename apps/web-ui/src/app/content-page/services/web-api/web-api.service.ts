@@ -75,7 +75,7 @@ export class WebApiService {
     accessToken: string,
     request: GetGPhotosMediaItemDetailsRequest,
   ): Observable<Result<GetGPhotosMediaItemDetailsResponse>> {
-    const url = `${environment.webApiEndpoint}/api/v1/gphotos/media-items/${request.gPhotosMediaItemId}`;
+    const url = `${environment.webApiEndpoint}/api/v1/storage/gphotos/media-items/${request.gPhotosMediaItemId}`;
     return this.httpClient
       .get<GetGPhotosMediaItemDetailsResponse>(url, {
         headers: {
