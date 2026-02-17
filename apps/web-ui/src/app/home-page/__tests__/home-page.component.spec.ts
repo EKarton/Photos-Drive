@@ -9,10 +9,18 @@ import { HomePageComponent } from '../home-page.component';
 describe('HomePageComponent', () => {
   let component: HomePageComponent;
   let fixture: ComponentFixture<HomePageComponent>;
-  let mockWindow: Window;
+  let mockWindow: {
+    localStorage: { removeItem: jasmine.Spy };
+    pageYOffset: number;
+    location: { href: string; pathname: string };
+  };
 
   beforeEach(async () => {
-    mockWindow = { location: { href: '' }, pageYOffset: 0 } as Window;
+    mockWindow = {
+      location: { href: '', pathname: '' },
+      pageYOffset: 0,
+      localStorage: { removeItem: jasmine.createSpy('removeItem') },
+    };
 
     await TestBed.configureTestingModule({
       imports: [HomePageComponent],
@@ -89,7 +97,7 @@ describe('HomePageComponent', () => {
     expect(header.classList.contains('bg-base-200')).toBeFalse();
   });
 
-  it('should redirect to login URL on handleLoginClick', () => {
+  it('should clear auth redirect local storage and redirect to login URL on handleLoginClick', () => {
     const button = fixture.nativeElement.querySelector(
       '[data-test-id="login-button"]',
     );
@@ -97,5 +105,8 @@ describe('HomePageComponent', () => {
 
     const expectedHref = `${environment.loginUrl}?select_account=true`;
     expect(mockWindow.location.href).toBe(expectedHref);
+    expect(mockWindow.localStorage.removeItem).toHaveBeenCalledWith(
+      'auth_redirect_path',
+    );
   });
 });

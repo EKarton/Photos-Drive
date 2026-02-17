@@ -21,6 +21,7 @@ export class HomePageComponent {
   }
 
   handleLoginClick() {
+    this.window.localStorage.removeItem('auth_redirect_path');
     this.window.location.href = `${environment.loginUrl}?select_account=true`;
   }
 }
