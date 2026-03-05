@@ -1,6 +1,6 @@
 [project]
 name = "photos_drive"
-version = "9.2.0"
+version = "9.2.1"
 description = ""
 authors = [{ name = "Emilio Kartono", email = "e.kartonoe@gmail.com" }]
 packages = [{include = "photos_drive"}]

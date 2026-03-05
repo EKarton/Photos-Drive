@@ -89,3 +89,19 @@ class MongoDBMapCellsRepository(MapCellsRepository):
             },
             session=session,
         )
+
+    def remove_many_media_items(self, media_item_ids: list[MediaItemId]):
+        if len(media_item_ids) == 0:
+            return
+
+        session = self._mongodb_sessions_provider.get_session_for_client_id(
+            self._client_id,
+        )
+        self._mongodb_client["photos_drive"]["map_cells"].delete_many(
+            filter={
+                "media_item_id": {
+                    "$in": [media_item_id_to_string(id) for id in media_item_ids]
+                },
+            },
+            session=session,
+        )

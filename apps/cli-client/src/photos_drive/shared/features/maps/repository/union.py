@@ -49,6 +49,10 @@ class UnionMapCellsRepository(MapCellsRepository):
         for repo in self._repositories:
             repo.remove_media_item(media_item_id)
 
+    def remove_many_media_items(self, media_item_ids: list[MediaItemId]):
+        for repo in self._repositories:
+            repo.remove_many_media_items(media_item_ids)
+
 
 def create_union_map_cells_repository_from_db_clients(
     mongodb_clients_repo: MongoDBClientsRepository,

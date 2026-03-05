@@ -55,3 +55,11 @@ class TestUnionMapCellsRepository(unittest.TestCase):
 
         self.repo1.remove_media_item.assert_called_once_with(mid)
         self.repo2.remove_media_item.assert_called_once_with(mid)
+
+    def test_remove_many_media_items__delegates_to_all_repos(self):
+        id_1 = MediaItemId(self.repo1.get_client_id(), ObjectId())
+        id_2 = MediaItemId(self.repo2.get_client_id(), ObjectId())
+        self.union_repo.remove_many_media_items([id_1, id_2])
+
+        self.repo1.remove_many_media_items.assert_called_once_with([id_1, id_2])
+        self.repo2.remove_many_media_items.assert_called_once_with([id_1, id_2])

@@ -196,9 +196,10 @@ class PhotosBackup:
                 queue.append(child_diff_tree_node)
 
         # Step 6: Delete the media items marked for deletion
-        self.__media_items_repo.delete_many_media_items(
-            [media_item.id for media_item in total_media_items_to_delete]
-        )
+        media_item_ids_to_delete = [
+            media_item.id for media_item in total_media_items_to_delete
+        ]
+        self.__media_items_repo.delete_many_media_items(media_item_ids_to_delete)
 
         # Step 7: Delete albums with no child albums and no media items
         total_num_albums_deleted = 0
@@ -208,8 +209,7 @@ class PhotosBackup:
                 total_num_albums_deleted += self.__albums_pruner.prune_album(album_id)
 
         # Step 8: Delete items from the maps
-        for media_item in total_media_items_to_delete:
-            self.__map_cells_repo.remove_media_item(media_item.id)
+        self.__map_cells_repo.remove_many_media_items(media_item_ids_to_delete)
 
         # Step 9: Add items to the maps repo
         for media_item in add_diffs_to_media_item.values():

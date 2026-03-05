@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import datetime
 import unittest
 
@@ -101,3 +102,27 @@ class TestMongoDBMapCellsRepository(unittest.TestCase):
         # Check that cells were deleted
         deleted = list(self.mongo_client["photos_drive"]["map_cells"].find())
         self.assertEqual(len(deleted), 0)
+
+    def test_remove_many_media_items(self):
+        ids_to_remove = [
+            MediaItemId(MONGO_CLIENT_ID, ObjectId()),
+            MediaItemId(MONGO_CLIENT_ID, ObjectId()),
+        ]
+
+        # Insert mock media items into the mock database
+        for mid in ids_to_remove:
+            media_item = replace(MEDIA_ITEM, id=mid)
+            self.repo.add_media_item(media_item)
+
+        # Test deletion of multiple items
+        self.repo.remove_many_media_items(ids_to_remove)
+
+        # Assert that all items have been removed
+        for mid in ids_to_remove:
+            deleted_media = self.mongo_client["photos_drive"]["map_cells"].find_one(
+                {"media_item_id": media_item_id_to_string(mid)}
+            )
+            self.assertIsNone(deleted_media)
+
+    def test_remove_many_media_items_with_no_documents_throws_no_errors(self):
+        self.repo.remove_many_media_items([])
