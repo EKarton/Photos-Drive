@@ -120,7 +120,7 @@ class TestMongoDBMapCellsRepository(unittest.TestCase):
         # Assert that all items have been removed
         for mid in ids_to_remove:
             deleted_media = self.mongo_client["photos_drive"]["map_cells"].find_one(
-                {"_id": mid.object_id}
+                {"media_item_id": media_item_id_to_string(mid)}
             )
             self.assertIsNone(deleted_media)
 
