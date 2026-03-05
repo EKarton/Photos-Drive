@@ -24,7 +24,7 @@ The system consists of three main applications:
 
 ## Data Stores
 
-The entire system uses different data stores to store different types of data. Refer to [this guide](./docs/database_schema.md) for more info on their schemas. In essence, there are four types of data stores in the system:
+The entire system uses different data stores to store different types of data. Refer to [this guide](./docs/internal/database_schema.md) for more info on their schemas. In essence, there are four types of data stores in the system:
 
 ### 1. Config Store
 

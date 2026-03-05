@@ -43,3 +43,12 @@ class MapCellsRepository(ABC):
         Args:
             media_item_id (MediaItemId): The ID of the media item to remove
         '''
+
+    @abstractmethod
+    def remove_many_media_items(self, media_item_ids: list[MediaItemId]):
+        '''
+        Removes a list of media items from the cells repository.
+
+        Args:
+            media_item_ids (list[MediaItemId): The IDs of the media items to remove
+        '''
