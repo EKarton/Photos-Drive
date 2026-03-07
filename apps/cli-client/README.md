@@ -25,6 +25,12 @@ Refer to [this doc](./docs/getting_started.md) on step-by-step instructions on h
 
 1. Ensure Python, [UV](https://docs.astral.sh/uv), [Exiftool](https://exiftool.org), and [Libmagic](https://man7.org/linux/man-pages/man3/libmagic.3.html) are installed on your machine
 
+   Note: if you are using homebrew, you can install them via:
+
+   ```shell
+   brew install uv exiftool libmagic
+   ```
+
 1. Install dependencies by running:
 
    ```bash
