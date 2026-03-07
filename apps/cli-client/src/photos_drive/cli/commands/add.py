@@ -1,4 +1,5 @@
 import logging
+import os
 
 import typer
 from typing_extensions import Annotated
@@ -89,6 +90,7 @@ def add(
 ):
     setup_logging(verbose)
 
+    logger.debug(f"Current working directory: {os.getcwd()}")
     logger.debug(
         "Called add handler with args:\n"
         + f" path: {path}\n"

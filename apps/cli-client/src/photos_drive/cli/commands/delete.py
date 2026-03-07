@@ -81,7 +81,7 @@ def delete(
     setup_logging(verbose)
 
     logger.debug(
-        "Called add handler with args:\n"
+        "Called delete handler with args:\n"
         + f" path: {path}\n"
         + f" config_file: {config_file}\n"
         + f" config_mongodb={config_mongodb}\n"

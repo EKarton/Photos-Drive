@@ -1,5 +1,6 @@
 import logging
 import math
+import os
 from typing import Generator
 
 import typer
@@ -101,6 +102,7 @@ def sync(
 ):
     setup_logging(verbose)
 
+    logger.debug(f"Current working directory: {os.getcwd()}")
     logger.debug(
         "Called sync handler with args:\n"
         + f" local_dir_path: {local_dir_path}\n"
