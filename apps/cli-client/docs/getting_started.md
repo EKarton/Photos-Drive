@@ -17,6 +17,13 @@ This guide contains steps on how to get started with the Photos Drive CLI.
 
 - [PyEnv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation)
 - [Exiftool](https://exiftool.org/)
+- [Libmagic](https://man7.org/linux/man-pages/man3/libmagic.3.html)
+
+   Note: if you are using homebrew, you can install them via:
+
+   ```shell
+   brew install uv exiftool libmagic
+   ```
 
 ## Installation
 
