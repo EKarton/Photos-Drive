@@ -32,6 +32,10 @@ export default async function () {
         params.append('prompt', 'select_account');
       }
 
+      if (typeof req.query['state'] === 'string' && req.query['state'].length > 0) {
+        params.append('state', req.query['state']);
+      }
+
       url.search = params.toString();
       res.redirect(url.toString());
     }

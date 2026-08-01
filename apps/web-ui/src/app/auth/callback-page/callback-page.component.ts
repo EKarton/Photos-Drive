@@ -19,13 +19,23 @@ export class CallbackPageComponent implements OnInit, OnDestroy {
 
   private readonly subscription = new Subscription();
 
-  readonly code$ = this.route.queryParamMap.pipe(
-    map((params) => params.get('code')!),
+  readonly codeAndState$ = this.route.queryParamMap.pipe(
+    map((params) => ({
+      code: params.get('code')!,
+      state: params.get('state'),
+    })),
   );
 
   ngOnInit(): void {
     this.subscription.add(
-      this.code$.subscribe((code) => {
+      this.codeAndState$.subscribe(({ code, state }) => {
+        const expectedState = this.window.sessionStorage.getItem('oauth_state');
+        if (expectedState && state !== expectedState) {
+          console.error('OAuth state mismatch');
+          this.router.navigate(['/']);
+          return;
+        }
+        this.window.sessionStorage.removeItem('oauth_state');
         this.store.dispatch(authActions.loadAuth({ code }));
       }),
     );

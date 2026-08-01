@@ -19,6 +19,10 @@ describe('CallbackPageComponent', () => {
       .createSpy('getItem')
       .and.returnValue(null);
 
+    let mockSessionStorageGetItem = jasmine
+      .createSpy('getItem')
+      .and.returnValue('test-state');
+
     router = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
@@ -28,7 +32,7 @@ describe('CallbackPageComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParamMap: of(ImmutableMap().set('code', 'test-auth-code')),
+            queryParamMap: of(ImmutableMap({ code: 'test-auth-code', state: 'test-state' })),
           },
         },
         provideMockStore({
@@ -39,6 +43,10 @@ describe('CallbackPageComponent', () => {
           useValue: {
             localStorage: {
               getItem: mockLocalStorageGetItem,
+            },
+            sessionStorage: {
+              getItem: mockSessionStorageGetItem,
+              removeItem: jasmine.createSpy('removeItem'),
             },
           },
         },

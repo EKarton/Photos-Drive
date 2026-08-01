@@ -18,12 +18,16 @@ describe('webApiAuthRequestInterceptor', () => {
   let httpMock: HttpTestingController;
   let windowMock: {
     localStorage: { setItem: jasmine.Spy };
+    sessionStorage: { setItem: jasmine.Spy };
     location: { href: string; pathname: string };
   };
 
   beforeEach(() => {
     windowMock = {
       localStorage: {
+        setItem: jasmine.createSpy('setItem'),
+      },
+      sessionStorage: {
         setItem: jasmine.createSpy('setItem'),
       },
       location: {
@@ -56,7 +60,11 @@ describe('webApiAuthRequestInterceptor', () => {
       next: () => fail('Should not have succeeded'),
       error: () => fail('Should not have failed'),
       complete: () => {
-        expect(windowMock.location.href).toBe(environment.loginUrl);
+        expect(windowMock.location.href).toContain(`${environment.loginUrl}?state=`);
+        expect(windowMock.sessionStorage.setItem).toHaveBeenCalledWith(
+          'oauth_state',
+          jasmine.any(String),
+        );
         expect(windowMock.localStorage.setItem).toHaveBeenCalledWith(
           'auth_redirect_path',
           '/content/home',
@@ -77,7 +85,7 @@ describe('webApiAuthRequestInterceptor', () => {
       next: () => fail('should have failed with 401 error'),
       error: (error) => {
         expect(error.status).toBe(401);
-        expect(windowMock.location.href).not.toBe(environment.loginUrl);
+        expect(windowMock.location.href).not.toContain(environment.loginUrl);
       },
     });
 
@@ -93,7 +101,7 @@ describe('webApiAuthRequestInterceptor', () => {
       next: () => fail('should have failed with 500 error'),
       error: (error) => {
         expect(error.status).toBe(500);
-        expect(windowMock.location.href).not.toBe(environment.loginUrl);
+        expect(windowMock.location.href).not.toContain(environment.loginUrl);
       },
     });
 
@@ -108,7 +116,7 @@ describe('webApiAuthRequestInterceptor', () => {
 
     httpClient.get(testUrl).subscribe((data) => {
       expect(data).toEqual(testData);
-      expect(windowMock.location.href).not.toBe(environment.loginUrl);
+      expect(windowMock.location.href).not.toContain(environment.loginUrl);
     });
 
     httpMock.expectOne(testUrl).flush(testData);

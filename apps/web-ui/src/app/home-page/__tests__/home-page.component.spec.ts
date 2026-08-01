@@ -11,6 +11,7 @@ describe('HomePageComponent', () => {
   let fixture: ComponentFixture<HomePageComponent>;
   let mockWindow: {
     localStorage: { removeItem: jasmine.Spy };
+    sessionStorage: { setItem: jasmine.Spy };
     pageYOffset: number;
     location: { href: string; pathname: string };
   };
@@ -20,6 +21,7 @@ describe('HomePageComponent', () => {
       location: { href: '', pathname: '' },
       pageYOffset: 0,
       localStorage: { removeItem: jasmine.createSpy('removeItem') },
+      sessionStorage: { setItem: jasmine.createSpy('setItem') },
     };
 
     await TestBed.configureTestingModule({
@@ -103,8 +105,12 @@ describe('HomePageComponent', () => {
     );
     button.click();
 
-    const expectedHref = `${environment.loginUrl}?select_account=true`;
-    expect(mockWindow.location.href).toBe(expectedHref);
+    const expectedHref = `${environment.loginUrl}?select_account=true&state=`;
+    expect(mockWindow.location.href).toContain(expectedHref);
+    expect(mockWindow.sessionStorage.setItem).toHaveBeenCalledWith(
+      'oauth_state',
+      jasmine.any(String),
+    );
     expect(mockWindow.localStorage.removeItem).toHaveBeenCalledWith(
       'auth_redirect_path',
     );

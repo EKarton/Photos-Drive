@@ -22,6 +22,8 @@ export class HomePageComponent {
 
   handleLoginClick() {
     this.window.localStorage.removeItem('auth_redirect_path');
-    this.window.location.href = `${environment.loginUrl}?select_account=true`;
+    const state = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+    this.window.sessionStorage.setItem('oauth_state', state);
+    this.window.location.href = `${environment.loginUrl}?select_account=true&state=${state}`;
   }
 }

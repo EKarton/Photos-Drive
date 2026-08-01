@@ -1,8 +1,10 @@
 import { wrap } from 'async-middleware';
 import axios from 'axios';
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { verifyAuthentication } from '../../../middlewares/authentication';
 import { verifyAuthorization } from '../../../middlewares/authorization';
+import { rateLimitKey } from '../../../utils/rateLimitKey';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
@@ -15,6 +17,11 @@ export default async function (gPhotoClientRepo: GPhotosClientsRepository) {
     '/api/v1/storage/gphotos/media-items/:gMediaItemId',
     await verifyAuthentication(),
     await verifyAuthorization(),
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 100,
+      keyGenerator: rateLimitKey
+    }),
     wrap(async (req, res) => {
       const rawGMediaItemIdParts = req.params.gMediaItemId.split(':');
       const gPhotosClientId = rawGMediaItemIdParts[0];
