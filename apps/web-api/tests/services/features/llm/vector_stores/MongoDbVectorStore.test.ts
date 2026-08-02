@@ -210,14 +210,8 @@ describe('MongoDbVectorStore', () => {
                 },
                 media_item_id: {
                   $in: [
-                    {
-                      clientId: '407f1f77bcf86cd799439011',
-                      objectId: '507f1f77bcf86cd799439011'
-                    },
-                    {
-                      clientId: '407f1f77bcf86cd799439012',
-                      objectId: '507f1f77bcf86cd799439012'
-                    }
+                    '407f1f77bcf86cd799439011:507f1f77bcf86cd799439011',
+                    '407f1f77bcf86cd799439012:507f1f77bcf86cd799439012'
                   ]
                 }
               },
