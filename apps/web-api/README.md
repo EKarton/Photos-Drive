@@ -32,4 +32,4 @@ Refer to [this guide](./docs/setup.md) for a step-by-step guide on how to set up
 
 1. To run tests, run `pnpm test`. It automatically runs code coverage, and puts the code coverage under the `./coverage` folder.
 
-1. To run tests for a particular file, run tests like this: `pnpm test:coverage tests/middlewares`
+1. To run tests for a particular file, run tests like this: `pnpm test tests/middlewares`
