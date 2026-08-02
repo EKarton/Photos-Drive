@@ -20,7 +20,9 @@ export const webApiAuthRequestInterceptor: HttpInterceptorFn = (req, next) => {
             'auth_redirect_path',
             window.location.pathname,
           );
-          const state = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+          const state =
+            Math.random().toString(36).substring(2) +
+            Math.random().toString(36).substring(2);
           window.sessionStorage.setItem('oauth_state', state);
           window.location.href = `${environment.loginUrl}?state=${state}`;
 

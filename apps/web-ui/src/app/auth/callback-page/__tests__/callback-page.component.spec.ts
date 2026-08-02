@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Map as ImmutableMap } from 'immutable';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { WINDOW } from '../../../app.tokens';
 import { authState } from '../../store';
@@ -14,7 +14,7 @@ describe('CallbackPageComponent', () => {
   let router: jasmine.SpyObj<Router>;
   let mockLocalStorageGetItem: jasmine.Spy;
   let mockSessionStorageGetItem: jasmine.Spy;
-  let queryParamMapSubject: BehaviorSubject<any>;
+  let queryParamMapSubject: BehaviorSubject<Params>;
 
   beforeEach(() => {
     mockLocalStorageGetItem = jasmine
@@ -26,7 +26,10 @@ describe('CallbackPageComponent', () => {
       .and.returnValue('test-state');
 
     router = jasmine.createSpyObj('Router', ['navigate']);
-    queryParamMapSubject = new BehaviorSubject(ImmutableMap({ code: 'test-auth-code', state: 'test-state' }));
+    queryParamMapSubject = new BehaviorSubject({
+      code: 'test-auth-code',
+      state: 'test-state',
+    } as Params);
 
     TestBed.configureTestingModule({
       imports: [CallbackPageComponent],
@@ -93,8 +96,10 @@ describe('CallbackPageComponent', () => {
 
   it('should navigate to / if oauth state mismatch', () => {
     mockSessionStorageGetItem.and.returnValue('different-state');
-    queryParamMapSubject.next(ImmutableMap({ code: 'test-auth-code', state: 'test-state' }));
-    
+    queryParamMapSubject.next(
+      ImmutableMap({ code: 'test-auth-code', state: 'test-state' }),
+    );
+
     expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 });

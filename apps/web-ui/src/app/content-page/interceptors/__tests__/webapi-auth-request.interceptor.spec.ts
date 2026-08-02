@@ -60,7 +60,9 @@ describe('webApiAuthRequestInterceptor', () => {
       next: () => fail('Should not have succeeded'),
       error: () => fail('Should not have failed'),
       complete: () => {
-        expect(windowMock.location.href).toContain(`${environment.loginUrl}?state=`);
+        expect(windowMock.location.href).toContain(
+          `${environment.loginUrl}?state=`,
+        );
         expect(windowMock.sessionStorage.setItem).toHaveBeenCalledWith(
           'oauth_state',
           jasmine.any(String),
