@@ -21,7 +21,7 @@ const vectorSearchMediaItemsBodySchema = z.object({
   earliestDateTaken: z.iso.datetime().optional(),
   latestDateTaken: z.iso.datetime().optional(),
   withinMediaItemIds: z.array(z.string()).optional(),
-  topK: z.number().optional()
+  topK: z.number().max(100).optional()
 });
 
 export default async function (

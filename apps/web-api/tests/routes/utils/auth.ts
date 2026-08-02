@@ -13,7 +13,8 @@ export const fakeAuthEnv = {
   GOOGLE_CLIENT_ID: 'fake-client-id',
   GOOGLE_CLIENT_SECRET: 'fake-client-secret',
   GOOGLE_CALLBACK_URI: 'http://localhost:3000/auth/google/callback',
-  VAULT_FILE_PATH: '/tmp/vault.json'
+  VAULT_FILE_PATH: '/tmp/vault.json',
+  CORS_FRONTEND_ENDPOINT: 'http://localhost:4200'
 };
 
 /**

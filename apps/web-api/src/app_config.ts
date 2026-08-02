@@ -53,7 +53,7 @@ const appConfigSchema = z
     TRUST_PROXY_HOPS: z.coerce.number().default(1),
     VAULT_FILE_PATH: z.string().default(''),
     VAULT_MONGODB: z.string().default(''),
-    CORS_FRONTEND_ENDPOINT: z.string().default('*'),
+    CORS_FRONTEND_ENDPOINT: z.string().min(1),
     MAPBOX_API_TOKEN: z.string().default('')
   })
   .refine((data) => data.VAULT_FILE_PATH || data.VAULT_MONGODB, {

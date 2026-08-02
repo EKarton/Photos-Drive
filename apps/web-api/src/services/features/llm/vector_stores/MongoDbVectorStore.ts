@@ -6,7 +6,10 @@ import {
   Document as MongoDBDocument,
   ObjectId
 } from 'mongodb';
-import { convertStringToMediaItemId } from '../../../core/media_items/MediaItems';
+import {
+  convertStringToMediaItemId,
+  mediaIdToString
+} from '../../../core/media_items/MediaItems';
 import {
   BaseVectorStore,
   MediaItemEmbedding,
@@ -75,7 +78,7 @@ export class MongoDbVectorStore extends BaseVectorStore {
 
     if (query.withinMediaItemIds && query.withinMediaItemIds.length > 0) {
       filter.media_item_id = {
-        $in: query.withinMediaItemIds
+        $in: query.withinMediaItemIds.map(mediaIdToString)
       };
     }
 

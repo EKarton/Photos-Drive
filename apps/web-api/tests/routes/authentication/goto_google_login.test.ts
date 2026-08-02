@@ -39,7 +39,7 @@ describe('GET auth/v1/google', () => {
     );
   });
 
-  it('should return correct redirect uri given no select_account query param', async () => {
+  it('should return correct redirect uri given select_account query param', async () => {
     const app = express();
     app.use(await authRouter());
 
@@ -48,6 +48,18 @@ describe('GET auth/v1/google', () => {
     expect(res.statusCode).toEqual(302);
     expect(res.headers['location']).toEqual(
       'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fphotos&response_type=code&scope=profile&prompt=select_account'
+    );
+  });
+
+  it('should return correct redirect uri given state query param', async () => {
+    const app = express();
+    app.use(await authRouter());
+
+    const res = await request(app).get('/auth/v1/google?state=random_state');
+
+    expect(res.statusCode).toEqual(302);
+    expect(res.headers['location']).toEqual(
+      'https://accounts.google.com/o/oauth2/v2/auth?client_id=123&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fphotos&response_type=code&scope=profile&state=random_state'
     );
   });
 });
