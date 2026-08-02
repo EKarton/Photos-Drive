@@ -4,11 +4,11 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { verifyAuthentication } from '../../../middlewares/authentication';
 import { verifyAuthorization } from '../../../middlewares/authorization';
-import { rateLimitKey } from '../../../utils/rateLimitKey';
 import {
   GPhotosClientsRepository,
   NoGPhotosClientFoundError
 } from '../../../services/core/storage/gphotos/GPhotosClientsRepository';
+import { rateLimitKey } from '../../../utils/rateLimitKey';
 
 export default async function (gPhotoClientRepo: GPhotosClientsRepository) {
   const router: Router = Router();
