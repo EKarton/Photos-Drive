@@ -19,7 +19,7 @@ export default async function (gPhotoClientRepo: GPhotosClientsRepository) {
     await verifyAuthorization(),
     rateLimit({
       windowMs: 15 * 60 * 1000,
-      max: 100,
+      max: 1200,
       keyGenerator: rateLimitKey
     }),
     wrap(async (req, res) => {
